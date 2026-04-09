@@ -80,9 +80,12 @@ export function AudienceGame({ usuario, progresso, onBack, onRememberVariation, 
   }, [challenge.id, challenge.variacoes.length, progresso]);
 
   useEffect(() => {
-    onRememberVariation(challenge.id, variationIndex);
     setOptions(shuffle(currentVariation.options));
-  }, [challenge.id, currentVariation.options, onRememberVariation, variationIndex]);
+  }, [challenge.id, currentVariation.options, variationIndex]);
+
+  useEffect(() => {
+    onRememberVariation(challenge.id, variationIndex);
+  }, [challenge.id, onRememberVariation, variationIndex]);
 
   useEffect(() => {
     if (phase !== "showing") return;
