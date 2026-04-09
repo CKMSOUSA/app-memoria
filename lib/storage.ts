@@ -1,11 +1,12 @@
 "use client";
 
 import { createDefaultProgress, mergeProgress } from "@/lib/scoring";
-import type { ProgressState, Usuario, UsuarioPersistido } from "@/lib/types";
+import type { ProgressState, SessionRecord, Usuario, UsuarioPersistido } from "@/lib/types";
 
 const USERS_KEY = "app_memoria_usuarios_v2";
 const SESSION_KEY = "app_memoria_usuario_ativo_v2";
 const PROGRESS_PREFIX = "app_memoria_progresso_v2";
+const HISTORY_PREFIX = "app_memoria_historico_v1";
 export const AVATAR_OPTIONS = ["🧠", "🚀", "🦊", "🐼", "🦁", "🧩"];
 
 type RegisterResult = {
@@ -205,6 +206,45 @@ export function loadProgress(email: string) {
 export function saveProgress(email: string, progress: ProgressState) {
   if (!canUseStorage()) return;
   localStorage.setItem(`${PROGRESS_PREFIX}:${email}`, JSON.stringify(progress));
+}
+
+export function listUsers() {
+  return readUsers().map(toPublicUser);
+}
+
+export function loadSessionHistory(email: string) {
+  if (!canUseStorage()) return [] as SessionRecord[];
+  const raw = localStorage.getItem(`${HISTORY_PREFIX}:${email}`);
+  if (!raw) return [] as SessionRecord[];
+
+  try {
+    return JSON.parse(raw) as SessionRecord[];
+  } catch {
+    return [] as SessionRecord[];
+  }
+}
+
+export function appendSessionHistory(email: string, record: Omit<SessionRecord, "id" | "email">) {
+  if (!canUseStorage()) return [] as SessionRecord[];
+  const current = loadSessionHistory(email);
+  const next: SessionRecord[] = [
+    {
+      ...record,
+      id: `${Date.now()}-${Math.random().toString(16).slice(2, 8)}`,
+      email,
+    },
+    ...current,
+  ].slice(0, 120);
+
+  localStorage.setItem(`${HISTORY_PREFIX}:${email}`, JSON.stringify(next));
+  return next;
+}
+
+export function loadAllHistories() {
+  return listUsers().map((user) => ({
+    user,
+    history: loadSessionHistory(user.email),
+  }));
 }
 
 export function simulateRecovery(email: string) {

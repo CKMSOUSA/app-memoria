@@ -7,8 +7,10 @@ export type Tela =
   | "atencao"
   | "comparacao"
   | "espacial"
+  | "logica"
   | "perfil"
-  | "especial";
+  | "especial"
+  | "admin";
 
 export type DataMode = "local" | "remote";
 
@@ -41,7 +43,21 @@ export type ProgressState = {
   atencao: Record<number, ChallengeProgress>;
   comparacao: Record<number, ChallengeProgress>;
   espacial: Record<number, ChallengeProgress>;
+  logica: Record<number, ChallengeProgress>;
   especial: Record<number, ChallengeProgress>;
+};
+
+export type SessionMode = keyof ProgressState;
+
+export type SessionRecord = {
+  id: string;
+  email: string;
+  mode: SessionMode;
+  challengeId: number;
+  score: number;
+  timeSeconds: number;
+  completed: boolean;
+  playedAt: string;
 };
 
 export type MemoryChallenge = {
@@ -131,4 +147,28 @@ export type ExclusiveChallenge = {
   descricao: string;
   minimoParaConcluir: number;
   variacoes: ExclusiveVariation[];
+};
+
+export type LogicRound = {
+  prompt: string;
+  sequence: string[];
+  options: string[];
+  correctAnswer: string;
+  explanation: string;
+};
+
+export type LogicVariation = {
+  prompt: string;
+  promptInfantil?: string;
+  rounds: LogicRound[];
+};
+
+export type LogicChallenge = {
+  id: number;
+  difficultyLabel: string;
+  nome: string;
+  nomeInfantil?: string;
+  variacoes: LogicVariation[];
+  tempoLimite: number;
+  minimoParaConcluir: number;
 };

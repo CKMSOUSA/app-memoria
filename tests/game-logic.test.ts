@@ -4,6 +4,7 @@ import {
   evaluateAttentionRound,
   evaluateAudienceRound,
   evaluateComparisonRound,
+  evaluateLogicRound,
   evaluateMemoryRound,
   evaluateSpatialRound,
   getNextVariationIndex,
@@ -92,4 +93,18 @@ test("evaluateComparisonRound validates left and right choices", () => {
   assert.deepEqual(result.mistakes, [1, 2]);
   assert.equal(result.completed, false);
   assert.equal(result.score, 17);
+});
+
+test("evaluateLogicRound validates the next term choices", () => {
+  const result = evaluateLogicRound({
+    expectedAnswers: ["4", "A", "12"],
+    selectedAnswers: ["4", "B", "12"],
+    answerSeconds: 8,
+    timeLimit: 18,
+    minimumToComplete: 2,
+  });
+
+  assert.deepEqual(result.hits, [0, 2]);
+  assert.deepEqual(result.mistakes, [1]);
+  assert.equal(result.completed, true);
 });

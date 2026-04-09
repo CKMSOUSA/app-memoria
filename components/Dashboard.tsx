@@ -5,6 +5,7 @@ import {
   attentionChallenges,
   comparisonChallenges,
   exclusiveChallenges,
+  logicChallenges,
   memoryChallenges,
   spatialChallenges,
 } from "@/lib/game-data-v3";
@@ -16,9 +17,11 @@ import {
   getCompletionRateForIds,
   getNivel,
   getRecommendedChallengeId,
+  getReportSummary,
+  getSessionModeLabel,
   isChallengeUnlocked,
 } from "@/lib/scoring";
-import type { DataMode, ProgressState, Usuario } from "@/lib/types";
+import type { DataMode, ProgressState, SessionRecord, Usuario } from "@/lib/types";
 
 type DashboardProps = {
   usuario: Usuario;
@@ -27,10 +30,13 @@ type DashboardProps = {
   onOpenAttention: () => void;
   onOpenComparison: () => void;
   onOpenSpatial: () => void;
+  onOpenLogic: () => void;
   onOpenProfile: () => void;
   onOpenSpecial: () => void;
+  onOpenAdmin: () => void;
   onLogout: () => void;
   dataMode: DataMode;
+  history: SessionRecord[];
 };
 
 function ProgressList({
@@ -39,12 +45,13 @@ function ProgressList({
   progressMap,
 }: {
   title: string;
-  mode: "memoria" | "atencao" | "comparacao" | "espacial";
+  mode: "memoria" | "atencao" | "comparacao" | "espacial" | "logica";
   progressMap:
     | ProgressState["memoria"]
     | ProgressState["atencao"]
     | ProgressState["comparacao"]
-    | ProgressState["espacial"];
+    | ProgressState["espacial"]
+    | ProgressState["logica"];
 }) {
   const challenges =
     mode === "memoria"
@@ -53,7 +60,9 @@ function ProgressList({
         ? attentionChallenges
         : mode === "comparacao"
           ? comparisonChallenges
-          : spatialChallenges;
+          : mode === "espacial"
+            ? spatialChallenges
+            : logicChallenges;
 
   return (
     <section className="panel">
@@ -128,10 +137,13 @@ export function Dashboard({
   onOpenAttention,
   onOpenComparison,
   onOpenSpatial,
+  onOpenLogic,
   onOpenProfile,
   onOpenSpecial,
+  onOpenAdmin,
   onLogout,
   dataMode,
+  history,
 }: DashboardProps) {
   const memoriaRate = getCompletionRate(progresso.memoria);
   const atencaoRate = getCompletionRate(progresso.atencao);
@@ -155,6 +167,10 @@ export function Dashboard({
       item.id ===
       getRecommendedChallengeId(progresso.comparacao, comparisonChallenges.map((challenge) => challenge.id)),
   );
+  const logicaRecomendada = logicChallenges.find(
+    (item) => item.id === getRecommendedChallengeId(progresso.logica, logicChallenges.map((challenge) => challenge.id)),
+  );
+  const resumo = getReportSummary(history);
 
   return (
     <main className="shell shell-dashboard">
@@ -180,8 +196,14 @@ export function Dashboard({
         <button className="btn btn-side" onClick={onOpenSpatial}>
           Orientacao espacial
         </button>
+        <button className="btn btn-side" onClick={onOpenLogic}>
+          Jogo de logica
+        </button>
         <button className="btn btn-side" onClick={onOpenSpecial}>
           Trilha exclusiva
+        </button>
+        <button className="btn btn-side" onClick={onOpenAdmin}>
+          Area administrativa
         </button>
         <button className="btn btn-side" onClick={onOpenProfile}>
           Perfil
@@ -214,6 +236,9 @@ export function Dashboard({
             <button className="btn btn-secondary" onClick={onOpenSpatial}>
               Treinar orientacao
             </button>
+            <button className="btn btn-secondary" onClick={onOpenLogic}>
+              Treinar logica
+            </button>
             <button className="btn btn-primary" onClick={onOpenMemory}>
               Treinar memoria
             </button>
@@ -245,7 +270,29 @@ export function Dashboard({
             value={`${espacialRate}%`}
             caption="Progresso nos desafios de rota, direcao e referencia espacial"
           />
+          <StatCard label="Logica" value={`${getCompletionRate(progresso.logica)}%`} caption="Sequencias, padroes e previsao do proximo termo" />
           <StatCard label="Trilha exclusiva" value={`${especialRate}%`} caption="Progresso no minijogo do seu publico" />
+        </section>
+
+        <section className="panel report-panel">
+          <div className="section-head">
+            <h3>Relatorio de desempenho</h3>
+            <span className="small-muted">Resumo automatico das suas sessoes</span>
+          </div>
+          <div className="stats-grid">
+            <StatCard label="Sessoes" value={String(resumo.totalSessions)} caption="Rodadas registradas no historico" />
+            <StatCard label="Concluidas" value={String(resumo.completedSessions)} caption="Sessoes com meta atingida" />
+            <StatCard label="Media" value={String(resumo.averageScore)} caption="Pontuacao media por sessao" />
+            <StatCard label="Modo forte" value={getSessionModeLabel(resumo.strongestMode)} caption="Trilha com melhor desempenho acumulado" />
+          </div>
+          <div className="button-row">
+            <button className="btn btn-secondary" onClick={onOpenAdmin}>
+              Abrir area administrativa
+            </button>
+            <button className="btn btn-secondary" onClick={onOpenLogic}>
+              Treinar logica
+            </button>
+          </div>
         </section>
 
         <section className="panel">
@@ -319,6 +366,14 @@ export function Dashboard({
               Abrir comparacao
             </button>
           </article>
+          <article className="quick-card">
+            <p className="small-muted">Recomendacao de logica</p>
+            <h3>{logicaRecomendada?.nome ?? "Primeira fase"}</h3>
+            <p className="muted">Boa para perceber padroes, completar sequencias e prever o proximo elemento.</p>
+            <button className="btn btn-secondary" onClick={onOpenLogic}>
+              Abrir logica
+            </button>
+          </article>
         </section>
 
         <section className="panel split-panel">
@@ -355,6 +410,7 @@ export function Dashboard({
           <ProgressList title="Trilha de atencao" mode="atencao" progressMap={progresso.atencao} />
           <ProgressList title="Trilha de comparacao" mode="comparacao" progressMap={progresso.comparacao} />
           <ProgressList title="Trilha de orientacao espacial" mode="espacial" progressMap={progresso.espacial} />
+          <ProgressList title="Trilha de logica" mode="logica" progressMap={progresso.logica} />
         </div>
       </section>
     </main>

@@ -12,7 +12,10 @@ export function GameGuide({ title, objective, steps, tip }: GameGuideProps) {
         <h3>{title}</h3>
         <span className="guide-badge">Leia antes de jogar</span>
       </div>
-      <p className="guide-objective">{objective}</p>
+      <div className="guide-objective-box">
+        <span className="guide-objective-label">Como funciona</span>
+        <p className="guide-objective">{objective}</p>
+      </div>
       <ol className="guide-steps">
         {steps.map((step, index) => (
           <li key={step}>

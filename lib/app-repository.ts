@@ -1,10 +1,14 @@
 "use client";
 
 import {
+  appendSessionHistory,
   bootstrapStorage,
   clearActiveSession,
   getActiveSession,
+  listUsers,
+  loadAllHistories,
   loadProgress,
+  loadSessionHistory,
   loginUser,
   registerUser,
   saveProgress,
@@ -12,7 +16,7 @@ import {
   updateUserProfile,
   updateUserPoints,
 } from "@/lib/storage";
-import type { DataMode, ProgressState, Usuario } from "@/lib/types";
+import type { DataMode, ProgressState, SessionRecord, Usuario } from "@/lib/types";
 
 type RegisterResult = {
   error: string | null;
@@ -36,6 +40,10 @@ type AppRepository = {
   updateUserPoints: (email: string, delta: number) => Promise<Usuario | null>;
   loadProgress: (email: string) => Promise<ProgressState>;
   saveProgress: (email: string, progress: ProgressState) => Promise<void>;
+  loadSessionHistory: (email: string) => Promise<SessionRecord[]>;
+  appendSessionHistory: (email: string, record: Omit<SessionRecord, "id" | "email">) => Promise<SessionRecord[]>;
+  listUsers: () => Promise<Usuario[]>;
+  loadAllHistories: () => Promise<Array<{ user: Usuario; history: SessionRecord[] }>>;
   simulateRecovery: (email: string) => string;
 };
 
@@ -63,6 +71,10 @@ const localRepository: AppRepository = {
   updateUserPoints: async (email, delta) => updateUserPoints(email, delta),
   loadProgress: async (email) => loadProgress(email),
   saveProgress: async (email, progress) => saveProgress(email, progress),
+  loadSessionHistory: async (email) => loadSessionHistory(email),
+  appendSessionHistory: async (email, record) => appendSessionHistory(email, record),
+  listUsers: async () => listUsers(),
+  loadAllHistories: async () => loadAllHistories(),
   simulateRecovery: (email) => simulateRecovery(email),
 };
 
@@ -123,6 +135,38 @@ const remoteRepository: AppRepository = {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(progress),
     });
+  },
+  loadSessionHistory: async (email) => {
+    const response = await fetch(`${getRemoteBaseUrl()}/history/${encodeURIComponent(email)}`, {
+      method: "GET",
+      headers: { "Content-Type": "application/json" },
+      cache: "no-store",
+    });
+    return (await parseJson<SessionRecord[]>(response)) ?? [];
+  },
+  appendSessionHistory: async (email, record) => {
+    const response = await fetch(`${getRemoteBaseUrl()}/history/${encodeURIComponent(email)}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(record),
+    });
+    return (await parseJson<SessionRecord[]>(response)) ?? [];
+  },
+  listUsers: async () => {
+    const response = await fetch(`${getRemoteBaseUrl()}/users`, {
+      method: "GET",
+      headers: { "Content-Type": "application/json" },
+      cache: "no-store",
+    });
+    return (await parseJson<Usuario[]>(response)) ?? [];
+  },
+  loadAllHistories: async () => {
+    const response = await fetch(`${getRemoteBaseUrl()}/admin/histories`, {
+      method: "GET",
+      headers: { "Content-Type": "application/json" },
+      cache: "no-store",
+    });
+    return (await parseJson<Array<{ user: Usuario; history: SessionRecord[] }>>(response)) ?? [];
   },
   simulateRecovery: () =>
     "Modo remoto preparado. Em producao, use um endpoint de recuperacao com email e token temporario.",

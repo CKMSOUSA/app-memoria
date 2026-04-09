@@ -2,6 +2,7 @@ import type {
   AttentionChallenge,
   ComparisonChallenge,
   ExclusiveChallenge,
+  LogicChallenge,
   MemoryChallenge,
   SpatialChallenge,
 } from "@/lib/types";
@@ -498,3 +499,162 @@ export const exclusiveChallenges: ExclusiveChallenge[] = [
   ...createExclusiveChallenges("adolescente", 201, exclusiveAdolescente),
   ...createExclusiveChallenges("adulto", 301, exclusiveAdulto),
 ];
+
+const logicSeeds = [
+  {
+    nome: "Sequencia crescente",
+    nomeInfantil: "Qual vem depois?",
+    rounds: [
+      { prompt: "Descubra o proximo numero.", sequence: ["1", "2", "3"], options: ["4", "5", "2"], correctAnswer: "4", explanation: "A sequencia cresce de 1 em 1." },
+      { prompt: "Continue a sequencia.", sequence: ["4", "5", "6"], options: ["8", "7", "5"], correctAnswer: "7", explanation: "A sequencia continua crescendo de 1 em 1." },
+      { prompt: "Escolha o proximo termo.", sequence: ["7", "8", "9"], options: ["10", "11", "8"], correctAnswer: "10", explanation: "O padrao e somar 1." },
+    ],
+  },
+  {
+    nome: "Sequencia alternada",
+    nomeInfantil: "Troca de simbolos",
+    rounds: [
+      { prompt: "Observe a alternancia.", sequence: ["A", "B", "A", "B"], options: ["A", "C", "B"], correctAnswer: "A", explanation: "A e B se alternam." },
+      { prompt: "Observe a alternancia.", sequence: ["sol", "lua", "sol", "lua"], options: ["estrela", "sol", "lua"], correctAnswer: "sol", explanation: "Sol e lua se alternam." },
+      { prompt: "Observe a alternancia.", sequence: ["1", "3", "1", "3"], options: ["5", "1", "3"], correctAnswer: "1", explanation: "1 e 3 se alternam." },
+    ],
+  },
+  {
+    nome: "Soma simples",
+    nomeInfantil: "Pulos de dois",
+    rounds: [
+      { prompt: "Descubra o padrao.", sequence: ["2", "4", "6"], options: ["7", "8", "10"], correctAnswer: "8", explanation: "A sequencia cresce de 2 em 2." },
+      { prompt: "Descubra o padrao.", sequence: ["5", "7", "9"], options: ["10", "11", "12"], correctAnswer: "11", explanation: "A sequencia cresce de 2 em 2." },
+      { prompt: "Descubra o padrao.", sequence: ["10", "12", "14"], options: ["15", "16", "18"], correctAnswer: "16", explanation: "A sequencia cresce de 2 em 2." },
+    ],
+  },
+  {
+    nome: "Letras em ordem",
+    nomeInfantil: "Alfabeto em fila",
+    rounds: [
+      { prompt: "Qual letra vem depois?", sequence: ["A", "B", "C"], options: ["D", "E", "B"], correctAnswer: "D", explanation: "A ordem segue o alfabeto." },
+      { prompt: "Qual letra vem depois?", sequence: ["M", "N", "O"], options: ["P", "Q", "L"], correctAnswer: "P", explanation: "A ordem segue o alfabeto." },
+      { prompt: "Qual letra vem depois?", sequence: ["X", "Y"], options: ["Z", "W", "A"], correctAnswer: "Z", explanation: "A ordem segue o alfabeto." },
+    ],
+  },
+  {
+    nome: "Padrao de tamanho",
+    nomeInfantil: "Grande e pequeno",
+    rounds: [
+      { prompt: "Continue o padrao.", sequence: ["grande", "pequeno", "grande"], options: ["grande", "medio", "pequeno"], correctAnswer: "pequeno", explanation: "Grande e pequeno se alternam." },
+      { prompt: "Continue o padrao.", sequence: ["alto", "baixo", "alto"], options: ["baixo", "alto", "medio"], correctAnswer: "baixo", explanation: "Alto e baixo se alternam." },
+      { prompt: "Continue o padrao.", sequence: ["longo", "curto", "longo"], options: ["longo", "curto", "medio"], correctAnswer: "curto", explanation: "Longo e curto se alternam." },
+    ],
+  },
+  {
+    nome: "Sequencia por 3",
+    nomeInfantil: "Pulos de tres",
+    rounds: [
+      { prompt: "Descubra o proximo valor.", sequence: ["3", "6", "9"], options: ["10", "12", "15"], correctAnswer: "12", explanation: "A sequencia cresce de 3 em 3." },
+      { prompt: "Descubra o proximo valor.", sequence: ["12", "15", "18"], options: ["19", "21", "24"], correctAnswer: "21", explanation: "A sequencia cresce de 3 em 3." },
+      { prompt: "Descubra o proximo valor.", sequence: ["21", "24", "27"], options: ["28", "30", "33"], correctAnswer: "30", explanation: "A sequencia cresce de 3 em 3." },
+    ],
+  },
+  {
+    nome: "Padrao misto 1",
+    nomeInfantil: "Mistura de padroes",
+    rounds: [
+      { prompt: "Encontre o padrao.", sequence: ["2", "4", "2", "4"], options: ["2", "6", "4"], correctAnswer: "2", explanation: "Os valores 2 e 4 se alternam." },
+      { prompt: "Encontre o padrao.", sequence: ["A", "C", "A", "C"], options: ["C", "A", "B"], correctAnswer: "A", explanation: "A e C se alternam." },
+      { prompt: "Encontre o padrao.", sequence: ["1", "2", "4"], options: ["6", "8", "5"], correctAnswer: "8", explanation: "A sequencia dobra: 1, 2, 4, 8." },
+    ],
+  },
+  {
+    nome: "Padrao misto 2",
+    nomeInfantil: "Descubra a regra",
+    rounds: [
+      { prompt: "Descubra a regra.", sequence: ["5", "10", "15"], options: ["18", "20", "25"], correctAnswer: "20", explanation: "A sequencia cresce de 5 em 5." },
+      { prompt: "Descubra a regra.", sequence: ["B", "D", "F"], options: ["G", "H", "I"], correctAnswer: "H", explanation: "A sequencia pula uma letra do alfabeto." },
+      { prompt: "Descubra a regra.", sequence: ["2", "4", "8"], options: ["10", "12", "16"], correctAnswer: "16", explanation: "A sequencia dobra a cada passo." },
+    ],
+  },
+  {
+    nome: "Padrao com simbolos",
+    nomeInfantil: "Qual vem agora?",
+    rounds: [
+      { prompt: "Observe a sequencia.", sequence: ["@", "#", "@", "#"], options: ["@", "$", "#"], correctAnswer: "@", explanation: "Os simbolos se alternam." },
+      { prompt: "Observe a sequencia.", sequence: ["▲", "■", "▲", "■"], options: ["■", "▲", "●"], correctAnswer: "▲", explanation: "Triangulo e quadrado se alternam." },
+      { prompt: "Observe a sequencia.", sequence: ["1", "4", "7"], options: ["8", "10", "11"], correctAnswer: "10", explanation: "A sequencia cresce de 3 em 3." },
+    ],
+  },
+  {
+    nome: "Analise rapida",
+    nomeInfantil: "Raciocinio final",
+    rounds: [
+      { prompt: "Encontre o proximo termo.", sequence: ["10", "9", "8"], options: ["7", "6", "9"], correctAnswer: "7", explanation: "A sequencia diminui de 1 em 1." },
+      { prompt: "Encontre o proximo termo.", sequence: ["A1", "A2", "A3"], options: ["A4", "B4", "A5"], correctAnswer: "A4", explanation: "Mantem a letra A e aumenta o numero em 1." },
+      { prompt: "Encontre o proximo termo.", sequence: ["3", "6", "12"], options: ["18", "24", "20"], correctAnswer: "24", explanation: "A sequencia dobra: 3, 6, 12, 24." },
+    ],
+  },
+  {
+    nome: "Matriz simples",
+    nomeInfantil: "Pensar e escolher",
+    rounds: [
+      { prompt: "Qual e o proximo?", sequence: ["1", "1", "2", "3"], options: ["4", "5", "6"], correctAnswer: "5", explanation: "Cada termo soma os dois anteriores: 1, 1, 2, 3, 5." },
+      { prompt: "Qual e o proximo?", sequence: ["2", "3", "5", "8"], options: ["11", "13", "15"], correctAnswer: "13", explanation: "Cada termo soma os dois anteriores." },
+      { prompt: "Qual e o proximo?", sequence: ["1", "2", "4", "8"], options: ["10", "12", "16"], correctAnswer: "16", explanation: "A sequencia dobra a cada passo." },
+    ],
+  },
+  {
+    nome: "Raciocinio crescente",
+    nomeInfantil: "Passos de logica",
+    rounds: [
+      { prompt: "Complete a sequencia.", sequence: ["4", "8", "12"], options: ["14", "16", "18"], correctAnswer: "16", explanation: "A sequencia cresce de 4 em 4." },
+      { prompt: "Complete a sequencia.", sequence: ["C", "F", "I"], options: ["K", "L", "M"], correctAnswer: "L", explanation: "Pula duas letras a cada passo." },
+      { prompt: "Complete a sequencia.", sequence: ["1", "4", "9"], options: ["12", "16", "18"], correctAnswer: "16", explanation: "Quadrados perfeitos: 1, 4, 9, 16." },
+    ],
+  },
+  {
+    nome: "Logica avançada 1",
+    nomeInfantil: "Desafio esperto",
+    rounds: [
+      { prompt: "Descubra a regra.", sequence: ["2", "5", "10"], options: ["12", "17", "20"], correctAnswer: "17", explanation: "As somas aumentam: +3, +5, +7." },
+      { prompt: "Descubra a regra.", sequence: ["Z", "X", "V"], options: ["T", "U", "S"], correctAnswer: "T", explanation: "Volta duas letras no alfabeto." },
+      { prompt: "Descubra a regra.", sequence: ["3", "9", "27"], options: ["54", "81", "72"], correctAnswer: "81", explanation: "Multiplica por 3 a cada passo." },
+    ],
+  },
+  {
+    nome: "Logica avançada 2",
+    nomeInfantil: "Desafio mestre",
+    rounds: [
+      { prompt: "Descubra a regra.", sequence: ["1", "3", "6", "10"], options: ["12", "14", "15"], correctAnswer: "15", explanation: "Soma progressiva: +2, +3, +4, depois +5." },
+      { prompt: "Descubra a regra.", sequence: ["B1", "D2", "F3"], options: ["G4", "H4", "H5"], correctAnswer: "H4", explanation: "A letra pula uma casa e o numero cresce de 1 em 1." },
+      { prompt: "Descubra a regra.", sequence: ["32", "16", "8"], options: ["2", "4", "6"], correctAnswer: "4", explanation: "A sequencia divide por 2." },
+    ],
+  },
+  {
+    nome: "Mestre da logica",
+    nomeInfantil: "Fase final",
+    rounds: [
+      { prompt: "Descubra o proximo termo.", sequence: ["2", "6", "12", "20"], options: ["26", "30", "32"], correctAnswer: "30", explanation: "As diferencas sao +4, +6, +8, depois +10." },
+      { prompt: "Descubra o proximo termo.", sequence: ["A", "D", "G", "J"], options: ["L", "M", "N"], correctAnswer: "M", explanation: "A sequencia avanca 3 letras por vez." },
+      { prompt: "Descubra o proximo termo.", sequence: ["1", "2", "6", "24"], options: ["96", "120", "48"], correctAnswer: "120", explanation: "Cada termo multiplica pelo proximo numero: x2, x3, x4, x5." },
+    ],
+  },
+];
+
+export const logicChallenges: LogicChallenge[] = logicSeeds.map((seed, index) => ({
+  id: index + 1,
+  difficultyLabel: PHASE_LABELS_15[index],
+  nome: seed.nome,
+  nomeInfantil: seed.nomeInfantil,
+  variacoes: [0, 1, 2].map((variation) => ({
+    prompt: "Observe a regra da sequencia e escolha o proximo termo correto.",
+    promptInfantil: "Veja a sequencia e toque no item que vem depois.",
+    rounds: seed.rounds.map((round, roundIndex) => {
+      const rotatedOptions = [...round.options];
+      const shift = (variation + roundIndex) % rotatedOptions.length;
+      return {
+        ...round,
+        options: rotatedOptions.map((_, optionIndex) => rotatedOptions[(optionIndex + shift) % rotatedOptions.length]),
+      };
+    }),
+  })),
+  tempoLimite: Math.max(14, 24 - Math.floor(index / 2)),
+  minimoParaConcluir: Math.min(3, 2 + Math.floor(index / 6)),
+}));

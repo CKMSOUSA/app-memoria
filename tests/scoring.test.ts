@@ -15,6 +15,7 @@ import {
   attentionChallenges,
   comparisonChallenges,
   exclusiveChallenges,
+  logicChallenges,
   memoryChallenges,
   spatialChallenges,
 } from "@/lib/game-data-v3";
@@ -26,6 +27,7 @@ test("createDefaultProgress prepares the three progress tracks", () => {
   assert.ok(Object.keys(progress.atencao).length > 0);
   assert.ok(Object.keys(progress.comparacao).length > 0);
   assert.ok(Object.keys(progress.espacial).length > 0);
+  assert.ok(Object.keys(progress.logica).length > 0);
   assert.ok(Object.keys(progress.especial).length > 0);
 });
 
@@ -34,6 +36,7 @@ test("expanded tracks expose the requested amount of phases", () => {
   assert.equal(attentionChallenges.length, 15);
   assert.equal(comparisonChallenges.length, 15);
   assert.equal(spatialChallenges.length, 15);
+  assert.equal(logicChallenges.length, 15);
   assert.equal(exclusiveChallenges.filter((item) => item.audience === "infantil").length, 10);
   assert.equal(exclusiveChallenges.filter((item) => item.audience === "adolescente").length, 10);
   assert.equal(exclusiveChallenges.filter((item) => item.audience === "adulto").length, 10);
@@ -59,6 +62,7 @@ test("mergeProgress preserves saved data while filling missing challenges", () =
   assert.equal(merged.atencao[1].completed, false);
   assert.equal(merged.comparacao[1].attempts, 0);
   assert.equal(merged.espacial[1].attempts, 0);
+  assert.equal(merged.logica[1].attempts, 0);
   assert.equal(merged.especial[101].attempts, 0);
 });
 

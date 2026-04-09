@@ -2,16 +2,18 @@
 
 import { useEffect, useState } from "react";
 import { AttentionGame } from "@/components/AttentionGame";
+import { AdminScreen } from "@/components/AdminScreen";
 import { AudienceGame } from "@/components/AudienceGame";
 import { AuthScreen } from "@/components/AuthScreen";
 import { ComparisonGame } from "@/components/ComparisonGame";
 import { Dashboard } from "@/components/Dashboard";
+import { LogicGame } from "@/components/LogicGame";
 import { MemoryGame } from "@/components/MemoryGame";
 import { ProfileScreen } from "@/components/ProfileScreen";
 import { SpatialGame } from "@/components/SpatialGame";
 import { getAppRepository } from "@/lib/app-repository";
 import { mergeProgress } from "@/lib/scoring";
-import type { DataMode, ProgressState, Tela, Usuario } from "@/lib/types";
+import type { DataMode, ProgressState, SessionRecord, SessionMode, Tela, Usuario } from "@/lib/types";
 
 const repository = getAppRepository();
 
@@ -19,6 +21,8 @@ export default function Page() {
   const [tela, setTela] = useState<Tela>("login");
   const [usuario, setUsuario] = useState<Usuario | null>(null);
   const [progresso, setProgresso] = useState<ProgressState>(mergeProgress());
+  const [history, setHistory] = useState<SessionRecord[]>([]);
+  const [adminHistories, setAdminHistories] = useState<Array<{ user: Usuario; history: SessionRecord[]; progress?: ProgressState }>>([]);
   const [dataMode, setDataMode] = useState<DataMode>(repository.mode);
   const [ready, setReady] = useState(false);
 
@@ -36,6 +40,11 @@ export default function Page() {
           setProgresso(await repository.loadProgress(activeUser.email));
         } catch {
           setProgresso(mergeProgress());
+        }
+        try {
+          setHistory(await repository.loadSessionHistory(activeUser.email));
+        } catch {
+          setHistory([]);
         }
         setTela("dashboard");
       }
@@ -61,6 +70,11 @@ export default function Page() {
     } catch {
       setProgresso(mergeProgress());
     }
+    try {
+      setHistory(await repository.loadSessionHistory(activeUser.email));
+    } catch {
+      setHistory([]);
+    }
     setTela("dashboard");
     return activeUser;
   }
@@ -74,6 +88,8 @@ export default function Page() {
     repository.clearActiveSession();
     setUsuario(null);
     setProgresso(mergeProgress());
+    setHistory([]);
+    setAdminHistories([]);
     setTela("login");
   }
 
@@ -83,8 +99,33 @@ export default function Page() {
     if (updatedUser) setUsuario(updatedUser);
   }
 
+  async function handleOpenAdmin() {
+    const allUsers = await repository.listUsers();
+    const histories = await repository.loadAllHistories();
+    const nextAdminHistories = await Promise.all(
+      allUsers.map(async (userItem) => {
+        const existing = histories.find((item) => item.user.email === userItem.email);
+        let progressForUser = mergeProgress();
+        try {
+          progressForUser = await repository.loadProgress(userItem.email);
+        } catch {
+          progressForUser = mergeProgress();
+        }
+
+        return {
+          user: userItem,
+          history: existing?.history ?? [],
+          progress: progressForUser,
+        };
+      }),
+    );
+
+    setAdminHistories(nextAdminHistories);
+    setTela("admin");
+  }
+
   function persistResult(
-    mode: "memoria" | "atencao" | "comparacao" | "espacial" | "especial",
+    mode: SessionMode,
     challengeId: number,
     score: number,
     timeSeconds: number,
@@ -118,6 +159,16 @@ export default function Page() {
 
     void repository.saveProgress(usuario.email, updatedProgress);
     setProgresso(updatedProgress);
+    void repository
+      .appendSessionHistory(usuario.email, {
+        mode,
+        challengeId,
+        score,
+        timeSeconds,
+        completed,
+        playedAt: new Date().toISOString(),
+      })
+      .then((nextHistory) => setHistory(nextHistory));
 
     if (improvement > 0) {
       void repository.updateUserPoints(usuario.email, improvement).then((updatedUser) => {
@@ -127,7 +178,7 @@ export default function Page() {
   }
 
   function persistVariation(
-    mode: "memoria" | "atencao" | "comparacao" | "espacial" | "especial",
+    mode: SessionMode,
     challengeId: number,
     variationIndex: number,
   ) {
@@ -172,8 +223,10 @@ export default function Page() {
           tela === "atencao" ||
           tela === "comparacao" ||
           tela === "espacial" ||
+          tela === "logica" ||
           tela === "perfil" ||
-          tela === "especial"
+          tela === "especial" ||
+          tela === "admin"
             ? "login"
             : tela
         }
@@ -249,6 +302,20 @@ export default function Page() {
     );
   }
 
+  if (tela === "logica") {
+    return (
+      <LogicGame
+        usuario={usuario}
+        progresso={progresso.logica}
+        onBack={() => setTela("dashboard")}
+        onRememberVariation={(challengeId, variationIndex) => persistVariation("logica", challengeId, variationIndex)}
+        onSaveResult={(challengeId, score, timeSeconds, completed, variationIndex) =>
+          persistResult("logica", challengeId, score, timeSeconds, completed, variationIndex)
+        }
+      />
+    );
+  }
+
   if (tela === "especial") {
     return (
       <AudienceGame
@@ -269,16 +336,30 @@ export default function Page() {
     return <ProfileScreen usuario={usuario} onBack={() => setTela("dashboard")} onSaveProfile={handleSaveProfile} />;
   }
 
+  if (tela === "admin") {
+    return (
+      <AdminScreen
+        usuario={usuario}
+        progressoAtual={progresso}
+        histories={adminHistories}
+        onBack={() => setTela("dashboard")}
+      />
+    );
+  }
+
   return (
     <Dashboard
       usuario={usuario}
       progresso={progresso}
+      history={history}
       onOpenMemory={() => setTela("memoria")}
       onOpenAttention={() => setTela("atencao")}
       onOpenComparison={() => setTela("comparacao")}
       onOpenSpatial={() => setTela("espacial")}
+      onOpenLogic={() => setTela("logica")}
       onOpenProfile={() => setTela("perfil")}
       onOpenSpecial={() => setTela("especial")}
+      onOpenAdmin={() => void handleOpenAdmin()}
       onLogout={handleLogout}
       dataMode={dataMode}
     />

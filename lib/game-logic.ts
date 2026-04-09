@@ -164,3 +164,33 @@ export function evaluateComparisonRound({
     completed,
   };
 }
+
+export function evaluateLogicRound({
+  expectedAnswers,
+  selectedAnswers,
+  answerSeconds,
+  timeLimit,
+  minimumToComplete,
+}: {
+  expectedAnswers: string[];
+  selectedAnswers: string[];
+  answerSeconds: number;
+  timeLimit: number;
+  minimumToComplete: number;
+}) {
+  const hits = expectedAnswers
+    .map((answer, index) => (normalizeText(selectedAnswers[index] ?? "") === normalizeText(answer) ? index : -1))
+    .filter((index) => index >= 0);
+  const mistakes = expectedAnswers
+    .map((answer, index) => (normalizeText(selectedAnswers[index] ?? "") !== normalizeText(answer) ? index : -1))
+    .filter((index) => index >= 0);
+  const score = Math.max(0, hits.length * 7 + Math.max(0, timeLimit + 8 - answerSeconds) - mistakes.length * 2);
+  const completed = hits.length >= minimumToComplete;
+
+  return {
+    hits,
+    mistakes,
+    score,
+    completed,
+  };
+}

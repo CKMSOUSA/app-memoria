@@ -2,10 +2,11 @@ import {
   attentionChallenges,
   comparisonChallenges,
   exclusiveChallenges,
+  logicChallenges,
   memoryChallenges,
   spatialChallenges,
 } from "@/lib/game-data-v3";
-import type { ProgressState } from "@/lib/types";
+import type { ProgressState, SessionMode, SessionRecord } from "@/lib/types";
 
 function defaultChallengeProgress() {
   return {
@@ -25,6 +26,7 @@ export function createDefaultProgress(): ProgressState {
     atencao: Object.fromEntries(attentionChallenges.map((challenge) => [challenge.id, defaultChallengeProgress()])),
     comparacao: Object.fromEntries(comparisonChallenges.map((challenge) => [challenge.id, defaultChallengeProgress()])),
     espacial: Object.fromEntries(spatialChallenges.map((challenge) => [challenge.id, defaultChallengeProgress()])),
+    logica: Object.fromEntries(logicChallenges.map((challenge) => [challenge.id, defaultChallengeProgress()])),
     especial: Object.fromEntries(exclusiveChallenges.map((challenge) => [challenge.id, defaultChallengeProgress()])),
   };
 }
@@ -60,6 +62,13 @@ export function mergeProgress(saved?: Partial<ProgressState> | null): ProgressSt
     };
   }
 
+  for (const challenge of logicChallenges) {
+    base.logica[challenge.id] = {
+      ...base.logica[challenge.id],
+      ...(saved?.logica?.[challenge.id] ?? {}),
+    };
+  }
+
   for (const challenge of exclusiveChallenges) {
     base.especial[challenge.id] = {
       ...base.especial[challenge.id],
@@ -81,6 +90,46 @@ export function getCompletionRate(progressMap: Record<number, { completed: boole
   const values = Object.values(progressMap);
   if (values.length === 0) return 0;
   return Math.round((values.filter((item) => item.completed).length / values.length) * 100);
+}
+
+export function getSessionModeLabel(mode: SessionMode) {
+  switch (mode) {
+    case "memoria":
+      return "Memoria";
+    case "atencao":
+      return "Atencao";
+    case "comparacao":
+      return "Comparacao";
+    case "espacial":
+      return "Orientacao espacial";
+    case "logica":
+      return "Logica";
+    default:
+      return "Trilha exclusiva";
+  }
+}
+
+export function getReportSummary(history: SessionRecord[]) {
+  const totalSessions = history.length;
+  const completedSessions = history.filter((item) => item.completed).length;
+  const averageScore =
+    totalSessions > 0 ? Math.round(history.reduce((sum, item) => sum + item.score, 0) / totalSessions) : 0;
+  const totalMinutes = Math.round(history.reduce((sum, item) => sum + item.timeSeconds, 0) / 60);
+  const strongestMode =
+    Object.entries(
+      history.reduce<Record<string, number>>((acc, item) => {
+        acc[item.mode] = (acc[item.mode] ?? 0) + item.score;
+        return acc;
+      }, {}),
+    ).sort((a, b) => b[1] - a[1])[0]?.[0] ?? "memoria";
+
+  return {
+    totalSessions,
+    completedSessions,
+    averageScore,
+    totalMinutes,
+    strongestMode: strongestMode as SessionMode,
+  };
 }
 
 export function getCompletionRateForIds(
