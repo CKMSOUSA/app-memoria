@@ -1,5 +1,7 @@
 # App Memoria
 
+Ultima atualizacao de deploy: 2026-04-09
+
 Aplicativo de treino cognitivo com trilhas de:
 
 - Memoria
