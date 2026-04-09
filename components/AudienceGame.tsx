@@ -41,9 +41,8 @@ export function AudienceGame({ usuario, progresso, onBack, onRememberVariation, 
   const [selectedId, setSelectedId] = useState(audienceChallenges[0]?.id ?? 0);
   const [variationIndex, setVariationIndex] = useState(0);
   const [phase, setPhase] = useState<Phase>("idle");
-  const [selectedSequence, setSelectedSequence] = useState<string[]>([]);
+  const [response, setResponse] = useState("");
   const [feedback, setFeedback] = useState("");
-  const [options, setOptions] = useState<string[]>([]);
   const [review, setReview] = useState<{
     hits: string[];
     wrongItems: string[];
@@ -77,21 +76,17 @@ export function AudienceGame({ usuario, progresso, onBack, onRememberVariation, 
     setVariationIndex(getNextVariationIndex(challenge.variacoes.length, lastVariationIndex));
     setPhase("idle");
     setFeedback("");
-    setSelectedSequence([]);
+    setResponse("");
     setReview(null);
     answerStartedAtRef.current = null;
   }, [challenge.id, challenge.variacoes.length]);
-
-  useEffect(() => {
-    setOptions(shuffle(currentVariation.options));
-  }, [challenge.id, currentVariation.options, variationIndex]);
 
   useEffect(() => {
     onRememberVariation(challenge.id, variationIndex);
   }, [challenge.id, onRememberVariation, variationIndex]);
 
   function startRound() {
-    setSelectedSequence([]);
+    setResponse("");
     setFeedback("");
     setReview(null);
     setPhase("showing");
@@ -99,7 +94,7 @@ export function AudienceGame({ usuario, progresso, onBack, onRememberVariation, 
   }
 
   function startAnswering() {
-    setSelectedSequence([]);
+    setResponse("");
     setFeedback("");
     setReview(null);
     setPhase("answering");
@@ -108,7 +103,7 @@ export function AudienceGame({ usuario, progresso, onBack, onRememberVariation, 
 
   function resetRound() {
     setVariationIndex((current) => getNextVariationIndex(challenge.variacoes.length, current));
-    setSelectedSequence([]);
+    setResponse("");
     setFeedback("");
     setReview(null);
     setPhase("idle");
@@ -122,38 +117,36 @@ export function AudienceGame({ usuario, progresso, onBack, onRememberVariation, 
     return progresso[previousChallenge.id]?.completed ?? false;
   }
 
-  function handleOptionClick(option: string) {
+  function submitAnswer() {
     if (phase !== "answering") return;
+    const selectedSequence = response
+      .split(/[;,\n\s]+/)
+      .map((item) => item.trim())
+      .filter(Boolean);
+    const answerSeconds = answerStartedAtRef.current
+      ? Math.max(1, Math.round((Date.now() - answerStartedAtRef.current) / 1000))
+      : 0;
+    const result = evaluateAudienceRound({
+      expectedSequence: currentVariation.sequence,
+      selectedSequence,
+      answerSeconds,
+      revealSeconds: currentVariation.revealSeconds,
+      minimumToComplete: challenge.minimoParaConcluir,
+    });
 
-    const nextSequence = [...selectedSequence, option];
-    setSelectedSequence(nextSequence);
-
-    if (nextSequence.length === currentVariation.sequence.length) {
-      const answerSeconds = answerStartedAtRef.current
-        ? Math.max(1, Math.round((Date.now() - answerStartedAtRef.current) / 1000))
-        : 0;
-      const result = evaluateAudienceRound({
-        expectedSequence: currentVariation.sequence,
-        selectedSequence: nextSequence,
-        answerSeconds,
-        revealSeconds: currentVariation.revealSeconds,
-        minimumToComplete: challenge.minimoParaConcluir,
-      });
-
-      setPhase("result");
-      setFeedback(
-        result.completed
-          ? `Voce reconstruiu ${result.hits.length} item(ns) na ordem certa e concluiu a fase.`
-          : `Voce acertou ${result.hits.length} item(ns). Precisa de ${challenge.minimoParaConcluir} para concluir esta fase.`,
-      );
-      setReview({
-        hits: result.hits,
-        wrongItems: result.misses,
-        missedItems: currentVariation.sequence.filter((item) => !result.hits.includes(item)),
-        score: result.score,
-      });
-      onSaveResult(challenge.id, result.score, answerSeconds, result.completed, variationIndex);
-    }
+    setPhase("result");
+    setFeedback(
+      result.completed
+        ? `Voce reconstruiu ${result.hits.length} item(ns) na ordem certa e concluiu a fase.`
+        : `Voce acertou ${result.hits.length} item(ns). Precisa de ${challenge.minimoParaConcluir} para concluir esta fase.`,
+    );
+    setReview({
+      hits: result.hits,
+      wrongItems: result.misses,
+      missedItems: currentVariation.sequence.filter((item) => !result.hits.includes(item)),
+      score: result.score,
+    });
+    onSaveResult(challenge.id, result.score, answerSeconds, result.completed, variationIndex);
   }
 
   return (
@@ -294,7 +287,7 @@ export function AudienceGame({ usuario, progresso, onBack, onRememberVariation, 
                   {phase === "idle" ? "Iniciar rodada" : "Rodada iniciada"}
                 </button>
                 <button className="btn btn-secondary" onClick={startAnswering} disabled={phase !== "showing"}>
-                  Comecar resposta
+                  Ocultar e responder
                 </button>
                 <button className="btn btn-secondary" onClick={resetRound}>
                   Trocar rodada
@@ -306,51 +299,28 @@ export function AudienceGame({ usuario, progresso, onBack, onRememberVariation, 
               <div className="section-head">
                 <h3>Monte a sequencia</h3>
                 <span className="small-muted">
-                  {phase === "answering" ? "Clique na ordem correta" : "Aguardando rodada"}
+                  {phase === "answering" ? "Digite a sequencia na ordem correta" : "Aguardando rodada"}
                 </span>
               </div>
 
-              <div className="selected-sequence">
-                {selectedSequence.length > 0 ? selectedSequence.join(" - ") : "Sua resposta aparecera aqui."}
-              </div>
-
-              <AudienceOptionsGrid
-                options={options}
-                canAnswer={phase === "answering"}
-                limitReached={selectedSequence.length >= currentVariation.sequence.length}
-                onChoose={handleOptionClick}
+              <textarea
+                className="text-input area-input"
+                placeholder="Digite os itens na mesma ordem, separados por espaco, virgula ou quebra de linha."
+                value={response}
+                disabled={phase !== "answering"}
+                onChange={(event) => setResponse(event.target.value)}
+                rows={7}
               />
+
+              <div className="button-row">
+                <button className="btn btn-primary" onClick={submitAnswer} disabled={phase !== "answering" || !response.trim()}>
+                  Corrigir rodada
+                </button>
+              </div>
             </section>
           </div>
         )}
       </section>
     </main>
-  );
-}
-
-function AudienceOptionsGrid({
-  options,
-  canAnswer,
-  limitReached,
-  onChoose,
-}: {
-  options: string[];
-  canAnswer: boolean;
-  limitReached: boolean;
-  onChoose: (option: string) => void;
-}) {
-  return (
-    <div className="exclusive-grid">
-      {options.map((option) => (
-        <button
-          key={option}
-          className="exclusive-option"
-          onClick={() => onChoose(option)}
-          disabled={!canAnswer || limitReached}
-        >
-          {option}
-        </button>
-      ))}
-    </div>
   );
 }
