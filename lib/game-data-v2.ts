@@ -1,0 +1,373 @@
+import type { AttentionChallenge, ExclusiveChallenge, MemoryChallenge, SpatialChallenge } from "@/lib/types";
+
+export const memoryChallenges: MemoryChallenge[] = [
+  {
+    id: 1,
+    difficultyLabel: "Muito facil",
+    nome: "Objetos do cotidiano",
+    nomeInfantil: "Coisas da casa",
+    variacoes: [
+      ["casa", "livro", "sol", "mesa", "carro"],
+      ["janela", "cadeira", "chave", "prato", "retrato"],
+      ["escada", "tapete", "fogao", "copo", "quadro"],
+    ],
+    variacoesInfantis: [
+      ["bola", "urso", "suco", "cama", "luz"],
+      ["dado", "meia", "pipa", "copo", "tinta"],
+      ["roda", "bota", "casa", "giz", "leite"],
+    ],
+    tempoMemorizacao: 8,
+    minimoParaConcluir: 3,
+  },
+  {
+    id: 2,
+    difficultyLabel: "Facil",
+    nome: "Natureza e estudo",
+    nomeInfantil: "Bichos e escola",
+    variacoes: [
+      ["gato", "arvore", "rio", "porta", "lapis"],
+      ["flor", "caderno", "pedra", "ponte", "borracha"],
+      ["folha", "caneta", "chuva", "trilha", "mochila"],
+    ],
+    variacoesInfantis: [
+      ["gato", "flor", "rio", "cola", "lapis"],
+      ["pato", "nuvem", "livro", "tinta", "folha"],
+      ["abelha", "sol", "caderno", "chuva", "borracha"],
+    ],
+    tempoMemorizacao: 7,
+    minimoParaConcluir: 3,
+  },
+  {
+    id: 3,
+    difficultyLabel: "Menos facil",
+    nome: "Movimento e rotina",
+    nomeInfantil: "Passeio do dia",
+    variacoes: [
+      ["aviao", "pao", "relogio", "escola", "mar"],
+      ["onibus", "cafe", "agenda", "trabalho", "praia"],
+      ["bicicleta", "almoco", "alarme", "mercado", "parque"],
+    ],
+    variacoesInfantis: [
+      ["bike", "pao", "escola", "pracinha", "suco"],
+      ["onibus", "lanche", "parque", "tenis", "recreio"],
+      ["patins", "fruta", "mochila", "amigo", "balanco"],
+    ],
+    tempoMemorizacao: 7,
+    minimoParaConcluir: 4,
+  },
+  {
+    id: 4,
+    difficultyLabel: "Intermediaria",
+    nome: "Cenario noturno",
+    nomeInfantil: "Noite calma",
+    variacoes: [
+      ["lua", "estrela", "ceu", "noite", "nuvem"],
+      ["cometa", "sombra", "vento", "silencio", "brisa"],
+      ["neblina", "lanterna", "constelacao", "sereno", "aurora"],
+    ],
+    variacoesInfantis: [
+      ["lua", "estrela", "ceu", "sono", "nuvem"],
+      ["vento", "luz", "coberta", "janela", "noite"],
+      ["sereno", "silencio", "lanterna", "cometa", "pijama"],
+    ],
+    tempoMemorizacao: 6,
+    minimoParaConcluir: 4,
+  },
+  {
+    id: 5,
+    difficultyLabel: "Avancada",
+    nome: "Cores em foco",
+    nomeInfantil: "Cores brincantes",
+    variacoes: [
+      ["verde", "azul", "vermelho", "amarelo", "preto"],
+      ["branco", "laranja", "rosa", "cinza", "roxo"],
+      ["turquesa", "bege", "marrom", "lilas", "dourado"],
+    ],
+    variacoesInfantis: [
+      ["azul", "verde", "rosa", "amarelo", "preto"],
+      ["branco", "laranja", "roxo", "vermelho", "cinza"],
+      ["lilas", "bege", "marrom", "dourado", "turquesa"],
+    ],
+    tempoMemorizacao: 6,
+    minimoParaConcluir: 5,
+  },
+];
+
+export const attentionChallenges: AttentionChallenge[] = [
+  {
+    id: 1,
+    difficultyLabel: "Muito facil",
+    nome: "Foco em triangulos",
+    nomeInfantil: "Caça a letra T",
+    variacoes: [
+      {
+        instrucao: "Clique apenas nas letras T antes do tempo acabar.",
+        instrucaoInfantil: "Ache so as letras T. Toque nelas bem rapido.",
+        alvo: "T",
+        grade: ["T", "O", "Q", "T", "D", "T", "Q", "O", "T", "D", "T", "O"],
+        gradeInfantil: ["T", "O", "T", "D", "Q", "T", "O", "T"],
+      },
+      {
+        instrucao: "Encontre somente os simbolos T nesta grade.",
+        instrucaoInfantil: "Procure as letras T escondidas nesta rodada.",
+        alvo: "T",
+        grade: ["P", "T", "R", "B", "T", "N", "T", "C", "L", "T", "V", "T"],
+        gradeInfantil: ["P", "T", "B", "T", "N", "T", "C", "T"],
+      },
+      {
+        instrucao: "Selecione apenas as letras T e ignore o resto.",
+        instrucaoInfantil: "Clique no T e deixe as outras letras quietinhas.",
+        alvo: "T",
+        grade: ["T", "Y", "G", "T", "S", "M", "T", "K", "J", "T", "Z", "T"],
+        gradeInfantil: ["T", "Y", "T", "S", "M", "T", "K", "T"],
+      },
+    ],
+    tempoLimite: 18,
+    minimoParaConcluir: 4,
+  },
+  {
+    id: 2,
+    difficultyLabel: "Facil",
+    nome: "Busca por letras",
+    nomeInfantil: "Caça a letra A",
+    variacoes: [
+      {
+        instrucao: "Encontre somente as letras A na grade.",
+        instrucaoInfantil: "Toque so nas letras A.",
+        alvo: "A",
+        grade: ["A", "M", "A", "R", "V", "A", "N", "X", "A", "H", "K", "A"],
+        gradeInfantil: ["A", "M", "A", "R", "A", "N", "X", "A"],
+      },
+      {
+        instrucao: "Clique apenas nas letras A e ignore as demais.",
+        instrucaoInfantil: "Procure a letra A de novo nesta nova grade.",
+        alvo: "A",
+        grade: ["P", "A", "L", "A", "T", "W", "A", "C", "A", "Q", "E", "A"],
+        gradeInfantil: ["P", "A", "L", "A", "W", "A", "C", "A"],
+      },
+      {
+        instrucao: "Seu alvo continua sendo a letra A, mas a distribuicao mudou.",
+        instrucaoInfantil: "As letras mudaram de lugar. Encontre os As.",
+        alvo: "A",
+        grade: ["A", "F", "J", "A", "U", "A", "B", "Y", "A", "N", "A", "D"],
+        gradeInfantil: ["A", "F", "A", "U", "A", "B", "A", "D"],
+      },
+    ],
+    tempoLimite: 16,
+    minimoParaConcluir: 4,
+  },
+  {
+    id: 3,
+    difficultyLabel: "Menos facil",
+    nome: "Atencao seletiva",
+    nomeInfantil: "Missao do numero 7",
+    variacoes: [
+      {
+        instrucao: "Selecione apenas os numeros 7 e ignore os demais.",
+        instrucaoInfantil: "Clique so no numero 7.",
+        alvo: "7",
+        grade: ["7", "1", "4", "7", "9", "2", "7", "3", "7", "6", "8", "7"],
+        gradeInfantil: ["7", "1", "7", "2", "7", "3", "6", "7"],
+      },
+      {
+        instrucao: "Encontre todos os numeros 7 nesta grade variada.",
+        instrucaoInfantil: "Os numeros 7 mudaram de lugar. Ache todos.",
+        alvo: "7",
+        grade: ["5", "7", "2", "7", "4", "8", "7", "0", "7", "6", "7", "3"],
+        gradeInfantil: ["5", "7", "2", "7", "8", "7", "0", "7"],
+      },
+      {
+        instrucao: "Seu foco agora e clicar apenas nos 7 o mais rapido possivel.",
+        instrucaoInfantil: "Va rapido, mas toque so no 7.",
+        alvo: "7",
+        grade: ["7", "9", "7", "2", "1", "7", "5", "7", "4", "7", "8", "6"],
+        gradeInfantil: ["7", "9", "7", "2", "7", "5", "7", "4"],
+      },
+    ],
+    tempoLimite: 14,
+    minimoParaConcluir: 5,
+  },
+];
+
+export const exclusiveChallenges: ExclusiveChallenge[] = [
+  {
+    id: 1,
+    audience: "infantil",
+    difficultyLabel: "Muito facil",
+    nome: "Parada da Sequencia",
+    descricao: "Veja a sequencia de figuras-palavra e toque na mesma ordem.",
+    minimoParaConcluir: 3,
+    variacoes: [
+      {
+        prompt: "Veja os amigos da brincadeira e repita a ordem.",
+        sequence: ["bola", "gato", "sol"],
+        revealSeconds: 7,
+        options: ["bola", "gato", "sol", "pipa", "flor"],
+      },
+      {
+        prompt: "Memorize a fila de brinquedos.",
+        sequence: ["dado", "pipa", "robo"],
+        revealSeconds: 7,
+        options: ["dado", "pipa", "robo", "suco", "meia"],
+      },
+      {
+        prompt: "Agora repita a ordem dos bichinhos e objetos.",
+        sequence: ["urso", "barco", "luz", "tinta"],
+        revealSeconds: 8,
+        options: ["urso", "barco", "luz", "tinta", "nuvem", "giz"],
+      },
+    ],
+  },
+  {
+    id: 2,
+    audience: "adolescente",
+    difficultyLabel: "Intermediaria",
+    nome: "Codigo Relampago",
+    descricao: "Decore a sequencia de codigos curtos e reconstrua na ordem correta.",
+    minimoParaConcluir: 4,
+    variacoes: [
+      {
+        prompt: "Memorize a ordem dos codigos e monte novamente.",
+        sequence: ["A7", "K2", "M9", "R4"],
+        revealSeconds: 6,
+        options: ["A7", "K2", "M9", "R4", "Q8", "L3"],
+      },
+      {
+        prompt: "Os codigos mudaram. Tente manter foco e velocidade.",
+        sequence: ["T5", "B1", "N6", "Z3"],
+        revealSeconds: 6,
+        options: ["T5", "B1", "N6", "Z3", "Y4", "H2"],
+      },
+      {
+        prompt: "Nova rodada com mais interferencia visual.",
+        sequence: ["C8", "P4", "D7", "S1", "V6"],
+        revealSeconds: 7,
+        options: ["C8", "P4", "D7", "S1", "V6", "W2", "F9"],
+      },
+    ],
+  },
+  {
+    id: 3,
+    audience: "adulto",
+    difficultyLabel: "Avancada",
+    nome: "Sequencia Executiva",
+    descricao: "Observe blocos mistos de letras e numeros e reproduza sem repetir erros.",
+    minimoParaConcluir: 5,
+    variacoes: [
+      {
+        prompt: "Memorize a sequencia de identificadores curtos.",
+        sequence: ["AX3", "Q7", "LM2", "R5", "TN8"],
+        revealSeconds: 6,
+        options: ["AX3", "Q7", "LM2", "R5", "TN8", "B4", "K9"],
+      },
+      {
+        prompt: "Mais densidade de informacao. Reconstrua a ordem completa.",
+        sequence: ["M4", "PX8", "A2", "CZ7", "L9"],
+        revealSeconds: 5,
+        options: ["M4", "PX8", "A2", "CZ7", "L9", "T3", "H6"],
+      },
+      {
+        prompt: "Ultima rodada: mais compressao de tempo e mais distractores.",
+        sequence: ["VR1", "D8", "K5", "NA3", "Q2", "T7"],
+        revealSeconds: 5,
+        options: ["VR1", "D8", "K5", "NA3", "Q2", "T7", "X4", "B9"],
+      },
+    ],
+  },
+];
+
+export const spatialChallenges: SpatialChallenge[] = [
+  {
+    id: 1,
+    difficultyLabel: "Muito facil",
+    nome: "Rota do explorador",
+    nomeInfantil: "Caminho do robo",
+    minimoParaConcluir: 3,
+    tempoResposta: 18,
+    variacoes: [
+      {
+        prompt: "Observe a rota e reconstrua os movimentos na mesma ordem.",
+        promptInfantil: "Veja o caminho e aperte as setas na mesma ordem.",
+        sequence: ["cima", "direita", "direita", "baixo"],
+        revealSeconds: 6,
+        options: ["cima", "baixo", "esquerda", "direita"],
+      },
+      {
+        prompt: "A rota mudou. Mantenha a referencia espacial e repita.",
+        promptInfantil: "O caminho mudou. Repita as setas certinhas.",
+        sequence: ["esquerda", "cima", "direita", "baixo"],
+        revealSeconds: 6,
+        options: ["cima", "baixo", "esquerda", "direita"],
+      },
+      {
+        prompt: "Nova rota com curvas mais rapidas.",
+        promptInfantil: "Agora o robo virou mais vezes. Tente de novo.",
+        sequence: ["cima", "cima", "esquerda", "baixo", "direita"],
+        revealSeconds: 7,
+        options: ["cima", "baixo", "esquerda", "direita"],
+      },
+    ],
+  },
+  {
+    id: 2,
+    difficultyLabel: "Facil",
+    nome: "Mapa mental",
+    nomeInfantil: "Mapa dos passos",
+    minimoParaConcluir: 4,
+    tempoResposta: 16,
+    variacoes: [
+      {
+        prompt: "Memorize a sequencia de deslocamentos no mapa.",
+        promptInfantil: "Guarde o caminho do mapa e monte depois.",
+        sequence: ["direita", "cima", "cima", "esquerda", "baixo"],
+        revealSeconds: 6,
+        options: ["cima", "baixo", "esquerda", "direita"],
+      },
+      {
+        prompt: "Reproduza o trajeto sem inverter lados.",
+        promptInfantil: "Cuidado para nao trocar esquerda com direita.",
+        sequence: ["baixo", "direita", "cima", "direita", "baixo"],
+        revealSeconds: 6,
+        options: ["cima", "baixo", "esquerda", "direita"],
+      },
+      {
+        prompt: "Mais uma rota para desafiar sua orientacao espacial.",
+        promptInfantil: "Novo caminho no mapa. Siga a ordem certa.",
+        sequence: ["esquerda", "baixo", "baixo", "direita", "cima"],
+        revealSeconds: 7,
+        options: ["cima", "baixo", "esquerda", "direita"],
+      },
+    ],
+  },
+  {
+    id: 3,
+    difficultyLabel: "Menos facil",
+    nome: "Rotacao e destino",
+    nomeInfantil: "Giro do foguete",
+    minimoParaConcluir: 5,
+    tempoResposta: 14,
+    variacoes: [
+      {
+        prompt: "Observe a rota final e reconstrua os giros corretamente.",
+        promptInfantil: "Veja para onde o foguete foi e repita o caminho.",
+        sequence: ["cima", "direita", "baixo", "direita", "cima", "esquerda"],
+        revealSeconds: 7,
+        options: ["cima", "baixo", "esquerda", "direita"],
+      },
+      {
+        prompt: "Agora a rota exige mais controle de direcao.",
+        promptInfantil: "Mais curvas. Aperte as setas com calma.",
+        sequence: ["direita", "direita", "cima", "esquerda", "baixo", "baixo"],
+        revealSeconds: 7,
+        options: ["cima", "baixo", "esquerda", "direita"],
+      },
+      {
+        prompt: "Ultima rota: mais longa e com menos margem de erro.",
+        promptInfantil: "Ultimo caminho. Tente lembrar tudo na ordem.",
+        sequence: ["esquerda", "cima", "direita", "direita", "baixo", "esquerda"],
+        revealSeconds: 7,
+        options: ["cima", "baixo", "esquerda", "direita"],
+      },
+    ],
+  },
+];

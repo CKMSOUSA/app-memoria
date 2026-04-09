@@ -1,0 +1,63 @@
+:root {
+  --bg-main: #f4efe6;
+  --bg-panel: #fffaf2;
+  --bg-soft: #f7f0e5;
+  --bg-card: #fffdf8;
+  --ink-strong: #1d2a2f;
+  --ink-soft: #5f6d73;
+  --accent: #cf5f3c;
+  --accent-dark: #9f442b;
+  --accent-soft: #f6d1bf;
+  --success: #2d8a54;
+  --warning: #c28623;
+  --danger: #b84b4b;
+  --line: #e5d8c5;
+  --shadow: 0 24px 60px rgba(59, 42, 24, 0.12);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: Georgia, "Times New Roman", serif;
+  background:
+    radial-gradient(circle at top left, rgba(207, 95, 60, 0.14), transparent 24%),
+    radial-gradient(circle at bottom right, rgba(45, 138, 84, 0.12), transparent 28%),
+    linear-gradient(135deg, #f2ebdd 0%, #faf6ef 45%, #f7ecdf 100%);
+  color: var(--ink-strong);
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+button {
+  transition:
+    transform 160ms ease,
+    box-shadow 160ms ease,
+    background-color 160ms ease,
+    border-color 160ms ease;
+}
+
+button:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+a {
+  color: inherit;
+}
