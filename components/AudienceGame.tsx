@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { exclusiveChallenges } from "@/lib/game-data-v3";
 import { evaluateAudienceRound, getNextVariationIndex } from "@/lib/game-logic";
 import { getAgeLabel, getAudienceFromAge, getAudienceLabel } from "@/lib/scoring";
@@ -57,9 +57,14 @@ export function AudienceGame({ usuario, progresso, onBack, onRememberVariation, 
     () => audienceChallenges.find((item) => item.id === selectedId) ?? audienceChallenges[0] ?? exclusiveChallenges[0],
     [audienceChallenges, selectedId],
   );
+  const progressoRef = useRef(progresso);
   const phaseNumber = Math.max(1, audienceChallenges.findIndex((item) => item.id === challenge.id) + 1);
   const completedCount = audienceChallenges.filter((item) => progresso[item.id]?.completed).length;
   const currentVariation = challenge.variacoes[variationIndex] ?? challenge.variacoes[0];
+
+  useEffect(() => {
+    progressoRef.current = progresso;
+  }, [progresso]);
 
   useEffect(() => {
     if (audienceChallenges.length === 0) return;
@@ -69,7 +74,7 @@ export function AudienceGame({ usuario, progresso, onBack, onRememberVariation, 
   }, [audienceChallenges]);
 
   useEffect(() => {
-    const lastVariationIndex = progresso[challenge.id]?.lastVariationIndex ?? null;
+    const lastVariationIndex = progressoRef.current[challenge.id]?.lastVariationIndex ?? null;
     setVariationIndex(getNextVariationIndex(challenge.variacoes.length, lastVariationIndex));
     setPhase("idle");
     setRevealLeft(0);
@@ -77,7 +82,7 @@ export function AudienceGame({ usuario, progresso, onBack, onRememberVariation, 
     setSelectedSequence([]);
     setAnswerSeconds(0);
     setReview(null);
-  }, [challenge.id, challenge.variacoes.length, progresso]);
+  }, [challenge.id, challenge.variacoes.length]);
 
   useEffect(() => {
     setOptions(shuffle(currentVariation.options));
