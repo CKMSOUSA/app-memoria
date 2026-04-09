@@ -470,6 +470,32 @@ h2 {
   font-size: 16px;
 }
 
+.exclusive-game-card {
+  background: #fffdfa;
+  backdrop-filter: none;
+}
+
+.exclusive-panel {
+  background: #fffefb;
+}
+
+.exclusive-word-box {
+  background: #fff7ef;
+  color: #7f3419;
+  border: 1px solid rgba(229, 216, 197, 0.9);
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+.exclusive-answer-input {
+  background: #ffffff;
+  color: #1f2937;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: geometricPrecision;
+}
+
 .area-input {
   min-height: 180px;
   resize: vertical;

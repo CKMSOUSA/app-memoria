@@ -151,7 +151,7 @@ export function AudienceGame({ usuario, progresso, onBack, onRememberVariation, 
 
   return (
     <main className="shell shell-center">
-      <section className="game-card">
+      <section className="game-card exclusive-game-card">
         <header className="game-header">
           <div>
             <p className="eyebrow">Minijogo Exclusivo</p>
@@ -164,7 +164,7 @@ export function AudienceGame({ usuario, progresso, onBack, onRememberVariation, 
           </button>
         </header>
 
-        <section className="panel">
+        <section className="panel exclusive-panel">
           <div className="section-head">
             <h3>Escolha a fase exclusiva</h3>
             <span className="small-muted">{`${completedCount}/${audienceChallenges.length} concluidas nesta trilha`}</span>
@@ -259,7 +259,7 @@ export function AudienceGame({ usuario, progresso, onBack, onRememberVariation, 
           </section>
         ) : (
           <div className="game-grid">
-            <section className="panel">
+            <section className="panel exclusive-panel">
               <div className="section-head">
                 <h3>Como funciona</h3>
                 <span className="small-muted">Meta: {challenge.minimoParaConcluir} acertos em ordem</span>
@@ -277,9 +277,11 @@ export function AudienceGame({ usuario, progresso, onBack, onRememberVariation, 
               </div>
 
               {phase === "showing" ? (
-                <div className="word-box">{currentVariation.sequence.join(" - ")}</div>
+                <div className="word-box exclusive-word-box">{currentVariation.sequence.join(" - ")}</div>
               ) : (
-                <div className="word-box word-box-hidden">A sequencia aparece apenas durante a exibicao inicial.</div>
+                <div className="word-box word-box-hidden exclusive-word-box">
+                  A sequencia aparece apenas durante a exibicao inicial.
+                </div>
               )}
 
               <div className="button-row">
@@ -295,7 +297,7 @@ export function AudienceGame({ usuario, progresso, onBack, onRememberVariation, 
               </div>
             </section>
 
-            <section className="panel">
+            <section className="panel exclusive-panel">
               <div className="section-head">
                 <h3>Monte a sequencia</h3>
                 <span className="small-muted">
@@ -304,7 +306,7 @@ export function AudienceGame({ usuario, progresso, onBack, onRememberVariation, 
               </div>
 
               <textarea
-                className="text-input area-input"
+                className="text-input area-input exclusive-answer-input"
                 placeholder="Digite os itens na mesma ordem, separados por espaco, virgula ou quebra de linha."
                 value={response}
                 disabled={phase !== "answering"}
