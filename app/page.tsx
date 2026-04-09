@@ -7,7 +7,9 @@ import { AudienceGame } from "@/components/AudienceGame";
 import { AuthScreen } from "@/components/AuthScreen";
 import { ComparisonGame } from "@/components/ComparisonGame";
 import { Dashboard } from "@/components/Dashboard";
+import { HelpScreen } from "@/components/HelpScreen";
 import { LogicGame } from "@/components/LogicGame";
+import type { HelpRequest } from "@/lib/types";
 import { MemoryGame } from "@/components/MemoryGame";
 import { ProfileScreen } from "@/components/ProfileScreen";
 import { SpatialGame } from "@/components/SpatialGame";
@@ -22,6 +24,7 @@ export default function Page() {
   const [usuario, setUsuario] = useState<Usuario | null>(null);
   const [progresso, setProgresso] = useState<ProgressState>(mergeProgress());
   const [history, setHistory] = useState<SessionRecord[]>([]);
+  const [helpRequests, setHelpRequests] = useState<HelpRequest[]>([]);
   const [adminHistories, setAdminHistories] = useState<Array<{ user: Usuario; history: SessionRecord[]; progress?: ProgressState }>>([]);
   const [dataMode, setDataMode] = useState<DataMode>(repository.mode);
   const [ready, setReady] = useState(false);
@@ -45,6 +48,11 @@ export default function Page() {
           setHistory(await repository.loadSessionHistory(activeUser.email));
         } catch {
           setHistory([]);
+        }
+        try {
+          setHelpRequests(await repository.loadHelpRequests());
+        } catch {
+          setHelpRequests([]);
         }
         setTela("dashboard");
       }
@@ -75,6 +83,11 @@ export default function Page() {
     } catch {
       setHistory([]);
     }
+    try {
+      setHelpRequests(await repository.loadHelpRequests());
+    } catch {
+      setHelpRequests([]);
+    }
     setTela("dashboard");
     return activeUser;
   }
@@ -89,6 +102,7 @@ export default function Page() {
     setUsuario(null);
     setProgresso(mergeProgress());
     setHistory([]);
+    setHelpRequests([]);
     setAdminHistories([]);
     setTela("login");
   }
@@ -122,6 +136,11 @@ export default function Page() {
 
     setAdminHistories(nextAdminHistories);
     setTela("admin");
+  }
+
+  async function handleSubmitHelpRequest(request: { email: string; name: string; subject: string; message: string }) {
+    const nextRequests = await repository.appendHelpRequest(request);
+    setHelpRequests(nextRequests);
   }
 
   function persistResult(
@@ -226,6 +245,7 @@ export default function Page() {
           tela === "logica" ||
           tela === "perfil" ||
           tela === "especial" ||
+          tela === "ajuda" ||
           tela === "admin"
             ? "login"
             : tela
@@ -342,7 +362,19 @@ export default function Page() {
         usuario={usuario}
         progressoAtual={progresso}
         histories={adminHistories}
+        helpRequests={helpRequests}
         onBack={() => setTela("dashboard")}
+      />
+    );
+  }
+
+  if (tela === "ajuda") {
+    return (
+      <HelpScreen
+        usuario={usuario}
+        requests={helpRequests.filter((item) => item.email === usuario.email)}
+        onBack={() => setTela("dashboard")}
+        onSubmit={handleSubmitHelpRequest}
       />
     );
   }
@@ -359,6 +391,7 @@ export default function Page() {
       onOpenLogic={() => setTela("logica")}
       onOpenProfile={() => setTela("perfil")}
       onOpenSpecial={() => setTela("especial")}
+      onOpenHelp={() => setTela("ajuda")}
       onOpenAdmin={() => void handleOpenAdmin()}
       onLogout={handleLogout}
       dataMode={dataMode}

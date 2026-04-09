@@ -10,6 +10,7 @@ export type Tela =
   | "logica"
   | "perfil"
   | "especial"
+  | "ajuda"
   | "admin";
 
 export type DataMode = "local" | "remote";
@@ -58,6 +59,16 @@ export type SessionRecord = {
   timeSeconds: number;
   completed: boolean;
   playedAt: string;
+};
+
+export type HelpRequest = {
+  id: string;
+  email: string;
+  name: string;
+  subject: string;
+  message: string;
+  createdAt: string;
+  status: "aberta" | "respondida";
 };
 
 export type MemoryChallenge = {

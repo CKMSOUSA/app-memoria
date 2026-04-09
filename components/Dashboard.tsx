@@ -34,6 +34,7 @@ type DashboardProps = {
   onOpenProfile: () => void;
   onOpenSpecial: () => void;
   onOpenAdmin: () => void;
+  onOpenHelp: () => void;
   onLogout: () => void;
   dataMode: DataMode;
   history: SessionRecord[];
@@ -141,6 +142,7 @@ export function Dashboard({
   onOpenProfile,
   onOpenSpecial,
   onOpenAdmin,
+  onOpenHelp,
   onLogout,
   dataMode,
   history,
@@ -208,6 +210,9 @@ export function Dashboard({
         <button className="btn btn-side" onClick={onOpenProfile}>
           Perfil
         </button>
+        <button className="btn btn-side" onClick={onOpenHelp}>
+          Ajuda
+        </button>
         <button className="btn btn-side" onClick={onLogout}>
           Sair
         </button>
@@ -238,6 +243,9 @@ export function Dashboard({
             </button>
             <button className="btn btn-secondary" onClick={onOpenLogic}>
               Treinar logica
+            </button>
+            <button className="btn btn-secondary" onClick={onOpenHelp}>
+              Abrir ajuda
             </button>
             <button className="btn btn-primary" onClick={onOpenMemory}>
               Treinar memoria

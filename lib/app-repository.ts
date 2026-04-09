@@ -2,11 +2,13 @@
 
 import {
   appendSessionHistory,
+  appendHelpRequest,
   bootstrapStorage,
   clearActiveSession,
   getActiveSession,
   listUsers,
   loadAllHistories,
+  loadHelpRequests,
   loadProgress,
   loadSessionHistory,
   loginUser,
@@ -16,7 +18,7 @@ import {
   updateUserProfile,
   updateUserPoints,
 } from "@/lib/storage";
-import type { DataMode, ProgressState, SessionRecord, Usuario } from "@/lib/types";
+import type { DataMode, HelpRequest, ProgressState, SessionRecord, Usuario } from "@/lib/types";
 
 type RegisterResult = {
   error: string | null;
@@ -44,6 +46,8 @@ type AppRepository = {
   appendSessionHistory: (email: string, record: Omit<SessionRecord, "id" | "email">) => Promise<SessionRecord[]>;
   listUsers: () => Promise<Usuario[]>;
   loadAllHistories: () => Promise<Array<{ user: Usuario; history: SessionRecord[] }>>;
+  loadHelpRequests: () => Promise<HelpRequest[]>;
+  appendHelpRequest: (request: Omit<HelpRequest, "id" | "createdAt" | "status">) => Promise<HelpRequest[]>;
   simulateRecovery: (email: string) => string;
 };
 
@@ -75,6 +79,8 @@ const localRepository: AppRepository = {
   appendSessionHistory: async (email, record) => appendSessionHistory(email, record),
   listUsers: async () => listUsers(),
   loadAllHistories: async () => loadAllHistories(),
+  loadHelpRequests: async () => loadHelpRequests(),
+  appendHelpRequest: async (request) => appendHelpRequest(request),
   simulateRecovery: (email) => simulateRecovery(email),
 };
 
@@ -167,6 +173,22 @@ const remoteRepository: AppRepository = {
       cache: "no-store",
     });
     return (await parseJson<Array<{ user: Usuario; history: SessionRecord[] }>>(response)) ?? [];
+  },
+  loadHelpRequests: async () => {
+    const response = await fetch(`${getRemoteBaseUrl()}/help`, {
+      method: "GET",
+      headers: { "Content-Type": "application/json" },
+      cache: "no-store",
+    });
+    return (await parseJson<HelpRequest[]>(response)) ?? [];
+  },
+  appendHelpRequest: async (request) => {
+    const response = await fetch(`${getRemoteBaseUrl()}/help`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(request),
+    });
+    return (await parseJson<HelpRequest[]>(response)) ?? [];
   },
   simulateRecovery: () =>
     "Modo remoto preparado. Em producao, use um endpoint de recuperacao com email e token temporario.",

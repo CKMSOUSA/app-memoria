@@ -1,16 +1,17 @@
 "use client";
 
 import { getCompletionRate, getReportSummary, getSessionModeLabel } from "@/lib/scoring";
-import type { ProgressState, SessionRecord, Usuario } from "@/lib/types";
+import type { HelpRequest, ProgressState, SessionRecord, Usuario } from "@/lib/types";
 
 type AdminScreenProps = {
   usuario: Usuario;
   progressoAtual: ProgressState;
   histories: Array<{ user: Usuario; history: SessionRecord[]; progress?: ProgressState }>;
+  helpRequests: HelpRequest[];
   onBack: () => void;
 };
 
-export function AdminScreen({ usuario, progressoAtual, histories, onBack }: AdminScreenProps) {
+export function AdminScreen({ usuario, progressoAtual, histories, helpRequests, onBack }: AdminScreenProps) {
   const normalizedHistories = histories.length > 0 ? histories : [{ user: usuario, history: [], progress: progressoAtual }];
 
   return (
@@ -44,6 +45,11 @@ export function AdminScreen({ usuario, progressoAtual, histories, onBack }: Admi
             <p className="small-muted">Conclusoes totais</p>
             <h3>{normalizedHistories.reduce((sum, item) => sum + item.history.filter((entry) => entry.completed).length, 0)}</h3>
             <p className="muted">Ajuda a acompanhar aderencia e evolucao geral.</p>
+          </article>
+          <article className="stat-card">
+            <p className="small-muted">Pedidos de ajuda</p>
+            <h3>{helpRequests.length}</h3>
+            <p className="muted">Duvidas registradas pelos usuarios dentro do app.</p>
           </article>
         </section>
 
@@ -111,6 +117,28 @@ export function AdminScreen({ usuario, progressoAtual, histories, onBack }: Admi
                 </article>
               );
             })}
+          </div>
+        </section>
+
+        <section className="panel">
+          <div className="section-head">
+            <h3>Duvidas enviadas</h3>
+            <span className="small-muted">Acompanhamento rapido da central de ajuda</span>
+          </div>
+          <div className="faq-list">
+            {helpRequests.length > 0 ? (
+              helpRequests.slice(0, 8).map((request) => (
+                <article key={request.id} className="faq-card">
+                  <div className="section-head">
+                    <strong>{request.subject}</strong>
+                    <span className="small-muted">{`${request.name} - ${request.status}`}</span>
+                  </div>
+                  <p className="muted">{request.message}</p>
+                </article>
+              ))
+            ) : (
+              <p className="small-muted">Nenhuma duvida registrada ate agora.</p>
+            )}
           </div>
         </section>
       </section>

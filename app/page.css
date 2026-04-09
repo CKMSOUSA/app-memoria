@@ -901,6 +901,21 @@ h2 {
   font-size: 14px;
 }
 
+.faq-list,
+.help-history {
+  display: grid;
+  gap: 12px;
+}
+
+.faq-card {
+  display: grid;
+  gap: 8px;
+  padding: 16px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.82);
+  border: 1px solid var(--line);
+}
+
 .comparison-progress {
   display: flex;
   gap: 10px;
