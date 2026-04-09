@@ -41,8 +41,6 @@ export function AudienceGame({ usuario, progresso, onBack, onRememberVariation, 
   const [selectedId, setSelectedId] = useState(audienceChallenges[0]?.id ?? 0);
   const [variationIndex, setVariationIndex] = useState(0);
   const [phase, setPhase] = useState<Phase>("idle");
-  const [revealLeft, setRevealLeft] = useState(0);
-  const [answerSeconds, setAnswerSeconds] = useState(0);
   const [selectedSequence, setSelectedSequence] = useState<string[]>([]);
   const [feedback, setFeedback] = useState("");
   const [options, setOptions] = useState<string[]>([]);
@@ -59,6 +57,7 @@ export function AudienceGame({ usuario, progresso, onBack, onRememberVariation, 
   );
   const currentVariation = challenge.variacoes[variationIndex] ?? challenge.variacoes[0];
   const progressoRef = useRef(progresso);
+  const answerStartedAtRef = useRef<number | null>(null);
   const phaseNumber = Math.max(1, audienceChallenges.findIndex((item) => item.id === challenge.id) + 1);
   const completedCount = audienceChallenges.filter((item) => progresso[item.id]?.completed).length;
 
@@ -77,11 +76,10 @@ export function AudienceGame({ usuario, progresso, onBack, onRememberVariation, 
     const lastVariationIndex = progressoRef.current[challenge.id]?.lastVariationIndex ?? null;
     setVariationIndex(getNextVariationIndex(challenge.variacoes.length, lastVariationIndex));
     setPhase("idle");
-    setRevealLeft(0);
     setFeedback("");
     setSelectedSequence([]);
-    setAnswerSeconds(0);
     setReview(null);
+    answerStartedAtRef.current = null;
   }, [challenge.id, challenge.variacoes.length]);
 
   useEffect(() => {
@@ -92,40 +90,29 @@ export function AudienceGame({ usuario, progresso, onBack, onRememberVariation, 
     onRememberVariation(challenge.id, variationIndex);
   }, [challenge.id, onRememberVariation, variationIndex]);
 
-  useEffect(() => {
-    if (phase !== "showing") return;
-    if (revealLeft <= 0) {
-      setPhase("answering");
-      return;
-    }
-
-    const timeout = window.setTimeout(() => setRevealLeft((value) => value - 1), 1000);
-    return () => window.clearTimeout(timeout);
-  }, [phase, revealLeft]);
-
-  useEffect(() => {
-    if (phase !== "answering") return;
-    const interval = window.setInterval(() => setAnswerSeconds((value) => value + 1), 1000);
-    return () => window.clearInterval(interval);
-  }, [phase]);
-
   function startRound() {
-    setRevealLeft(currentVariation.revealSeconds);
     setSelectedSequence([]);
-    setAnswerSeconds(0);
     setFeedback("");
     setReview(null);
     setPhase("showing");
+    answerStartedAtRef.current = null;
+  }
+
+  function startAnswering() {
+    setSelectedSequence([]);
+    setFeedback("");
+    setReview(null);
+    setPhase("answering");
+    answerStartedAtRef.current = Date.now();
   }
 
   function resetRound() {
     setVariationIndex((current) => getNextVariationIndex(challenge.variacoes.length, current));
     setSelectedSequence([]);
-    setAnswerSeconds(0);
-    setRevealLeft(0);
     setFeedback("");
     setReview(null);
     setPhase("idle");
+    answerStartedAtRef.current = null;
   }
 
   function isAudienceChallengeUnlocked(challengeId: number) {
@@ -142,6 +129,9 @@ export function AudienceGame({ usuario, progresso, onBack, onRememberVariation, 
     setSelectedSequence(nextSequence);
 
     if (nextSequence.length === currentVariation.sequence.length) {
+      const answerSeconds = answerStartedAtRef.current
+        ? Math.max(1, Math.round((Date.now() - answerStartedAtRef.current) / 1000))
+        : 0;
       const result = evaluateAudienceRound({
         expectedSequence: currentVariation.sequence,
         selectedSequence: nextSequence,
@@ -283,8 +273,14 @@ export function AudienceGame({ usuario, progresso, onBack, onRememberVariation, 
               </div>
               <p className="muted">{currentVariation.prompt}</p>
               <div className="meter-box">
-                <strong>Tempo de exibicao</strong>
-                <span>{phase === "showing" ? `${revealLeft}s restantes` : `${currentVariation.revealSeconds}s por rodada`}</span>
+                <strong>Etapa da rodada</strong>
+                <span>
+                  {phase === "showing"
+                    ? "Memorizando a sequencia"
+                    : phase === "answering"
+                      ? "Respondendo a sequencia"
+                      : "Pronto para iniciar"}
+                </span>
               </div>
 
               {phase === "showing" ? (
@@ -294,8 +290,11 @@ export function AudienceGame({ usuario, progresso, onBack, onRememberVariation, 
               )}
 
               <div className="button-row">
-                <button className="btn btn-primary" onClick={startRound} disabled={phase === "showing"}>
-                  {phase === "showing" ? "Observando..." : "Iniciar rodada"}
+                <button className="btn btn-primary" onClick={startRound} disabled={phase === "showing" || phase === "answering"}>
+                  {phase === "idle" ? "Iniciar rodada" : "Rodada iniciada"}
+                </button>
+                <button className="btn btn-secondary" onClick={startAnswering} disabled={phase !== "showing"}>
+                  Comecar resposta
                 </button>
                 <button className="btn btn-secondary" onClick={resetRound}>
                   Trocar rodada
@@ -306,7 +305,9 @@ export function AudienceGame({ usuario, progresso, onBack, onRememberVariation, 
             <section className="panel">
               <div className="section-head">
                 <h3>Monte a sequencia</h3>
-                <span className="small-muted">{phase === "answering" ? `${answerSeconds}s respondendo` : "Aguardando rodada"}</span>
+                <span className="small-muted">
+                  {phase === "answering" ? "Clique na ordem correta" : "Aguardando rodada"}
+                </span>
               </div>
 
               <div className="selected-sequence">
