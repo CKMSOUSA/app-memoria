@@ -8,7 +8,7 @@ import type { Usuario } from "@/lib/types";
 type ProfileScreenProps = {
   usuario: Usuario;
   onBack: () => void;
-  onSaveProfile: (profile: Pick<Usuario, "idade" | "nome" | "avatar">) => void;
+  onSaveProfile: (profile: Pick<Usuario, "idade" | "nome" | "avatar">) => void | Promise<void>;
 };
 
 export function ProfileScreen({ usuario, onBack, onSaveProfile }: ProfileScreenProps) {
@@ -44,7 +44,7 @@ export function ProfileScreen({ usuario, onBack, onSaveProfile }: ProfileScreenP
             <p className="eyebrow">Perfil</p>
             <h1>Preferencias do Jogador</h1>
             <p className="muted">
-              Ajuste sua idade para o app recalibrar a trilha, a linguagem e a complexidade dos desafios.
+              Ajuste sua idade para o app recalibrar a trilha, a linguagem, a complexidade e a progressao das fases.
             </p>
           </div>
           <div className="hero-badge">Perfil editavel</div>

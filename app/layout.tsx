@@ -3,8 +3,8 @@ import "./globals.css";
 import "./page.css";
 
 export const metadata: Metadata = {
-  title: "NeuroApp",
-  description: "Aplicativo de treino de memoria e atencao",
+  title: "NeuroApp Memoria",
+  description: "Aplicativo de treino de memoria, atencao, comparacao e orientacao espacial.",
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {

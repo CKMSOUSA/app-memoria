@@ -79,10 +79,10 @@ export function AuthScreen({
             <p className="eyebrow">Treino cognitivo</p>
             <h1>{titulo}</h1>
             <p className="muted">
-              Acompanhe sua evolucao e treine memoria e atencao com desafios curtos e progressivos.
+              Treine memoria, atencao, comparacao e orientacao espacial com fases curtas, progressivas e guiadas.
             </p>
           </div>
-          <div className="hero-badge">MVP pronto para evoluir</div>
+          <div className="hero-badge">Base pronta para backend online</div>
         </div>
 
         {tela === "cadastro" && (

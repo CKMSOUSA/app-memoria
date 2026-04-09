@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { GameGuide } from "@/components/GameGuide";
 import { comparisonChallenges } from "@/lib/game-data-v3";
 import { evaluateComparisonRound, getNextVariationIndex } from "@/lib/game-logic";
 import {
@@ -251,6 +252,33 @@ export function ComparisonGame({
                 }`}
               </p>
 
+              <GameGuide
+                title="Como jogar"
+                objective="Leia o criterio da fase e escolha, em cada comparacao, qual lado atende melhor a esse criterio."
+                steps={[
+                  "Clique em Iniciar rodada para abrir a sequencia de comparacoes.",
+                  "Leia o criterio da fase antes de responder.",
+                  "Escolha entre a opcao esquerda e a direita em cada rodada.",
+                  "No fim, compare suas respostas com a correcao explicada.",
+                ]}
+                tip="Algumas fases pedem o maior valor, outras o menor, a palavra mais longa ou o que vem antes. O criterio da fase e o mais importante."
+              />
+
+              <div className="phase-summary">
+                <div className="phase-chip">
+                  <strong>Fase</strong>
+                  <span>{`${challenge.id} de ${comparisonChallenges.length}`}</span>
+                </div>
+                <div className="phase-chip">
+                  <strong>Meta</strong>
+                  <span>{`${difficulty.minimoParaConcluir} acertos`}</span>
+                </div>
+                <div className="phase-chip">
+                  <strong>Rodadas</strong>
+                  <span>{variation.rounds.length}</span>
+                </div>
+              </div>
+
               <div className="status-row">
                 <div className="meter-box">
                   <strong>Tempo restante</strong>
@@ -278,7 +306,7 @@ export function ComparisonGame({
                   {phase === "playing" ? "Rodada em andamento" : "Iniciar rodada"}
                 </button>
                 <button className="btn btn-secondary" onClick={resetRound}>
-                  Reiniciar
+                  Trocar rodada
                 </button>
               </div>
             </section>

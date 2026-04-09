@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { GameGuide } from "@/components/GameGuide";
 import { memoryChallenges } from "@/lib/game-data-v3";
 import { evaluateMemoryRound, getNextVariationIndex } from "@/lib/game-logic";
 import {
@@ -259,8 +260,35 @@ export function MemoryGame({ usuario, progresso, onBack, onRememberVariation, on
               </div>
 
               <p className="muted">
-                {`${getAgeLabel(usuario.idade)} - objetivo: lembrar pelo menos ${dificuldade.minimoParaConcluir} de ${palavrasVisiveis.length} palavras.`}
+                {`${getAgeLabel(usuario.idade)} - objetivo: lembrar pelo menos ${dificuldade.minimoParaConcluir} de ${palavrasVisiveis.length} palavras desta rodada.`}
               </p>
+
+              <GameGuide
+                title="Como jogar"
+                objective="Observe as palavras, espere o tempo terminar e depois escreva apenas o que voce lembrar."
+                steps={[
+                  "Clique em Iniciar rodada para mostrar as palavras.",
+                  "Memorize a lista enquanto o contador estiver ativo.",
+                  "Quando as palavras sumirem, digite o que lembrar no campo ao lado.",
+                  "Use Corrigir rodada para ver acertos, erros e itens faltantes.",
+                ]}
+                tip="Cada rodada vale uma correcao. Para subir pontos, voce precisa superar o seu melhor score nesta fase."
+              />
+
+              <div className="phase-summary">
+                <div className="phase-chip">
+                  <strong>Fase</strong>
+                  <span>{`${challenge.id} de ${memoryChallenges.length}`}</span>
+                </div>
+                <div className="phase-chip">
+                  <strong>Meta</strong>
+                  <span>{`${dificuldade.minimoParaConcluir} acertos`}</span>
+                </div>
+                <div className="phase-chip">
+                  <strong>Palavras</strong>
+                  <span>{`${palavrasVisiveis.length} itens`}</span>
+                </div>
+              </div>
 
               <div className="meter-box">
                 <strong>Tempo de memorizacao</strong>
@@ -278,7 +306,7 @@ export function MemoryGame({ usuario, progresso, onBack, onRememberVariation, on
                   {phase === "idle" ? "Iniciar rodada" : "Memorizando"}
                 </button>
                 <button className="btn btn-secondary" onClick={resetRound}>
-                  Reiniciar
+                  Trocar rodada
                 </button>
               </div>
             </section>
@@ -292,7 +320,7 @@ export function MemoryGame({ usuario, progresso, onBack, onRememberVariation, on
               </div>
               <textarea
                 className="text-input area-input"
-                placeholder="Digite as palavras separadas por espaco, virgula ou quebra de linha."
+                placeholder="Digite as palavras separadas por espaco, virgula ou quebra de linha. A ordem nao precisa ser igual."
                 value={response}
                 disabled={phase !== "answering"}
                 onChange={(event) => setResponse(event.target.value)}

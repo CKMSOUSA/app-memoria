@@ -10,11 +10,26 @@ Aplicativo de treino cognitivo com trilhas de:
 - Orientacao espacial
 - Trilha exclusiva por publico
 
+## O que foi reforcado nesta versao
+
+- textos e instrucoes mais guiados dentro dos jogos
+- faseamento mais gradual e pedagogico
+- interface mais clara para iniciar, executar e corrigir as rodadas
+- camada de repositorio pronta para trocar `localStorage` por backend online
+- rota de status em `/api/status` para apoiar a futura integracao de API real
+
 ## Rodar localmente
 
 ```bash
 npm install
 npm run dev
+```
+
+Se quiser preparar o app para backend remoto no futuro, copie o arquivo `.env.example` e ajuste:
+
+```bash
+NEXT_PUBLIC_APP_DATA_MODE=local
+NEXT_PUBLIC_API_BASE_URL=/api
 ```
 
 ## Build de producao
@@ -91,3 +106,25 @@ Isso significa:
 - a publicacao online funciona, mas ainda sem backend real
 
 Para uma versao publica mais completa no futuro, o ideal e integrar um backend como Supabase ou Firebase.
+
+## Preparacao para backend real
+
+O projeto agora ja possui uma camada de dados preparada para dois modos:
+
+- `local`: usa `localStorage`, ideal para MVP e testes
+- `remote`: pronto para consumir um backend real de autenticacao, perfil e progresso
+
+Arquivo principal dessa preparacao:
+
+- `lib/app-repository.ts`
+
+Rotas esperadas no modo remoto:
+
+- `POST /auth/login`
+- `POST /auth/register`
+- `PATCH /users/:email`
+- `POST /users/:email/points`
+- `GET /progress/:email`
+- `PUT /progress/:email`
+
+Isso permite migrar depois para Supabase, Firebase ou API propria sem reescrever as telas do app.

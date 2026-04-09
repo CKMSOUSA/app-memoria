@@ -9,41 +9,38 @@ import { Dashboard } from "@/components/Dashboard";
 import { MemoryGame } from "@/components/MemoryGame";
 import { ProfileScreen } from "@/components/ProfileScreen";
 import { SpatialGame } from "@/components/SpatialGame";
-import {
-  bootstrapStorage,
-  clearActiveSession,
-  getActiveSession,
-  loadProgress,
-  loginUser,
-  registerUser,
-  saveProgress,
-  simulateRecovery,
-  updateUserProfile,
-  updateUserPoints,
-} from "@/lib/storage";
+import { getAppRepository } from "@/lib/app-repository";
 import { mergeProgress } from "@/lib/scoring";
-import type { ProgressState, Tela, Usuario } from "@/lib/types";
+import type { DataMode, ProgressState, Tela, Usuario } from "@/lib/types";
+
+const repository = getAppRepository();
 
 export default function Page() {
   const [tela, setTela] = useState<Tela>("login");
   const [usuario, setUsuario] = useState<Usuario | null>(null);
   const [progresso, setProgresso] = useState<ProgressState>(mergeProgress());
+  const [dataMode, setDataMode] = useState<DataMode>(repository.mode);
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
 
     async function init() {
-      await bootstrapStorage();
+      await repository.bootstrap();
       if (!isMounted) return;
 
-      const activeUser = getActiveSession();
+      const activeUser = repository.getActiveSession();
       if (activeUser) {
         setUsuario(activeUser);
-        setProgresso(loadProgress(activeUser.email));
+        try {
+          setProgresso(await repository.loadProgress(activeUser.email));
+        } catch {
+          setProgresso(mergeProgress());
+        }
         setTela("dashboard");
       }
 
+      setDataMode(repository.mode);
       setReady(true);
     }
 
@@ -55,30 +52,34 @@ export default function Page() {
   }, []);
 
   async function handleLogin(email: string, password: string) {
-    const activeUser = await loginUser(email, password);
+    const activeUser = await repository.loginUser(email, password);
     if (!activeUser) return null;
 
     setUsuario(activeUser);
-    setProgresso(loadProgress(activeUser.email));
+    try {
+      setProgresso(await repository.loadProgress(activeUser.email));
+    } catch {
+      setProgresso(mergeProgress());
+    }
     setTela("dashboard");
     return activeUser;
   }
 
   async function handleRegister(email: string, password: string, idade: Usuario["idade"], nome: string, avatar: string) {
-    const result = await registerUser(email, password, idade, nome, avatar);
+    const result = await repository.registerUser(email, password, idade, nome, avatar);
     return result.error ?? null;
   }
 
   function handleLogout() {
-    clearActiveSession();
+    repository.clearActiveSession();
     setUsuario(null);
     setProgresso(mergeProgress());
     setTela("login");
   }
 
-  function handleSaveProfile(profile: Pick<Usuario, "idade" | "nome" | "avatar">) {
+  async function handleSaveProfile(profile: Pick<Usuario, "idade" | "nome" | "avatar">) {
     if (!usuario) return;
-    const updatedUser = updateUserProfile(usuario.email, profile);
+    const updatedUser = await repository.updateUserProfile(usuario.email, profile);
     if (updatedUser) setUsuario(updatedUser);
   }
 
@@ -115,12 +116,13 @@ export default function Page() {
       },
     };
 
-    saveProgress(usuario.email, updatedProgress);
+    void repository.saveProgress(usuario.email, updatedProgress);
     setProgresso(updatedProgress);
 
     if (improvement > 0) {
-      const updatedUser = updateUserPoints(usuario.email, improvement);
-      if (updatedUser) setUsuario(updatedUser);
+      void repository.updateUserPoints(usuario.email, improvement).then((updatedUser) => {
+        if (updatedUser) setUsuario(updatedUser);
+      });
     }
   }
 
@@ -145,7 +147,7 @@ export default function Page() {
       },
     };
 
-    saveProgress(usuario.email, updatedProgress);
+    void repository.saveProgress(usuario.email, updatedProgress);
     setProgresso(updatedProgress);
   }
 
@@ -178,7 +180,7 @@ export default function Page() {
         onChangeScreen={(screen) => setTela(screen)}
         onLogin={handleLogin}
         onRegister={handleRegister}
-        onRecover={simulateRecovery}
+        onRecover={repository.simulateRecovery}
       />
     );
   }
@@ -278,6 +280,7 @@ export default function Page() {
       onOpenProfile={() => setTela("perfil")}
       onOpenSpecial={() => setTela("especial")}
       onLogout={handleLogout}
+      dataMode={dataMode}
     />
   );
 }

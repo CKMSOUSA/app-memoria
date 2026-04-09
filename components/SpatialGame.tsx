@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { GameGuide } from "@/components/GameGuide";
 import { spatialChallenges } from "@/lib/game-data-v3";
 import { evaluateSpatialRound, getNextVariationIndex } from "@/lib/game-logic";
 import {
@@ -315,26 +316,32 @@ export function SpatialGame({ usuario, progresso, onBack, onRememberVariation, o
                 }`}
               </p>
 
-              <section className="spatial-instructions">
-                <strong>Como jogar</strong>
-                <ol className="clean-list spatial-steps">
-                  <li>Primeiro, clique em `Iniciar rodada`.</li>
-                  <li>Depois, olhe o tabuleiro e descubra para onde o caminho foi andando.</li>
-                  <li>O `0` e o ponto de partida. O `1` mostra o primeiro passo. O `2` mostra o segundo. O `3` mostra o terceiro, e assim por diante.</li>
-                  <li>Sua tarefa e lembrar o caminho e repetir os passos na mesma ordem usando os botoes abaixo.</li>
-                  <li>Voce nao clica no tabuleiro. Voce responde apenas clicando em `Cima`, `Baixo`, `Esquerda` e `Direita`.</li>
-                </ol>
+              <GameGuide
+                title="Como jogar"
+                objective="Observe o caminho no tabuleiro e depois repita os movimentos na mesma ordem usando somente os botoes de direcao."
+                steps={[
+                  "Clique em Iniciar rodada para mostrar a rota.",
+                  "Use os numeros do tabuleiro como guia: 0 e o inicio, 1 e o primeiro passo, 2 e o segundo, e assim por diante.",
+                  "Quando a rota sumir, responda clicando em Cima, Baixo, Esquerda e Direita.",
+                  "Na correcao final, compare a rota certa com a rota que voce montou.",
+                ]}
+                tip="Voce nao precisa clicar no tabuleiro. O tabuleiro serve apenas para mostrar o caminho visualmente."
+              />
 
-                <div className="spatial-example">
-                  <strong>Exemplo</strong>
-                  <p className="muted">
-                    Se o `1` estiver acima do `0`, o primeiro clique certo e `Cima`.
-                    Se o `2` estiver a direita do `1`, o segundo clique certo e `Direita`.
-                    Se o `3` estiver abaixo do `2`, o terceiro clique certo e `Baixo`.
-                  </p>
-                  <p className="muted">Nesse exemplo, a resposta seria: `Cima`, depois `Direita`, depois `Baixo`.</p>
+              <div className="phase-summary">
+                <div className="phase-chip">
+                  <strong>Fase</strong>
+                  <span>{`${challenge.id} de ${spatialChallenges.length}`}</span>
                 </div>
-              </section>
+                <div className="phase-chip">
+                  <strong>Meta</strong>
+                  <span>{`${difficulty.minimoParaConcluir} movimentos certos`}</span>
+                </div>
+                <div className="phase-chip">
+                  <strong>Rota</strong>
+                  <span>{`${currentVariation.sequence.length} passos`}</span>
+                </div>
+              </div>
 
               <div className="meter-box">
                 <strong>Tempo de observacao</strong>
@@ -348,7 +355,7 @@ export function SpatialGame({ usuario, progresso, onBack, onRememberVariation, o
                   {phase === "showing" ? "Observando rota" : "Iniciar rodada"}
                 </button>
                 <button className="btn btn-secondary" onClick={resetRound}>
-                  Reiniciar
+                  Trocar rota
                 </button>
               </div>
             </section>
@@ -363,7 +370,7 @@ export function SpatialGame({ usuario, progresso, onBack, onRememberVariation, o
 
               <div className="meter-box">
                 <strong>Objetivo da rodada</strong>
-                <span>{`Clique nos botoes Cima, Baixo, Esquerda e Direita para repetir ${currentVariation.sequence.length} movimentos na mesma ordem.`}</span>
+                <span>{`Repita ${currentVariation.sequence.length} movimentos na mesma ordem usando Cima, Baixo, Esquerda e Direita.`}</span>
               </div>
 
               <div className="selected-sequence">

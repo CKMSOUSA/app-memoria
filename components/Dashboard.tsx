@@ -1,5 +1,6 @@
 "use client";
 
+import { getDataModeDescription, getDataModeLabel } from "@/lib/app-repository";
 import {
   attentionChallenges,
   comparisonChallenges,
@@ -17,7 +18,7 @@ import {
   getRecommendedChallengeId,
   isChallengeUnlocked,
 } from "@/lib/scoring";
-import type { ProgressState, Usuario } from "@/lib/types";
+import type { DataMode, ProgressState, Usuario } from "@/lib/types";
 
 type DashboardProps = {
   usuario: Usuario;
@@ -29,6 +30,7 @@ type DashboardProps = {
   onOpenProfile: () => void;
   onOpenSpecial: () => void;
   onLogout: () => void;
+  dataMode: DataMode;
 };
 
 function ProgressList({
@@ -129,6 +131,7 @@ export function Dashboard({
   onOpenProfile,
   onOpenSpecial,
   onLogout,
+  dataMode,
 }: DashboardProps) {
   const memoriaRate = getCompletionRate(progresso.memoria);
   const atencaoRate = getCompletionRate(progresso.atencao);
@@ -194,7 +197,8 @@ export function Dashboard({
             <p className="eyebrow">Painel do usuario</p>
             <h1>{`Ola, ${usuario.nome}`}</h1>
             <p className="muted">
-              Seu progresso fica salvo por desafio. Novos pontos entram apenas quando voce supera seu melhor score.
+              Seu progresso fica salvo por desafio. Os pontos so aumentam quando voce supera seu melhor resultado em
+              cada fase.
             </p>
           </div>
           <div className="topbar-actions">
@@ -220,6 +224,7 @@ export function Dashboard({
           <StatCard label="Pontos totais" value={String(usuario.pontos)} caption="Pontuacao acumulada por melhora real" />
           <StatCard label="Nivel atual" value={getNivel(usuario.pontos)} caption="Escala progressiva do aplicativo" />
           <StatCard label="Idade" value={getAgeLabel(usuario.idade)} caption={getAudienceLabel(currentAudience)} />
+          <StatCard label="Dados" value={getDataModeLabel(dataMode)} caption={getDataModeDescription(dataMode)} />
           <StatCard
             label="Status"
             value={usuario.premium ? "Premium" : "Basico"}
@@ -245,7 +250,7 @@ export function Dashboard({
 
         <section className="panel">
           <div className="section-head">
-            <h3>Trilhas Por Publico</h3>
+            <h3>Trilhas por publico</h3>
             <span className="small-muted">O app ajusta conteudo e dificuldade automaticamente pela idade</span>
           </div>
           <div className="track-grid">
@@ -289,6 +294,33 @@ export function Dashboard({
           </div>
         </section>
 
+        <section className="panel quick-grid">
+          <article className="quick-card">
+            <p className="small-muted">Recomendacao de memoria</p>
+            <h3>{memoriaRecomendada?.nome ?? "Primeira fase"}</h3>
+            <p className="muted">Boa para trabalhar evocacao de palavras e consolidar rotina curta de treino.</p>
+            <button className="btn btn-secondary" onClick={onOpenMemory}>
+              Abrir memoria
+            </button>
+          </article>
+          <article className="quick-card">
+            <p className="small-muted">Recomendacao de atencao</p>
+            <h3>{atencaoRecomendada?.nome ?? "Primeira fase"}</h3>
+            <p className="muted">Boa para foco seletivo, velocidade visual e reducao de erros por impulso.</p>
+            <button className="btn btn-secondary" onClick={onOpenAttention}>
+              Abrir atencao
+            </button>
+          </article>
+          <article className="quick-card">
+            <p className="small-muted">Recomendacao de comparacao</p>
+            <h3>{comparacaoRecomendada?.nome ?? "Primeira fase"}</h3>
+            <p className="muted">Boa para criterio, ordem, tamanho, quantidade e decisao rapida entre opcoes.</p>
+            <button className="btn btn-secondary" onClick={onOpenComparison}>
+              Abrir comparacao
+            </button>
+          </article>
+        </section>
+
         <section className="panel split-panel">
           <div>
             <div className="section-head">
@@ -299,8 +331,8 @@ export function Dashboard({
               <div className="progress-fill" style={{ width: `${Math.min((usuario.pontos / 75) * 100, 100)}%` }} />
             </div>
             <p className="muted">
-              Continue tentando melhorar seus melhores resultados. Isso reduz a repeticao vazia e deixa a progressao
-              mais honesta.
+              Continue tentando melhorar seus melhores resultados. Assim a progressao fica mais justa, mais clara e
+              menos repetitiva.
             </p>
           </div>
 
@@ -313,7 +345,7 @@ export function Dashboard({
               <li>{`Atencao: priorize "${atencaoRecomendada?.nome ?? "primeiro desafio"}" para variar o treino`}</li>
               <li>{`Comparacao: priorize "${comparacaoRecomendada?.nome ?? "primeiro desafio"}" para ampliar o raciocinio comparativo`}</li>
               <li>Inclua uma rodada de orientacao espacial para treinar esquerda, direita e rotas em sequencia</li>
-              <li>O dashboard puxa primeiro desafios pendentes e evita sugerir o que foi jogado mais recentemente</li>
+              <li>As fases liberam em ordem, entao concluir bem a atual ajuda a manter a trilha pedagogica</li>
             </ul>
           </div>
         </section>

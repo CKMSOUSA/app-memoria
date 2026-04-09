@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { GameGuide } from "@/components/GameGuide";
 import { attentionChallenges } from "@/lib/game-data-v3";
 import { evaluateAttentionRound, getNextVariationIndex } from "@/lib/game-logic";
 import {
@@ -321,6 +322,33 @@ export function AttentionGame({ usuario, progresso, onBack, onRememberVariation,
               </div>
               <p className="muted">{`${getAgeLabel(usuario.idade)} - ${audience === "infantil" && variacaoAtual.instrucaoInfantil ? variacaoAtual.instrucaoInfantil : variacaoAtual.instrucao}`}</p>
 
+              <GameGuide
+                title="Como jogar"
+                objective="Clique somente nos simbolos alvo. Tudo o que nao for alvo conta como erro."
+                steps={[
+                  "Confira o simbolo alvo antes de iniciar a rodada.",
+                  "Clique em Iniciar rodada para liberar a grade.",
+                  "Toque apenas nas celulas com o alvo correto antes do tempo acabar.",
+                  "No final, veja quantos alvos encontrou e quantos erros cometeu.",
+                ]}
+                tip="Quanto menos erros e quanto mais rapido voce encontrar os alvos, melhor sera o score da fase."
+              />
+
+              <div className="phase-summary">
+                <div className="phase-chip">
+                  <strong>Fase</strong>
+                  <span>{`${challenge.id} de ${attentionChallenges.length}`}</span>
+                </div>
+                <div className="phase-chip">
+                  <strong>Meta</strong>
+                  <span>{`${dificuldade.minimoParaConcluir} alvos`}</span>
+                </div>
+                <div className="phase-chip">
+                  <strong>Grade</strong>
+                  <span>{`${gradeVisivel.length} celulas`}</span>
+                </div>
+              </div>
+
               <div className="attention-banner">
                 <strong>Alvo do desafio</strong>
                 <div className="target-pill">{variacaoAtual.alvo}</div>
@@ -342,7 +370,7 @@ export function AttentionGame({ usuario, progresso, onBack, onRememberVariation,
                   {phase === "playing" ? "Rodada em andamento" : "Iniciar rodada"}
                 </button>
                 <button className="btn btn-secondary" onClick={resetRound}>
-                  Reiniciar
+                  Trocar rodada
                 </button>
               </div>
             </section>

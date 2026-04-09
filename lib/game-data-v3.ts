@@ -144,8 +144,8 @@ export const memoryChallenges: MemoryChallenge[] = memorySeeds.map((seed, index)
   nomeInfantil: seed.nomeInfantil,
   variacoes: seed.adulto,
   variacoesInfantis: seed.infantil,
-  tempoMemorizacao: Math.max(4, 8 - Math.floor(index / 3)),
-  minimoParaConcluir: Math.min(5, 3 + Math.floor(index / 3)),
+  tempoMemorizacao: Math.max(5, 10 - Math.floor(index / 2)),
+  minimoParaConcluir: Math.min(5, 2 + Math.floor(index / 4)),
 }));
 
 const attentionSeeds = [
@@ -197,8 +197,8 @@ export const attentionChallenges: AttentionChallenge[] = attentionSeeds.map((see
   nome: seed.nome,
   nomeInfantil: seed.nomeInfantil,
   variacoes: [0, 1, 2].map((variation) => buildAttentionVariation(seed.alvo, seed.distratores, variation + index)),
-  tempoLimite: Math.max(10, 18 - Math.floor(index / 2)),
-  minimoParaConcluir: Math.min(6, 4 + Math.floor(index / 4)),
+  tempoLimite: Math.max(12, 24 - index),
+  minimoParaConcluir: Math.min(6, 3 + Math.floor(index / 3)),
 }));
 
 type ComparisonSeed = {
@@ -393,8 +393,8 @@ export const comparisonChallenges: ComparisonChallenge[] = comparisonSeeds.map((
     promptInfantil: seed.promptInfantil,
     rounds: rotatePairs(seed.pairs, variation),
   })),
-  tempoLimite: Math.max(12, 20 - Math.floor(index / 2)),
-  minimoParaConcluir: Math.min(3, 2 + Math.floor(index / 5)),
+  tempoLimite: Math.max(14, 24 - Math.floor(index / 2)),
+  minimoParaConcluir: Math.min(3, 2 + Math.floor(index / 7)),
 }));
 
 const spatialSeeds = [
@@ -427,8 +427,8 @@ export const spatialChallenges: SpatialChallenge[] = spatialSeeds.map((seed, ind
     revealSeconds: 6 + Math.floor((index + variationIndex) / 5),
     options: ["cima", "baixo", "esquerda", "direita"],
   })),
-  minimoParaConcluir: Math.min(6, 3 + Math.floor(index / 4)),
-  tempoResposta: Math.max(12, 18 - Math.floor(index / 2)),
+  minimoParaConcluir: Math.min(7, 3 + Math.floor(index / 3)),
+  tempoResposta: Math.max(12, 20 - Math.floor(index / 2)),
 }));
 
 type ExclusiveSeed = {
@@ -483,11 +483,11 @@ function createExclusiveChallenges(audience: "infantil" | "adolescente" | "adult
     difficultyLabel: PHASE_LABELS_10[index],
     nome: seed.nome,
     descricao: seed.descricao,
-    minimoParaConcluir: Math.min(6, 3 + Math.floor(index / 2)),
+    minimoParaConcluir: Math.min(7, 2 + Math.floor(index / 2)),
     variacoes: seed.sequencias.map((sequence) => ({
       prompt: "Memorize a sequencia e monte novamente na mesma ordem.",
       sequence,
-      revealSeconds: Math.max(4, 7 - Math.floor(index / 4)),
+      revealSeconds: Math.max(4, 8 - Math.floor(index / 4)),
       options: Array.from(new Set([...sequence, ...sequence.slice(0, Math.min(sequence.length, 3))])).slice(0, sequence.length + 2),
     })),
   }));

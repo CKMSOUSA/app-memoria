@@ -193,7 +193,9 @@ h2 {
 .panel,
 .stat-card,
 .meter-box,
-.attention-banner {
+.attention-banner,
+.guide-card,
+.quick-card {
   background: rgba(255, 253, 248, 0.92);
   border: 1px solid var(--line);
   border-radius: 22px;
@@ -273,7 +275,8 @@ h2 {
 .stats-grid,
 .game-grid,
 .dual-panels,
-.track-grid {
+.track-grid,
+.quick-grid {
   display: grid;
   gap: 16px;
 }
@@ -286,6 +289,10 @@ h2 {
 .dual-panels,
 .track-grid {
   grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+}
+
+.quick-grid {
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
 }
 
 .stat-card h3 {
@@ -303,6 +310,11 @@ h2 {
 .track-card-active {
   border-color: var(--accent);
   box-shadow: 0 16px 28px rgba(207, 95, 60, 0.14);
+}
+
+.quick-card {
+  display: grid;
+  gap: 12px;
 }
 
 .audience-hero {
@@ -349,6 +361,53 @@ h2 {
   background: rgba(255, 251, 244, 0.92);
   color: var(--ink-strong);
   font-weight: 700;
+}
+
+.guide-card {
+  margin-top: 18px;
+  display: grid;
+  gap: 12px;
+  background: rgba(250, 244, 235, 0.96);
+}
+
+.guide-objective {
+  margin-bottom: 0;
+}
+
+.guide-steps {
+  margin: 0;
+  padding-left: 20px;
+  color: var(--ink-soft);
+  line-height: 1.75;
+}
+
+.guide-tip {
+  margin: 0;
+  padding: 12px 14px;
+  border-radius: 16px;
+  background: rgba(207, 95, 60, 0.08);
+  color: var(--accent-dark);
+  font-weight: 700;
+}
+
+.phase-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.phase-chip {
+  display: grid;
+  gap: 4px;
+  padding: 14px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.82);
+  border: 1px solid var(--line);
+}
+
+.phase-chip span {
+  color: var(--ink-soft);
 }
 
 .exclusive-grid {
@@ -716,5 +775,9 @@ h2 {
 
   .attention-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .phase-summary {
+    grid-template-columns: 1fr;
   }
 }

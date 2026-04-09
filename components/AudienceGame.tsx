@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { GameGuide } from "@/components/GameGuide";
 import { exclusiveChallenges } from "@/lib/game-data-v3";
 import { evaluateAudienceRound, getNextVariationIndex } from "@/lib/game-logic";
 import { getAgeLabel, getAudienceFromAge, getAudienceLabel } from "@/lib/scoring";
@@ -21,15 +22,6 @@ type AudienceGameProps = {
 };
 
 type Phase = "idle" | "showing" | "answering" | "result";
-
-function shuffle<T>(items: T[]) {
-  const copy = [...items];
-  for (let index = copy.length - 1; index > 0; index -= 1) {
-    const randomIndex = Math.floor(Math.random() * (index + 1));
-    [copy[index], copy[randomIndex]] = [copy[randomIndex], copy[index]];
-  }
-  return copy;
-}
 
 export function AudienceGame({ usuario, progresso, onBack, onRememberVariation, onSaveResult }: AudienceGameProps) {
   const audience = getAudienceFromAge(usuario.idade);
@@ -265,6 +257,34 @@ export function AudienceGame({ usuario, progresso, onBack, onRememberVariation, 
                 <span className="small-muted">Meta: {challenge.minimoParaConcluir} acertos em ordem</span>
               </div>
               <p className="muted">{currentVariation.prompt}</p>
+
+              <GameGuide
+                title="Como jogar"
+                objective="Veja a sequencia uma vez, esconda e depois reescreva os itens na mesma ordem."
+                steps={[
+                  "Clique em Iniciar rodada para mostrar a sequencia.",
+                  "Leia os itens com calma e memorize a ordem em que aparecem.",
+                  "Clique em Ocultar e responder para entrar no modo de resposta.",
+                  "Digite os itens na mesma ordem e corrija a rodada.",
+                ]}
+                tip="A fase so conta como concluida quando voce atinge a meta de itens certos em ordem."
+              />
+
+              <div className="phase-summary">
+                <div className="phase-chip">
+                  <strong>Fase</strong>
+                  <span>{`${phaseNumber} de ${audienceChallenges.length}`}</span>
+                </div>
+                <div className="phase-chip">
+                  <strong>Meta</strong>
+                  <span>{`${challenge.minimoParaConcluir} itens certos`}</span>
+                </div>
+                <div className="phase-chip">
+                  <strong>Sequencia</strong>
+                  <span>{`${currentVariation.sequence.length} itens`}</span>
+                </div>
+              </div>
+
               <div className="meter-box">
                 <strong>Etapa da rodada</strong>
                 <span>

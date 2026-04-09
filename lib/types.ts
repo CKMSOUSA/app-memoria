@@ -10,6 +10,8 @@ export type Tela =
   | "perfil"
   | "especial";
 
+export type DataMode = "local" | "remote";
+
 export type Usuario = {
   nome: string;
   email: string;
