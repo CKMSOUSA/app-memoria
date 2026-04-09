@@ -1,6 +1,6 @@
 "use client";
 
-import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { exclusiveChallenges } from "@/lib/game-data-v3";
 import { evaluateAudienceRound, getNextVariationIndex } from "@/lib/game-logic";
 import { getAgeLabel, getAudienceFromAge, getAudienceLabel } from "@/lib/scoring";
@@ -59,27 +59,12 @@ export function AudienceGame({ usuario, progresso, onBack, onRememberVariation, 
   );
   const currentVariation = challenge.variacoes[variationIndex] ?? challenge.variacoes[0];
   const progressoRef = useRef(progresso);
-  const phaseRef = useRef(phase);
-  const answerSecondsRef = useRef(answerSeconds);
-  const selectedSequenceRef = useRef(selectedSequence);
-  const challengeRef = useRef(challenge);
-  const currentVariationRef = useRef(currentVariation);
-  const variationIndexRef = useRef(variationIndex);
   const phaseNumber = Math.max(1, audienceChallenges.findIndex((item) => item.id === challenge.id) + 1);
   const completedCount = audienceChallenges.filter((item) => progresso[item.id]?.completed).length;
 
   useEffect(() => {
     progressoRef.current = progresso;
   }, [progresso]);
-
-  useEffect(() => {
-    phaseRef.current = phase;
-    answerSecondsRef.current = answerSeconds;
-    selectedSequenceRef.current = selectedSequence;
-    challengeRef.current = challenge;
-    currentVariationRef.current = currentVariation;
-    variationIndexRef.current = variationIndex;
-  }, [answerSeconds, challenge, currentVariation, phase, selectedSequence, variationIndex]);
 
   useEffect(() => {
     if (audienceChallenges.length === 0) return;
@@ -150,41 +135,36 @@ export function AudienceGame({ usuario, progresso, onBack, onRememberVariation, 
     return progresso[previousChallenge.id]?.completed ?? false;
   }
 
-  const handleOptionClick = useCallback((option: string) => {
-    if (phaseRef.current !== "answering") return;
+  function handleOptionClick(option: string) {
+    if (phase !== "answering") return;
 
-    const activeSequence = selectedSequenceRef.current;
-    const activeChallenge = challengeRef.current;
-    const activeVariation = currentVariationRef.current;
-    const activeAnswerSeconds = answerSecondsRef.current;
-    const activeVariationIndex = variationIndexRef.current;
-    const nextSequence = [...activeSequence, option];
+    const nextSequence = [...selectedSequence, option];
     setSelectedSequence(nextSequence);
 
-    if (nextSequence.length === activeVariation.sequence.length) {
+    if (nextSequence.length === currentVariation.sequence.length) {
       const result = evaluateAudienceRound({
-        expectedSequence: activeVariation.sequence,
+        expectedSequence: currentVariation.sequence,
         selectedSequence: nextSequence,
-        answerSeconds: activeAnswerSeconds,
-        revealSeconds: activeVariation.revealSeconds,
-        minimumToComplete: activeChallenge.minimoParaConcluir,
+        answerSeconds,
+        revealSeconds: currentVariation.revealSeconds,
+        minimumToComplete: challenge.minimoParaConcluir,
       });
 
       setPhase("result");
       setFeedback(
         result.completed
           ? `Voce reconstruiu ${result.hits.length} item(ns) na ordem certa e concluiu a fase.`
-          : `Voce acertou ${result.hits.length} item(ns). Precisa de ${activeChallenge.minimoParaConcluir} para concluir esta fase.`,
+          : `Voce acertou ${result.hits.length} item(ns). Precisa de ${challenge.minimoParaConcluir} para concluir esta fase.`,
       );
       setReview({
         hits: result.hits,
         wrongItems: result.misses,
-        missedItems: activeVariation.sequence.filter((item) => !result.hits.includes(item)),
+        missedItems: currentVariation.sequence.filter((item) => !result.hits.includes(item)),
         score: result.score,
       });
-      onSaveResult(activeChallenge.id, result.score, activeAnswerSeconds, result.completed, activeVariationIndex);
+      onSaveResult(challenge.id, result.score, answerSeconds, result.completed, variationIndex);
     }
-  }, [onSaveResult]);
+  }
 
   return (
     <main className="shell shell-center">
@@ -347,7 +327,7 @@ export function AudienceGame({ usuario, progresso, onBack, onRememberVariation, 
   );
 }
 
-const AudienceOptionsGrid = memo(function AudienceOptionsGrid({
+function AudienceOptionsGrid({
   options,
   canAnswer,
   limitReached,
@@ -372,4 +352,4 @@ const AudienceOptionsGrid = memo(function AudienceOptionsGrid({
       ))}
     </div>
   );
-});
+}
