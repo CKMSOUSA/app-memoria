@@ -108,9 +108,9 @@ function ProgressList({
 function StatCard({ label, value, caption }: { label: string; value: string; caption: string }) {
   return (
     <article className="stat-card">
-      <p className="small-muted">{label}</p>
-      <h3>{value}</h3>
-      <p className="muted">{caption}</p>
+      <p className="stat-card-label">{label}</p>
+      <h3 className="stat-card-value">{value}</h3>
+      <p className="stat-card-caption">{caption}</p>
     </article>
   );
 }
@@ -237,23 +237,13 @@ export function Dashboard({
 
       <section className="content">
         <header className="topbar panel">
-          <div>
+          <div className="topbar-main">
             <p className="eyebrow">Painel do usuario</p>
-            <h1>{`Ola, ${usuario.nome}`}</h1>
+            <h1 className="dashboard-title">{`Ola, ${usuario.nome}`}</h1>
             <p className="muted">
               Seu progresso fica salvo por desafio. Os pontos so aumentam quando voce supera seu melhor resultado em
               cada fase.
             </p>
-          </div>
-          <div className="topbar-right">
-            <div className="topbar-support-actions">
-              <button className="btn btn-topbar-profile" onClick={onOpenProfile}>
-                Editar perfil
-              </button>
-              <button className="btn btn-topbar-help" onClick={onOpenHelp}>
-                Abrir ajuda
-              </button>
-            </div>
             <div className="topbar-actions">
               <button className="btn btn-primary" onClick={onOpenMemory}>
                 Memoria
@@ -269,6 +259,21 @@ export function Dashboard({
               </button>
               <button className="btn btn-secondary" onClick={onOpenLogic}>
                 Logica
+              </button>
+            </div>
+          </div>
+          <div className="topbar-right">
+            <div className="topbar-support-actions">
+              {canOpenAdmin ? (
+                <button className="btn btn-topbar-admin" onClick={onOpenAdmin}>
+                  Administrativo
+                </button>
+              ) : null}
+              <button className="btn btn-topbar-profile" onClick={onOpenProfile}>
+                Editar perfil
+              </button>
+              <button className="btn btn-topbar-help" onClick={onOpenHelp}>
+                Abrir ajuda
               </button>
             </div>
           </div>
