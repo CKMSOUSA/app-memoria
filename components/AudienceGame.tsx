@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { ChildVisualBadge } from "@/components/ChildVisualBadge";
 import { GameGuide } from "@/components/GameGuide";
 import { exclusiveChallenges } from "@/lib/game-data-v3";
 import { evaluateAudienceRound, getNextVariationIndex } from "@/lib/game-logic";
@@ -47,6 +48,7 @@ export function AudienceGame({ usuario, progresso, onBack, onRememberVariation, 
     [audienceChallenges, selectedId],
   );
   const currentVariation = challenge.variacoes[variationIndex] ?? challenge.variacoes[0];
+  const showChildVisuals = usuario.idade <= 10;
   const progressoRef = useRef(progresso);
   const answerStartedAtRef = useRef<number | null>(null);
   const phaseNumber = Math.max(1, audienceChallenges.findIndex((item) => item.id === challenge.id) + 1);
@@ -297,7 +299,15 @@ export function AudienceGame({ usuario, progresso, onBack, onRememberVariation, 
               </div>
 
               {phase === "showing" ? (
-                <div className="word-box exclusive-word-box">{currentVariation.sequence.join(" - ")}</div>
+                showChildVisuals ? (
+                  <div className="word-box exclusive-word-box child-visual-grid-box">
+                    {currentVariation.sequence.map((item) => (
+                      <ChildVisualBadge key={item} token={item} />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="word-box exclusive-word-box">{currentVariation.sequence.join(" - ")}</div>
+                )
               ) : (
                 <div className="word-box word-box-hidden exclusive-word-box">
                   A sequencia aparece apenas durante a exibicao inicial.

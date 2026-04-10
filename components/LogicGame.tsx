@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { ChildVisualBadge } from "@/components/ChildVisualBadge";
 import { GameGuide } from "@/components/GameGuide";
 import { logicChallenges } from "@/lib/game-data-v3";
 import { evaluateLogicRound, getNextVariationIndex } from "@/lib/game-logic";
@@ -44,6 +45,7 @@ export function LogicGame({ usuario, progresso, onBack, onRememberVariation, onS
     [selectedId],
   );
   const audience = getAudienceFromAge(usuario.idade);
+  const showChildVisuals = usuario.idade <= 10;
   const variation = challenge.variacoes[variationIndex] ?? challenge.variacoes[0];
   const currentRound = variation.rounds[currentRoundIndex] ?? variation.rounds[0];
 
@@ -282,7 +284,7 @@ export function LogicGame({ usuario, progresso, onBack, onRememberVariation, onS
               <div className="logic-sequence">
                 {currentRound.sequence.map((item) => (
                   <span key={`${currentRound.prompt}-${item}`} className="logic-token">
-                    {item}
+                    {showChildVisuals ? <ChildVisualBadge token={item} compact /> : item}
                   </span>
                 ))}
                 <span className="logic-token logic-token-next">?</span>
@@ -294,7 +296,7 @@ export function LogicGame({ usuario, progresso, onBack, onRememberVariation, onS
                 {currentRound.options.map((option) => (
                   <button key={option} className="comparison-card logic-card" onClick={() => handleAnswer(option)} disabled={phase !== "playing"}>
                     <span className="small-muted">Opcao</span>
-                    <strong>{option}</strong>
+                    <strong>{showChildVisuals ? <ChildVisualBadge token={option} /> : option}</strong>
                   </button>
                 ))}
               </div>

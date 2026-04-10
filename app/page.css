@@ -898,6 +898,46 @@ h2 {
   font-size: 24px;
 }
 
+.child-visual-grid-box {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 12px;
+}
+
+.child-visual-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 54px;
+  padding: 10px 14px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.82);
+  border: 1px solid rgba(229, 216, 197, 0.9);
+  color: var(--ink-strong);
+  font-weight: 700;
+}
+
+.child-visual-badge-compact {
+  min-height: 44px;
+  padding: 8px 10px;
+  border-radius: 14px;
+  gap: 8px;
+}
+
+.child-visual-emoji {
+  font-size: 24px;
+  line-height: 1;
+}
+
+.child-visual-badge-compact .child-visual-emoji {
+  font-size: 20px;
+}
+
+.child-visual-label {
+  font-size: 15px;
+  line-height: 1.3;
+}
+
 .report-panel {
   display: grid;
   gap: 16px;

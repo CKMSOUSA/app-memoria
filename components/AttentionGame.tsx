@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { ChildVisualBadge } from "@/components/ChildVisualBadge";
 import { GameGuide } from "@/components/GameGuide";
 import { attentionChallenges } from "@/lib/game-data-v3";
 import { evaluateAttentionRound, getNextVariationIndex } from "@/lib/game-logic";
@@ -66,6 +67,7 @@ export function AttentionGame({ usuario, progresso, onBack, onRememberVariation,
   );
   const progressoRef = useRef(progresso);
   const audience = getAudienceFromAge(usuario.idade);
+  const showChildVisuals = usuario.idade <= 10;
   const variacaoAtual = challenge.variacoes[variationIndex] ?? challenge.variacoes[0];
   const ageProfile = getAttentionAgeProfile(usuario.idade);
   const gradeBase =
@@ -81,9 +83,10 @@ export function AttentionGame({ usuario, progresso, onBack, onRememberVariation,
     progress: progresso[selectedId],
   });
 
+  const activeTarget = showChildVisuals && variacaoAtual.gradeInfantil?.includes(variacaoAtual.alvo) ? variacaoAtual.alvo : variacaoAtual.alvo;
   const targetIndexes = useMemo(
-    () => grid.map((item, index) => (item === variacaoAtual.alvo ? index : -1)).filter((value) => value >= 0),
-    [grid, variacaoAtual.alvo],
+    () => grid.map((item, index) => (item === activeTarget ? index : -1)).filter((value) => value >= 0),
+    [activeTarget, grid],
   );
 
   useEffect(() => {
@@ -106,7 +109,7 @@ export function AttentionGame({ usuario, progresso, onBack, onRememberVariation,
       setPhase("result");
       setReview({
         ...result,
-        hits: Array.from({ length: result.foundCount }, () => variacaoAtual.alvo),
+        hits: Array.from({ length: result.foundCount }, () => activeTarget),
         errors: wrongSelections,
       });
       setFeedback(
@@ -120,7 +123,7 @@ export function AttentionGame({ usuario, progresso, onBack, onRememberVariation,
 
     const timeout = window.setTimeout(() => setTimeLeft((value) => value - 1), 1000);
     return () => window.clearTimeout(timeout);
-  }, [challenge.id, dificuldade.minimoParaConcluir, dificuldade.tempoLimite, foundTargets.length, onSaveResult, phase, targetIndexes.length, timeLeft, variacaoAtual.alvo, variationIndex, wrongClicks, wrongSelections]);
+  }, [activeTarget, challenge.id, dificuldade.minimoParaConcluir, dificuldade.tempoLimite, foundTargets.length, onSaveResult, phase, targetIndexes.length, timeLeft, variationIndex, wrongClicks, wrongSelections]);
 
   useEffect(() => {
     setGrid(shuffle(gradeVisivel));
@@ -147,7 +150,7 @@ export function AttentionGame({ usuario, progresso, onBack, onRememberVariation,
       setPhase("result");
       setReview({
         ...result,
-        hits: Array.from({ length: result.foundCount }, () => variacaoAtual.alvo),
+        hits: Array.from({ length: result.foundCount }, () => activeTarget),
         errors: wrongSelections,
       });
       setFeedback(
@@ -157,7 +160,7 @@ export function AttentionGame({ usuario, progresso, onBack, onRememberVariation,
       );
       onSaveResult(challenge.id, result.score, result.elapsedSeconds, result.completed, variationIndex);
     }
-  }, [challenge.id, dificuldade.minimoParaConcluir, dificuldade.tempoLimite, foundTargets, onSaveResult, phase, targetIndexes, timeLeft, variacaoAtual.alvo, variationIndex, wrongClicks, wrongSelections]);
+  }, [activeTarget, challenge.id, dificuldade.minimoParaConcluir, dificuldade.tempoLimite, foundTargets, onSaveResult, phase, targetIndexes, timeLeft, variationIndex, wrongClicks, wrongSelections]);
 
   function startRound() {
     setGrid(shuffle(gradeVisivel));
@@ -190,7 +193,7 @@ export function AttentionGame({ usuario, progresso, onBack, onRememberVariation,
     if (phase !== "playing") return;
     if (foundTargets.includes(index)) return;
 
-    if (grid[index] === variacaoAtual.alvo) {
+    if (grid[index] === activeTarget) {
       setFoundTargets((current) => [...current, index]);
       return;
     }
@@ -351,7 +354,9 @@ export function AttentionGame({ usuario, progresso, onBack, onRememberVariation,
 
               <div className="attention-banner">
                 <strong>Alvo do desafio</strong>
-                <div className="target-pill">{variacaoAtual.alvo}</div>
+                <div className="target-pill">
+                  {showChildVisuals ? <ChildVisualBadge token={activeTarget} compact /> : activeTarget}
+                </div>
               </div>
 
               <div className="status-row">
@@ -393,7 +398,7 @@ export function AttentionGame({ usuario, progresso, onBack, onRememberVariation,
                       onClick={() => handleCellClick(index)}
                       disabled={phase !== "playing" || isFound}
                     >
-                      {item}
+                      {showChildVisuals ? <ChildVisualBadge token={item} compact /> : item}
                     </button>
                   );
                 })}

@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { ChildVisualBadge } from "@/components/ChildVisualBadge";
 import { GameGuide } from "@/components/GameGuide";
 import { comparisonChallenges } from "@/lib/game-data-v3";
 import { evaluateComparisonRound, getNextVariationIndex } from "@/lib/game-logic";
@@ -56,6 +57,7 @@ export function ComparisonGame({
     [selectedId],
   );
   const audience = getAudienceFromAge(usuario.idade);
+  const showChildVisuals = usuario.idade <= 10;
   const variation = challenge.variacoes[variationIndex] ?? challenge.variacoes[0];
   const rounds = usuario.idade <= 10 && variation.roundsAte10?.length ? variation.roundsAte10 : variation.rounds;
   const currentRound = rounds[currentRoundIndex] ?? rounds[0];
@@ -334,11 +336,11 @@ export function ComparisonGame({
               <div className="comparison-board">
                 <button className="comparison-card" onClick={() => handleAnswer("left")} disabled={phase !== "playing"}>
                   <span className="small-muted">Opcao esquerda</span>
-                  <strong>{currentRound.left}</strong>
+                  <strong>{showChildVisuals ? <ChildVisualBadge token={currentRound.left} /> : currentRound.left}</strong>
                 </button>
                 <button className="comparison-card" onClick={() => handleAnswer("right")} disabled={phase !== "playing"}>
                   <span className="small-muted">Opcao direita</span>
-                  <strong>{currentRound.right}</strong>
+                  <strong>{showChildVisuals ? <ChildVisualBadge token={currentRound.right} /> : currentRound.right}</strong>
                 </button>
               </div>
 

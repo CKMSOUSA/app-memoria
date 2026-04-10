@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { ChildVisualBadge } from "@/components/ChildVisualBadge";
 import { GameGuide } from "@/components/GameGuide";
 import { spatialChallenges } from "@/lib/game-data-v3";
 import { evaluateSpatialRound, getNextVariationIndex } from "@/lib/game-logic";
@@ -95,6 +96,7 @@ export function SpatialGame({ usuario, progresso, onBack, onRememberVariation, o
     [selectedId],
   );
   const audience = getAudienceFromAge(usuario.idade);
+  const showChildVisuals = usuario.idade <= 10;
   const currentVariation = challenge.variacoes[variationIndex] ?? challenge.variacoes[0];
   const difficulty = getSpatialDifficulty({
     tempoBase: challenge.tempoResposta,
@@ -375,7 +377,9 @@ export function SpatialGame({ usuario, progresso, onBack, onRememberVariation, o
 
               <div className="selected-sequence">
                 {selectedMoves.length > 0
-                  ? selectedMoves.map((item) => directionLabelMap[item]).join(" - ")
+                  ? showChildVisuals
+                    ? selectedMoves.map((item) => directionLabelMap[item]).join(" - ")
+                    : selectedMoves.map((item) => directionLabelMap[item]).join(" - ")
                   : "Sua sequencia de direcoes aparecera aqui."}
               </div>
 
@@ -389,7 +393,7 @@ export function SpatialGame({ usuario, progresso, onBack, onRememberVariation, o
                     onClick={() => pushMove(option)}
                     disabled={phase !== "answering" || selectedMoves.length >= currentVariation.sequence.length}
                   >
-                    {directionLabelMap[option]}
+                    {showChildVisuals ? <ChildVisualBadge token={directionLabelMap[option]} compact /> : directionLabelMap[option]}
                   </button>
                 ))}
               </div>

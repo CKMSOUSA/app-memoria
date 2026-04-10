@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { ChildVisualBadge } from "@/components/ChildVisualBadge";
 import { GameGuide } from "@/components/GameGuide";
 import { memoryChallenges } from "@/lib/game-data-v3";
 import { evaluateMemoryRound, getNextVariationIndex } from "@/lib/game-logic";
@@ -52,6 +53,7 @@ export function MemoryGame({ usuario, progresso, onBack, onRememberVariation, on
   );
   const progressoRef = useRef(progresso);
   const audience = getAudienceFromAge(usuario.idade);
+  const showChildVisuals = usuario.idade <= 10;
   const baseVariacoes =
     audience === "infantil" && challenge.variacoesInfantis?.length ? challenge.variacoesInfantis : challenge.variacoes;
   const palavrasDaRodada = baseVariacoes[variationIndex] ?? baseVariacoes[0];
@@ -296,7 +298,15 @@ export function MemoryGame({ usuario, progresso, onBack, onRememberVariation, on
               </div>
 
               {phase === "memorizing" ? (
-                <div className="word-box">{palavrasVisiveis.join(" - ")}</div>
+                showChildVisuals ? (
+                  <div className="word-box child-visual-grid-box">
+                    {palavrasVisiveis.map((item) => (
+                      <ChildVisualBadge key={item} token={item} />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="word-box">{palavrasVisiveis.join(" - ")}</div>
+                )
               ) : (
                 <div className="word-box word-box-hidden">As palavras ficam visiveis apenas durante a memorizacao.</div>
               )}
