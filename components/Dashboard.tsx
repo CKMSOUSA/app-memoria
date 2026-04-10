@@ -118,6 +118,18 @@ function StatCard({ label, value, caption }: { label: string; value: string; cap
   );
 }
 
+function CompactMetricCard({ label, value, caption }: { label: string; value: string; caption: string }) {
+  return (
+    <article className="metric-chip-card">
+      <div className="metric-chip-top">
+        <p className="metric-chip-label">{label}</p>
+        <strong className="metric-chip-value">{value}</strong>
+      </div>
+      <p className="metric-chip-caption">{caption}</p>
+    </article>
+  );
+}
+
 function TrackCard({
   title,
   audience,
@@ -339,40 +351,48 @@ export function Dashboard({
             <h3>Resumo do treino</h3>
             <span className="small-muted">Indicadores principais do desempenho atual</span>
           </div>
-          <div className="stats-grid">
-            <StatCard label="Pontos totais" value={String(usuario.pontos)} caption="Pontuacao acumulada por melhora real" />
-            <StatCard label="Nivel atual" value={getNivel(usuario.pontos)} caption="Escala progressiva do aplicativo" />
-            <StatCard
+          <div className="metrics-strip">
+            <CompactMetricCard
+              label="Pontos"
+              value={String(usuario.pontos)}
+              caption="Pontuacao acumulada por melhora real"
+            />
+            <CompactMetricCard label="Nivel" value={getNivel(usuario.pontos)} caption="Escala progressiva do aplicativo" />
+            <CompactMetricCard
               label="Status"
               value={usuario.premium ? "Premium" : "Basico"}
               caption="Conteudos extras podem ser destravados no futuro"
             />
-            <StatCard
-              label="Memoria + Visual"
+            <CompactMetricCard
+              label="Memoria / Visual"
               value={`${memoriaRate}% / ${visualRate}%`}
               caption="Progresso nas trilhas verbal e visual"
             />
-            <StatCard
+            <CompactMetricCard
               label="Atencao"
               value={`${atencaoRate}%`}
               caption="Percentual de desafios concluidos em foco seletivo"
             />
-            <StatCard
+            <CompactMetricCard
               label="Comparacao"
               value={`${comparacaoRate}%`}
               caption="Comparacoes de quantidade, valor, ordem e tamanho"
             />
-            <StatCard
-              label="Orientacao espacial"
+            <CompactMetricCard
+              label="Orientacao"
               value={`${espacialRate}%`}
               caption="Progresso nos desafios de rota, direcao e referencia espacial"
             />
-            <StatCard
+            <CompactMetricCard
               label="Logica"
               value={`${getCompletionRate(progresso.logica)}%`}
               caption="Sequencias, padroes e previsao do proximo termo"
             />
-            <StatCard label="Trilha exclusiva" value={`${especialRate}%`} caption="Progresso no minijogo do seu publico" />
+            <CompactMetricCard
+              label="Trilha exclusiva"
+              value={`${especialRate}%`}
+              caption="Progresso no minijogo do seu publico"
+            />
           </div>
         </section>
 
