@@ -490,11 +490,13 @@ h2 {
 }
 
 .metric-chip-value {
-  font-size: clamp(16px, 1.35vw, 22px);
+  font-size: clamp(14px, 1.15vw, 20px);
   line-height: 1.05;
   color: var(--ink-strong);
   text-transform: uppercase;
   letter-spacing: 0.04em;
+  word-break: break-word;
+  overflow-wrap: anywhere;
 }
 
 .metric-chip-caption {
@@ -513,6 +515,9 @@ h2 {
 
 .track-card .small-muted {
   font-size: 15px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 800;
 }
 
 .track-card-active {
