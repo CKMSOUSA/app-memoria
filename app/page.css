@@ -476,16 +476,21 @@ h2 {
 }
 
 .metric-chip-card:nth-child(2) {
-  min-width: 272px;
+  min-width: 292px;
 }
 
 .metric-chip-card:first-child,
 .metric-chip-card:nth-child(3) {
-  min-width: 156px;
+  min-width: 148px;
 }
 
 .metric-chip-card:nth-child(4) {
   min-width: 188px;
+}
+
+.metric-chip-card:nth-child(5),
+.metric-chip-card:nth-child(6) {
+  min-width: 170px;
 }
 
 .metric-chip-card:nth-child(2) .metric-chip-value {
