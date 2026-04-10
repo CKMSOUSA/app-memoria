@@ -366,16 +366,6 @@ export function MemoryGame({ usuario, progresso, onBack, onRememberVariation, on
                 <strong>Tempo de memorizacao</strong>
                 <span>{phase === "memorizing" ? `${countdown}s restantes` : "Pronto para iniciar"}</span>
               </div>
-
-              {phase === "memorizing" ? (
-                <div className="word-box memory-visual-box">
-                  {palavrasVisiveis.map((item) => (
-                    <MemoryFigureCard key={item} token={item} />
-                  ))}
-                </div>
-              ) : (
-                <div className="word-box word-box-hidden">As figuras ficam visiveis apenas durante a memorizacao.</div>
-              )}
             </section>
 
             <section className="panel">
@@ -405,6 +395,17 @@ export function MemoryGame({ usuario, progresso, onBack, onRememberVariation, on
               </div>
 
               <div className="memory-answer-board">
+                {phase === "memorizing" ? (
+                  <div className="memory-preview-box">
+                    <p className="small-muted memory-preview-label">Figuras para memorizar</p>
+                    <div className="memory-selected-grid">
+                      {palavrasVisiveis.map((item) => (
+                        <MemoryFigureCard key={item} token={item} />
+                      ))}
+                    </div>
+                  </div>
+                ) : null}
+
                 <div className="memory-selected-box">
                   {selectedItems.length > 0 ? (
                     <div className="memory-selected-grid">
