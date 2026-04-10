@@ -455,18 +455,23 @@ h2 {
 
 .metrics-strip {
   display: grid;
-  grid-template-columns: repeat(9, minmax(0, 1fr));
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(156px, 1fr);
   gap: 12px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  scroll-snap-type: x proximity;
 }
 
 .metric-chip-card {
   display: grid;
   gap: 10px;
-  min-height: 120px;
+  min-height: 108px;
   padding: 16px;
   border-radius: 18px;
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.96) 0%, rgba(250, 244, 236, 0.96) 100%);
   border: 1px solid rgba(229, 216, 197, 0.9);
+  scroll-snap-align: start;
 }
 
 .metric-chip-top {
@@ -1395,7 +1400,7 @@ h2 {
 }
 
 .report-panel .stats-grid {
-  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
 .report-panel .stat-card {
@@ -1411,6 +1416,15 @@ h2 {
 .report-panel .stat-card-caption {
   font-size: 14px;
   line-height: 1.45;
+}
+
+.metrics-strip::-webkit-scrollbar {
+  height: 8px;
+}
+
+.metrics-strip::-webkit-scrollbar-thumb {
+  background: rgba(207, 95, 60, 0.2);
+  border-radius: 999px;
 }
 
 .admin-grid {
@@ -1532,7 +1546,11 @@ h2 {
   }
 
   .metrics-strip {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-auto-columns: minmax(190px, 1fr);
+  }
+
+  .report-panel .stats-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
@@ -1556,6 +1574,10 @@ h2 {
   }
 
   .metrics-strip {
-    grid-template-columns: 1fr 1fr;
+    grid-auto-columns: minmax(170px, 78vw);
+  }
+
+  .report-panel .stats-grid {
+    grid-template-columns: 1fr;
   }
 }
