@@ -788,6 +788,11 @@ h2 {
   margin-top: 14px;
 }
 
+.comparison-controls {
+  margin-top: 8px;
+  margin-bottom: 10px;
+}
+
 .comparison-card {
   display: grid;
   gap: 10px;

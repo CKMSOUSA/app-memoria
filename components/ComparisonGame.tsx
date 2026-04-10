@@ -302,14 +302,6 @@ export function ComparisonGame({
                 ))}
               </div>
 
-              <div className="button-row">
-                <button className="btn btn-primary" onClick={startRound} disabled={phase === "playing"}>
-                  {phase === "playing" ? "Rodada em andamento" : "Iniciar rodada"}
-                </button>
-                <button className="btn btn-secondary" onClick={resetRound}>
-                  Trocar rodada
-                </button>
-              </div>
             </section>
 
             <section className="panel">
@@ -318,6 +310,15 @@ export function ComparisonGame({
                 <span className="small-muted">
                   {phase === "playing" ? `${currentRoundIndex + 1}/${rounds.length}` : "Aguardando rodada"}
                 </span>
+              </div>
+
+              <div className="button-row comparison-controls">
+                <button className="btn btn-primary" onClick={startRound} disabled={phase === "playing"}>
+                  {phase === "playing" ? "Rodada em andamento" : "Iniciar rodada"}
+                </button>
+                <button className="btn btn-secondary" onClick={resetRound}>
+                  Trocar rodada
+                </button>
               </div>
 
               <div className="comparison-board">
