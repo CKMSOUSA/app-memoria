@@ -32,6 +32,7 @@ NEXT_PUBLIC_APP_DATA_MODE=local
 NEXT_PUBLIC_API_BASE_URL=/api
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
+NEXT_PUBLIC_ADMIN_CONFIRM_CODE=4321
 ```
 
 ## Build de producao
@@ -117,6 +118,13 @@ O app agora diferencia dois perfis:
 - `admin`: acesso adicional a area administrativa e acompanhamento de usuarios
 
 A conta de teste padrao vem como `admin`.
+
+Para abrir a area administrativa, alem de login e perfil `admin`, o app agora pede um codigo extra de confirmacao.
+Esse codigo pode ser alterado em:
+
+- `NEXT_PUBLIC_ADMIN_CONFIRM_CODE`
+
+No ambiente atual de desenvolvimento, o valor padrao e `4321`.
 
 ## Preparacao para backend real
 

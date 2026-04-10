@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { AttentionGame } from "@/components/AttentionGame";
+import { AdminConfirmScreen } from "@/components/AdminConfirmScreen";
 import { AdminScreen } from "@/components/AdminScreen";
 import { AudienceGame } from "@/components/AudienceGame";
 import { AuthScreen } from "@/components/AuthScreen";
@@ -27,6 +28,7 @@ export default function Page() {
   const [history, setHistory] = useState<SessionRecord[]>([]);
   const [helpRequests, setHelpRequests] = useState<HelpRequest[]>([]);
   const [adminHistories, setAdminHistories] = useState<Array<{ user: Usuario; history: SessionRecord[]; progress?: ProgressState }>>([]);
+  const [adminConfirmed, setAdminConfirmed] = useState(false);
   const [dataMode, setDataMode] = useState<DataMode>(repository.mode);
   const [ready, setReady] = useState(false);
 
@@ -40,6 +42,7 @@ export default function Page() {
       const activeUser = repository.getActiveSession();
       if (activeUser) {
         setUsuario(activeUser);
+        setAdminConfirmed(false);
         try {
           setProgresso(await repository.loadProgress(activeUser.email));
         } catch {
@@ -75,11 +78,18 @@ export default function Page() {
     }
   }, [tela, usuario]);
 
+  useEffect(() => {
+    if (usuario && usuario.role !== "admin" && tela === "adminConfirm") {
+      setTela("dashboard");
+    }
+  }, [tela, usuario]);
+
   async function handleLogin(email: string, password: string) {
     const activeUser = await repository.loginUser(email, password);
     if (!activeUser) return null;
 
     setUsuario(activeUser);
+    setAdminConfirmed(false);
     try {
       setProgresso(await repository.loadProgress(activeUser.email));
     } catch {
@@ -107,6 +117,7 @@ export default function Page() {
   function handleLogout() {
     repository.clearActiveSession();
     setUsuario(null);
+    setAdminConfirmed(false);
     setProgresso(mergeProgress());
     setHistory([]);
     setHelpRequests([]);
@@ -120,12 +131,7 @@ export default function Page() {
     if (updatedUser) setUsuario(updatedUser);
   }
 
-  async function handleOpenAdmin() {
-    if (!usuario || usuario.role !== "admin") {
-      setTela("dashboard");
-      return;
-    }
-
+  async function openAdminArea() {
     const allUsers = await repository.listUsers();
     const histories = await repository.loadAllHistories();
     const nextAdminHistories = await Promise.all(
@@ -148,6 +154,29 @@ export default function Page() {
 
     setAdminHistories(nextAdminHistories);
     setTela("admin");
+  }
+
+  async function handleOpenAdmin() {
+    if (!usuario || usuario.role !== "admin") {
+      setTela("dashboard");
+      return;
+    }
+
+    if (!adminConfirmed) {
+      setTela("adminConfirm");
+      return;
+    }
+
+    await openAdminArea();
+  }
+
+  function handleAdminCodeConfirm(code: string) {
+    const expectedCode = (process.env.NEXT_PUBLIC_ADMIN_CONFIRM_CODE?.trim() || "4321").trim();
+    if (code !== expectedCode) return false;
+
+    setAdminConfirmed(true);
+    void openAdminArea();
+    return true;
   }
 
   async function handleSubmitHelpRequest(request: { email: string; name: string; subject: string; message: string }) {
@@ -259,6 +288,7 @@ export default function Page() {
           tela === "perfil" ||
           tela === "especial" ||
           tela === "ajuda" ||
+          tela === "adminConfirm" ||
           tela === "admin"
             ? "login"
             : tela
@@ -381,6 +411,16 @@ export default function Page() {
 
   if (tela === "perfil") {
     return <ProfileScreen usuario={usuario} onBack={() => setTela("dashboard")} onSaveProfile={handleSaveProfile} />;
+  }
+
+  if (tela === "adminConfirm") {
+    return (
+      <AdminConfirmScreen
+        usuario={usuario}
+        onBack={() => setTela("dashboard")}
+        onConfirm={handleAdminCodeConfirm}
+      />
+    );
   }
 
   if (tela === "admin") {

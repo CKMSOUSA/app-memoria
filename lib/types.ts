@@ -12,6 +12,7 @@ export type Tela =
   | "perfil"
   | "especial"
   | "ajuda"
+  | "adminConfirm"
   | "admin";
 
 export type DataMode = "local" | "remote";
