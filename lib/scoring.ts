@@ -5,6 +5,7 @@ import {
   logicChallenges,
   memoryChallenges,
   spatialChallenges,
+  visualChallenges,
 } from "@/lib/game-data-v3";
 import type { ProgressState, SessionMode, SessionRecord } from "@/lib/types";
 
@@ -23,6 +24,7 @@ function defaultChallengeProgress() {
 export function createDefaultProgress(): ProgressState {
   return {
     memoria: Object.fromEntries(memoryChallenges.map((challenge) => [challenge.id, defaultChallengeProgress()])),
+    visual: Object.fromEntries(visualChallenges.map((challenge) => [challenge.id, defaultChallengeProgress()])),
     atencao: Object.fromEntries(attentionChallenges.map((challenge) => [challenge.id, defaultChallengeProgress()])),
     comparacao: Object.fromEntries(comparisonChallenges.map((challenge) => [challenge.id, defaultChallengeProgress()])),
     espacial: Object.fromEntries(spatialChallenges.map((challenge) => [challenge.id, defaultChallengeProgress()])),
@@ -38,6 +40,13 @@ export function mergeProgress(saved?: Partial<ProgressState> | null): ProgressSt
     base.memoria[challenge.id] = {
       ...base.memoria[challenge.id],
       ...(saved?.memoria?.[challenge.id] ?? {}),
+    };
+  }
+
+  for (const challenge of visualChallenges) {
+    base.visual[challenge.id] = {
+      ...base.visual[challenge.id],
+      ...(saved?.visual?.[challenge.id] ?? {}),
     };
   }
 
@@ -98,6 +107,8 @@ export function getSessionModeLabel(mode: SessionMode) {
       return "Memoria";
     case "atencao":
       return "Atencao";
+    case "visual":
+      return "Memoria visual";
     case "comparacao":
       return "Comparacao";
     case "espacial":

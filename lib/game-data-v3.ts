@@ -5,6 +5,7 @@ import type {
   LogicChallenge,
   MemoryChallenge,
   SpatialChallenge,
+  VisualMemoryChallenge,
 } from "@/lib/types";
 
 const PHASE_LABELS_15 = [
@@ -147,6 +148,48 @@ export const memoryChallenges: MemoryChallenge[] = memorySeeds.map((seed, index)
   variacoesInfantis: seed.infantil,
   tempoMemorizacao: Math.max(5, 10 - Math.floor(index / 2)),
   minimoParaConcluir: Math.min(5, 2 + Math.floor(index / 4)),
+}));
+
+const visualSets = [
+  ["🐶", "🐱", "🦊", "🐻"],
+  ["🌷", "🌻", "🌹", "🌼"],
+  ["🦁", "🐸", "🐼", "🦋"],
+  ["🍎", "🍓", "🍊", "🍇"],
+  ["🚗", "🚲", "🚀", "⛵"],
+  ["🐧", "🐰", "🐨", "🦉"],
+  ["🌵", "🌺", "🍀", "🌸"],
+  ["⭐", "🌙", "☀️", "☁️"],
+  ["🐠", "🦀", "🐙", "🐬"],
+  ["🎈", "🪁", "⚽", "🧩"],
+  ["🦓", "🦒", "🐯", "🦜"],
+  ["🌳", "🍄", "🌲", "🪻"],
+  ["🍕", "🍔", "🍩", "🍉"],
+  ["🚂", "✈️", "🚜", "🚁"],
+  ["🐝", "🦄", "🐢", "🦚"],
+];
+
+function buildVisualVariation(baseItems: string[], extraItems: string[]) {
+  return Array.from(new Set([...baseItems, ...extraItems])).slice(0, baseItems.length + 1);
+}
+
+export const visualChallenges: VisualMemoryChallenge[] = visualSets.map((items, index) => ({
+  id: index + 1,
+  difficultyLabel: PHASE_LABELS_15[index],
+  nome: `Memoria visual ${index + 1}`,
+  nomeInfantil:
+    index < 5
+      ? index % 2 === 0
+        ? "Cartas de animais"
+        : "Cartas ilustradas"
+      : "Cartas de figuras",
+  variacoes: [
+    items,
+    buildVisualVariation(items.slice(1), [items[0], visualSets[(index + 1) % visualSets.length][0]]),
+    buildVisualVariation(items.slice(0, 3), [visualSets[(index + 2) % visualSets.length][1], items[3]]),
+  ],
+  revealSeconds: Math.max(4, 7 - Math.floor(index / 4)),
+  tempoLimite: Math.max(18, 34 - index),
+  minimoParaConcluir: Math.min(6, 2 + Math.floor(index / 3)),
 }));
 
 const attentionSeeds = [
@@ -384,6 +427,39 @@ function rotatePairs<T>(items: T[], shift: number) {
   return items.map((_, index) => items[(index + shift) % items.length]);
 }
 
+function buildShapeRounds(index: number): ComparisonSeed["pairs"] {
+  const shapeGroups = [
+    ["▲", "●", "■"],
+    ["◆", "⬟", "⬢"],
+    ["🔺", "🔵", "🟩"],
+    ["🔶", "🟣", "🟨"],
+    ["⬛", "🔷", "🟥"],
+  ];
+  const current = shapeGroups[index % shapeGroups.length];
+  const next = shapeGroups[(index + 1) % shapeGroups.length];
+
+  return [
+    {
+      left: `${index + 2} ${current[0]}`,
+      right: `${index + 4} ${current[0]}`,
+      correct: "right",
+      explanation: `O grupo da direita tem mais figuras ${current[0]}.`,
+    },
+    {
+      left: `${next[0]} ${next[0]} ${next[0]}`,
+      right: `${next[1]} ${next[1]}`,
+      correct: "left",
+      explanation: `A esquerda tem mais figuras do que a direita.`,
+    },
+    {
+      left: `${current[2]} ${current[2]}`,
+      right: `${current[2]} ${current[2]} ${current[2]}`,
+      correct: "right",
+      explanation: `A direita mostra uma quantidade maior da mesma figura.`,
+    },
+  ];
+}
+
 export const comparisonChallenges: ComparisonChallenge[] = comparisonSeeds.map((seed, index) => ({
   id: index + 1,
   difficultyLabel: PHASE_LABELS_15[index],
@@ -391,8 +467,9 @@ export const comparisonChallenges: ComparisonChallenge[] = comparisonSeeds.map((
   nomeInfantil: seed.nomeInfantil,
   variacoes: [0, 1, 2].map((variation) => ({
     prompt: seed.prompt,
-    promptInfantil: seed.promptInfantil,
+    promptInfantil: `${seed.promptInfantil} Para criancas pequenas, o app tambem usa figuras geometricas e conjuntos visuais.`,
     rounds: rotatePairs(seed.pairs, variation),
+    roundsAte10: rotatePairs(buildShapeRounds(index), variation),
   })),
   tempoLimite: Math.max(14, 24 - Math.floor(index / 2)),
   minimoParaConcluir: Math.min(3, 2 + Math.floor(index / 7)),

@@ -93,6 +93,7 @@ export function AdminScreen({ usuario, progressoAtual, histories, helpRequests, 
 
                   <div className="admin-progress-grid">
                     <span>{`Memoria ${getCompletionRate(effectiveProgress.memoria)}%`}</span>
+                    <span>{`Visual ${getCompletionRate(effectiveProgress.visual)}%`}</span>
                     <span>{`Atencao ${getCompletionRate(effectiveProgress.atencao)}%`}</span>
                     <span>{`Comparacao ${getCompletionRate(effectiveProgress.comparacao)}%`}</span>
                     <span>{`Espacial ${getCompletionRate(effectiveProgress.espacial)}%`}</span>

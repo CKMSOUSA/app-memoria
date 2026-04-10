@@ -4,6 +4,7 @@ export type Tela =
   | "recuperar"
   | "dashboard"
   | "memoria"
+  | "visual"
   | "atencao"
   | "comparacao"
   | "espacial"
@@ -41,6 +42,7 @@ export type ChallengeProgress = {
 
 export type ProgressState = {
   memoria: Record<number, ChallengeProgress>;
+  visual: Record<number, ChallengeProgress>;
   atencao: Record<number, ChallengeProgress>;
   comparacao: Record<number, ChallengeProgress>;
   espacial: Record<number, ChallengeProgress>;
@@ -111,6 +113,7 @@ export type ComparisonVariation = {
   prompt: string;
   promptInfantil?: string;
   rounds: ComparisonRound[];
+  roundsAte10?: ComparisonRound[];
 };
 
 export type ComparisonChallenge = {
@@ -180,6 +183,17 @@ export type LogicChallenge = {
   nome: string;
   nomeInfantil?: string;
   variacoes: LogicVariation[];
+  tempoLimite: number;
+  minimoParaConcluir: number;
+};
+
+export type VisualMemoryChallenge = {
+  id: number;
+  difficultyLabel: string;
+  nome: string;
+  nomeInfantil?: string;
+  variacoes: string[][];
+  revealSeconds: number;
   tempoLimite: number;
   minimoParaConcluir: number;
 };

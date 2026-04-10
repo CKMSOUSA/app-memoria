@@ -18,12 +18,14 @@ import {
   logicChallenges,
   memoryChallenges,
   spatialChallenges,
+  visualChallenges,
 } from "@/lib/game-data-v3";
 
 test("createDefaultProgress prepares the three progress tracks", () => {
   const progress = createDefaultProgress();
 
   assert.ok(Object.keys(progress.memoria).length > 0);
+  assert.ok(Object.keys(progress.visual).length > 0);
   assert.ok(Object.keys(progress.atencao).length > 0);
   assert.ok(Object.keys(progress.comparacao).length > 0);
   assert.ok(Object.keys(progress.espacial).length > 0);
@@ -33,6 +35,7 @@ test("createDefaultProgress prepares the three progress tracks", () => {
 
 test("expanded tracks expose the requested amount of phases", () => {
   assert.equal(memoryChallenges.length, 15);
+  assert.equal(visualChallenges.length, 15);
   assert.equal(attentionChallenges.length, 15);
   assert.equal(comparisonChallenges.length, 15);
   assert.equal(spatialChallenges.length, 15);
@@ -59,6 +62,7 @@ test("mergeProgress preserves saved data while filling missing challenges", () =
 
   assert.equal(merged.memoria[1].completed, true);
   assert.equal(merged.memoria[1].lastVariationIndex, 1);
+  assert.equal(merged.visual[1].completed, false);
   assert.equal(merged.atencao[1].completed, false);
   assert.equal(merged.comparacao[1].attempts, 0);
   assert.equal(merged.espacial[1].attempts, 0);

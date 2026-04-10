@@ -7,6 +7,7 @@ import {
   evaluateLogicRound,
   evaluateMemoryRound,
   evaluateSpatialRound,
+  evaluateVisualRound,
   getNextVariationIndex,
 } from "@/lib/game-logic";
 
@@ -107,4 +108,18 @@ test("evaluateLogicRound validates the next term choices", () => {
   assert.deepEqual(result.hits, [0, 2]);
   assert.deepEqual(result.mistakes, [1]);
   assert.equal(result.completed, true);
+});
+
+test("evaluateVisualRound scores matched pairs and penalizes mistakes", () => {
+  const result = evaluateVisualRound({
+    pairsFound: 3,
+    totalPairs: 4,
+    wrongMatches: 1,
+    answerSeconds: 9,
+    timeLimit: 18,
+    minimumToComplete: 3,
+  });
+
+  assert.equal(result.completed, true);
+  assert.equal(result.score, 37);
 });

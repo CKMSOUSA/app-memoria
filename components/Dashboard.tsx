@@ -8,6 +8,7 @@ import {
   logicChallenges,
   memoryChallenges,
   spatialChallenges,
+  visualChallenges,
 } from "@/lib/game-data-v3";
 import {
   getAudienceFromAge,
@@ -27,6 +28,7 @@ type DashboardProps = {
   usuario: Usuario;
   progresso: ProgressState;
   onOpenMemory: () => void;
+  onOpenVisual: () => void;
   onOpenAttention: () => void;
   onOpenComparison: () => void;
   onOpenSpatial: () => void;
@@ -46,9 +48,10 @@ function ProgressList({
   progressMap,
 }: {
   title: string;
-  mode: "memoria" | "atencao" | "comparacao" | "espacial" | "logica";
+  mode: "memoria" | "visual" | "atencao" | "comparacao" | "espacial" | "logica";
   progressMap:
     | ProgressState["memoria"]
+    | ProgressState["visual"]
     | ProgressState["atencao"]
     | ProgressState["comparacao"]
     | ProgressState["espacial"]
@@ -57,6 +60,8 @@ function ProgressList({
   const challenges =
     mode === "memoria"
       ? memoryChallenges
+      : mode === "visual"
+        ? visualChallenges
       : mode === "atencao"
         ? attentionChallenges
         : mode === "comparacao"
@@ -135,6 +140,7 @@ export function Dashboard({
   usuario,
   progresso,
   onOpenMemory,
+  onOpenVisual,
   onOpenAttention,
   onOpenComparison,
   onOpenSpatial,
@@ -148,6 +154,7 @@ export function Dashboard({
   history,
 }: DashboardProps) {
   const memoriaRate = getCompletionRate(progresso.memoria);
+  const visualRate = getCompletionRate(progresso.visual);
   const atencaoRate = getCompletionRate(progresso.atencao);
   const comparacaoRate = getCompletionRate(progresso.comparacao);
   const espacialRate = getCompletionRate(progresso.espacial);
@@ -159,6 +166,9 @@ export function Dashboard({
   );
   const memoriaRecomendada = memoryChallenges.find(
     (item) => item.id === getRecommendedChallengeId(progresso.memoria, memoryChallenges.map((challenge) => challenge.id)),
+  );
+  const visualRecomendada = visualChallenges.find(
+    (item) => item.id === getRecommendedChallengeId(progresso.visual, visualChallenges.map((challenge) => challenge.id)),
   );
   const atencaoRecomendada = attentionChallenges.find(
     (item) =>
@@ -188,6 +198,9 @@ export function Dashboard({
         <button className="btn btn-side btn-side-active">Dashboard</button>
         <button className="btn btn-side" onClick={onOpenMemory}>
           Jogo de memoria
+        </button>
+        <button className="btn btn-side" onClick={onOpenVisual}>
+          Memoria visual
         </button>
         <button className="btn btn-side" onClick={onOpenAttention}>
           Jogo de atencao
@@ -264,9 +277,14 @@ export function Dashboard({
             caption="Conteudos extras podem ser destravados no futuro"
           />
           <StatCard
-            label="Memoria + Atencao"
-            value={`${memoriaRate}% / ${atencaoRate}%`}
-            caption="Percentual de desafios concluidos em cada trilha"
+            label="Memoria + Visual"
+            value={`${memoriaRate}% / ${visualRate}%`}
+            caption="Progresso nas trilhas verbal e visual"
+          />
+          <StatCard
+            label="Atencao"
+            value={`${atencaoRate}%`}
+            caption="Percentual de desafios concluidos em foco seletivo"
           />
           <StatCard
             label="Comparacao"
@@ -359,6 +377,14 @@ export function Dashboard({
             </button>
           </article>
           <article className="quick-card">
+            <p className="small-muted">Recomendacao visual</p>
+            <h3>{visualRecomendada?.nomeInfantil ?? visualRecomendada?.nome ?? "Primeira fase"}</h3>
+            <p className="muted">Boa para pareamento de figuras, memoria de posicao e treino com animais e flores.</p>
+            <button className="btn btn-secondary" onClick={onOpenVisual}>
+              Abrir memoria visual
+            </button>
+          </article>
+          <article className="quick-card">
             <p className="small-muted">Recomendacao de atencao</p>
             <h3>{atencaoRecomendada?.nome ?? "Primeira fase"}</h3>
             <p className="muted">Boa para foco seletivo, velocidade visual e reducao de erros por impulso.</p>
@@ -415,6 +441,7 @@ export function Dashboard({
 
         <div className="dual-panels">
           <ProgressList title="Trilha de memoria" mode="memoria" progressMap={progresso.memoria} />
+          <ProgressList title="Trilha de memoria visual" mode="visual" progressMap={progresso.visual} />
           <ProgressList title="Trilha de atencao" mode="atencao" progressMap={progresso.atencao} />
           <ProgressList title="Trilha de comparacao" mode="comparacao" progressMap={progresso.comparacao} />
           <ProgressList title="Trilha de orientacao espacial" mode="espacial" progressMap={progresso.espacial} />

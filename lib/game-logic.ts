@@ -81,6 +81,33 @@ export function evaluateAttentionRound({
   };
 }
 
+export function evaluateVisualRound({
+  pairsFound,
+  totalPairs,
+  wrongMatches,
+  answerSeconds,
+  timeLimit,
+  minimumToComplete,
+}: {
+  pairsFound: number;
+  totalPairs: number;
+  wrongMatches: number;
+  answerSeconds: number;
+  timeLimit: number;
+  minimumToComplete: number;
+}) {
+  const score = Math.max(0, pairsFound * 8 + Math.max(0, timeLimit + 6 - answerSeconds) - wrongMatches * 2);
+  const completed = pairsFound >= minimumToComplete;
+
+  return {
+    pairsFound,
+    totalPairs,
+    wrongMatches,
+    score,
+    completed,
+  };
+}
+
 export function evaluateAudienceRound({
   expectedSequence,
   selectedSequence,

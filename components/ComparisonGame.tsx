@@ -57,7 +57,8 @@ export function ComparisonGame({
   );
   const audience = getAudienceFromAge(usuario.idade);
   const variation = challenge.variacoes[variationIndex] ?? challenge.variacoes[0];
-  const currentRound = variation.rounds[currentRoundIndex] ?? variation.rounds[0];
+  const rounds = usuario.idade <= 10 && variation.roundsAte10?.length ? variation.roundsAte10 : variation.rounds;
+  const currentRound = rounds[currentRoundIndex] ?? rounds[0];
   const difficulty = getComparisonDifficulty({
     tempoBase: challenge.tempoLimite,
     minimoBase: challenge.minimoParaConcluir,
@@ -104,7 +105,7 @@ export function ComparisonGame({
   }
 
   const finishRound = useCallback((answers: Array<"left" | "right">) => {
-    const expectedAnswers = variation.rounds.map((item) => item.correct);
+    const expectedAnswers = rounds.map((item) => item.correct);
     const elapsedSeconds = Math.max(difficulty.tempoLimite - timeLeft, 0);
     const result = evaluateComparisonRound({
       expectedAnswers,
@@ -128,7 +129,7 @@ export function ComparisonGame({
     difficulty.tempoLimite,
     onSaveResult,
     timeLeft,
-    variation.rounds,
+    rounds,
     variationIndex,
   ]);
 
@@ -149,7 +150,7 @@ export function ComparisonGame({
     const nextAnswers = [...selectedAnswers, answer];
     setSelectedAnswers(nextAnswers);
 
-    if (currentRoundIndex >= variation.rounds.length - 1) {
+    if (currentRoundIndex >= rounds.length - 1) {
       finishRound(nextAnswers);
       return;
     }
@@ -211,7 +212,7 @@ export function ComparisonGame({
             </div>
 
             <div className="review-grid">
-              {variation.rounds.map((round, index) => {
+              {rounds.map((round, index) => {
                 const userAnswer = selectedAnswers[index];
                 const correct = review.hits.includes(index);
                 return (
@@ -275,7 +276,7 @@ export function ComparisonGame({
                 </div>
                 <div className="phase-chip">
                   <strong>Rodadas</strong>
-                  <span>{variation.rounds.length}</span>
+                  <span>{rounds.length}</span>
                 </div>
               </div>
 
@@ -286,12 +287,12 @@ export function ComparisonGame({
                 </div>
                 <div className="meter-box">
                   <strong>Meta da fase</strong>
-                  <span>{`${difficulty.minimoParaConcluir}/${variation.rounds.length} acertos`}</span>
+                  <span>{`${difficulty.minimoParaConcluir}/${rounds.length} acertos`}</span>
                 </div>
               </div>
 
               <div className="comparison-progress">
-                {variation.rounds.map((_, index) => (
+                {rounds.map((_, index) => (
                   <span
                     key={index}
                     className={`comparison-dot ${
@@ -315,7 +316,7 @@ export function ComparisonGame({
               <div className="section-head">
                 <h3>Rodada atual</h3>
                 <span className="small-muted">
-                  {phase === "playing" ? `${currentRoundIndex + 1}/${variation.rounds.length}` : "Aguardando rodada"}
+                  {phase === "playing" ? `${currentRoundIndex + 1}/${rounds.length}` : "Aguardando rodada"}
                 </span>
               </div>
 

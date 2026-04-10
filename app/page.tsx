@@ -13,6 +13,7 @@ import type { HelpRequest } from "@/lib/types";
 import { MemoryGame } from "@/components/MemoryGame";
 import { ProfileScreen } from "@/components/ProfileScreen";
 import { SpatialGame } from "@/components/SpatialGame";
+import { VisualMemoryGame } from "@/components/VisualMemoryGame";
 import { getAppRepository } from "@/lib/app-repository";
 import { mergeProgress } from "@/lib/scoring";
 import type { DataMode, ProgressState, SessionRecord, SessionMode, Tela, Usuario } from "@/lib/types";
@@ -239,6 +240,7 @@ export default function Page() {
         tela={
           tela === "dashboard" ||
           tela === "memoria" ||
+          tela === "visual" ||
           tela === "atencao" ||
           tela === "comparacao" ||
           tela === "espacial" ||
@@ -269,6 +271,20 @@ export default function Page() {
         }
         onSaveResult={(challengeId, score, timeSeconds, completed, variationIndex) =>
           persistResult("memoria", challengeId, score, timeSeconds, completed, variationIndex)
+        }
+      />
+    );
+  }
+
+  if (tela === "visual") {
+    return (
+      <VisualMemoryGame
+        usuario={usuario}
+        progresso={progresso.visual}
+        onBack={() => setTela("dashboard")}
+        onRememberVariation={(challengeId, variationIndex) => persistVariation("visual", challengeId, variationIndex)}
+        onSaveResult={(challengeId, score, timeSeconds, completed, variationIndex) =>
+          persistResult("visual", challengeId, score, timeSeconds, completed, variationIndex)
         }
       />
     );
@@ -385,6 +401,7 @@ export default function Page() {
       progresso={progresso}
       history={history}
       onOpenMemory={() => setTela("memoria")}
+      onOpenVisual={() => setTela("visual")}
       onOpenAttention={() => setTela("atencao")}
       onOpenComparison={() => setTela("comparacao")}
       onOpenSpatial={() => setTela("espacial")}
