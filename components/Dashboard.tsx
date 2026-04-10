@@ -399,27 +399,29 @@ export function Dashboard({
           </div>
         </section>
 
-        <section className="panel backend-panel">
-          <div className="section-head">
-            <h3>Contas e Progresso Online</h3>
-            <span className={`pill ${backendStatus.ready ? "pill-success" : "pill-neutral"}`}>{backendStatus.provider}</span>
-          </div>
-          <p className="muted">{backendStatus.description}</p>
-          <div className="phase-summary">
-            <div className="phase-chip">
-              <strong>Modo</strong>
-              <span>{backendStatus.mode === "remote" ? "Remoto" : "Local"}</span>
+        {canOpenAdmin ? (
+          <section className="panel backend-panel">
+            <div className="section-head">
+              <h3>Contas e Progresso Online</h3>
+              <span className={`pill ${backendStatus.ready ? "pill-success" : "pill-neutral"}`}>{backendStatus.provider}</span>
             </div>
-            <div className="phase-chip">
-              <strong>Status</strong>
-              <span>{backendStatus.ready ? "Pronto para sincronizar" : "Falta configurar credenciais"}</span>
+            <p className="muted">{backendStatus.description}</p>
+            <div className="phase-summary">
+              <div className="phase-chip">
+                <strong>Modo</strong>
+                <span>{backendStatus.mode === "remote" ? "Remoto" : "Local"}</span>
+              </div>
+              <div className="phase-chip">
+                <strong>Status</strong>
+                <span>{backendStatus.ready ? "Pronto para sincronizar" : "Falta configurar credenciais"}</span>
+              </div>
+              <div className="phase-chip">
+                <strong>Impacto</strong>
+                <span>{backendStatus.ready ? "Conta e progresso online" : "Conta e progresso ficam no navegador"}</span>
+              </div>
             </div>
-            <div className="phase-chip">
-              <strong>Impacto</strong>
-              <span>{backendStatus.ready ? "Conta e progresso online" : "Conta e progresso ficam no navegador"}</span>
-            </div>
-          </div>
-        </section>
+          </section>
+        ) : null}
 
         <section className="panel">
           <div className="section-head">
