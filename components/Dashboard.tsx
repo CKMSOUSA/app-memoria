@@ -245,28 +245,32 @@ export function Dashboard({
               cada fase.
             </p>
           </div>
-          <div className="topbar-actions">
-            <button className="btn btn-secondary" onClick={onOpenProfile}>
-              Editar perfil
-            </button>
-            <button className="btn btn-secondary" onClick={onOpenAttention}>
-              Treinar atencao
-            </button>
-            <button className="btn btn-secondary" onClick={onOpenComparison}>
-              Treinar comparacao
-            </button>
-            <button className="btn btn-secondary" onClick={onOpenSpatial}>
-              Treinar orientacao
-            </button>
-            <button className="btn btn-secondary" onClick={onOpenLogic}>
-              Treinar logica
-            </button>
-            <button className="btn btn-secondary" onClick={onOpenHelp}>
-              Abrir ajuda
-            </button>
-            <button className="btn btn-primary" onClick={onOpenMemory}>
-              Treinar memoria
-            </button>
+          <div className="topbar-groups">
+            <div className="topbar-actions">
+              <button className="btn btn-primary" onClick={onOpenMemory}>
+                Treinar memoria
+              </button>
+              <button className="btn btn-secondary" onClick={onOpenAttention}>
+                Treinar atencao
+              </button>
+              <button className="btn btn-secondary" onClick={onOpenComparison}>
+                Treinar comparacao
+              </button>
+              <button className="btn btn-secondary" onClick={onOpenSpatial}>
+                Treinar orientacao
+              </button>
+              <button className="btn btn-secondary" onClick={onOpenLogic}>
+                Treinar logica
+              </button>
+            </div>
+            <div className="topbar-support-actions">
+              <button className="btn btn-secondary" onClick={onOpenProfile}>
+                Editar perfil
+              </button>
+              <button className="btn btn-secondary" onClick={onOpenHelp}>
+                Abrir ajuda
+              </button>
+            </div>
           </div>
         </header>
 
