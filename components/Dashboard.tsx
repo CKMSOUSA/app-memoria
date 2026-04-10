@@ -348,7 +348,7 @@ export function Dashboard({
 
         <section className="panel metrics-panel">
           <div className="section-head">
-            <h3>Resumo do treino</h3>
+            <h3>{`Resumo do treino: Status ${usuario.premium ? "Premium" : "Basico"}`}</h3>
             <span className="small-muted">Indicadores principais do desempenho atual</span>
           </div>
           <div className="metrics-strip">
@@ -358,11 +358,6 @@ export function Dashboard({
               caption="Pontuacao acumulada por melhora real"
             />
             <CompactMetricCard label="Nivel" value={getNivel(usuario.pontos)} caption="Escala progressiva do aplicativo" />
-            <CompactMetricCard
-              label="Status"
-              value={usuario.premium ? "Premium" : "Basico"}
-              caption="Conteudos extras podem ser destravados no futuro"
-            />
             <CompactMetricCard
               label="Memoria / Visual"
               value={`${memoriaRate}% / ${visualRate}%`}
