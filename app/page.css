@@ -474,6 +474,15 @@ h2 {
   scroll-snap-align: start;
 }
 
+.metric-chip-card:nth-child(2) {
+  min-width: 210px;
+}
+
+.metric-chip-card:first-child,
+.metric-chip-card:nth-child(3) {
+  min-width: 172px;
+}
+
 .metric-chip-top {
   display: grid;
   gap: 8px;
