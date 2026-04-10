@@ -836,6 +836,70 @@ h2 {
   margin-bottom: 10px;
 }
 
+.round-controls {
+  margin-top: 8px;
+  margin-bottom: 12px;
+}
+
+.round-task-card {
+  display: grid;
+  gap: 6px;
+  margin-top: 6px;
+  margin-bottom: 12px;
+  padding: 14px 16px;
+  border-radius: 18px;
+  background: rgba(255, 251, 244, 0.92);
+  border: 1px solid rgba(229, 216, 197, 0.9);
+}
+
+.round-task-title {
+  font-size: 22px;
+  color: var(--ink-strong);
+}
+
+.round-task-meta {
+  color: var(--accent-dark);
+  font-weight: 700;
+}
+
+.round-task-description {
+  margin: 0;
+  color: var(--ink-soft);
+  line-height: 1.6;
+}
+
+.memory-controls {
+  margin-top: 8px;
+  margin-bottom: 12px;
+}
+
+.memory-task-card {
+  display: grid;
+  gap: 6px;
+  margin-top: 6px;
+  margin-bottom: 12px;
+  padding: 14px 16px;
+  border-radius: 18px;
+  background: rgba(255, 251, 244, 0.92);
+  border: 1px solid rgba(229, 216, 197, 0.9);
+}
+
+.memory-task-title {
+  font-size: 22px;
+  color: var(--ink-strong);
+}
+
+.memory-task-meta {
+  color: var(--accent-dark);
+  font-weight: 700;
+}
+
+.memory-task-description {
+  margin: 0;
+  color: var(--ink-soft);
+  line-height: 1.6;
+}
+
 .comparison-task-card {
   display: grid;
   gap: 6px;

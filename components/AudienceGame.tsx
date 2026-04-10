@@ -258,7 +258,6 @@ export function AudienceGame({ usuario, progresso, onBack, onRememberVariation, 
                 <h3>Como funciona</h3>
                 <span className="small-muted">Meta: {challenge.minimoParaConcluir} acertos em ordem</span>
               </div>
-              <p className="muted">{currentVariation.prompt}</p>
 
               <GameGuide
                 title="Como jogar"
@@ -313,8 +312,23 @@ export function AudienceGame({ usuario, progresso, onBack, onRememberVariation, 
                   A sequencia aparece apenas durante a exibicao inicial.
                 </div>
               )}
+            </section>
 
-              <div className="button-row">
+            <section className="panel exclusive-panel">
+              <div className="section-head">
+                <h3>Monte a sequencia</h3>
+                <span className="small-muted">
+                  {phase === "answering" ? "Digite a sequencia na ordem correta" : "Aguardando rodada"}
+                </span>
+              </div>
+
+              <div className="round-task-card">
+                <strong className="round-task-title">{challenge.nome}</strong>
+                <span className="round-task-meta">{`Fase ${phaseNumber} - ${challenge.difficultyLabel}`}</span>
+                <p className="round-task-description">{currentVariation.prompt}</p>
+              </div>
+
+              <div className="button-row round-controls">
                 <button className="btn btn-primary" onClick={startRound} disabled={phase === "showing" || phase === "answering"}>
                   {phase === "idle" ? "Iniciar rodada" : "Rodada iniciada"}
                 </button>
@@ -324,15 +338,6 @@ export function AudienceGame({ usuario, progresso, onBack, onRememberVariation, 
                 <button className="btn btn-secondary" onClick={resetRound}>
                   Trocar rodada
                 </button>
-              </div>
-            </section>
-
-            <section className="panel exclusive-panel">
-              <div className="section-head">
-                <h3>Monte a sequencia</h3>
-                <span className="small-muted">
-                  {phase === "answering" ? "Digite a sequencia na ordem correta" : "Aguardando rodada"}
-                </span>
               </div>
 
               <textarea

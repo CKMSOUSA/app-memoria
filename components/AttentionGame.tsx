@@ -323,7 +323,6 @@ export function AttentionGame({ usuario, progresso, onBack, onRememberVariation,
                 <h3>{audience === "infantil" && challenge.nomeInfantil ? challenge.nomeInfantil : challenge.nome}</h3>
                 <span className="small-muted">{`Fase ${challenge.id} - ${challenge.difficultyLabel}`}</span>
               </div>
-              <p className="muted">{`${getAgeLabel(usuario.idade)} - ${audience === "infantil" && variacaoAtual.instrucaoInfantil ? variacaoAtual.instrucaoInfantil : variacaoAtual.instrucao}`}</p>
 
               <GameGuide
                 title="Como jogar"
@@ -370,14 +369,6 @@ export function AttentionGame({ usuario, progresso, onBack, onRememberVariation,
                 </div>
               </div>
 
-              <div className="button-row">
-                <button className="btn btn-primary" onClick={startRound} disabled={phase === "playing"}>
-                  {phase === "playing" ? "Rodada em andamento" : "Iniciar rodada"}
-                </button>
-                <button className="btn btn-secondary" onClick={resetRound}>
-                  Trocar rodada
-                </button>
-              </div>
             </section>
 
             <section className="panel">
@@ -386,6 +377,27 @@ export function AttentionGame({ usuario, progresso, onBack, onRememberVariation,
                 <span className="small-muted">
                   {foundTargets.length}/{targetIndexes.length} alvo(s) encontrados
                 </span>
+              </div>
+
+              <div className="round-task-card">
+                <strong className="round-task-title">
+                  {audience === "infantil" && challenge.nomeInfantil ? challenge.nomeInfantil : challenge.nome}
+                </strong>
+                <span className="round-task-meta">{`Fase ${challenge.id} - ${challenge.difficultyLabel}`}</span>
+                <p className="round-task-description">
+                  {`${getAgeLabel(usuario.idade)} - ${
+                    audience === "infantil" && variacaoAtual.instrucaoInfantil ? variacaoAtual.instrucaoInfantil : variacaoAtual.instrucao
+                  }`}
+                </p>
+              </div>
+
+              <div className="button-row round-controls">
+                <button className="btn btn-primary" onClick={startRound} disabled={phase === "playing"}>
+                  {phase === "playing" ? "Rodada em andamento" : "Iniciar rodada"}
+                </button>
+                <button className="btn btn-secondary" onClick={resetRound}>
+                  Trocar rodada
+                </button>
               </div>
 
               <div className="attention-grid">

@@ -301,9 +301,6 @@ export function VisualMemoryGame({
                 <h3>{audience === "infantil" && challenge.nomeInfantil ? challenge.nomeInfantil : challenge.nome}</h3>
                 <span className="small-muted">{`Fase ${challenge.id} - ${challenge.difficultyLabel}`}</span>
               </div>
-              <p className="muted">
-                {`${getAgeLabel(usuario.idade)} - memorize as cartas, depois encontre os pares iguais.`}
-              </p>
 
               <GameGuide
                 title="Como jogar"
@@ -348,15 +345,6 @@ export function VisualMemoryGame({
                   <span>{wrongMatches}</span>
                 </div>
               </div>
-
-              <div className="button-row">
-                <button className="btn btn-primary" onClick={startRound} disabled={phase === "showing" || phase === "playing"}>
-                  Iniciar rodada
-                </button>
-                <button className="btn btn-secondary" onClick={resetRound}>
-                  Trocar rodada
-                </button>
-              </div>
             </section>
 
             <section className="panel">
@@ -365,6 +353,25 @@ export function VisualMemoryGame({
                 <span className="small-muted">
                   {phase === "playing" ? "Encontre os pares iguais" : "Aguardando rodada"}
                 </span>
+              </div>
+
+              <div className="round-task-card">
+                <strong className="round-task-title">
+                  {audience === "infantil" && challenge.nomeInfantil ? challenge.nomeInfantil : challenge.nome}
+                </strong>
+                <span className="round-task-meta">{`Fase ${challenge.id} - ${challenge.difficultyLabel}`}</span>
+                <p className="round-task-description">
+                  {`${getAgeLabel(usuario.idade)} - Memorize as cartas abertas e depois encontre os pares iguais.`}
+                </p>
+              </div>
+
+              <div className="button-row round-controls">
+                <button className="btn btn-primary" onClick={startRound} disabled={phase === "showing" || phase === "playing"}>
+                  Iniciar rodada
+                </button>
+                <button className="btn btn-secondary" onClick={resetRound}>
+                  Trocar rodada
+                </button>
               </div>
 
               <div className="visual-grid">

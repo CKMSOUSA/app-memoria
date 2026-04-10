@@ -219,12 +219,6 @@ export function LogicGame({ usuario, progresso, onBack, onRememberVariation, onS
                 <span className="small-muted">{`Fase ${challenge.id} - ${challenge.difficultyLabel}`}</span>
               </div>
 
-              <p className="muted">
-                {`${getAgeLabel(usuario.idade)} - ${
-                  audience === "infantil" && variation.promptInfantil ? variation.promptInfantil : variation.prompt
-                }`}
-              </p>
-
               <GameGuide
                 title="Como jogar"
                 objective="Observe a regra da sequencia e escolha qual opcao vem depois."
@@ -262,15 +256,6 @@ export function LogicGame({ usuario, progresso, onBack, onRememberVariation, onS
                   <span>{`${challenge.minimoParaConcluir}/${variation.rounds.length} acertos`}</span>
                 </div>
               </div>
-
-              <div className="button-row">
-                <button className="btn btn-primary" onClick={startRound} disabled={phase === "playing"}>
-                  {phase === "playing" ? "Rodada em andamento" : "Iniciar rodada"}
-                </button>
-                <button className="btn btn-secondary" onClick={resetRound}>
-                  Trocar rodada
-                </button>
-              </div>
             </section>
 
             <section className="panel">
@@ -279,6 +264,27 @@ export function LogicGame({ usuario, progresso, onBack, onRememberVariation, onS
                 <span className="small-muted">
                   {phase === "playing" ? `${currentRoundIndex + 1}/${variation.rounds.length}` : "Aguardando rodada"}
                 </span>
+              </div>
+
+              <div className="round-task-card">
+                <strong className="round-task-title">
+                  {audience === "infantil" && challenge.nomeInfantil ? challenge.nomeInfantil : challenge.nome}
+                </strong>
+                <span className="round-task-meta">{`Fase ${challenge.id} - ${challenge.difficultyLabel}`}</span>
+                <p className="round-task-description">
+                  {`${getAgeLabel(usuario.idade)} - ${
+                    audience === "infantil" && variation.promptInfantil ? variation.promptInfantil : variation.prompt
+                  }`}
+                </p>
+              </div>
+
+              <div className="button-row round-controls">
+                <button className="btn btn-primary" onClick={startRound} disabled={phase === "playing"}>
+                  {phase === "playing" ? "Rodada em andamento" : "Iniciar rodada"}
+                </button>
+                <button className="btn btn-secondary" onClick={resetRound}>
+                  Trocar rodada
+                </button>
               </div>
 
               <div className="logic-sequence">

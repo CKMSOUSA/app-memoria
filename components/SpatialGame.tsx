@@ -312,12 +312,6 @@ export function SpatialGame({ usuario, progresso, onBack, onRememberVariation, o
                 <span className="small-muted">{`Fase ${challenge.id} - ${challenge.difficultyLabel}`}</span>
               </div>
 
-              <p className="muted">
-                {`${getAgeLabel(usuario.idade)} - ${
-                  audience === "infantil" && currentVariation.promptInfantil ? currentVariation.promptInfantil : currentVariation.prompt
-                }`}
-              </p>
-
               <GameGuide
                 title="Como jogar"
                 objective="Observe o caminho no tabuleiro e depois repita os movimentos na mesma ordem usando somente os botoes de direcao."
@@ -351,15 +345,6 @@ export function SpatialGame({ usuario, progresso, onBack, onRememberVariation, o
               </div>
 
               <SpatialBoard path={phase === "showing" ? expectedPath : buildBoardPath([])} masked={phase !== "showing"} />
-
-              <div className="button-row">
-                <button className="btn btn-primary" onClick={startRound} disabled={phase === "showing"}>
-                  {phase === "showing" ? "Observando rota" : "Iniciar rodada"}
-                </button>
-                <button className="btn btn-secondary" onClick={resetRound}>
-                  Trocar rota
-                </button>
-              </div>
             </section>
 
             <section className="panel">
@@ -368,6 +353,27 @@ export function SpatialGame({ usuario, progresso, onBack, onRememberVariation, o
                 <span className="small-muted">
                   {phase === "answering" ? `${answerSeconds}s respondendo` : "Aguardando rodada"}
                 </span>
+              </div>
+
+              <div className="round-task-card">
+                <strong className="round-task-title">
+                  {audience === "infantil" && challenge.nomeInfantil ? challenge.nomeInfantil : challenge.nome}
+                </strong>
+                <span className="round-task-meta">{`Fase ${challenge.id} - ${challenge.difficultyLabel}`}</span>
+                <p className="round-task-description">
+                  {`${getAgeLabel(usuario.idade)} - ${
+                    audience === "infantil" && currentVariation.promptInfantil ? currentVariation.promptInfantil : currentVariation.prompt
+                  }`}
+                </p>
+              </div>
+
+              <div className="button-row round-controls">
+                <button className="btn btn-primary" onClick={startRound} disabled={phase === "showing"}>
+                  {phase === "showing" ? "Observando rota" : "Iniciar rodada"}
+                </button>
+                <button className="btn btn-secondary" onClick={resetRound}>
+                  Trocar rota
+                </button>
               </div>
 
               <div className="meter-box">
