@@ -457,10 +457,10 @@ h2 {
   display: grid;
   grid-auto-flow: column;
   grid-auto-columns: minmax(184px, 1fr);
-  gap: 10px;
+  gap: 6px;
   overflow-x: auto;
-  padding-bottom: 4px;
-  padding-right: 8px;
+  padding-bottom: 2px;
+  padding-right: 0;
   scroll-snap-type: x proximity;
 }
 
@@ -476,7 +476,7 @@ h2 {
 }
 
 .metric-chip-card:nth-child(2) {
-  min-width: 286px;
+  min-width: 272px;
 }
 
 .metric-chip-card:first-child,
@@ -489,7 +489,7 @@ h2 {
 }
 
 .metric-chip-card:nth-child(2) .metric-chip-value {
-  font-size: clamp(12px, 1vw, 18px);
+  font-size: clamp(11px, 0.92vw, 17px);
   letter-spacing: 0.02em;
   line-height: 1.08;
   max-width: 12ch;
