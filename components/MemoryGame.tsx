@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ChildVisualBadge } from "@/components/ChildVisualBadge";
 import { GameGuide } from "@/components/GameGuide";
+import { getChildVisual } from "@/lib/child-visuals";
 import { memoryChallenges } from "@/lib/game-data-v3";
 import { evaluateMemoryRound, getNextVariationIndex } from "@/lib/game-logic";
 import {
@@ -31,13 +31,68 @@ type MemoryGameProps = {
 
 type Phase = "idle" | "memorizing" | "answering" | "result";
 
+const MEMORY_FALLBACK_VISUALS = [
+  "🦋",
+  "🌈",
+  "🍀",
+  "🎈",
+  "🪁",
+  "🧸",
+  "🎯",
+  "🌟",
+  "🎨",
+  "🧩",
+  "🦄",
+  "🐠",
+  "🌼",
+  "🍎",
+  "🚂",
+  "⛵",
+  "🏕️",
+  "🛝",
+  "💎",
+  "🔔",
+];
+
+function getMemoryVisual(token: string) {
+  const base = getChildVisual(token);
+  if (base !== "✨") return base;
+
+  const hash = token.split("").reduce((sum, char, index) => sum + char.charCodeAt(0) * (index + 1), 0);
+  return MEMORY_FALLBACK_VISUALS[hash % MEMORY_FALLBACK_VISUALS.length];
+}
+
+function getStableVisualChoices(expectedItems: string[], allVariations: string[][], challengeId: number, variation: number) {
+  const extras = Array.from(new Set(allVariations.flat().filter((item) => !expectedItems.includes(item))));
+  const seed = challengeId * 31 + variation * 17;
+  const scoreFor = (token: string, offset: number) =>
+    (token + String(seed + offset)).split("").reduce((sum, char, index) => sum + char.charCodeAt(0) * (index + 1), 0);
+
+  const orderedExtras = [...extras].sort((left, right) => scoreFor(left, 11) - scoreFor(right, 11));
+  const pickedExtras = orderedExtras.slice(0, Math.max(3, Math.min(5, orderedExtras.length)));
+
+  return Array.from(new Set([...expectedItems, ...pickedExtras])).sort(
+    (left, right) => scoreFor(left, 23) - scoreFor(right, 23),
+  );
+}
+
+function MemoryFigureCard({ token }: { token: string }) {
+  return (
+    <span className="memory-figure-card" aria-label={token} title={token}>
+      <span className="memory-figure-emoji" aria-hidden="true">
+        {getMemoryVisual(token)}
+      </span>
+    </span>
+  );
+}
+
 export function MemoryGame({ usuario, progresso, onBack, onRememberVariation, onSaveResult }: MemoryGameProps) {
   const [selectedId, setSelectedId] = useState(1);
   const [variationIndex, setVariationIndex] = useState(0);
   const [phase, setPhase] = useState<Phase>("idle");
   const [countdown, setCountdown] = useState(0);
   const [answerSeconds, setAnswerSeconds] = useState(0);
-  const [response, setResponse] = useState("");
+  const [selectedItems, setSelectedItems] = useState<string[]>([]);
   const [feedback, setFeedback] = useState("");
   const [review, setReview] = useState<{
     hits: string[];
@@ -53,12 +108,15 @@ export function MemoryGame({ usuario, progresso, onBack, onRememberVariation, on
   );
   const progressoRef = useRef(progresso);
   const audience = getAudienceFromAge(usuario.idade);
-  const showChildVisuals = usuario.idade <= 10;
   const baseVariacoes =
     audience === "infantil" && challenge.variacoesInfantis?.length ? challenge.variacoesInfantis : challenge.variacoes;
   const palavrasDaRodada = baseVariacoes[variationIndex] ?? baseVariacoes[0];
   const ageProfile = getMemoryAgeProfile(usuario.idade);
   const palavrasVisiveis = palavrasDaRodada.slice(0, ageProfile.visibleWords);
+  const visualChoices = useMemo(
+    () => getStableVisualChoices(palavrasVisiveis, baseVariacoes, challenge.id, variationIndex),
+    [baseVariacoes, challenge.id, palavrasVisiveis, variationIndex],
+  );
   const dificuldade = getMemoryDifficulty({
     tempoBase: challenge.tempoMemorizacao,
     minimoBase: challenge.minimoParaConcluir,
@@ -93,7 +151,7 @@ export function MemoryGame({ usuario, progresso, onBack, onRememberVariation, on
     setPhase("idle");
     setCountdown(0);
     setAnswerSeconds(0);
-    setResponse("");
+    setSelectedItems([]);
     setFeedback("");
     setReview(null);
   }, [selectedId, baseVariacoes.length]);
@@ -106,7 +164,7 @@ export function MemoryGame({ usuario, progresso, onBack, onRememberVariation, on
     setPhase("idle");
     setCountdown(0);
     setAnswerSeconds(0);
-    setResponse("");
+    setSelectedItems([]);
     setFeedback("");
     setReview(null);
     setVariationIndex((current) => getNextVariationIndex(baseVariacoes.length, current));
@@ -116,9 +174,17 @@ export function MemoryGame({ usuario, progresso, onBack, onRememberVariation, on
     setPhase("memorizing");
     setCountdown(dificuldade.tempoMemorizacao);
     setAnswerSeconds(0);
-    setResponse("");
+    setSelectedItems([]);
     setFeedback("");
     setReview(null);
+  }
+
+  function toggleItem(item: string) {
+    if (phase !== "answering") return;
+
+    setSelectedItems((current) =>
+      current.includes(item) ? current.filter((token) => token !== item) : [...current, item],
+    );
   }
 
   function submitAnswer() {
@@ -126,7 +192,7 @@ export function MemoryGame({ usuario, progresso, onBack, onRememberVariation, on
 
     const result = evaluateMemoryRound({
       expectedWords: palavrasVisiveis,
-      response,
+      response: selectedItems.join(", "),
       answerSeconds,
       memorizationSeconds: dificuldade.tempoMemorizacao,
       minimumToComplete: dificuldade.minimoParaConcluir,
@@ -135,8 +201,8 @@ export function MemoryGame({ usuario, progresso, onBack, onRememberVariation, on
     setPhase("result");
     setFeedback(
       result.completed
-        ? `Voce acertou ${result.hits.length} palavra(s) e concluiu o desafio. Score da rodada: ${result.score}.`
-        : `Voce acertou ${result.hits.length} palavra(s). Precisa de ${dificuldade.minimoParaConcluir} para concluir este desafio.`,
+        ? `Voce acertou ${result.hits.length} figura(s) e concluiu o desafio. Score da rodada: ${result.score}.`
+        : `Voce acertou ${result.hits.length} figura(s). Precisa de ${dificuldade.minimoParaConcluir} para concluir este desafio.`,
     );
     setReview(result);
     onSaveResult(challenge.id, result.score, answerSeconds, result.completed, variationIndex);
@@ -203,27 +269,23 @@ export function MemoryGame({ usuario, progresso, onBack, onRememberVariation, on
                 <div className="review-tags">
                   {review.hits.length > 0 ? (
                     review.hits.map((item) => (
-                      <span key={item} className="review-tag">
-                        {item}
-                      </span>
+                      <MemoryFigureCard key={item} token={item} />
                     ))
                   ) : (
-                    <span className="small-muted">Nenhuma palavra correta.</span>
+                    <span className="small-muted">Nenhuma figura correta.</span>
                   )}
                 </div>
               </div>
 
               <div className="review-column review-bad">
-                <strong>Erros digitados</strong>
+                <strong>Erros marcados</strong>
                 <div className="review-tags">
                   {review.wrongWords.length > 0 ? (
                     review.wrongWords.map((item) => (
-                      <span key={item} className="review-tag">
-                        {item}
-                      </span>
+                      <MemoryFigureCard key={item} token={item} />
                     ))
                   ) : (
-                    <span className="small-muted">Nenhum erro digitado.</span>
+                    <span className="small-muted">Nenhuma figura errada.</span>
                   )}
                 </div>
               </div>
@@ -233,9 +295,7 @@ export function MemoryGame({ usuario, progresso, onBack, onRememberVariation, on
                 <div className="review-tags">
                   {review.missedWords.length > 0 ? (
                     review.missedWords.map((item) => (
-                      <span key={item} className="review-tag">
-                        {item}
-                      </span>
+                      <MemoryFigureCard key={item} token={item} />
                     ))
                   ) : (
                     <span className="small-muted">Voce lembrou de todas.</span>
@@ -267,12 +327,12 @@ export function MemoryGame({ usuario, progresso, onBack, onRememberVariation, on
 
               <GameGuide
                 title="Como jogar"
-                objective="Observe as palavras, espere o tempo terminar e depois escreva apenas o que voce lembrar."
+                objective="Observe as figuras, espere o tempo terminar e depois selecione apenas as que voce lembrar."
                 steps={[
-                  "Clique em Iniciar rodada para mostrar as palavras.",
-                  "Memorize a lista enquanto o contador estiver ativo.",
-                  "Quando as palavras sumirem, digite o que lembrar no campo ao lado.",
-                  "Use Corrigir rodada para ver acertos, erros e itens faltantes.",
+                  "Clique em Iniciar rodada para mostrar as figuras.",
+                  "Memorize cada figura enquanto o contador estiver ativo.",
+                  "Quando as figuras sumirem, selecione no painel ao lado o que voce lembrar.",
+                  "Use Corrigir rodada para ver acertos, erros e figuras faltantes.",
                 ]}
                 tip="Cada rodada vale uma correcao. Para subir pontos, voce precisa superar o seu melhor score nesta fase."
               />
@@ -287,7 +347,7 @@ export function MemoryGame({ usuario, progresso, onBack, onRememberVariation, on
                   <span>{`${dificuldade.minimoParaConcluir} acertos`}</span>
                 </div>
                 <div className="phase-chip">
-                  <strong>Palavras</strong>
+                  <strong>Figuras</strong>
                   <span>{`${palavrasVisiveis.length} itens`}</span>
                 </div>
               </div>
@@ -298,17 +358,13 @@ export function MemoryGame({ usuario, progresso, onBack, onRememberVariation, on
               </div>
 
               {phase === "memorizing" ? (
-                showChildVisuals ? (
-                  <div className="word-box child-visual-grid-box">
-                    {palavrasVisiveis.map((item) => (
-                      <ChildVisualBadge key={item} token={item} />
-                    ))}
-                  </div>
-                ) : (
-                  <div className="word-box">{palavrasVisiveis.join(" - ")}</div>
-                )
+                <div className="word-box memory-visual-box">
+                  {palavrasVisiveis.map((item) => (
+                    <MemoryFigureCard key={item} token={item} />
+                  ))}
+                </div>
               ) : (
-                <div className="word-box word-box-hidden">As palavras ficam visiveis apenas durante a memorizacao.</div>
+                <div className="word-box word-box-hidden">As figuras ficam visiveis apenas durante a memorizacao.</div>
               )}
 
               <div className="button-row">
@@ -323,22 +379,52 @@ export function MemoryGame({ usuario, progresso, onBack, onRememberVariation, on
 
             <section className="panel">
               <div className="section-head">
-                <h3>Sua resposta</h3>
+                <h3>Figuras lembradas</h3>
                 <span className="small-muted">
                   {phase === "answering" ? `${answerSeconds}s respondendo` : "Aguardando rodada"}
                 </span>
               </div>
-              <textarea
-                className="text-input area-input"
-                placeholder="Digite as palavras separadas por espaco, virgula ou quebra de linha. A ordem nao precisa ser igual."
-                value={response}
-                disabled={phase !== "answering"}
-                onChange={(event) => setResponse(event.target.value)}
-                rows={8}
-              />
+              <div className="memory-answer-board">
+                <div className="memory-selected-box">
+                  {selectedItems.length > 0 ? (
+                    <div className="memory-selected-grid">
+                      {selectedItems.map((item) => (
+                        <MemoryFigureCard key={item} token={item} />
+                      ))}
+                    </div>
+                  ) : (
+                    <span className="small-muted">As figuras escolhidas aparecem aqui.</span>
+                  )}
+                </div>
+
+                <div className="memory-choice-grid">
+                  {visualChoices.map((item) => (
+                    <button
+                      key={item}
+                      className={`memory-choice-button ${selectedItems.includes(item) ? "memory-choice-button-selected" : ""}`}
+                      type="button"
+                      onClick={() => toggleItem(item)}
+                      disabled={phase !== "answering"}
+                    >
+                      <MemoryFigureCard token={item} />
+                    </button>
+                  ))}
+                </div>
+              </div>
               <div className="button-row">
-                <button className="btn btn-primary" onClick={submitAnswer} disabled={phase !== "answering" || !response.trim()}>
+                <button
+                  className="btn btn-primary"
+                  onClick={submitAnswer}
+                  disabled={phase !== "answering" || selectedItems.length === 0}
+                >
                   Corrigir rodada
+                </button>
+                <button
+                  className="btn btn-secondary"
+                  onClick={() => setSelectedItems([])}
+                  disabled={phase !== "answering" || selectedItems.length === 0}
+                >
+                  Limpar escolha
                 </button>
               </div>
             </section>
