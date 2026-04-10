@@ -321,10 +321,6 @@ export function MemoryGame({ usuario, progresso, onBack, onRememberVariation, on
                 <span className="small-muted">{`Fase ${challenge.id} - ${challenge.difficultyLabel}`}</span>
               </div>
 
-              <p className="muted">
-                {`${getAgeLabel(usuario.idade)} - objetivo: lembrar pelo menos ${dificuldade.minimoParaConcluir} de ${palavrasVisiveis.length} palavras desta rodada.`}
-              </p>
-
               <GameGuide
                 title="Como jogar"
                 objective="Observe as figuras, espere o tempo terminar e depois selecione apenas as que voce lembrar."
@@ -366,15 +362,6 @@ export function MemoryGame({ usuario, progresso, onBack, onRememberVariation, on
               ) : (
                 <div className="word-box word-box-hidden">As figuras ficam visiveis apenas durante a memorizacao.</div>
               )}
-
-              <div className="button-row">
-                <button className="btn btn-primary" onClick={startChallenge} disabled={phase === "memorizing"}>
-                  {phase === "idle" ? "Iniciar rodada" : "Memorizando"}
-                </button>
-                <button className="btn btn-secondary" onClick={resetRound}>
-                  Trocar rodada
-                </button>
-              </div>
             </section>
 
             <section className="panel">
@@ -384,6 +371,25 @@ export function MemoryGame({ usuario, progresso, onBack, onRememberVariation, on
                   {phase === "answering" ? `${answerSeconds}s respondendo` : "Aguardando rodada"}
                 </span>
               </div>
+              <div className="memory-task-card">
+                <strong className="memory-task-title">
+                  {audience === "infantil" && challenge.nomeInfantil ? challenge.nomeInfantil : challenge.nome}
+                </strong>
+                <span className="memory-task-meta">{`Fase ${challenge.id} - ${challenge.difficultyLabel}`}</span>
+                <p className="memory-task-description">
+                  {`${getAgeLabel(usuario.idade)} - Lembre pelo menos ${dificuldade.minimoParaConcluir} de ${palavrasVisiveis.length} figuras desta rodada.`}
+                </p>
+              </div>
+
+              <div className="button-row memory-controls">
+                <button className="btn btn-primary" onClick={startChallenge} disabled={phase === "memorizing"}>
+                  {phase === "idle" ? "Iniciar rodada" : "Memorizando"}
+                </button>
+                <button className="btn btn-secondary" onClick={resetRound}>
+                  Trocar rodada
+                </button>
+              </div>
+
               <div className="memory-answer-board">
                 <div className="memory-selected-box">
                   {selectedItems.length > 0 ? (
