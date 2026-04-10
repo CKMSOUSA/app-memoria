@@ -462,7 +462,6 @@ export default function Page() {
       onOpenHelp={() => setTela("ajuda")}
       onOpenAdmin={() => void handleOpenAdmin()}
       onLogout={handleLogout}
-      dataMode={dataMode}
     />
   );
 }

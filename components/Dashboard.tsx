@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-import { getDataModeDescription, getDataModeLabel, getRemoteBackendStatus } from "@/lib/app-repository";
+import { getRemoteBackendStatus } from "@/lib/app-repository";
 import {
   attentionChallenges,
   comparisonChallenges,
@@ -24,7 +24,7 @@ import {
   getSessionModeLabel,
   isChallengeUnlocked,
 } from "@/lib/scoring";
-import type { DataMode, ProgressState, SessionRecord, Usuario } from "@/lib/types";
+import type { ProgressState, SessionRecord, Usuario } from "@/lib/types";
 
 type TrailMode = "memoria" | "visual" | "atencao" | "comparacao" | "espacial" | "logica";
 
@@ -42,7 +42,6 @@ type DashboardProps = {
   onOpenAdmin: () => void;
   onOpenHelp: () => void;
   onLogout: () => void;
-  dataMode: DataMode;
   history: SessionRecord[];
 };
 
@@ -154,7 +153,6 @@ export function Dashboard({
   onOpenAdmin,
   onOpenHelp,
   onLogout,
-  dataMode,
   history,
 }: DashboardProps) {
   const backendStatus = getRemoteBackendStatus();
@@ -277,7 +275,10 @@ export function Dashboard({
         <header className="topbar panel">
           <div className="topbar-main">
             <p className="eyebrow">Painel do usuario</p>
-            <h1 className="dashboard-title">{`Ola, ${usuario.nome}`}</h1>
+            <div className="dashboard-title-row">
+              <h1 className="dashboard-title">{`Ola, ${usuario.nome}`}</h1>
+              <span className="dashboard-age-chip">{getAgeLabel(usuario.idade)}</span>
+            </div>
             <p className="muted">
               Seu progresso fica salvo por desafio. Os pontos so aumentam quando voce supera seu melhor resultado em
               cada fase.
@@ -333,43 +334,46 @@ export function Dashboard({
           </div>
         </header>
 
-        <section className="stats-grid">
-          <StatCard label="Pontos totais" value={String(usuario.pontos)} caption="Pontuacao acumulada por melhora real" />
-          <StatCard label="Nivel atual" value={getNivel(usuario.pontos)} caption="Escala progressiva do aplicativo" />
-          <StatCard label="Idade" value={getAgeLabel(usuario.idade)} caption={getAudienceLabel(currentAudience)} />
-          <StatCard label="Dados" value={getDataModeLabel(dataMode)} caption={getDataModeDescription(dataMode)} />
-          <StatCard
-            label="Perfil de acesso"
-            value={usuario.role === "admin" ? "Administrador" : "Aluno"}
-            caption={usuario.role === "admin" ? "Pode acompanhar usuarios e pedidos de ajuda" : "Acesso focado no treino do aluno"}
-          />
-          <StatCard
-            label="Status"
-            value={usuario.premium ? "Premium" : "Basico"}
-            caption="Conteudos extras podem ser destravados no futuro"
-          />
-          <StatCard
-            label="Memoria + Visual"
-            value={`${memoriaRate}% / ${visualRate}%`}
-            caption="Progresso nas trilhas verbal e visual"
-          />
-          <StatCard
-            label="Atencao"
-            value={`${atencaoRate}%`}
-            caption="Percentual de desafios concluidos em foco seletivo"
-          />
-          <StatCard
-            label="Comparacao"
-            value={`${comparacaoRate}%`}
-            caption="Comparacoes de quantidade, valor, ordem e tamanho"
-          />
-          <StatCard
-            label="Orientacao espacial"
-            value={`${espacialRate}%`}
-            caption="Progresso nos desafios de rota, direcao e referencia espacial"
-          />
-          <StatCard label="Logica" value={`${getCompletionRate(progresso.logica)}%`} caption="Sequencias, padroes e previsao do proximo termo" />
-          <StatCard label="Trilha exclusiva" value={`${especialRate}%`} caption="Progresso no minijogo do seu publico" />
+        <section className="panel metrics-panel">
+          <div className="section-head">
+            <h3>Resumo do treino</h3>
+            <span className="small-muted">Indicadores principais do desempenho atual</span>
+          </div>
+          <div className="stats-grid">
+            <StatCard label="Pontos totais" value={String(usuario.pontos)} caption="Pontuacao acumulada por melhora real" />
+            <StatCard label="Nivel atual" value={getNivel(usuario.pontos)} caption="Escala progressiva do aplicativo" />
+            <StatCard
+              label="Status"
+              value={usuario.premium ? "Premium" : "Basico"}
+              caption="Conteudos extras podem ser destravados no futuro"
+            />
+            <StatCard
+              label="Memoria + Visual"
+              value={`${memoriaRate}% / ${visualRate}%`}
+              caption="Progresso nas trilhas verbal e visual"
+            />
+            <StatCard
+              label="Atencao"
+              value={`${atencaoRate}%`}
+              caption="Percentual de desafios concluidos em foco seletivo"
+            />
+            <StatCard
+              label="Comparacao"
+              value={`${comparacaoRate}%`}
+              caption="Comparacoes de quantidade, valor, ordem e tamanho"
+            />
+            <StatCard
+              label="Orientacao espacial"
+              value={`${espacialRate}%`}
+              caption="Progresso nos desafios de rota, direcao e referencia espacial"
+            />
+            <StatCard
+              label="Logica"
+              value={`${getCompletionRate(progresso.logica)}%`}
+              caption="Sequencias, padroes e previsao do proximo termo"
+            />
+            <StatCard label="Trilha exclusiva" value={`${especialRate}%`} caption="Progresso no minijogo do seu publico" />
+          </div>
         </section>
 
         <section className="panel report-panel">

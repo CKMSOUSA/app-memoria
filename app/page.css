@@ -107,6 +107,27 @@
   line-height: 1.02;
 }
 
+.dashboard-title-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.dashboard-age-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: rgba(255, 243, 229, 0.94);
+  border: 1px solid rgba(207, 95, 60, 0.22);
+  color: var(--accent-dark);
+  font-weight: 800;
+  font-size: 14px;
+}
+
 .eyebrow {
   margin: 0 0 8px;
   text-transform: uppercase;
@@ -425,6 +446,11 @@ h2 {
   font-size: 15px;
   line-height: 1.55;
   max-width: 24ch;
+}
+
+.metrics-panel {
+  display: grid;
+  gap: 16px;
 }
 
 .track-card {
