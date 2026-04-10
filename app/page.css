@@ -36,7 +36,7 @@
 .topbar,
 .button-row,
 .topbar-actions,
-.topbar-groups,
+.topbar-right,
 .topbar-support-actions,
 .status-row {
   display: flex;
@@ -45,7 +45,7 @@
   flex-wrap: wrap;
 }
 
-.topbar-groups {
+.topbar-right {
   display: grid;
   gap: 14px;
   justify-items: end;
@@ -53,6 +53,18 @@
 
 .topbar-support-actions {
   justify-content: flex-end;
+}
+
+.btn-topbar-profile {
+  background: linear-gradient(135deg, #2c6387 0%, #4a89b2 100%);
+  color: white;
+  box-shadow: 0 14px 24px rgba(44, 99, 135, 0.2);
+}
+
+.btn-topbar-help {
+  background: linear-gradient(135deg, #2d8a54 0%, #51a878 100%);
+  color: white;
+  box-shadow: 0 14px 24px rgba(45, 138, 84, 0.2);
 }
 
 .eyebrow {

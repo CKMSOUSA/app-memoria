@@ -245,30 +245,30 @@ export function Dashboard({
               cada fase.
             </p>
           </div>
-          <div className="topbar-groups">
-            <div className="topbar-actions">
-              <button className="btn btn-primary" onClick={onOpenMemory}>
-                Treinar memoria
-              </button>
-              <button className="btn btn-secondary" onClick={onOpenAttention}>
-                Treinar atencao
-              </button>
-              <button className="btn btn-secondary" onClick={onOpenComparison}>
-                Treinar comparacao
-              </button>
-              <button className="btn btn-secondary" onClick={onOpenSpatial}>
-                Treinar orientacao
-              </button>
-              <button className="btn btn-secondary" onClick={onOpenLogic}>
-                Treinar logica
-              </button>
-            </div>
+          <div className="topbar-right">
             <div className="topbar-support-actions">
-              <button className="btn btn-secondary" onClick={onOpenProfile}>
+              <button className="btn btn-topbar-profile" onClick={onOpenProfile}>
                 Editar perfil
               </button>
-              <button className="btn btn-secondary" onClick={onOpenHelp}>
+              <button className="btn btn-topbar-help" onClick={onOpenHelp}>
                 Abrir ajuda
+              </button>
+            </div>
+            <div className="topbar-actions">
+              <button className="btn btn-primary" onClick={onOpenMemory}>
+                Memoria
+              </button>
+              <button className="btn btn-secondary" onClick={onOpenAttention}>
+                Atencao
+              </button>
+              <button className="btn btn-secondary" onClick={onOpenComparison}>
+                Comparacao
+              </button>
+              <button className="btn btn-secondary" onClick={onOpenSpatial}>
+                Orientacao espacial
+              </button>
+              <button className="btn btn-secondary" onClick={onOpenLogic}>
+                Logica
               </button>
             </div>
           </div>
