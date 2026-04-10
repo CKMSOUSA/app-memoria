@@ -22,7 +22,7 @@ export function AdminScreen({ usuario, progressoAtual, histories, helpRequests, 
             <p className="eyebrow">Area administrativa</p>
             <h1>Acompanhe usuarios, progresso e sessoes</h1>
             <p className="muted">
-              Painel de acompanhamento com resumo por aluno, ultima atividade e modo de treino mais forte.
+              Painel de acompanhamento com resumo por aluno, ultima atividade, modo de treino mais forte e central de ajuda.
             </p>
           </div>
           <button className="btn btn-secondary" onClick={onBack}>

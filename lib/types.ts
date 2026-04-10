@@ -15,6 +15,7 @@ export type Tela =
   | "admin";
 
 export type DataMode = "local" | "remote";
+export type UserRole = "aluno" | "admin";
 
 export type Usuario = {
   nome: string;
@@ -24,6 +25,7 @@ export type Usuario = {
   pontos: number;
   criadoEm: string;
   idade: number;
+  role: UserRole;
 };
 
 export type UsuarioPersistido = Usuario & {

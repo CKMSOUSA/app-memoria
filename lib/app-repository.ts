@@ -51,12 +51,51 @@ type AppRepository = {
   simulateRecovery: (email: string) => string;
 };
 
+export type RemoteBackendStatus = {
+  mode: DataMode;
+  ready: boolean;
+  provider: string;
+  description: string;
+};
+
 function getRemoteBaseUrl() {
   return process.env.NEXT_PUBLIC_API_BASE_URL?.trim() || "/api";
 }
 
 function getRepositoryMode(): DataMode {
   return process.env.NEXT_PUBLIC_APP_DATA_MODE === "remote" ? "remote" : "local";
+}
+
+export function getRemoteBackendStatus(): RemoteBackendStatus {
+  const mode = getRepositoryMode();
+  const hasSupabase =
+    Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL?.trim()) &&
+    Boolean(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim());
+
+  if (mode === "local") {
+    return {
+      mode,
+      ready: false,
+      provider: "Local",
+      description: "Modo local ativo. O app funciona no navegador e ja aceita migracao para backend online.",
+    };
+  }
+
+  if (hasSupabase) {
+    return {
+      mode,
+      ready: true,
+      provider: "Supabase",
+      description: "Modo remoto configurado com credenciais publicas para autenticar e sincronizar progresso online.",
+    };
+  }
+
+  return {
+    mode,
+    ready: false,
+    provider: "Remoto pendente",
+    description: "Modo remoto selecionado, mas ainda faltam credenciais de provedor para ativar contas e progresso online.",
+  };
 }
 
 async function parseJson<T>(response: Response): Promise<T | null> {

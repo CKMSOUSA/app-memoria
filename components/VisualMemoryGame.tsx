@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { GameGuide } from "@/components/GameGuide";
+import { ReviewMetrics } from "@/components/ReviewMetrics";
 import { visualChallenges } from "@/lib/game-data-v3";
 import { evaluateVisualRound, getNextVariationIndex } from "@/lib/game-logic";
 import { getAgeLabel, getAudienceFromAge, getNivel, isChallengeUnlocked } from "@/lib/scoring";
@@ -265,6 +266,14 @@ export function VisualMemoryGame({
               </div>
               <span className="pill">Score {review.score}</span>
             </div>
+            <ReviewMetrics
+              items={[
+                { label: "Pares", value: `${review.pairsFound}/${review.totalPairs}` },
+                { label: "Erros", value: String(review.wrongMatches) },
+                { label: "Meta", value: `${challenge.minimoParaConcluir} pares` },
+              ]}
+              note="Na memoria visual, o ideal e observar posicao e categoria da figura antes das cartas virarem."
+            />
             <div className="review-grid">
               <div className="review-column review-good">
                 <strong>Pares encontrados</strong>
@@ -312,6 +321,7 @@ export function VisualMemoryGame({
                   "No fim da rodada, confira quantos pares encontrou e quantos erros cometeu.",
                 ]}
                 tip="Para criancas pequenas, as figuras funcionam como apoio visual mais concreto do que palavras."
+                isChild={usuario.idade <= 10}
               />
 
               <div className="phase-summary">
@@ -366,10 +376,10 @@ export function VisualMemoryGame({
               </div>
 
               <div className="button-row round-controls">
-                <button className="btn btn-primary" onClick={startRound} disabled={phase === "showing" || phase === "playing"}>
+                <button className="btn btn-primary btn-round-start" onClick={startRound} disabled={phase === "showing" || phase === "playing"}>
                   Iniciar rodada
                 </button>
-                <button className="btn btn-secondary" onClick={resetRound}>
+                <button className="btn btn-secondary btn-round-swap" onClick={resetRound}>
                   Trocar rodada
                 </button>
               </div>

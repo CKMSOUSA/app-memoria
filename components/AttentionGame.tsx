@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ChildVisualBadge } from "@/components/ChildVisualBadge";
 import { GameGuide } from "@/components/GameGuide";
+import { ReviewMetrics } from "@/components/ReviewMetrics";
 import { attentionChallenges } from "@/lib/game-data-v3";
 import { evaluateAttentionRound, getNextVariationIndex } from "@/lib/game-logic";
 import {
@@ -256,13 +257,21 @@ export function AttentionGame({ usuario, progresso, onBack, onRememberVariation,
 
         {phase === "result" && review ? (
           <section className="review-card review-card-full">
-            <div className="section-head">
-              <div>
-                <h3>Correcao da rodada</h3>
-                <p className="muted">{feedback}</p>
+              <div className="section-head">
+                <div>
+                  <h3>Correcao da rodada</h3>
+                  <p className="muted">{feedback}</p>
+                </div>
+                <span className="pill">Score {review.score}</span>
               </div>
-              <span className="pill">Score {review.score}</span>
-            </div>
+              <ReviewMetrics
+                items={[
+                  { label: "Alvos certos", value: String(review.foundCount) },
+                  { label: "Erros", value: String(review.wrongClicks) },
+                  { label: "Tempo", value: `${review.elapsedSeconds}s` },
+                ]}
+                note="Observe se voce perdeu por pressa ou por clicar no simbolo errado. O foco seletivo melhora quando erro e velocidade entram em equilibrio."
+              />
 
             <div className="review-grid">
               <div className="review-column review-good">
@@ -334,6 +343,7 @@ export function AttentionGame({ usuario, progresso, onBack, onRememberVariation,
                   "No final, veja quantos alvos encontrou e quantos erros cometeu.",
                 ]}
                 tip="Quanto menos erros e quanto mais rapido voce encontrar os alvos, melhor sera o score da fase."
+                isChild={usuario.idade <= 10}
               />
 
               <div className="phase-summary">
@@ -392,10 +402,10 @@ export function AttentionGame({ usuario, progresso, onBack, onRememberVariation,
               </div>
 
               <div className="button-row round-controls">
-                <button className="btn btn-primary" onClick={startRound} disabled={phase === "playing"}>
+                <button className="btn btn-primary btn-round-start" onClick={startRound} disabled={phase === "playing"}>
                   {phase === "playing" ? "Rodada em andamento" : "Iniciar rodada"}
                 </button>
-                <button className="btn btn-secondary" onClick={resetRound}>
+                <button className="btn btn-secondary btn-round-swap" onClick={resetRound}>
                   Trocar rodada
                 </button>
               </div>

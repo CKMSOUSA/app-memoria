@@ -207,6 +207,7 @@ export function AuthScreen({
           <span>Nome: Usuario teste</span>
           <span>Email: user@email.com</span>
           <span>Senha: 123456</span>
+          <span>Perfil: admin</span>
         </div>
       </section>
     </main>

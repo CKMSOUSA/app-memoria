@@ -41,6 +41,7 @@ function normalizeUser(user: UsuarioPersistido): UsuarioPersistido {
     nome: user.nome ?? "Jogador",
     avatar: user.avatar ?? AVATAR_OPTIONS[0],
     idade: typeof legacyUser.idade === "number" ? legacyUser.idade : idadeLegada,
+    role: user.role ?? "aluno",
   };
 }
 
@@ -89,6 +90,7 @@ export async function bootstrapStorage() {
     pontos: 45,
     criadoEm: new Date().toISOString(),
     idade: DEFAULT_IDADE,
+    role: "admin",
   };
 
   writeUsers([seeded]);
@@ -124,6 +126,7 @@ export async function registerUser(email: string, password: string, idade: numbe
     pontos: 0,
     criadoEm: new Date().toISOString(),
     idade,
+    role: "aluno",
   };
 
   const nextUsers = [...users, createdUser];

@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ChildVisualBadge } from "@/components/ChildVisualBadge";
 import { GameGuide } from "@/components/GameGuide";
+import { ReviewMetrics } from "@/components/ReviewMetrics";
 import { exclusiveChallenges } from "@/lib/game-data-v3";
 import { evaluateAudienceRound, getNextVariationIndex } from "@/lib/game-logic";
 import { getAgeLabel, getAudienceFromAge, getAudienceLabel } from "@/lib/scoring";
@@ -194,6 +195,14 @@ export function AudienceGame({ usuario, progresso, onBack, onRememberVariation, 
               </div>
               <span className="pill">Score {review.score}</span>
             </div>
+            <ReviewMetrics
+              items={[
+                { label: "Acertos", value: String(review.hits.length) },
+                { label: "Erros", value: String(review.wrongItems.length) },
+                { label: "Faltaram", value: String(review.missedItems.length) },
+              ]}
+              note="Aqui a ordem importa. Mesmo acertando o item, ele precisa aparecer na posicao certa para contar."
+            />
 
             <div className="review-grid">
               <div className="review-column review-good">
@@ -269,6 +278,7 @@ export function AudienceGame({ usuario, progresso, onBack, onRememberVariation, 
                   "Digite os itens na mesma ordem e corrija a rodada.",
                 ]}
                 tip="A fase so conta como concluida quando voce atinge a meta de itens certos em ordem."
+                isChild={usuario.idade <= 10}
               />
 
               <div className="phase-summary">
@@ -329,13 +339,13 @@ export function AudienceGame({ usuario, progresso, onBack, onRememberVariation, 
               </div>
 
               <div className="button-row round-controls">
-                <button className="btn btn-primary" onClick={startRound} disabled={phase === "showing" || phase === "answering"}>
+                <button className="btn btn-primary btn-round-start" onClick={startRound} disabled={phase === "showing" || phase === "answering"}>
                   {phase === "idle" ? "Iniciar rodada" : "Rodada iniciada"}
                 </button>
-                <button className="btn btn-secondary" onClick={startAnswering} disabled={phase !== "showing"}>
+                <button className="btn btn-secondary btn-round-submit" onClick={startAnswering} disabled={phase !== "showing"}>
                   Ocultar e responder
                 </button>
-                <button className="btn btn-secondary" onClick={resetRound}>
+                <button className="btn btn-secondary btn-round-swap" onClick={resetRound}>
                   Trocar rodada
                 </button>
               </div>
@@ -350,7 +360,7 @@ export function AudienceGame({ usuario, progresso, onBack, onRememberVariation, 
               />
 
               <div className="button-row">
-                <button className="btn btn-primary" onClick={submitAnswer} disabled={phase !== "answering" || !response.trim()}>
+                <button className="btn btn-primary btn-round-submit" onClick={submitAnswer} disabled={phase !== "answering" || !response.trim()}>
                   Corrigir rodada
                 </button>
               </div>

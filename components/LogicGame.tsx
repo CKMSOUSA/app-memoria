@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ChildVisualBadge } from "@/components/ChildVisualBadge";
 import { GameGuide } from "@/components/GameGuide";
+import { ReviewMetrics } from "@/components/ReviewMetrics";
 import { logicChallenges } from "@/lib/game-data-v3";
 import { evaluateLogicRound, getNextVariationIndex } from "@/lib/game-logic";
 import { getAgeLabel, getAudienceFromAge, getNivel, isChallengeUnlocked } from "@/lib/scoring";
@@ -185,6 +186,14 @@ export function LogicGame({ usuario, progresso, onBack, onRememberVariation, onS
               </div>
               <span className="pill">Score {review.score}</span>
             </div>
+            <ReviewMetrics
+              items={[
+                { label: "Acertos", value: String(review.hits.length) },
+                { label: "Erros", value: String(review.mistakes.length) },
+                { label: "Sequencias", value: String(variation.rounds.length) },
+              ]}
+              note="Leia a explicacao correta depois de cada rodada. Isso ajuda a reconhecer o padrao com mais rapidez na proxima tentativa."
+            />
 
             <div className="review-grid">
               {variation.rounds.map((round, index) => {
@@ -229,6 +238,7 @@ export function LogicGame({ usuario, progresso, onBack, onRememberVariation, onS
                   "Ao final, compare sua resposta com a explicacao correta.",
                 ]}
                 tip="Nem toda sequencia cresce de 1 em 1. Algumas alternam, dobram ou pulam letras."
+                isChild={usuario.idade <= 10}
               />
 
               <div className="phase-summary">
@@ -279,10 +289,10 @@ export function LogicGame({ usuario, progresso, onBack, onRememberVariation, onS
               </div>
 
               <div className="button-row round-controls">
-                <button className="btn btn-primary" onClick={startRound} disabled={phase === "playing"}>
+                <button className="btn btn-primary btn-round-start" onClick={startRound} disabled={phase === "playing"}>
                   {phase === "playing" ? "Rodada em andamento" : "Iniciar rodada"}
                 </button>
-                <button className="btn btn-secondary" onClick={resetRound}>
+                <button className="btn btn-secondary btn-round-swap" onClick={resetRound}>
                   Trocar rodada
                 </button>
               </div>

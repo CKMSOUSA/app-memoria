@@ -1,6 +1,6 @@
 "use client";
 
-import { getDataModeDescription, getDataModeLabel } from "@/lib/app-repository";
+import { getDataModeDescription, getDataModeLabel, getRemoteBackendStatus } from "@/lib/app-repository";
 import {
   attentionChallenges,
   comparisonChallenges,
@@ -153,6 +153,7 @@ export function Dashboard({
   dataMode,
   history,
 }: DashboardProps) {
+  const backendStatus = getRemoteBackendStatus();
   const memoriaRate = getCompletionRate(progresso.memoria);
   const visualRate = getCompletionRate(progresso.visual);
   const atencaoRate = getCompletionRate(progresso.atencao);
@@ -183,6 +184,7 @@ export function Dashboard({
     (item) => item.id === getRecommendedChallengeId(progresso.logica, logicChallenges.map((challenge) => challenge.id)),
   );
   const resumo = getReportSummary(history);
+  const canOpenAdmin = usuario.role === "admin";
 
   return (
     <main className="shell shell-dashboard">
@@ -217,9 +219,11 @@ export function Dashboard({
         <button className="btn btn-side" onClick={onOpenSpecial}>
           Trilha exclusiva
         </button>
-        <button className="btn btn-side" onClick={onOpenAdmin}>
-          Area administrativa
-        </button>
+        {canOpenAdmin ? (
+          <button className="btn btn-side" onClick={onOpenAdmin}>
+            Area administrativa
+          </button>
+        ) : null}
         <button className="btn btn-side" onClick={onOpenProfile}>
           Perfil
         </button>
@@ -272,6 +276,11 @@ export function Dashboard({
           <StatCard label="Idade" value={getAgeLabel(usuario.idade)} caption={getAudienceLabel(currentAudience)} />
           <StatCard label="Dados" value={getDataModeLabel(dataMode)} caption={getDataModeDescription(dataMode)} />
           <StatCard
+            label="Perfil de acesso"
+            value={usuario.role === "admin" ? "Administrador" : "Aluno"}
+            caption={usuario.role === "admin" ? "Pode acompanhar usuarios e pedidos de ajuda" : "Acesso focado no treino do aluno"}
+          />
+          <StatCard
             label="Status"
             value={usuario.premium ? "Premium" : "Basico"}
             caption="Conteudos extras podem ser destravados no futuro"
@@ -312,12 +321,36 @@ export function Dashboard({
             <StatCard label="Modo forte" value={getSessionModeLabel(resumo.strongestMode)} caption="Trilha com melhor desempenho acumulado" />
           </div>
           <div className="button-row">
-            <button className="btn btn-secondary" onClick={onOpenAdmin}>
-              Abrir area administrativa
-            </button>
+            {canOpenAdmin ? (
+              <button className="btn btn-secondary" onClick={onOpenAdmin}>
+                Abrir area administrativa
+              </button>
+            ) : null}
             <button className="btn btn-secondary" onClick={onOpenLogic}>
               Treinar logica
             </button>
+          </div>
+        </section>
+
+        <section className="panel backend-panel">
+          <div className="section-head">
+            <h3>Contas e Progresso Online</h3>
+            <span className={`pill ${backendStatus.ready ? "pill-success" : "pill-neutral"}`}>{backendStatus.provider}</span>
+          </div>
+          <p className="muted">{backendStatus.description}</p>
+          <div className="phase-summary">
+            <div className="phase-chip">
+              <strong>Modo</strong>
+              <span>{backendStatus.mode === "remote" ? "Remoto" : "Local"}</span>
+            </div>
+            <div className="phase-chip">
+              <strong>Status</strong>
+              <span>{backendStatus.ready ? "Pronto para sincronizar" : "Falta configurar credenciais"}</span>
+            </div>
+            <div className="phase-chip">
+              <strong>Impacto</strong>
+              <span>{backendStatus.ready ? "Conta e progresso online" : "Conta e progresso ficam no navegador"}</span>
+            </div>
           </div>
         </section>
 

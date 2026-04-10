@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ChildVisualBadge } from "@/components/ChildVisualBadge";
 import { GameGuide } from "@/components/GameGuide";
+import { ReviewMetrics } from "@/components/ReviewMetrics";
 import { spatialChallenges } from "@/lib/game-data-v3";
 import { evaluateSpatialRound, getNextVariationIndex } from "@/lib/game-logic";
 import {
@@ -240,6 +241,14 @@ export function SpatialGame({ usuario, progresso, onBack, onRememberVariation, o
               </div>
               <span className="pill">Score {review.score}</span>
             </div>
+            <ReviewMetrics
+              items={[
+                { label: "Corretos", value: String(review.hits.length) },
+                { label: "Erros", value: String(review.wrongMoves.length) },
+                { label: "Passos", value: String(currentVariation.sequence.length) },
+              ]}
+              note="Compare a rota correta com a sua rota. Isso ajuda a perceber onde a referencia espacial se perdeu."
+            />
 
             <div className="review-grid">
               <div className="review-column review-good">
@@ -322,6 +331,7 @@ export function SpatialGame({ usuario, progresso, onBack, onRememberVariation, o
                   "Na correcao final, compare a rota certa com a rota que voce montou.",
                 ]}
                 tip="Voce nao precisa clicar no tabuleiro. O tabuleiro serve apenas para mostrar o caminho visualmente."
+                isChild={usuario.idade <= 10}
               />
 
               <div className="phase-summary">
@@ -368,10 +378,10 @@ export function SpatialGame({ usuario, progresso, onBack, onRememberVariation, o
               </div>
 
               <div className="button-row round-controls">
-                <button className="btn btn-primary" onClick={startRound} disabled={phase === "showing"}>
+                <button className="btn btn-primary btn-round-start" onClick={startRound} disabled={phase === "showing"}>
                   {phase === "showing" ? "Observando rota" : "Iniciar rodada"}
                 </button>
-                <button className="btn btn-secondary" onClick={resetRound}>
+                <button className="btn btn-secondary btn-round-swap" onClick={resetRound}>
                   Trocar rota
                 </button>
               </div>

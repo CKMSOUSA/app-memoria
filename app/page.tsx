@@ -69,6 +69,12 @@ export default function Page() {
     };
   }, []);
 
+  useEffect(() => {
+    if (usuario && usuario.role !== "admin" && tela === "admin") {
+      setTela("dashboard");
+    }
+  }, [tela, usuario]);
+
   async function handleLogin(email: string, password: string) {
     const activeUser = await repository.loginUser(email, password);
     if (!activeUser) return null;
@@ -115,6 +121,11 @@ export default function Page() {
   }
 
   async function handleOpenAdmin() {
+    if (!usuario || usuario.role !== "admin") {
+      setTela("dashboard");
+      return;
+    }
+
     const allUsers = await repository.listUsers();
     const histories = await repository.loadAllHistories();
     const nextAdminHistories = await Promise.all(

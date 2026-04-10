@@ -30,6 +30,8 @@ Se quiser preparar o app para backend remoto no futuro, copie o arquivo `.env.ex
 ```bash
 NEXT_PUBLIC_APP_DATA_MODE=local
 NEXT_PUBLIC_API_BASE_URL=/api
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
 ```
 
 ## Build de producao
@@ -107,6 +109,15 @@ Isso significa:
 
 Para uma versao publica mais completa no futuro, o ideal e integrar um backend como Supabase ou Firebase.
 
+## Perfis de acesso
+
+O app agora diferencia dois perfis:
+
+- `aluno`: foco no treino, relatorios pessoais e ajuda
+- `admin`: acesso adicional a area administrativa e acompanhamento de usuarios
+
+A conta de teste padrao vem como `admin`.
+
 ## Preparacao para backend real
 
 O projeto agora ja possui uma camada de dados preparada para dois modos:
@@ -128,3 +139,11 @@ Rotas esperadas no modo remoto:
 - `PUT /progress/:email`
 
 Isso permite migrar depois para Supabase, Firebase ou API propria sem reescrever as telas do app.
+
+## Status do backend remoto
+
+A rota `/api/status` agora informa:
+
+- modo atual (`local` ou `remote`)
+- se o provedor remoto foi configurado
+- se o app esta pronto para sincronizar contas e progresso online

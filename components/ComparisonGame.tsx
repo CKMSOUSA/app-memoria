@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ChildVisualBadge } from "@/components/ChildVisualBadge";
 import { GameGuide } from "@/components/GameGuide";
+import { ReviewMetrics } from "@/components/ReviewMetrics";
 import { comparisonChallenges } from "@/lib/game-data-v3";
 import { evaluateComparisonRound, getNextVariationIndex } from "@/lib/game-logic";
 import {
@@ -212,6 +213,14 @@ export function ComparisonGame({
               </div>
               <span className="pill">Score {review.score}</span>
             </div>
+            <ReviewMetrics
+              items={[
+                { label: "Acertos", value: String(review.hits.length) },
+                { label: "Erros", value: String(review.mistakes.length) },
+                { label: "Rodadas", value: String(rounds.length) },
+              ]}
+              note="Leia sempre o criterio da fase antes de responder. Em comparacao, o erro mais comum e escolher rapido sem conferir a regra."
+            />
 
             <div className="review-grid">
               {rounds.map((round, index) => {
@@ -265,6 +274,7 @@ export function ComparisonGame({
                   "No fim, compare suas respostas com a correcao explicada.",
                 ]}
                 tip="Algumas fases pedem o maior valor, outras o menor, a palavra mais longa ou o que vem antes. O criterio da fase e o mais importante."
+                isChild={usuario.idade <= 10}
               />
 
               <div className="phase-summary">
@@ -325,10 +335,10 @@ export function ComparisonGame({
               </div>
 
               <div className="button-row comparison-controls">
-                <button className="btn btn-primary" onClick={startRound} disabled={phase === "playing"}>
+                <button className="btn btn-primary btn-round-start" onClick={startRound} disabled={phase === "playing"}>
                   {phase === "playing" ? "Rodada em andamento" : "Iniciar rodada"}
                 </button>
-                <button className="btn btn-secondary" onClick={resetRound}>
+                <button className="btn btn-secondary btn-round-swap" onClick={resetRound}>
                   Trocar rodada
                 </button>
               </div>

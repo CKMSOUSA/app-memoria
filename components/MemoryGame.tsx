@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { GameGuide } from "@/components/GameGuide";
+import { ReviewMetrics } from "@/components/ReviewMetrics";
 import { getChildVisual } from "@/lib/child-visuals";
 import { memoryChallenges } from "@/lib/game-data-v3";
 import { evaluateMemoryRound, getNextVariationIndex } from "@/lib/game-logic";
@@ -255,13 +256,25 @@ export function MemoryGame({ usuario, progresso, onBack, onRememberVariation, on
 
         {phase === "result" && review ? (
           <section className="review-card review-card-full">
-            <div className="section-head">
-              <div>
-                <h3>Correcao da rodada</h3>
-                <p className="muted">{feedback}</p>
+              <div className="section-head">
+                <div>
+                  <h3>Correcao da rodada</h3>
+                  <p className="muted">{feedback}</p>
+                </div>
+                <span className="pill">Score {review.score}</span>
               </div>
-              <span className="pill">Score {review.score}</span>
-            </div>
+              <ReviewMetrics
+                items={[
+                  { label: "Acertos", value: String(review.hits.length) },
+                  { label: "Erros", value: String(review.wrongWords.length) },
+                  { label: "Faltaram", value: String(review.missedWords.length) },
+                ]}
+                note={
+                  review.completed
+                    ? "Excelente. Agora tente repetir mantendo a mesma precisao."
+                    : "Compare as figuras faltantes e tente reconstruir melhor a proxima rodada."
+                }
+              />
 
             <div className="review-grid">
               <div className="review-column review-good">
@@ -305,10 +318,10 @@ export function MemoryGame({ usuario, progresso, onBack, onRememberVariation, on
             </div>
 
             <div className="button-row">
-              <button className="btn btn-primary" onClick={startChallenge}>
+              <button className="btn btn-primary btn-round-retry" onClick={startChallenge}>
                 Tentar novamente
               </button>
-              <button className="btn btn-secondary" onClick={resetRound}>
+              <button className="btn btn-secondary btn-round-swap" onClick={resetRound}>
                 Trocar rodada
               </button>
             </div>
@@ -331,6 +344,7 @@ export function MemoryGame({ usuario, progresso, onBack, onRememberVariation, on
                   "Use Corrigir rodada para ver acertos, erros e figuras faltantes.",
                 ]}
                 tip="Cada rodada vale uma correcao. Para subir pontos, voce precisa superar o seu melhor score nesta fase."
+                isChild={usuario.idade <= 10}
               />
 
               <div className="phase-summary">
@@ -382,10 +396,10 @@ export function MemoryGame({ usuario, progresso, onBack, onRememberVariation, on
               </div>
 
               <div className="button-row memory-controls">
-                <button className="btn btn-primary" onClick={startChallenge} disabled={phase === "memorizing"}>
+                <button className="btn btn-primary btn-round-start" onClick={startChallenge} disabled={phase === "memorizing"}>
                   {phase === "idle" ? "Iniciar rodada" : "Memorizando"}
                 </button>
-                <button className="btn btn-secondary" onClick={resetRound}>
+                <button className="btn btn-secondary btn-round-swap" onClick={resetRound}>
                   Trocar rodada
                 </button>
               </div>
@@ -419,14 +433,14 @@ export function MemoryGame({ usuario, progresso, onBack, onRememberVariation, on
               </div>
               <div className="button-row">
                 <button
-                  className="btn btn-primary"
+                  className="btn btn-primary btn-round-submit"
                   onClick={submitAnswer}
                   disabled={phase !== "answering" || selectedItems.length === 0}
                 >
                   Corrigir rodada
                 </button>
                 <button
-                  className="btn btn-secondary"
+                  className="btn btn-secondary btn-round-clear"
                   onClick={() => setSelectedItems([])}
                   disabled={phase !== "answering" || selectedItems.length === 0}
                 >
