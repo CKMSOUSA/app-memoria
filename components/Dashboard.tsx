@@ -407,16 +407,13 @@ export function Dashboard({
             <StatCard label="Media" value={String(resumo.averageScore)} caption="Pontuacao media por sessao" />
             <StatCard label="Modo forte" value={getSessionModeLabel(resumo.strongestMode)} caption="Trilha com melhor desempenho acumulado" />
           </div>
-          <div className="button-row">
-            {canOpenAdmin ? (
+          {canOpenAdmin ? (
+            <div className="button-row">
               <button className="btn btn-secondary" onClick={onOpenAdmin}>
                 Abrir area administrativa
               </button>
-            ) : null}
-            <button className="btn btn-secondary" onClick={onOpenLogic}>
-              Treinar logica
-            </button>
-          </div>
+            </div>
+          ) : null}
         </section>
 
         {canOpenAdmin ? (
