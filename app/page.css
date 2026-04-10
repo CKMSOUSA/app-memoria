@@ -47,8 +47,9 @@
 
 .topbar-right {
   display: grid;
-  gap: 14px;
+  gap: 12px;
   justify-items: end;
+  width: min(430px, 100%);
 }
 
 .topbar-main {
@@ -59,6 +60,18 @@
 
 .topbar-support-actions {
   justify-content: flex-end;
+}
+
+.topbar-personal {
+  width: 100%;
+  display: grid;
+  gap: 12px;
+  padding: 18px 20px;
+}
+
+.topbar-personal h3 {
+  margin-bottom: 6px;
+  font-size: 28px;
 }
 
 .btn-topbar-admin {
@@ -77,6 +90,15 @@
   background: linear-gradient(135deg, #2d8a54 0%, #51a878 100%);
   color: white;
   box-shadow: 0 14px 24px rgba(45, 138, 84, 0.2);
+}
+
+.btn-topbar-admin,
+.btn-topbar-profile,
+.btn-topbar-help {
+  padding: 10px 14px;
+  min-height: 44px;
+  border-radius: 14px;
+  font-size: 15px;
 }
 
 .dashboard-title {
@@ -675,6 +697,56 @@ h2 {
 
 .challenge-item.is-complete {
   background: rgba(229, 245, 234, 0.9);
+}
+
+.trails-panel {
+  display: grid;
+  gap: 18px;
+}
+
+.trail-tabs {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.trail-tab {
+  display: grid;
+  gap: 4px;
+  min-width: 170px;
+  padding: 14px 16px;
+  border-radius: 18px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.7);
+  text-align: left;
+  color: var(--ink-strong);
+}
+
+.trail-tab-active {
+  border-color: rgba(207, 95, 60, 0.3);
+  background: linear-gradient(135deg, rgba(255, 240, 226, 0.98) 0%, rgba(255, 253, 248, 0.95) 100%);
+  box-shadow: 0 14px 26px rgba(207, 95, 60, 0.12);
+}
+
+.trail-tab-label {
+  font-size: 17px;
+  font-weight: 800;
+}
+
+.trail-tab-rate {
+  font-size: 13px;
+  color: var(--ink-soft);
+}
+
+.trail-panel-shell {
+  display: grid;
+}
+
+.trail-panel-shell .panel {
+  padding: 0;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
 }
 
 .challenge-title {
@@ -1352,6 +1424,15 @@ h2 {
   .sidebar {
     order: 2;
   }
+
+  .topbar-right {
+    width: 100%;
+    justify-items: stretch;
+  }
+
+  .topbar-support-actions {
+    justify-content: flex-start;
+  }
 }
 
 @media (max-width: 640px) {
@@ -1367,5 +1448,9 @@ h2 {
 
   .phase-summary {
     grid-template-columns: 1fr;
+  }
+
+  .trail-tab {
+    min-width: 100%;
   }
 }

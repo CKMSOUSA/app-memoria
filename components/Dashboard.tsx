@@ -1,5 +1,7 @@
 "use client";
 
+import { useState } from "react";
+
 import { getDataModeDescription, getDataModeLabel, getRemoteBackendStatus } from "@/lib/app-repository";
 import {
   attentionChallenges,
@@ -23,6 +25,8 @@ import {
   isChallengeUnlocked,
 } from "@/lib/scoring";
 import type { DataMode, ProgressState, SessionRecord, Usuario } from "@/lib/types";
+
+type TrailMode = "memoria" | "visual" | "atencao" | "comparacao" | "espacial" | "logica";
 
 type DashboardProps = {
   usuario: Usuario;
@@ -48,7 +52,7 @@ function ProgressList({
   progressMap,
 }: {
   title: string;
-  mode: "memoria" | "visual" | "atencao" | "comparacao" | "espacial" | "logica";
+  mode: TrailMode;
   progressMap:
     | ProgressState["memoria"]
     | ProgressState["visual"]
@@ -185,6 +189,40 @@ export function Dashboard({
   );
   const resumo = getReportSummary(history);
   const canOpenAdmin = usuario.role === "admin";
+  const [activeTrailTab, setActiveTrailTab] = useState<TrailMode>("memoria");
+  const trailTabs: Array<{
+    id: TrailMode;
+    label: string;
+    title: string;
+    rate: number;
+    progressMap:
+      | ProgressState["memoria"]
+      | ProgressState["visual"]
+      | ProgressState["atencao"]
+      | ProgressState["comparacao"]
+      | ProgressState["espacial"]
+      | ProgressState["logica"];
+  }> = [
+    { id: "memoria", label: "Memoria", title: "Trilha de memoria", rate: memoriaRate, progressMap: progresso.memoria },
+    { id: "visual", label: "Memoria visual", title: "Trilha de memoria visual", rate: visualRate, progressMap: progresso.visual },
+    { id: "atencao", label: "Atencao", title: "Trilha de atencao", rate: atencaoRate, progressMap: progresso.atencao },
+    {
+      id: "comparacao",
+      label: "Comparacao",
+      title: "Trilha de comparacao",
+      rate: comparacaoRate,
+      progressMap: progresso.comparacao,
+    },
+    {
+      id: "espacial",
+      label: "Orientacao espacial",
+      title: "Trilha de orientacao espacial",
+      rate: espacialRate,
+      progressMap: progresso.espacial,
+    },
+    { id: "logica", label: "Logica", title: "Trilha de logica", rate: getCompletionRate(progresso.logica), progressMap: progresso.logica },
+  ];
+  const activeTrail = trailTabs.find((trail) => trail.id === activeTrailTab) ?? trailTabs[0];
 
   return (
     <main className="shell shell-dashboard">
@@ -276,6 +314,22 @@ export function Dashboard({
                 Abrir ajuda
               </button>
             </div>
+            <section className={`topbar-personal panel audience-hero audience-${currentAudience}`}>
+              <div>
+                <p className="eyebrow">Experiencia personalizada</p>
+                <h3>{getAudienceLabel(currentAudience)}</h3>
+                <p className="muted">
+                  {currentAudience === "infantil"
+                    ? "Painel com linguagem mais ludica, jogos concretos e reforco positivo para criancas."
+                    : currentAudience === "adolescente"
+                      ? "Painel com ritmo mais rapido, metas intermediarias e desafios de foco e codificacao."
+                      : "Painel com maior densidade, rotina objetiva e desafios com mais carga cognitiva."}
+                </p>
+              </div>
+              <button className="btn btn-primary" onClick={onOpenSpecial}>
+                Abrir minijogo
+              </button>
+            </section>
           </div>
         </header>
 
@@ -390,25 +444,6 @@ export function Dashboard({
           </div>
         </section>
 
-        <section className={`panel audience-hero audience-${currentAudience}`}>
-          <div>
-            <p className="eyebrow">Experiencia personalizada</p>
-            <h3>{getAudienceLabel(currentAudience)}</h3>
-            <p className="muted">
-              {currentAudience === "infantil"
-                ? "Painel com linguagem mais ludica, jogos concretos e reforco positivo para criancas."
-                : currentAudience === "adolescente"
-                  ? "Painel com ritmo mais rapido, metas intermediarias e desafios de foco e codificacao."
-                  : "Painel com maior densidade, rotina objetiva e desafios com mais carga cognitiva."}
-            </p>
-          </div>
-          <div className="button-row">
-            <button className="btn btn-primary" onClick={onOpenSpecial}>
-              Abrir minijogo exclusivo
-            </button>
-          </div>
-        </section>
-
         <section className="panel quick-grid">
           <article className="quick-card">
             <p className="small-muted">Recomendacao de memoria</p>
@@ -481,14 +516,32 @@ export function Dashboard({
           </div>
         </section>
 
-        <div className="dual-panels">
-          <ProgressList title="Trilha de memoria" mode="memoria" progressMap={progresso.memoria} />
-          <ProgressList title="Trilha de memoria visual" mode="visual" progressMap={progresso.visual} />
-          <ProgressList title="Trilha de atencao" mode="atencao" progressMap={progresso.atencao} />
-          <ProgressList title="Trilha de comparacao" mode="comparacao" progressMap={progresso.comparacao} />
-          <ProgressList title="Trilha de orientacao espacial" mode="espacial" progressMap={progresso.espacial} />
-          <ProgressList title="Trilha de logica" mode="logica" progressMap={progresso.logica} />
-        </div>
+        <section className="panel trails-panel">
+          <div className="section-head">
+            <h3>Trilhas do aluno</h3>
+            <span className="small-muted">Abra apenas a trilha que quiser acompanhar agora</span>
+          </div>
+
+          <div className="trail-tabs" role="tablist" aria-label="Trilhas do aluno">
+            {trailTabs.map((trail) => (
+              <button
+                key={trail.id}
+                type="button"
+                role="tab"
+                aria-selected={trail.id === activeTrailTab}
+                className={`trail-tab ${trail.id === activeTrailTab ? "trail-tab-active" : ""}`}
+                onClick={() => setActiveTrailTab(trail.id)}
+              >
+                <span className="trail-tab-label">{trail.label}</span>
+                <span className="trail-tab-rate">{trail.rate}% concluidos</span>
+              </button>
+            ))}
+          </div>
+
+          <div className="trail-panel-shell">
+            <ProgressList title={activeTrail.title} mode={activeTrail.id} progressMap={activeTrail.progressMap} />
+          </div>
+        </section>
       </section>
     </main>
   );
