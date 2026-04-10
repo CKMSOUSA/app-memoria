@@ -312,6 +312,16 @@ export function ComparisonGame({
                 </span>
               </div>
 
+              <div className="comparison-task-card">
+                <strong className="comparison-task-title">
+                  {audience === "infantil" && challenge.nomeInfantil ? challenge.nomeInfantil : challenge.nome}
+                </strong>
+                <span className="comparison-task-meta">{`Fase ${challenge.id} - ${challenge.difficultyLabel}`}</span>
+                <p className="comparison-task-description">
+                  {audience === "infantil" && variation.promptInfantil ? variation.promptInfantil : variation.prompt}
+                </p>
+              </div>
+
               <div className="button-row comparison-controls">
                 <button className="btn btn-primary" onClick={startRound} disabled={phase === "playing"}>
                   {phase === "playing" ? "Rodada em andamento" : "Iniciar rodada"}
