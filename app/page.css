@@ -476,7 +476,7 @@ h2 {
 }
 
 .metric-chip-card:nth-child(2) {
-  min-width: 246px;
+  min-width: 268px;
 }
 
 .metric-chip-card:first-child,
@@ -486,6 +486,13 @@ h2 {
 
 .metric-chip-card:nth-child(4) {
   min-width: 200px;
+}
+
+.metric-chip-card:nth-child(2) .metric-chip-value {
+  font-size: clamp(12px, 1vw, 18px);
+  letter-spacing: 0.02em;
+  line-height: 1.08;
+  max-width: 12ch;
 }
 
 .metric-chip-top {
