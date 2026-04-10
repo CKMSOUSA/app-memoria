@@ -490,9 +490,11 @@ h2 {
 }
 
 .metric-chip-value {
-  font-size: clamp(18px, 1.6vw, 24px);
-  line-height: 1;
+  font-size: clamp(16px, 1.35vw, 22px);
+  line-height: 1.05;
   color: var(--ink-strong);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
 .metric-chip-caption {
@@ -507,6 +509,10 @@ h2 {
   border: 1px solid var(--line);
   border-radius: 20px;
   padding: 20px;
+}
+
+.track-card .small-muted {
+  font-size: 15px;
 }
 
 .track-card-active {
@@ -1404,9 +1410,15 @@ h2 {
 }
 
 .report-panel .stat-card {
-  min-height: 164px;
-  gap: 8px;
-  padding: 18px;
+  min-height: 136px;
+  gap: 6px;
+  padding: 16px;
+}
+
+.report-panel .stat-card-label {
+  font-size: 18px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 .report-panel .stat-card-value {
@@ -1416,6 +1428,10 @@ h2 {
 .report-panel .stat-card-caption {
   font-size: 14px;
   line-height: 1.45;
+}
+
+.report-panel .small-muted {
+  font-size: 14px;
 }
 
 .metrics-strip::-webkit-scrollbar {
