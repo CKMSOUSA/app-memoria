@@ -77,6 +77,13 @@ export type HelpRequest = {
   status: "aberta" | "respondida";
 };
 
+export type AdminOverview = {
+  users: Usuario[];
+  histories: Array<{ user: Usuario; history: SessionRecord[]; progress?: ProgressState }>;
+  helpRequests: HelpRequest[];
+  source: "local" | "supabase";
+};
+
 export type MemoryChallenge = {
   id: number;
   difficultyLabel: string;

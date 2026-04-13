@@ -29,6 +29,7 @@ export default function Page() {
   const [helpRequests, setHelpRequests] = useState<HelpRequest[]>([]);
   const [adminHistories, setAdminHistories] = useState<Array<{ user: Usuario; history: SessionRecord[]; progress?: ProgressState }>>([]);
   const [adminConfirmed, setAdminConfirmed] = useState(false);
+  const [adminAccessCode, setAdminAccessCode] = useState("");
   const [dataMode, setDataMode] = useState<DataMode>(repository.mode);
   const [ready, setReady] = useState(false);
 
@@ -39,12 +40,13 @@ export default function Page() {
       await repository.bootstrap();
       if (!isMounted) return;
 
-      const activeUser = repository.getActiveSession();
-      if (activeUser) {
-        setUsuario(activeUser);
-        setAdminConfirmed(false);
-        try {
-          setProgresso(await repository.loadProgress(activeUser.email));
+        const activeUser = repository.getActiveSession();
+        if (activeUser) {
+          setUsuario(activeUser);
+          setAdminConfirmed(false);
+          setAdminAccessCode("");
+          try {
+            setProgresso(await repository.loadProgress(activeUser.email));
         } catch {
           setProgresso(mergeProgress());
         }
@@ -90,6 +92,7 @@ export default function Page() {
 
     setUsuario(activeUser);
     setAdminConfirmed(false);
+    setAdminAccessCode("");
     try {
       setProgresso(await repository.loadProgress(activeUser.email));
     } catch {
@@ -118,6 +121,7 @@ export default function Page() {
     repository.clearActiveSession();
     setUsuario(null);
     setAdminConfirmed(false);
+    setAdminAccessCode("");
     setProgresso(mergeProgress());
     setHistory([]);
     setHelpRequests([]);
@@ -132,27 +136,9 @@ export default function Page() {
   }
 
   async function openAdminArea() {
-    const allUsers = await repository.listUsers();
-    const histories = await repository.loadAllHistories();
-    const nextAdminHistories = await Promise.all(
-      allUsers.map(async (userItem) => {
-        const existing = histories.find((item) => item.user.email === userItem.email);
-        let progressForUser = mergeProgress();
-        try {
-          progressForUser = await repository.loadProgress(userItem.email);
-        } catch {
-          progressForUser = mergeProgress();
-        }
-
-        return {
-          user: userItem,
-          history: existing?.history ?? [],
-          progress: progressForUser,
-        };
-      }),
-    );
-
-    setAdminHistories(nextAdminHistories);
+    const overview = await repository.loadAdminOverview(adminAccessCode);
+    setAdminHistories(overview.histories);
+    setHelpRequests(overview.helpRequests);
     setTela("admin");
   }
 
@@ -200,6 +186,7 @@ export default function Page() {
     }
 
     setAdminConfirmed(true);
+    setAdminAccessCode(code);
     void openAdminArea();
     return true;
   }

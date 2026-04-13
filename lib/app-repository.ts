@@ -39,7 +39,7 @@ import {
 import { appendSupabaseHelpRequest, loadSupabaseHelpRequests } from "@/lib/supabase-help";
 import { appendSupabaseSessionHistory, loadSupabaseSessionHistory } from "@/lib/supabase-history";
 import { loadSupabaseProgress, saveSupabaseProgress } from "@/lib/supabase-progress";
-import type { DataMode, HelpRequest, ProgressState, SessionRecord, Usuario } from "@/lib/types";
+import type { AdminOverview, DataMode, HelpRequest, ProgressState, SessionRecord, Usuario } from "@/lib/types";
 
 type RegisterResult = {
   error: string | null;
@@ -69,6 +69,7 @@ type AppRepository = {
   loadAllHistories: () => Promise<Array<{ user: Usuario; history: SessionRecord[] }>>;
   loadHelpRequests: () => Promise<HelpRequest[]>;
   appendHelpRequest: (request: Omit<HelpRequest, "id" | "createdAt" | "status">) => Promise<HelpRequest[]>;
+  loadAdminOverview: (adminCode?: string) => Promise<AdminOverview>;
   ensureAdminUser: () => Promise<Usuario | null>;
   simulateRecovery: (email: string) => string;
 };
@@ -132,6 +133,27 @@ export function getRemoteBackendStatus(): RemoteBackendStatus {
 async function parseJson<T>(response: Response): Promise<T | null> {
   if (!response.ok) return null;
   return (await response.json()) as T;
+}
+
+async function loadAdminOverviewFromApi(adminCode?: string) {
+  const session = getStoredSupabaseSession();
+  const headers = new Headers();
+
+  if (adminCode?.trim()) {
+    headers.set("x-admin-code", adminCode.trim());
+  }
+
+  if (session?.access_token) {
+    headers.set("Authorization", `Bearer ${session.access_token}`);
+  }
+
+  const response = await fetch("/api/admin/overview", {
+    method: "GET",
+    headers,
+    cache: "no-store",
+  });
+
+  return parseJson<AdminOverview>(response);
 }
 
 function mergeHelpRequests(localItems: HelpRequest[], remoteItems: HelpRequest[]) {
@@ -338,6 +360,23 @@ const localRepository: AppRepository = {
 
     return localItems;
   },
+  loadAdminOverview: async (adminCode) => {
+    const remoteOverview = await loadAdminOverviewFromApi(adminCode);
+    if (remoteOverview) return remoteOverview;
+
+    const users = listUsers();
+    const localHistories = loadAllHistories().map((item) => ({
+      ...item,
+      progress: loadProgress(item.user.email),
+    }));
+
+    return {
+      users,
+      histories: localHistories,
+      helpRequests: loadHelpRequests(),
+      source: "local",
+    };
+  },
   ensureAdminUser: async () => ensureAdminUser(),
   simulateRecovery: (email) => {
     if (hasSupabaseAuthConfig()) {
@@ -453,6 +492,13 @@ const remoteRepository: AppRepository = {
       body: JSON.stringify(request),
     });
     return (await parseJson<HelpRequest[]>(response)) ?? [];
+  },
+  loadAdminOverview: async (adminCode) => {
+    const overview = await loadAdminOverviewFromApi(adminCode);
+    if (!overview) {
+      throw new Error("Nao foi possivel carregar a visao administrativa online.");
+    }
+    return overview;
   },
   ensureAdminUser: async () => null,
   simulateRecovery: () =>

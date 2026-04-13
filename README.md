@@ -33,6 +33,8 @@ NEXT_PUBLIC_API_BASE_URL=/api
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
 NEXT_PUBLIC_ADMIN_CONFIRM_CODE=SEU_CODIGO_ADMIN
+SUPABASE_SERVICE_ROLE_KEY=
+ADMIN_SERVER_CODE=
 ```
 
 ## Build de producao
@@ -228,6 +230,32 @@ Observacao:
 
 - a leitura administrativa global de ajuda ainda depende de uma rota de servidor com permissao elevada
 - pela interface atual com Supabase publico, cada usuario sincroniza com seguranca as proprias duvidas
+
+## Painel administrativo online
+
+O projeto agora ja possui uma rota administrativa de servidor em:
+
+- `app/api/admin/overview/route.ts`
+
+Essa rota foi preparada para:
+
+- listar usuarios online
+- ler progresso de todos os usuarios
+- ler historico de sessoes
+- ler pedidos de ajuda
+
+Para isso funcionar na Vercel ou em producao, configure tambem:
+
+- `SUPABASE_SERVICE_ROLE_KEY`
+- `ADMIN_SERVER_CODE`
+
+Fluxo recomendado:
+
+1. o admin entra no app
+2. usa o acesso administrativo
+3. informa o codigo administrativo
+4. a rota `/api/admin/overview` valida o acesso
+5. o servidor consulta o Supabase com a service role key, sem expor essa chave ao navegador
 
 ## Status do backend remoto
 
