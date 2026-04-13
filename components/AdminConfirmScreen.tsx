@@ -4,22 +4,22 @@ import { useState } from "react";
 import type { Usuario } from "@/lib/types";
 
 type AdminConfirmScreenProps = {
-  usuario: Usuario;
+  usuario?: Usuario | null;
   onBack: () => void;
-  onConfirm: (code: string) => boolean;
+  onConfirm: (code: string) => boolean | Promise<boolean>;
 };
 
 export function AdminConfirmScreen({ usuario, onBack, onConfirm }: AdminConfirmScreenProps) {
   const [code, setCode] = useState("");
   const [notice, setNotice] = useState("");
 
-  function handleConfirm() {
+  async function handleConfirm() {
     if (!code.trim()) {
       setNotice("Digite o codigo de confirmacao para continuar.");
       return;
     }
 
-    const ok = onConfirm(code.trim());
+    const ok = await onConfirm(code.trim());
     if (!ok) {
       setNotice("Codigo de confirmacao invalido.");
     }
@@ -33,7 +33,9 @@ export function AdminConfirmScreen({ usuario, onBack, onConfirm }: AdminConfirmS
             <p className="eyebrow">Confirmacao administrativa</p>
             <h1>Confirme o acesso de admin</h1>
             <p className="muted">
-              {`${usuario.nome}, sua conta ja tem perfil administrativo. Agora confirme o codigo extra para abrir a area administrativa.`}
+              {usuario
+                ? `${usuario.nome}, sua conta ja tem perfil administrativo. Agora confirme o codigo extra para abrir a area administrativa.`
+                : "Digite o codigo exclusivo para abrir a area administrativa a partir da tela inicial do app."}
             </p>
           </div>
           <div className="hero-badge">Etapa extra de seguranca</div>

@@ -39,7 +39,6 @@ type DashboardProps = {
   onOpenLogic: () => void;
   onOpenProfile: () => void;
   onOpenSpecial: () => void;
-  onOpenAdmin: () => void;
   onOpenHelp: () => void;
   onLogout: () => void;
   history: SessionRecord[];
@@ -162,7 +161,6 @@ export function Dashboard({
   onOpenLogic,
   onOpenProfile,
   onOpenSpecial,
-  onOpenAdmin,
   onOpenHelp,
   onLogout,
   history,
@@ -198,7 +196,6 @@ export function Dashboard({
     (item) => item.id === getRecommendedChallengeId(progresso.logica, logicChallenges.map((challenge) => challenge.id)),
   );
   const resumo = getReportSummary(history);
-  const canOpenAdmin = usuario.role === "admin";
   const [activeTrailTab, setActiveTrailTab] = useState<TrailMode>("memoria");
   const trailTabs: Array<{
     id: TrailMode;
@@ -267,11 +264,6 @@ export function Dashboard({
         <button className="btn btn-side" onClick={onOpenSpecial}>
           Trilha exclusiva
         </button>
-        {canOpenAdmin ? (
-          <button className="btn btn-side" onClick={onOpenAdmin}>
-            Area administrativa
-          </button>
-        ) : null}
         <button className="btn btn-side" onClick={onOpenProfile}>
           Perfil
         </button>
@@ -315,11 +307,6 @@ export function Dashboard({
           </div>
           <div className="topbar-right">
             <div className="topbar-support-actions">
-              {canOpenAdmin ? (
-                <button className="btn btn-topbar-admin" onClick={onOpenAdmin}>
-                  Administrativo
-                </button>
-              ) : null}
               <button className="btn btn-topbar-profile" onClick={onOpenProfile}>
                 Editar perfil
               </button>
@@ -402,16 +389,9 @@ export function Dashboard({
             <StatCard label="Media" value={String(resumo.averageScore)} caption="Pontuacao media por sessao" />
             <StatCard label="Modo forte" value={getSessionModeLabel(resumo.strongestMode)} caption="Trilha com melhor desempenho acumulado" />
           </div>
-          {canOpenAdmin ? (
-            <div className="button-row">
-              <button className="btn btn-secondary" onClick={onOpenAdmin}>
-                Abrir area administrativa
-              </button>
-            </div>
-          ) : null}
         </section>
 
-        {canOpenAdmin ? (
+        {usuario.role === "admin" ? (
           <section className="panel backend-panel">
             <div className="section-head">
               <h3>Contas e Progresso Online</h3>

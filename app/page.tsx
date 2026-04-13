@@ -170,9 +170,35 @@ export default function Page() {
     await openAdminArea();
   }
 
-  function handleAdminCodeConfirm(code: string) {
+  async function hydrateUserSession(activeUser: Usuario) {
+    setUsuario(activeUser);
+    try {
+      setProgresso(await repository.loadProgress(activeUser.email));
+    } catch {
+      setProgresso(mergeProgress());
+    }
+    try {
+      setHistory(await repository.loadSessionHistory(activeUser.email));
+    } catch {
+      setHistory([]);
+    }
+    try {
+      setHelpRequests(await repository.loadHelpRequests());
+    } catch {
+      setHelpRequests([]);
+    }
+  }
+
+  async function handleAdminCodeConfirm(code: string) {
     const expectedCode = (process.env.NEXT_PUBLIC_ADMIN_CONFIRM_CODE?.trim() || "4321").trim();
     if (code !== expectedCode) return false;
+
+    if (!usuario) {
+      const users = await repository.listUsers();
+      const adminUser = users.find((item) => item.role === "admin");
+      if (!adminUser) return false;
+      await hydrateUserSession(adminUser);
+    }
 
     setAdminConfirmed(true);
     void openAdminArea();
@@ -275,6 +301,10 @@ export default function Page() {
   }
 
   if (!usuario) {
+    if (tela === "adminConfirm") {
+      return <AdminConfirmScreen usuario={null} onBack={() => setTela("login")} onConfirm={handleAdminCodeConfirm} />;
+    }
+
     return (
       <AuthScreen
         tela={
@@ -288,7 +318,6 @@ export default function Page() {
           tela === "perfil" ||
           tela === "especial" ||
           tela === "ajuda" ||
-          tela === "adminConfirm" ||
           tela === "admin"
             ? "login"
             : tela
@@ -460,7 +489,6 @@ export default function Page() {
       onOpenProfile={() => setTela("perfil")}
       onOpenSpecial={() => setTela("especial")}
       onOpenHelp={() => setTela("ajuda")}
-      onOpenAdmin={() => void handleOpenAdmin()}
       onLogout={handleLogout}
     />
   );

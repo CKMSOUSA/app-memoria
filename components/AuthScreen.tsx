@@ -5,8 +5,8 @@ import { AVATAR_OPTIONS } from "@/lib/storage";
 import type { Tela, Usuario } from "@/lib/types";
 
 type AuthScreenProps = {
-  tela: Exclude<Tela, "dashboard" | "memoria" | "atencao">;
-  onChangeScreen: (screen: Exclude<Tela, "dashboard" | "memoria" | "atencao">) => void;
+  tela: Exclude<Tela, "dashboard" | "memoria" | "atencao" | "admin">;
+  onChangeScreen: (screen: Exclude<Tela, "dashboard" | "memoria" | "atencao" | "admin">) => void;
   onLogin: (email: string, password: string) => Promise<Usuario | null>;
   onRegister: (email: string, password: string, idade: number, nome: string, avatar: string) => Promise<string | null>;
   onRecover: (email: string) => string;
@@ -28,7 +28,13 @@ export function AuthScreen({
   const [isPending, startTransition] = useTransition();
 
   const titulo =
-    tela === "cadastro" ? "Criar conta" : tela === "recuperar" ? "Recuperar acesso" : "Entrar no NeuroApp";
+    tela === "cadastro"
+      ? "Criar conta"
+      : tela === "recuperar"
+        ? "Recuperar acesso"
+        : tela === "adminAcesso"
+          ? "Acesso administrativo"
+          : "Entrar no NeuroApp";
 
   function resetMessage() {
     if (mensagem) setMensagem("");
@@ -99,19 +105,21 @@ export function AuthScreen({
           </label>
         )}
 
-        <label className="field">
-          <span>Email</span>
-          <input
-            placeholder="voce@email.com"
-            value={email}
-            onChange={(event) => {
-              resetMessage();
-              setEmail(event.target.value);
-            }}
-          />
-        </label>
+        {tela !== "adminAcesso" && (
+          <label className="field">
+            <span>Email</span>
+            <input
+              placeholder="voce@email.com"
+              value={email}
+              onChange={(event) => {
+                resetMessage();
+                setEmail(event.target.value);
+              }}
+            />
+          </label>
+        )}
 
-        {tela !== "recuperar" && (
+        {tela !== "recuperar" && tela !== "adminAcesso" && (
           <label className="field">
             <span>Senha</span>
             <input
@@ -179,6 +187,17 @@ export function AuthScreen({
           </button>
         )}
 
+        {tela === "adminAcesso" && (
+          <>
+            <p className="notice notice-ok">
+              Use esta entrada apenas para abrir a area administrativa com o codigo exclusivo de liberacao.
+            </p>
+            <button className="btn btn-primary" onClick={() => onChangeScreen("adminConfirm")}>
+              Continuar para codigo admin
+            </button>
+          </>
+        )}
+
         {mensagem ? (
           <p className={`notice ${mensagem.includes("realizado") || mensagem.includes("fluxo") ? "notice-ok" : ""}`}>
             {mensagem}
@@ -197,6 +216,9 @@ export function AuthScreen({
               </button>
               <button className="btn btn-link" onClick={() => onChangeScreen("recuperar")}>
                 Esqueci minha senha
+              </button>
+              <button className="btn btn-link" onClick={() => onChangeScreen("adminAcesso")}>
+                Acesso administrativo
               </button>
             </>
           )}

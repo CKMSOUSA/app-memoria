@@ -2,6 +2,7 @@ export type Tela =
   | "login"
   | "cadastro"
   | "recuperar"
+  | "adminAcesso"
   | "dashboard"
   | "memoria"
   | "visual"
