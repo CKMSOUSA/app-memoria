@@ -454,9 +454,9 @@ h2 {
 }
 
 .metrics-strip {
-  display: grid;
-  grid-auto-flow: column;
-  grid-auto-columns: minmax(184px, 1fr);
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: stretch;
   gap: 6px;
   overflow-x: auto;
   padding-bottom: 2px;
@@ -466,6 +466,7 @@ h2 {
 
 .metric-chip-card {
   display: grid;
+  flex: 0 0 184px;
   gap: 10px;
   min-height: 108px;
   padding: 16px;
@@ -476,28 +477,32 @@ h2 {
 }
 
 .metric-chip-card:nth-child(2) {
+  flex-basis: 292px;
   min-width: 292px;
 }
 
 .metric-chip-card:first-child,
 .metric-chip-card:nth-child(3) {
+  flex-basis: 148px;
   min-width: 148px;
 }
 
 .metric-chip-card:nth-child(4) {
+  flex-basis: 188px;
   min-width: 188px;
 }
 
 .metric-chip-card:nth-child(5),
 .metric-chip-card:nth-child(6) {
+  flex-basis: 170px;
   min-width: 170px;
 }
 
 .metric-chip-card:nth-child(2) .metric-chip-value {
-  font-size: clamp(11px, 0.92vw, 17px);
+  font-size: clamp(10px, 0.88vw, 16px);
   letter-spacing: 0.02em;
   line-height: 1.08;
-  max-width: 12ch;
+  max-width: 13ch;
 }
 
 .metric-chip-top {
@@ -1593,7 +1598,7 @@ h2 {
   }
 
   .metrics-strip {
-    grid-auto-columns: minmax(210px, 1fr);
+    gap: 8px;
   }
 
   .report-panel .stats-grid {
@@ -1621,7 +1626,7 @@ h2 {
   }
 
   .metrics-strip {
-    grid-auto-columns: minmax(190px, 78vw);
+    gap: 10px;
   }
 
   .report-panel .stats-grid {
