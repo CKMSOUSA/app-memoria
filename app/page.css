@@ -477,19 +477,19 @@ h2 {
 }
 
 .metric-chip-card:nth-child(2) {
-  flex-basis: 236px;
-  min-width: 236px;
+  flex-basis: 242px;
+  min-width: 242px;
 }
 
 .metric-chip-card:first-child,
 .metric-chip-card:nth-child(3) {
-  flex-basis: 148px;
-  min-width: 148px;
+  flex-basis: 214px;
+  min-width: 214px;
 }
 
 .metric-chip-card:nth-child(4) {
-  flex-basis: 244px;
-  min-width: 244px;
+  flex-basis: 176px;
+  min-width: 176px;
 }
 
 .metric-chip-card:nth-child(5),
