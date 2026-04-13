@@ -190,7 +190,7 @@ export default function Page() {
   }
 
   async function handleAdminCodeConfirm(code: string) {
-    const expectedCode = (process.env.NEXT_PUBLIC_ADMIN_CONFIRM_CODE?.trim() || "4321").trim();
+    const expectedCode = (process.env.NEXT_PUBLIC_ADMIN_CONFIRM_CODE?.trim() || "@72446066#").trim();
     if (code !== expectedCode) return false;
 
     if (!usuario) {
