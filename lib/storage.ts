@@ -173,6 +173,11 @@ export function clearActiveSession() {
   localStorage.removeItem(SESSION_KEY);
 }
 
+export function setActiveSession(email: string) {
+  if (!canUseStorage()) return;
+  localStorage.setItem(SESSION_KEY, email);
+}
+
 export function updateUserPoints(email: string, delta: number) {
   const users = readUsers();
   let updatedUser: Usuario | null = null;
@@ -216,6 +221,47 @@ export function updateUserProfile(email: string, profile: Pick<Usuario, "idade" 
 
   writeUsers(nextUsers);
   return updatedUser;
+}
+
+export function syncAuthUserProfile(profile: {
+  email: string;
+  nome?: string;
+  avatar?: string;
+  idade?: number;
+}) {
+  const users = readUsers();
+  const existing = users.find((user) => user.email === profile.email);
+
+  if (existing) {
+    const nextUsers = users.map((user) =>
+      user.email !== profile.email
+        ? user
+        : {
+            ...user,
+            nome: profile.nome ?? user.nome,
+            avatar: profile.avatar ?? user.avatar,
+            idade: profile.idade ?? user.idade,
+          },
+    );
+    writeUsers(nextUsers);
+    return toPublicUser(nextUsers.find((user) => user.email === profile.email) ?? existing);
+  }
+
+  const created: UsuarioPersistido = {
+    nome: profile.nome ?? "Jogador",
+    email: profile.email,
+    avatar: profile.avatar ?? AVATAR_OPTIONS[0],
+    passwordHash: "__supabase__",
+    premium: false,
+    pontos: 0,
+    criadoEm: new Date().toISOString(),
+    idade: profile.idade ?? DEFAULT_IDADE,
+    role: "aluno",
+  };
+
+  writeUsers([...users, created]);
+  localStorage.setItem(`${PROGRESS_PREFIX}:${created.email}`, JSON.stringify(createDefaultProgress()));
+  return toPublicUser(created);
 }
 
 export function loadProgress(email: string) {

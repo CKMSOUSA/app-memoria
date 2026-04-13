@@ -5,6 +5,8 @@ import {
   appendHelpRequest,
   bootstrapStorage,
   clearActiveSession,
+  setActiveSession,
+  syncAuthUserProfile,
   ensureAdminUser,
   getActiveSession,
   listUsers,
@@ -19,6 +21,14 @@ import {
   updateUserProfile,
   updateUserPoints,
 } from "@/lib/storage";
+import {
+  clearStoredSupabaseSession,
+  getStoredSupabaseSession,
+  hasSupabaseAuthConfig,
+  requestSupabaseRecovery,
+  signInWithSupabase,
+  signUpWithSupabase,
+} from "@/lib/supabase-auth";
 import type { DataMode, HelpRequest, ProgressState, SessionRecord, Usuario } from "@/lib/types";
 
 type RegisterResult = {
@@ -75,6 +85,15 @@ export function getRemoteBackendStatus(): RemoteBackendStatus {
     Boolean(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim());
 
   if (mode === "local") {
+    if (hasSupabase) {
+      return {
+        mode,
+        ready: false,
+        provider: "Supabase configurado",
+        description: "Credenciais do Supabase detectadas. O app continua em modo local ate concluirmos a migracao de login, progresso e API remota.",
+      };
+    }
+
     return {
       mode,
       ready: false,
@@ -108,10 +127,84 @@ async function parseJson<T>(response: Response): Promise<T | null> {
 const localRepository: AppRepository = {
   mode: "local",
   bootstrap: bootstrapStorage,
-  getActiveSession,
-  clearActiveSession,
-  loginUser,
-  registerUser,
+  getActiveSession: () => {
+    const authSession = getStoredSupabaseSession();
+    if (authSession?.user?.email && hasSupabaseAuthConfig()) {
+      return syncAuthUserProfile({
+        email: authSession.user.email,
+        nome:
+          typeof authSession.user.user_metadata?.nome === "string"
+            ? authSession.user.user_metadata.nome
+            : "Jogador",
+        avatar:
+          typeof authSession.user.user_metadata?.avatar === "string"
+            ? authSession.user.user_metadata.avatar
+            : undefined,
+        idade:
+          typeof authSession.user.user_metadata?.idade === "number"
+            ? authSession.user.user_metadata.idade
+            : undefined,
+      });
+    }
+
+    return getActiveSession();
+  },
+  clearActiveSession: () => {
+    clearActiveSession();
+    clearStoredSupabaseSession();
+  },
+  loginUser: async (email, password) => {
+    if (hasSupabaseAuthConfig()) {
+      const result = await signInWithSupabase(email, password);
+      if (result.session?.user?.email) {
+        const user = syncAuthUserProfile({
+          email: result.session.user.email,
+          nome:
+            typeof result.session.user.user_metadata?.nome === "string"
+              ? result.session.user.user_metadata.nome
+              : "Jogador",
+          avatar:
+            typeof result.session.user.user_metadata?.avatar === "string"
+              ? result.session.user.user_metadata.avatar
+              : undefined,
+          idade:
+            typeof result.session.user.user_metadata?.idade === "number"
+              ? result.session.user.user_metadata.idade
+              : undefined,
+        });
+        setActiveSession(user.email);
+        return user;
+      }
+    }
+
+    return loginUser(email, password);
+  },
+  registerUser: async (email, password, idade, nome, avatar) => {
+    if (hasSupabaseAuthConfig()) {
+      const result = await signUpWithSupabase(email, password, { idade, nome, avatar });
+      if (result.error) {
+        return { error: result.error, user: null };
+      }
+
+      const user = syncAuthUserProfile({
+        email: email.trim().toLowerCase(),
+        nome,
+        avatar,
+        idade,
+      });
+
+      if (result.session) {
+        setActiveSession(user.email);
+      }
+
+      return {
+        error: null,
+        user,
+      };
+    }
+
+    return registerUser(email, password, idade, nome, avatar);
+  },
   updateUserProfile: async (email, profile) => updateUserProfile(email, profile),
   updateUserPoints: async (email, delta) => updateUserPoints(email, delta),
   loadProgress: async (email) => loadProgress(email),
@@ -123,7 +216,13 @@ const localRepository: AppRepository = {
   loadHelpRequests: async () => loadHelpRequests(),
   appendHelpRequest: async (request) => appendHelpRequest(request),
   ensureAdminUser: async () => ensureAdminUser(),
-  simulateRecovery: (email) => simulateRecovery(email),
+  simulateRecovery: (email) => {
+    if (hasSupabaseAuthConfig()) {
+      void requestSupabaseRecovery(email);
+      return "Se este email existir, um fluxo de recuperacao sera iniciado pelo Supabase.";
+    }
+    return simulateRecovery(email);
+  },
 };
 
 const remoteRepository: AppRepository = {
