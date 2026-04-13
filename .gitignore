@@ -5,6 +5,8 @@ node_modules
 out
 coverage
 .vercel
+.env.local
+.env
 GitKrakenSetup.exe
 *.log
 npm-debug.log*

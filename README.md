@@ -148,6 +148,38 @@ Rotas esperadas no modo remoto:
 
 Isso permite migrar depois para Supabase, Firebase ou API propria sem reescrever as telas do app.
 
+## Integracao inicial com Supabase
+
+O projeto agora ja consegue usar o Supabase para:
+
+- cadastro
+- login
+- recuperacao de acesso
+- sincronizacao inicial do perfil do usuario
+
+Arquivos principais:
+
+- `lib/supabase-auth.ts`
+- `lib/supabase-profile.ts`
+- `supabase/user_profiles.sql`
+
+Antes de ativar a migracao completa, rode o SQL do arquivo abaixo no painel do Supabase:
+
+- `supabase/user_profiles.sql`
+
+Esse script cria a tabela `user_profiles` com:
+
+- nome
+- email
+- avatar
+- idade
+- role
+- premium
+- pontos
+- criado_em
+
+Por enquanto, o app segue em modo `local`, mas ja pode autenticar no Supabase e sincronizar o perfil quando a tabela existir.
+
 ## Status do backend remoto
 
 A rota `/api/status` agora informa:

@@ -29,6 +29,11 @@ import {
   signInWithSupabase,
   signUpWithSupabase,
 } from "@/lib/supabase-auth";
+import {
+  loadSupabaseProfileByEmail,
+  updateSupabaseProfile,
+  upsertSupabaseProfile,
+} from "@/lib/supabase-profile";
 import type { DataMode, HelpRequest, ProgressState, SessionRecord, Usuario } from "@/lib/types";
 
 type RegisterResult = {
@@ -157,20 +162,29 @@ const localRepository: AppRepository = {
     if (hasSupabaseAuthConfig()) {
       const result = await signInWithSupabase(email, password);
       if (result.session?.user?.email) {
+        const remoteProfile =
+          (await loadSupabaseProfileByEmail(result.session.user.email)) ??
+          (await upsertSupabaseProfile({
+            email: result.session.user.email,
+            nome:
+              typeof result.session.user.user_metadata?.nome === "string"
+                ? result.session.user.user_metadata.nome
+                : "Jogador",
+            avatar:
+              typeof result.session.user.user_metadata?.avatar === "string"
+                ? result.session.user.user_metadata.avatar
+                : "🧠",
+            idade:
+              typeof result.session.user.user_metadata?.idade === "number"
+                ? result.session.user.user_metadata.idade
+                : 25,
+          }));
+
         const user = syncAuthUserProfile({
           email: result.session.user.email,
-          nome:
-            typeof result.session.user.user_metadata?.nome === "string"
-              ? result.session.user.user_metadata.nome
-              : "Jogador",
-          avatar:
-            typeof result.session.user.user_metadata?.avatar === "string"
-              ? result.session.user.user_metadata.avatar
-              : undefined,
-          idade:
-            typeof result.session.user.user_metadata?.idade === "number"
-              ? result.session.user.user_metadata.idade
-              : undefined,
+          nome: remoteProfile?.nome ?? "Jogador",
+          avatar: remoteProfile?.avatar,
+          idade: remoteProfile?.idade,
         });
         setActiveSession(user.email);
         return user;
@@ -186,11 +200,25 @@ const localRepository: AppRepository = {
         return { error: result.error, user: null };
       }
 
+      const remoteProfile =
+        (await upsertSupabaseProfile({
+          email: email.trim().toLowerCase(),
+          nome,
+          avatar,
+          idade,
+        })) ??
+        syncAuthUserProfile({
+          email: email.trim().toLowerCase(),
+          nome,
+          avatar,
+          idade,
+        });
+
       const user = syncAuthUserProfile({
         email: email.trim().toLowerCase(),
-        nome,
-        avatar,
-        idade,
+        nome: remoteProfile.nome,
+        avatar: remoteProfile.avatar,
+        idade: remoteProfile.idade,
       });
 
       if (result.session) {
@@ -205,7 +233,23 @@ const localRepository: AppRepository = {
 
     return registerUser(email, password, idade, nome, avatar);
   },
-  updateUserProfile: async (email, profile) => updateUserProfile(email, profile),
+  updateUserProfile: async (email, profile) => {
+    const localUser = updateUserProfile(email, profile);
+
+    if (hasSupabaseAuthConfig()) {
+      const remoteUser = await updateSupabaseProfile(email, profile);
+      if (remoteUser) {
+        return syncAuthUserProfile({
+          email: remoteUser.email,
+          nome: remoteUser.nome,
+          avatar: remoteUser.avatar,
+          idade: remoteUser.idade,
+        });
+      }
+    }
+
+    return localUser;
+  },
   updateUserPoints: async (email, delta) => updateUserPoints(email, delta),
   loadProgress: async (email) => loadProgress(email),
   saveProgress: async (email, progress) => saveProgress(email, progress),
