@@ -477,8 +477,8 @@ h2 {
 }
 
 .metric-chip-card:nth-child(2) {
-  flex-basis: 292px;
-  min-width: 292px;
+  flex-basis: 266px;
+  min-width: 266px;
 }
 
 .metric-chip-card:first-child,
@@ -488,8 +488,8 @@ h2 {
 }
 
 .metric-chip-card:nth-child(4) {
-  flex-basis: 188px;
-  min-width: 188px;
+  flex-basis: 214px;
+  min-width: 214px;
 }
 
 .metric-chip-card:nth-child(5),
