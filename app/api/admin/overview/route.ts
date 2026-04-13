@@ -60,6 +60,10 @@ function getServiceRoleKey() {
   return process.env.SUPABASE_SERVICE_ROLE_KEY?.trim() || "";
 }
 
+function isOpaqueSecretKey(key: string) {
+  return key.startsWith("sb_secret_");
+}
+
 function getAdminServerCode() {
   return (
     process.env.ADMIN_SERVER_CODE?.trim() ||
@@ -73,13 +77,18 @@ async function serviceFetch(path: string) {
   const serviceKey = getServiceRoleKey();
   if (!url || !serviceKey) return null;
 
+  const headers: Record<string, string> = {
+    apikey: serviceKey,
+    "Content-Type": "application/json",
+  };
+
+  if (!isOpaqueSecretKey(serviceKey)) {
+    headers.Authorization = `Bearer ${serviceKey}`;
+  }
+
   const response = await fetch(`${url}/rest/v1${path}`, {
     method: "GET",
-    headers: {
-      apikey: serviceKey,
-      Authorization: `Bearer ${serviceKey}`,
-      "Content-Type": "application/json",
-    },
+    headers,
     cache: "no-store",
   });
 
