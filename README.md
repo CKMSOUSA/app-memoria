@@ -161,13 +161,16 @@ Arquivos principais:
 - `lib/supabase-auth.ts`
 - `lib/supabase-profile.ts`
 - `lib/supabase-progress.ts`
+- `lib/supabase-history.ts`
 - `supabase/user_profiles.sql`
 - `supabase/user_progress.sql`
+- `supabase/session_history.sql`
 
 Antes de ativar a migracao completa, rode os SQLs abaixo no painel do Supabase:
 
 - `supabase/user_profiles.sql`
 - `supabase/user_progress.sql`
+- `supabase/session_history.sql`
 
 Esse script cria a tabela `user_profiles` com:
 
@@ -191,10 +194,20 @@ E a tabela `user_progress` com:
 - concluido
 - ultima variacao usada
 
+E a tabela `session_history` com:
+
+- modo da sessao
+- fase jogada
+- score
+- tempo da rodada
+- se concluiu a meta
+- data da sessao
+
 Por enquanto, o app segue em modo `local`, mas ja pode autenticar no Supabase e sincronizar:
 
 - perfil do usuario
 - progresso das trilhas
+- historico de sessoes
 
 quando as tabelas existirem no projeto do Supabase.
 

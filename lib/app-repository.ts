@@ -14,6 +14,7 @@ import {
   loadHelpRequests,
   loadProgress,
   loadSessionHistory,
+  saveSessionHistory,
   loginUser,
   registerUser,
   saveProgress,
@@ -34,6 +35,7 @@ import {
   updateSupabaseProfile,
   upsertSupabaseProfile,
 } from "@/lib/supabase-profile";
+import { appendSupabaseSessionHistory, loadSupabaseSessionHistory } from "@/lib/supabase-history";
 import { loadSupabaseProgress, saveSupabaseProgress } from "@/lib/supabase-progress";
 import type { DataMode, HelpRequest, ProgressState, SessionRecord, Usuario } from "@/lib/types";
 
@@ -270,8 +272,30 @@ const localRepository: AppRepository = {
       await saveSupabaseProgress(email, progress);
     }
   },
-  loadSessionHistory: async (email) => loadSessionHistory(email),
-  appendSessionHistory: async (email, record) => appendSessionHistory(email, record),
+  loadSessionHistory: async (email) => {
+    if (hasSupabaseAuthConfig()) {
+      const remoteHistory = await loadSupabaseSessionHistory(email);
+      if (remoteHistory) {
+        saveSessionHistory(email, remoteHistory);
+        return remoteHistory;
+      }
+    }
+
+    return loadSessionHistory(email);
+  },
+  appendSessionHistory: async (email, record) => {
+    const localHistory = appendSessionHistory(email, record);
+
+    if (hasSupabaseAuthConfig()) {
+      const remoteHistory = await appendSupabaseSessionHistory(email, record);
+      if (remoteHistory) {
+        saveSessionHistory(email, remoteHistory);
+        return remoteHistory;
+      }
+    }
+
+    return localHistory;
+  },
   listUsers: async () => listUsers(),
   loadAllHistories: async () => loadAllHistories(),
   loadHelpRequests: async () => loadHelpRequests(),

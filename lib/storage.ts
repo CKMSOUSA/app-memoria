@@ -297,6 +297,11 @@ export function loadSessionHistory(email: string) {
   }
 }
 
+export function saveSessionHistory(email: string, history: SessionRecord[]) {
+  if (!canUseStorage()) return;
+  localStorage.setItem(`${HISTORY_PREFIX}:${email}`, JSON.stringify(history.slice(0, 120)));
+}
+
 export function appendSessionHistory(email: string, record: Omit<SessionRecord, "id" | "email">) {
   if (!canUseStorage()) return [] as SessionRecord[];
   const current = loadSessionHistory(email);
@@ -309,7 +314,7 @@ export function appendSessionHistory(email: string, record: Omit<SessionRecord, 
     ...current,
   ].slice(0, 120);
 
-  localStorage.setItem(`${HISTORY_PREFIX}:${email}`, JSON.stringify(next));
+  saveSessionHistory(email, next);
   return next;
 }
 
