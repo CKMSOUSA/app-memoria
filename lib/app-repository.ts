@@ -5,6 +5,7 @@ import {
   appendHelpRequest,
   bootstrapStorage,
   clearActiveSession,
+  ensureAdminUser,
   getActiveSession,
   listUsers,
   loadAllHistories,
@@ -48,6 +49,7 @@ type AppRepository = {
   loadAllHistories: () => Promise<Array<{ user: Usuario; history: SessionRecord[] }>>;
   loadHelpRequests: () => Promise<HelpRequest[]>;
   appendHelpRequest: (request: Omit<HelpRequest, "id" | "createdAt" | "status">) => Promise<HelpRequest[]>;
+  ensureAdminUser: () => Promise<Usuario | null>;
   simulateRecovery: (email: string) => string;
 };
 
@@ -120,6 +122,7 @@ const localRepository: AppRepository = {
   loadAllHistories: async () => loadAllHistories(),
   loadHelpRequests: async () => loadHelpRequests(),
   appendHelpRequest: async (request) => appendHelpRequest(request),
+  ensureAdminUser: async () => ensureAdminUser(),
   simulateRecovery: (email) => simulateRecovery(email),
 };
 
@@ -229,6 +232,7 @@ const remoteRepository: AppRepository = {
     });
     return (await parseJson<HelpRequest[]>(response)) ?? [];
   },
+  ensureAdminUser: async () => null,
   simulateRecovery: () =>
     "Modo remoto preparado. Em producao, use um endpoint de recuperacao com email e token temporario.",
 };

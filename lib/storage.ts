@@ -76,11 +76,7 @@ function writeUsers(users: UsuarioPersistido[]) {
   localStorage.setItem(USERS_KEY, JSON.stringify(users));
 }
 
-export async function bootstrapStorage() {
-  if (!canUseStorage()) return;
-  const users = readUsers();
-  if (users.length > 0) return;
-
+async function createSeedAdminUser() {
   const seeded: UsuarioPersistido = {
     nome: "Usuario teste",
     email: "user@email.com",
@@ -93,8 +89,35 @@ export async function bootstrapStorage() {
     role: "admin",
   };
 
-  writeUsers([seeded]);
+  return seeded;
+}
+
+export async function bootstrapStorage() {
+  if (!canUseStorage()) return;
+  const users = readUsers();
+  if (users.length === 0) {
+    const seeded = await createSeedAdminUser();
+    writeUsers([seeded]);
+    localStorage.setItem(`${PROGRESS_PREFIX}:${seeded.email}`, JSON.stringify(createDefaultProgress()));
+    return;
+  }
+
+  if (!users.some((user) => user.role === "admin")) {
+    const seeded = await createSeedAdminUser();
+    writeUsers([...users, seeded]);
+    localStorage.setItem(`${PROGRESS_PREFIX}:${seeded.email}`, JSON.stringify(createDefaultProgress()));
+  }
+}
+
+export async function ensureAdminUser() {
+  const users = readUsers();
+  const existingAdmin = users.find((user) => user.role === "admin");
+  if (existingAdmin) return toPublicUser(existingAdmin);
+
+  const seeded = await createSeedAdminUser();
+  writeUsers([...users, seeded]);
   localStorage.setItem(`${PROGRESS_PREFIX}:${seeded.email}`, JSON.stringify(createDefaultProgress()));
+  return toPublicUser(seeded);
 }
 
 export async function loginUser(email: string, password: string) {

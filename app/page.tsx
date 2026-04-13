@@ -194,8 +194,7 @@ export default function Page() {
     if (code !== expectedCode) return false;
 
     if (!usuario) {
-      const users = await repository.listUsers();
-      const adminUser = users.find((item) => item.role === "admin");
+      const adminUser = await repository.ensureAdminUser();
       if (!adminUser) return false;
       await hydrateUserSession(adminUser);
     }
