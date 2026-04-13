@@ -337,6 +337,11 @@ export function loadHelpRequests() {
   }
 }
 
+export function saveHelpRequests(requests: HelpRequest[]) {
+  if (!canUseStorage()) return;
+  localStorage.setItem(HELP_REQUESTS_KEY, JSON.stringify(requests.slice(0, 200)));
+}
+
 export function appendHelpRequest(request: Omit<HelpRequest, "id" | "createdAt" | "status">) {
   if (!canUseStorage()) return [] as HelpRequest[];
   const current = loadHelpRequests();
@@ -350,7 +355,7 @@ export function appendHelpRequest(request: Omit<HelpRequest, "id" | "createdAt" 
     ...current,
   ].slice(0, 200);
 
-  localStorage.setItem(HELP_REQUESTS_KEY, JSON.stringify(next));
+  saveHelpRequests(next);
   return next;
 }
 

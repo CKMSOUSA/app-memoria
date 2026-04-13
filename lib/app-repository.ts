@@ -14,6 +14,7 @@ import {
   loadHelpRequests,
   loadProgress,
   loadSessionHistory,
+  saveHelpRequests,
   saveSessionHistory,
   loginUser,
   registerUser,
@@ -35,6 +36,7 @@ import {
   updateSupabaseProfile,
   upsertSupabaseProfile,
 } from "@/lib/supabase-profile";
+import { appendSupabaseHelpRequest, loadSupabaseHelpRequests } from "@/lib/supabase-help";
 import { appendSupabaseSessionHistory, loadSupabaseSessionHistory } from "@/lib/supabase-history";
 import { loadSupabaseProgress, saveSupabaseProgress } from "@/lib/supabase-progress";
 import type { DataMode, HelpRequest, ProgressState, SessionRecord, Usuario } from "@/lib/types";
@@ -130,6 +132,16 @@ export function getRemoteBackendStatus(): RemoteBackendStatus {
 async function parseJson<T>(response: Response): Promise<T | null> {
   if (!response.ok) return null;
   return (await response.json()) as T;
+}
+
+function mergeHelpRequests(localItems: HelpRequest[], remoteItems: HelpRequest[]) {
+  const map = new Map<string, HelpRequest>();
+
+  for (const item of [...remoteItems, ...localItems]) {
+    map.set(item.id, item);
+  }
+
+  return Array.from(map.values()).sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1)).slice(0, 200);
 }
 
 const localRepository: AppRepository = {
@@ -298,8 +310,34 @@ const localRepository: AppRepository = {
   },
   listUsers: async () => listUsers(),
   loadAllHistories: async () => loadAllHistories(),
-  loadHelpRequests: async () => loadHelpRequests(),
-  appendHelpRequest: async (request) => appendHelpRequest(request),
+  loadHelpRequests: async () => {
+    const localItems = loadHelpRequests();
+
+    if (hasSupabaseAuthConfig()) {
+      const remoteItems = await loadSupabaseHelpRequests();
+      if (remoteItems) {
+        const merged = mergeHelpRequests(localItems, remoteItems);
+        saveHelpRequests(merged);
+        return merged;
+      }
+    }
+
+    return localItems;
+  },
+  appendHelpRequest: async (request) => {
+    const localItems = appendHelpRequest(request);
+
+    if (hasSupabaseAuthConfig()) {
+      const remoteItems = await appendSupabaseHelpRequest(request);
+      if (remoteItems) {
+        const merged = mergeHelpRequests(localItems, remoteItems);
+        saveHelpRequests(merged);
+        return merged;
+      }
+    }
+
+    return localItems;
+  },
   ensureAdminUser: async () => ensureAdminUser(),
   simulateRecovery: (email) => {
     if (hasSupabaseAuthConfig()) {

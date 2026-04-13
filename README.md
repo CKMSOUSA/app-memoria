@@ -162,15 +162,18 @@ Arquivos principais:
 - `lib/supabase-profile.ts`
 - `lib/supabase-progress.ts`
 - `lib/supabase-history.ts`
+- `lib/supabase-help.ts`
 - `supabase/user_profiles.sql`
 - `supabase/user_progress.sql`
 - `supabase/session_history.sql`
+- `supabase/help_requests.sql`
 
 Antes de ativar a migracao completa, rode os SQLs abaixo no painel do Supabase:
 
 - `supabase/user_profiles.sql`
 - `supabase/user_progress.sql`
 - `supabase/session_history.sql`
+- `supabase/help_requests.sql`
 
 Esse script cria a tabela `user_profiles` com:
 
@@ -203,13 +206,28 @@ E a tabela `session_history` com:
 - se concluiu a meta
 - data da sessao
 
+E a tabela `help_requests` com:
+
+- nome do usuario
+- email
+- assunto
+- mensagem
+- data de envio
+- status do atendimento
+
 Por enquanto, o app segue em modo `local`, mas ja pode autenticar no Supabase e sincronizar:
 
 - perfil do usuario
 - progresso das trilhas
 - historico de sessoes
+- pedidos de ajuda do proprio usuario
 
 quando as tabelas existirem no projeto do Supabase.
+
+Observacao:
+
+- a leitura administrativa global de ajuda ainda depende de uma rota de servidor com permissao elevada
+- pela interface atual com Supabase publico, cada usuario sincroniza com seguranca as proprias duvidas
 
 ## Status do backend remoto
 
