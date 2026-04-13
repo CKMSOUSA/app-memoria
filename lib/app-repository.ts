@@ -34,6 +34,7 @@ import {
   updateSupabaseProfile,
   upsertSupabaseProfile,
 } from "@/lib/supabase-profile";
+import { loadSupabaseProgress, saveSupabaseProgress } from "@/lib/supabase-progress";
 import type { DataMode, HelpRequest, ProgressState, SessionRecord, Usuario } from "@/lib/types";
 
 type RegisterResult = {
@@ -251,8 +252,24 @@ const localRepository: AppRepository = {
     return localUser;
   },
   updateUserPoints: async (email, delta) => updateUserPoints(email, delta),
-  loadProgress: async (email) => loadProgress(email),
-  saveProgress: async (email, progress) => saveProgress(email, progress),
+  loadProgress: async (email) => {
+    if (hasSupabaseAuthConfig()) {
+      const remoteProgress = await loadSupabaseProgress(email);
+      if (remoteProgress) {
+        saveProgress(email, remoteProgress);
+        return remoteProgress;
+      }
+    }
+
+    return loadProgress(email);
+  },
+  saveProgress: async (email, progress) => {
+    saveProgress(email, progress);
+
+    if (hasSupabaseAuthConfig()) {
+      await saveSupabaseProgress(email, progress);
+    }
+  },
   loadSessionHistory: async (email) => loadSessionHistory(email),
   appendSessionHistory: async (email, record) => appendSessionHistory(email, record),
   listUsers: async () => listUsers(),

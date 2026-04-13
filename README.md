@@ -32,7 +32,7 @@ NEXT_PUBLIC_APP_DATA_MODE=local
 NEXT_PUBLIC_API_BASE_URL=/api
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
-NEXT_PUBLIC_ADMIN_CONFIRM_CODE=4321
+NEXT_PUBLIC_ADMIN_CONFIRM_CODE=SEU_CODIGO_ADMIN
 ```
 
 ## Build de producao
@@ -124,8 +124,6 @@ Esse codigo pode ser alterado em:
 
 - `NEXT_PUBLIC_ADMIN_CONFIRM_CODE`
 
-No ambiente atual de desenvolvimento, o valor padrao e `4321`.
-
 ## Preparacao para backend real
 
 O projeto agora ja possui uma camada de dados preparada para dois modos:
@@ -156,16 +154,20 @@ O projeto agora ja consegue usar o Supabase para:
 - login
 - recuperacao de acesso
 - sincronizacao inicial do perfil do usuario
+- sincronizacao online do progresso das trilhas quando a tabela estiver criada
 
 Arquivos principais:
 
 - `lib/supabase-auth.ts`
 - `lib/supabase-profile.ts`
+- `lib/supabase-progress.ts`
 - `supabase/user_profiles.sql`
+- `supabase/user_progress.sql`
 
-Antes de ativar a migracao completa, rode o SQL do arquivo abaixo no painel do Supabase:
+Antes de ativar a migracao completa, rode os SQLs abaixo no painel do Supabase:
 
 - `supabase/user_profiles.sql`
+- `supabase/user_progress.sql`
 
 Esse script cria a tabela `user_profiles` com:
 
@@ -178,7 +180,23 @@ Esse script cria a tabela `user_profiles` com:
 - pontos
 - criado_em
 
-Por enquanto, o app segue em modo `local`, mas ja pode autenticar no Supabase e sincronizar o perfil quando a tabela existir.
+E a tabela `user_progress` com:
+
+- modo da trilha
+- challenge_id
+- tentativas
+- melhor score
+- ultimo score
+- melhor tempo
+- concluido
+- ultima variacao usada
+
+Por enquanto, o app segue em modo `local`, mas ja pode autenticar no Supabase e sincronizar:
+
+- perfil do usuario
+- progresso das trilhas
+
+quando as tabelas existirem no projeto do Supabase.
 
 ## Status do backend remoto
 
