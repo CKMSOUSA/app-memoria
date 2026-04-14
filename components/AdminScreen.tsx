@@ -1,5 +1,7 @@
 "use client";
 
+import { useMemo, useState } from "react";
+
 import { getCompletionRate, getReportSummary, getSessionModeLabel } from "@/lib/scoring";
 import type { HelpRequest, ProgressState, SessionRecord, Usuario } from "@/lib/types";
 
@@ -12,7 +14,47 @@ type AdminScreenProps = {
 };
 
 export function AdminScreen({ usuario, progressoAtual, histories, helpRequests, onBack }: AdminScreenProps) {
-  const normalizedHistories = histories.length > 0 ? histories : [{ user: usuario, history: [], progress: progressoAtual }];
+  const normalizedHistories = useMemo(
+    () => (histories.length > 0 ? histories : [{ user: usuario, history: [], progress: progressoAtual }]),
+    [histories, progressoAtual, usuario],
+  );
+  const [search, setSearch] = useState("");
+  const [helpStatusFilter, setHelpStatusFilter] = useState<"todas" | HelpRequest["status"]>("todas");
+
+  const filteredHistories = useMemo(() => {
+    const query = search.trim().toLowerCase();
+    if (!query) return normalizedHistories;
+
+    return normalizedHistories.filter(({ user, history }) => {
+      const matchesUser =
+        user.nome.toLowerCase().includes(query) ||
+        user.email.toLowerCase().includes(query);
+      const matchesHistory = history.some(
+        (entry) =>
+          getSessionModeLabel(entry.mode).toLowerCase().includes(query) ||
+          String(entry.challengeId).includes(query),
+      );
+
+      return matchesUser || matchesHistory;
+    });
+  }, [normalizedHistories, search]);
+
+  const filteredHelpRequests = useMemo(() => {
+    const query = search.trim().toLowerCase();
+
+    return helpRequests.filter((request) => {
+      const matchesStatus = helpStatusFilter === "todas" || request.status === helpStatusFilter;
+      if (!matchesStatus) return false;
+      if (!query) return true;
+
+      return (
+        request.name.toLowerCase().includes(query) ||
+        request.email.toLowerCase().includes(query) ||
+        request.subject.toLowerCase().includes(query) ||
+        request.message.toLowerCase().includes(query)
+      );
+    });
+  }, [helpRequests, helpStatusFilter, search]);
 
   return (
     <main className="shell shell-center">
@@ -53,13 +95,44 @@ export function AdminScreen({ usuario, progressoAtual, histories, helpRequests, 
           </article>
         </section>
 
+        <section className="panel admin-toolbar">
+          <div className="section-head">
+            <h3>Busca e filtros</h3>
+            <span className="small-muted">Refine usuarios, sessoes e duvidas</span>
+          </div>
+
+          <div className="admin-toolbar-grid">
+            <label className="field">
+              <span>Buscar por nome, email, trilha ou fase</span>
+              <input
+                value={search}
+                onChange={(event) => setSearch(event.target.value)}
+                placeholder="Ex.: Ana, user@email.com, memoria ou fase 3"
+              />
+            </label>
+
+            <label className="field">
+              <span>Status da ajuda</span>
+              <select
+                className="text-input"
+                value={helpStatusFilter}
+                onChange={(event) => setHelpStatusFilter(event.target.value as "todas" | HelpRequest["status"])}
+              >
+                <option value="todas">Todas</option>
+                <option value="aberta">Abertas</option>
+                <option value="respondida">Respondidas</option>
+              </select>
+            </label>
+          </div>
+        </section>
+
         <section className="panel">
           <div className="section-head">
             <h3>Resumo por aluno</h3>
-            <span className="small-muted">Visao administrativa de progresso e historico</span>
+            <span className="small-muted">{filteredHistories.length} aluno(s) encontrado(s)</span>
           </div>
           <div className="admin-grid">
-            {normalizedHistories.map(({ user, history, progress }) => {
+            {filteredHistories.map(({ user, history, progress }) => {
               const summary = getReportSummary(history);
               const effectiveProgress = progress ?? progressoAtual;
               return (
@@ -119,16 +192,17 @@ export function AdminScreen({ usuario, progressoAtual, histories, helpRequests, 
               );
             })}
           </div>
+          {filteredHistories.length === 0 ? <p className="small-muted">Nenhum aluno corresponde aos filtros atuais.</p> : null}
         </section>
 
         <section className="panel">
           <div className="section-head">
             <h3>Duvidas enviadas</h3>
-            <span className="small-muted">Acompanhamento rapido da central de ajuda</span>
+            <span className="small-muted">{filteredHelpRequests.length} item(ns) encontrado(s)</span>
           </div>
           <div className="faq-list">
-            {helpRequests.length > 0 ? (
-              helpRequests.slice(0, 8).map((request) => (
+            {filteredHelpRequests.length > 0 ? (
+              filteredHelpRequests.slice(0, 12).map((request) => (
                 <article key={request.id} className="faq-card">
                   <div className="section-head">
                     <strong>{request.subject}</strong>
@@ -138,7 +212,7 @@ export function AdminScreen({ usuario, progressoAtual, histories, helpRequests, 
                 </article>
               ))
             ) : (
-              <p className="small-muted">Nenhuma duvida registrada ate agora.</p>
+              <p className="small-muted">Nenhuma duvida corresponde aos filtros atuais.</p>
             )}
           </div>
         </section>
