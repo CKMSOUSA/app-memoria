@@ -40,6 +40,7 @@ type DashboardProps = {
   onOpenProfile: () => void;
   onOpenSpecial: () => void;
   onOpenHelp: () => void;
+  onOpenAdmin: () => void;
   onLogout: () => void;
   history: SessionRecord[];
 };
@@ -162,6 +163,7 @@ export function Dashboard({
   onOpenProfile,
   onOpenSpecial,
   onOpenHelp,
+  onOpenAdmin,
   onLogout,
   history,
 }: DashboardProps) {
@@ -270,6 +272,14 @@ export function Dashboard({
         <button className="btn btn-side" onClick={onOpenHelp}>
           Ajuda
         </button>
+        {usuario.role === "admin" ? (
+          <>
+            <p className="sidebar-label">Gestao</p>
+            <button className="btn btn-side" onClick={onOpenAdmin}>
+              Painel administrativo
+            </button>
+          </>
+        ) : null}
         <button className="btn btn-side" onClick={onLogout}>
           Sair
         </button>
@@ -307,6 +317,11 @@ export function Dashboard({
           </div>
           <div className="topbar-right">
             <div className="topbar-support-actions">
+              {usuario.role === "admin" ? (
+                <button className="btn btn-topbar-admin" onClick={onOpenAdmin}>
+                  Acesso administrador
+                </button>
+              ) : null}
               <button className="btn btn-topbar-profile" onClick={onOpenProfile}>
                 Editar perfil
               </button>

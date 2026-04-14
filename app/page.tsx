@@ -481,6 +481,7 @@ export default function Page() {
       onOpenProfile={() => setTela("perfil")}
       onOpenSpecial={() => setTela("especial")}
       onOpenHelp={() => setTela("ajuda")}
+      onOpenAdmin={handleOpenAdmin}
       onLogout={handleLogout}
     />
   );
