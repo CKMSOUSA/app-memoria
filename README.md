@@ -177,6 +177,8 @@ Antes de ativar a migracao completa, rode os SQLs abaixo no painel do Supabase:
 - `supabase/session_history.sql`
 - `supabase/help_requests.sql`
 
+Se a tabela `user_profiles` ja existir no projeto, rode novamente `supabase/user_profiles.sql` para adicionar a coluna `status`, usada no bloqueio e na exclusao logica de usuarios.
+
 Se a tabela `help_requests` ja existir no projeto, rode novamente `supabase/help_requests.sql` para adicionar a coluna `admin_reply`, usada no retorno do admin ao usuario.
 
 Esse script cria a tabela `user_profiles` com:

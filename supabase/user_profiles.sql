@@ -5,10 +5,14 @@ create table if not exists public.user_profiles (
   avatar text not null,
   idade integer not null check (idade >= 6 and idade <= 120),
   role text not null default 'aluno' check (role in ('aluno', 'admin')),
+  status text not null default 'ativo' check (status in ('ativo', 'bloqueado', 'excluido')),
   premium boolean not null default false,
   pontos integer not null default 0,
   criado_em timestamptz not null default now()
 );
+
+alter table public.user_profiles
+  add column if not exists status text not null default 'ativo';
 
 alter table public.user_profiles enable row level security;
 

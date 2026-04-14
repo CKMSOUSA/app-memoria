@@ -16,9 +16,18 @@ type AdminScreenProps = {
     status: HelpRequest["status"],
     adminReply?: string,
   ) => Promise<void>;
+  onUpdateUserStatus: (email: string, status: Usuario["status"]) => Promise<void>;
 };
 
-export function AdminScreen({ usuario, progressoAtual, histories, helpRequests, onBack, onUpdateHelpStatus }: AdminScreenProps) {
+export function AdminScreen({
+  usuario,
+  progressoAtual,
+  histories,
+  helpRequests,
+  onBack,
+  onUpdateHelpStatus,
+  onUpdateUserStatus,
+}: AdminScreenProps) {
   const normalizedHistories = useMemo(
     () => (histories.length > 0 ? histories : [{ user: usuario, history: [], progress: progressoAtual }]),
     [histories, progressoAtual, usuario],
@@ -26,6 +35,7 @@ export function AdminScreen({ usuario, progressoAtual, histories, helpRequests, 
   const [search, setSearch] = useState("");
   const [helpStatusFilter, setHelpStatusFilter] = useState<"todas" | HelpRequest["status"]>("todas");
   const [updatingHelpId, setUpdatingHelpId] = useState<string | null>(null);
+  const [updatingUserEmail, setUpdatingUserEmail] = useState<string | null>(null);
   const [replyDrafts, setReplyDrafts] = useState<Record<string, string>>({});
 
   const filteredHistories = useMemo(() => {
@@ -154,6 +164,10 @@ export function AdminScreen({ usuario, progressoAtual, histories, helpRequests, 
 
                   <div className="admin-chip-grid">
                     <div className="phase-chip">
+                      <strong>Status</strong>
+                      <span>{user.status}</span>
+                    </div>
+                    <div className="phase-chip">
                       <strong>Pontos</strong>
                       <span>{user.pontos}</span>
                     </div>
@@ -169,6 +183,41 @@ export function AdminScreen({ usuario, progressoAtual, histories, helpRequests, 
                       <strong>Modo forte</strong>
                       <span>{getSessionModeLabel(summary.strongestMode)}</span>
                     </div>
+                  </div>
+
+                  <div className="button-row">
+                    <button
+                      className="btn btn-secondary"
+                      disabled={updatingUserEmail === user.email || user.role === "admin"}
+                      onClick={async () => {
+                        setUpdatingUserEmail(user.email);
+                        try {
+                          await onUpdateUserStatus(user.email, user.status === "bloqueado" ? "ativo" : "bloqueado");
+                        } finally {
+                          setUpdatingUserEmail(null);
+                        }
+                      }}
+                    >
+                      {updatingUserEmail === user.email
+                        ? "Atualizando..."
+                        : user.status === "bloqueado"
+                          ? "Desbloquear usuario"
+                          : "Bloquear usuario"}
+                    </button>
+                    <button
+                      className="btn btn-secondary"
+                      disabled={updatingUserEmail === user.email || user.role === "admin" || user.status === "excluido"}
+                      onClick={async () => {
+                        setUpdatingUserEmail(user.email);
+                        try {
+                          await onUpdateUserStatus(user.email, "excluido");
+                        } finally {
+                          setUpdatingUserEmail(null);
+                        }
+                      }}
+                    >
+                      {user.status === "excluido" ? "Usuario excluido" : "Excluir usuario"}
+                    </button>
                   </div>
 
                   <div className="admin-progress-grid">

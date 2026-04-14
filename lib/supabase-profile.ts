@@ -1,6 +1,6 @@
 "use client";
 
-import type { Usuario, UserRole } from "@/lib/types";
+import type { Usuario, UserRole, UserStatus } from "@/lib/types";
 import { getStoredSupabaseSession, hasSupabaseAuthConfig } from "@/lib/supabase-auth";
 
 type SupabaseProfileRow = {
@@ -10,6 +10,7 @@ type SupabaseProfileRow = {
   avatar: string;
   idade: number;
   role: UserRole;
+  status: UserStatus;
   premium: boolean;
   pontos: number;
   criado_em: string;
@@ -21,6 +22,7 @@ type ProfilePayload = {
   avatar: string;
   idade: number;
   role?: UserRole;
+  status?: UserStatus;
   premium?: boolean;
   pontos?: number;
 };
@@ -43,6 +45,7 @@ function toPublicUser(profile: SupabaseProfileRow): Usuario {
     criadoEm: profile.criado_em,
     idade: profile.idade,
     role: profile.role,
+    status: profile.status,
   };
 }
 
@@ -65,7 +68,7 @@ async function profileFetch(path: string, init?: RequestInit) {
 
 export async function loadSupabaseProfileByEmail(email: string) {
   const response = await profileFetch(
-    `/user_profiles?email=eq.${encodeURIComponent(email)}&select=id,email,nome,avatar,idade,role,premium,pontos,criado_em`,
+    `/user_profiles?email=eq.${encodeURIComponent(email)}&select=id,email,nome,avatar,idade,role,status,premium,pontos,criado_em`,
     { method: "GET" },
   );
 
@@ -87,6 +90,7 @@ export async function upsertSupabaseProfile(payload: ProfilePayload) {
         avatar: payload.avatar,
         idade: payload.idade,
         role: payload.role ?? "aluno",
+        status: payload.status ?? "ativo",
         premium: payload.premium ?? false,
         pontos: payload.pontos ?? 0,
       },
@@ -100,7 +104,7 @@ export async function upsertSupabaseProfile(payload: ProfilePayload) {
 
 export async function updateSupabaseProfile(
   email: string,
-  payload: Partial<Pick<Usuario, "nome" | "avatar" | "idade" | "premium" | "pontos" | "role">>,
+  payload: Partial<Pick<Usuario, "nome" | "avatar" | "idade" | "premium" | "pontos" | "role" | "status">>,
 ) {
   const response = await profileFetch(`/user_profiles?email=eq.${encodeURIComponent(email)}`, {
     method: "PATCH",
@@ -114,6 +118,7 @@ export async function updateSupabaseProfile(
       ...(typeof payload.premium === "boolean" ? { premium: payload.premium } : {}),
       ...(typeof payload.pontos === "number" ? { pontos: payload.pontos } : {}),
       ...(payload.role ? { role: payload.role } : {}),
+      ...(payload.status ? { status: payload.status } : {}),
     }),
   });
 

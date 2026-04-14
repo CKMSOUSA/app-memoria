@@ -1,7 +1,7 @@
 "use client";
 
 import { createDefaultProgress, mergeProgress } from "@/lib/scoring";
-import type { HelpRequest, ProgressState, SessionRecord, Usuario, UsuarioPersistido } from "@/lib/types";
+import type { HelpRequest, ProgressState, SessionRecord, Usuario, UsuarioPersistido, UserStatus } from "@/lib/types";
 
 const USERS_KEY = "app_memoria_usuarios_v2";
 const SESSION_KEY = "app_memoria_usuario_ativo_v2";
@@ -42,6 +42,7 @@ function normalizeUser(user: UsuarioPersistido): UsuarioPersistido {
     avatar: user.avatar ?? AVATAR_OPTIONS[0],
     idade: typeof legacyUser.idade === "number" ? legacyUser.idade : idadeLegada,
     role: user.role ?? "aluno",
+    status: user.status ?? "ativo",
   };
 }
 
@@ -87,6 +88,7 @@ async function createSeedAdminUser() {
     criadoEm: new Date().toISOString(),
     idade: DEFAULT_IDADE,
     role: "admin",
+    status: "ativo",
   };
 
   return seeded;
@@ -124,6 +126,7 @@ export async function loginUser(email: string, password: string) {
   const users = readUsers();
   const found = users.find((user) => user.email.toLowerCase() === email.toLowerCase());
   if (!found) return null;
+  if (found.status !== "ativo") return null;
 
   const hash = await hashPassword(password);
   if (found.passwordHash !== hash) return null;
@@ -150,6 +153,7 @@ export async function registerUser(email: string, password: string, idade: numbe
     criadoEm: new Date().toISOString(),
     idade,
     role: "aluno",
+    status: "ativo",
   };
 
   const nextUsers = [...users, createdUser];
@@ -165,7 +169,11 @@ export function getActiveSession() {
   if (!email) return null;
 
   const found = readUsers().find((user) => user.email === email);
-  return found ? toPublicUser(found) : null;
+  if (!found || found.status !== "ativo") {
+    clearActiveSession();
+    return null;
+  }
+  return toPublicUser(found);
 }
 
 export function clearActiveSession() {
@@ -223,6 +231,38 @@ export function updateUserProfile(email: string, profile: Pick<Usuario, "idade" 
   return updatedUser;
 }
 
+export function updateUserStatus(email: string, status: UserStatus) {
+  const users = readUsers();
+  let updatedUser: Usuario | null = null;
+
+  const nextUsers = users.map((user) => {
+    if (user.email !== email) return user;
+    const next = { ...user, status };
+    updatedUser = toPublicUser(next);
+    return next;
+  });
+
+  writeUsers(nextUsers);
+
+  if (canUseStorage() && localStorage.getItem(SESSION_KEY) === email && status !== "ativo") {
+    clearActiveSession();
+  }
+
+  return updatedUser;
+}
+
+export function excludeUser(email: string) {
+  const updatedUser = updateUserStatus(email, "excluido");
+  if (!canUseStorage()) return updatedUser;
+
+  localStorage.removeItem(`${PROGRESS_PREFIX}:${email}`);
+  localStorage.removeItem(`${HISTORY_PREFIX}:${email}`);
+  const nextRequests = loadHelpRequests().filter((item) => item.email !== email);
+  saveHelpRequests(nextRequests);
+
+  return updatedUser;
+}
+
 export function syncAuthUserProfile(profile: {
   email: string;
   nome?: string;
@@ -231,6 +271,7 @@ export function syncAuthUserProfile(profile: {
   premium?: boolean;
   pontos?: number;
   role?: Usuario["role"];
+  status?: Usuario["status"];
   criadoEm?: string;
 }) {
   const users = readUsers();
@@ -248,6 +289,7 @@ export function syncAuthUserProfile(profile: {
             premium: typeof profile.premium === "boolean" ? profile.premium : user.premium,
             pontos: typeof profile.pontos === "number" ? profile.pontos : user.pontos,
             role: profile.role ?? user.role,
+            status: profile.status ?? user.status,
             criadoEm: profile.criadoEm ?? user.criadoEm,
           },
     );
@@ -265,6 +307,7 @@ export function syncAuthUserProfile(profile: {
     criadoEm: profile.criadoEm ?? new Date().toISOString(),
     idade: profile.idade ?? DEFAULT_IDADE,
     role: profile.role ?? "aluno",
+    status: profile.status ?? "ativo",
   };
 
   writeUsers([...users, created]);

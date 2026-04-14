@@ -18,6 +18,7 @@ export type Tela =
 
 export type DataMode = "local" | "remote";
 export type UserRole = "aluno" | "admin";
+export type UserStatus = "ativo" | "bloqueado" | "excluido";
 
 export type Usuario = {
   nome: string;
@@ -28,6 +29,7 @@ export type Usuario = {
   criadoEm: string;
   idade: number;
   role: UserRole;
+  status: UserStatus;
 };
 
 export type UsuarioPersistido = Usuario & {

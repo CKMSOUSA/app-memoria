@@ -201,6 +201,13 @@ export default function Page() {
     setHelpRequests(nextRequests);
   }
 
+  async function handleUpdateUserStatus(email: string, status: Usuario["status"]) {
+    await repository.updateManagedUserStatus(email, status, adminAccessCode);
+    const overview = await repository.loadAdminOverview(adminAccessCode);
+    setAdminHistories(overview.histories);
+    setHelpRequests(overview.helpRequests);
+  }
+
   function persistResult(
     mode: SessionMode,
     challengeId: number,
@@ -452,6 +459,7 @@ export default function Page() {
         helpRequests={helpRequests}
         onBack={() => setTela("dashboard")}
         onUpdateHelpStatus={handleUpdateHelpStatus}
+        onUpdateUserStatus={handleUpdateUserStatus}
       />
     );
   }

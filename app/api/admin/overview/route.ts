@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { mergeProgress } from "@/lib/scoring";
-import type { AdminOverview, HelpRequest, ProgressState, SessionMode, SessionRecord, Usuario, UserRole } from "@/lib/types";
+import type { AdminOverview, HelpRequest, ProgressState, SessionMode, SessionRecord, Usuario, UserRole, UserStatus } from "@/lib/types";
 
 type ProfileRow = {
   email: string;
@@ -12,6 +12,7 @@ type ProfileRow = {
   criado_em: string;
   idade: number;
   role: UserRole;
+  status: UserStatus;
 };
 
 type ProgressRow = {
@@ -143,10 +144,10 @@ async function loadUserFromToken(token: string) {
 }
 
 async function isAdminEmail(email: string) {
-  const response = await serviceFetch(`/user_profiles?email=eq.${encodeURIComponent(email)}&select=email,role&limit=1`);
+  const response = await serviceFetch(`/user_profiles?email=eq.${encodeURIComponent(email)}&select=email,role,status&limit=1`);
   if (!response?.ok) return false;
-  const rows = (await response.json()) as Array<{ email: string; role: UserRole }>;
-  return rows[0]?.role === "admin";
+  const rows = (await response.json()) as Array<{ email: string; role: UserRole; status: UserStatus }>;
+  return rows[0]?.role === "admin" && rows[0]?.status === "ativo";
 }
 
 async function authorizeAdmin(request: NextRequest) {
@@ -173,6 +174,7 @@ function toUsuario(row: ProfileRow): Usuario {
     criadoEm: row.criado_em,
     idade: row.idade,
     role: row.role,
+    status: row.status,
   };
 }
 
@@ -253,7 +255,7 @@ export async function GET(request: NextRequest) {
   }
 
   const [profilesResponse, progressResponse, historyResponse, helpResponse] = await Promise.all([
-    serviceFetch("/user_profiles?select=email,nome,avatar,premium,pontos,criado_em,idade,role&order=nome.asc"),
+    serviceFetch("/user_profiles?select=email,nome,avatar,premium,pontos,criado_em,idade,role,status&order=nome.asc"),
     serviceFetch("/user_progress?select=email,mode,challenge_id,attempts,best_score,last_score,best_time_seconds,completed,last_played_at,last_variation_index"),
     serviceFetch("/session_history?select=id,email,mode,challenge_id,score,time_seconds,completed,played_at&order=played_at.desc&limit=1000"),
     serviceFetch("/help_requests?select=id,email,name,subject,message,created_at,status,admin_reply&order=created_at.desc&limit=300"),

@@ -5,6 +5,7 @@ import {
   appendHelpRequest,
   bootstrapStorage,
   clearActiveSession,
+  excludeUser,
   setActiveSession,
   syncAuthUserProfile,
   ensureAdminUser,
@@ -20,6 +21,7 @@ import {
   registerUser,
   saveProgress,
   simulateRecovery,
+  updateUserStatus,
   updateUserProfile,
   updateUserPoints as updateStoredUserPoints,
 } from "@/lib/storage";
@@ -70,6 +72,7 @@ type AppRepository = {
   loadHelpRequests: () => Promise<HelpRequest[]>;
   appendHelpRequest: (request: Omit<HelpRequest, "id" | "createdAt" | "status">) => Promise<HelpRequest[]>;
   loadAdminOverview: (adminCode?: string) => Promise<AdminOverview>;
+  updateManagedUserStatus: (email: string, status: Usuario["status"], adminCode?: string) => Promise<void>;
   updateHelpRequestStatus: (
     requestId: string,
     status: HelpRequest["status"],
@@ -190,6 +193,33 @@ async function updateAdminHelpRequestStatus(
   return parseJson<{ helpRequests: HelpRequest[] }>(response);
 }
 
+async function updateManagedUserStatusFromApi(
+  email: string,
+  status: Usuario["status"],
+  adminCode?: string,
+) {
+  const session = getStoredSupabaseSession();
+  const headers = new Headers({
+    "Content-Type": "application/json",
+  });
+
+  if (adminCode?.trim()) {
+    headers.set("x-admin-code", adminCode.trim());
+  }
+
+  if (session?.access_token) {
+    headers.set("Authorization", `Bearer ${session.access_token}`);
+  }
+
+  const response = await fetch("/api/admin/users", {
+    method: "PATCH",
+    headers,
+    body: JSON.stringify({ email, status }),
+  });
+
+  return parseJson<{ ok: boolean }>(response);
+}
+
 function mergeHelpRequests(localItems: HelpRequest[], remoteItems: HelpRequest[]) {
   const map = new Map<string, HelpRequest>();
 
@@ -202,7 +232,32 @@ function mergeHelpRequests(localItems: HelpRequest[], remoteItems: HelpRequest[]
 
 const localRepository: AppRepository = {
   mode: "local",
-  bootstrap: bootstrapStorage,
+  bootstrap: async () => {
+    await bootstrapStorage();
+    const session = getStoredSupabaseSession();
+    const email = session?.user?.email?.trim().toLowerCase();
+    if (!email || !hasSupabaseAuthConfig()) return;
+
+    const remoteProfile = await loadSupabaseProfileByEmail(email);
+    if (remoteProfile) {
+      syncAuthUserProfile({
+        email: remoteProfile.email,
+        nome: remoteProfile.nome,
+        avatar: remoteProfile.avatar,
+        idade: remoteProfile.idade,
+        premium: remoteProfile.premium,
+        pontos: remoteProfile.pontos,
+        role: remoteProfile.role,
+        status: remoteProfile.status,
+        criadoEm: remoteProfile.criadoEm,
+      });
+
+      if (remoteProfile.status !== "ativo") {
+        clearStoredSupabaseSession();
+        clearActiveSession();
+      }
+    }
+  },
   getActiveSession: () => {
     const authSession = getStoredSupabaseSession();
     if (authSession?.user?.email && hasSupabaseAuthConfig()) {
@@ -257,7 +312,14 @@ const localRepository: AppRepository = {
               typeof result.session.user.user_metadata?.idade === "number"
                 ? result.session.user.user_metadata.idade
                 : 25,
+            status: "ativo",
           }));
+
+        if (remoteProfile?.status && remoteProfile.status !== "ativo") {
+          clearStoredSupabaseSession();
+          clearActiveSession();
+          return null;
+        }
 
         const user = syncAuthUserProfile({
           email: result.session.user.email,
@@ -267,6 +329,7 @@ const localRepository: AppRepository = {
           premium: remoteProfile?.premium,
           pontos: remoteProfile?.pontos,
           role: remoteProfile?.role,
+          status: remoteProfile?.status,
           criadoEm: remoteProfile?.criadoEm,
         });
         setActiveSession(user.email);
@@ -305,6 +368,7 @@ const localRepository: AppRepository = {
         premium: remoteProfile.premium,
         pontos: remoteProfile.pontos,
         role: remoteProfile.role,
+        status: remoteProfile.status,
         criadoEm: remoteProfile.criadoEm,
       });
 
@@ -334,6 +398,7 @@ const localRepository: AppRepository = {
           premium: remoteUser.premium,
           pontos: remoteUser.pontos,
           role: remoteUser.role,
+          status: remoteUser.status,
           criadoEm: remoteUser.criadoEm,
         });
       }
@@ -363,6 +428,7 @@ const localRepository: AppRepository = {
           premium: remoteUser.premium,
           pontos: remoteUser.pontos,
           role: remoteUser.role,
+          status: remoteUser.status,
           criadoEm: remoteUser.criadoEm,
         });
       }
@@ -458,6 +524,24 @@ const localRepository: AppRepository = {
       helpRequests: loadHelpRequests(),
       source: "local",
     };
+  },
+  updateManagedUserStatus: async (email, status, adminCode) => {
+    const remoteResult = await updateManagedUserStatusFromApi(email, status, adminCode);
+    if (remoteResult?.ok) {
+      if (status === "excluido") {
+        excludeUser(email);
+      } else {
+        updateUserStatus(email, status);
+      }
+      return;
+    }
+
+    if (status === "excluido") {
+      excludeUser(email);
+      return;
+    }
+
+    updateUserStatus(email, status);
   },
   updateHelpRequestStatus: async (requestId, status, adminReply, adminCode) => {
     const remoteResult = await updateAdminHelpRequestStatus(requestId, status, adminReply, adminCode);
@@ -595,6 +679,12 @@ const remoteRepository: AppRepository = {
       throw new Error("Nao foi possivel carregar a visao administrativa online.");
     }
     return overview;
+  },
+  updateManagedUserStatus: async (email, status, adminCode) => {
+    const result = await updateManagedUserStatusFromApi(email, status, adminCode);
+    if (!result?.ok) {
+      throw new Error("Nao foi possivel atualizar o usuario no backend administrativo.");
+    }
   },
   updateHelpRequestStatus: async (requestId, status, adminReply, adminCode) => {
     const result = await updateAdminHelpRequestStatus(requestId, status, adminReply, adminCode);
