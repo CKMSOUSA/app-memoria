@@ -7,8 +7,11 @@ create table if not exists public.help_requests (
   subject text not null,
   message text not null,
   created_at timestamptz not null default now(),
-  status text not null default 'aberta' check (status in ('aberta', 'respondida'))
+  status text not null default 'aberta' check (status in ('aberta', 'respondida')),
+  admin_reply text null
 );
+
+alter table public.help_requests add column if not exists admin_reply text null;
 
 alter table public.help_requests enable row level security;
 

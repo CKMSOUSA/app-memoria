@@ -183,6 +183,10 @@ h2 {
   margin-top: 16px;
 }
 
+.field-compact {
+  margin-top: 10px;
+}
+
 .field span {
   font-size: 14px;
   color: var(--ink-soft);
@@ -1558,6 +1562,25 @@ h2 {
   border-radius: 18px;
   background: rgba(255, 255, 255, 0.82);
   border: 1px solid var(--line);
+}
+
+.admin-reply-input {
+  min-height: 110px;
+  resize: vertical;
+}
+
+.admin-reply-preview,
+.help-reply-box {
+  margin: 0;
+  padding: 12px 14px;
+  border-radius: 16px;
+  background: rgba(44, 99, 135, 0.08);
+  border: 1px solid rgba(44, 99, 135, 0.16);
+}
+
+.help-reply-box {
+  display: grid;
+  gap: 6px;
 }
 
 .backend-panel {

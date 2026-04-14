@@ -75,6 +75,7 @@ export type HelpRequest = {
   message: string;
   createdAt: string;
   status: "aberta" | "respondida";
+  adminReply?: string | null;
 };
 
 export type AdminOverview = {

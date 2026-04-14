@@ -196,8 +196,8 @@ export default function Page() {
     setHelpRequests(nextRequests);
   }
 
-  async function handleUpdateHelpStatus(requestId: string, status: HelpRequest["status"]) {
-    const nextRequests = await repository.updateHelpRequestStatus(requestId, status, adminAccessCode);
+  async function handleUpdateHelpStatus(requestId: string, status: HelpRequest["status"], adminReply?: string) {
+    const nextRequests = await repository.updateHelpRequestStatus(requestId, status, adminReply, adminAccessCode);
     setHelpRequests(nextRequests);
   }
 

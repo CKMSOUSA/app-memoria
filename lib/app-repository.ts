@@ -73,6 +73,7 @@ type AppRepository = {
   updateHelpRequestStatus: (
     requestId: string,
     status: HelpRequest["status"],
+    adminReply?: string,
     adminCode?: string,
   ) => Promise<HelpRequest[]>;
   ensureAdminUser: () => Promise<Usuario | null>;
@@ -164,6 +165,7 @@ async function loadAdminOverviewFromApi(adminCode?: string) {
 async function updateAdminHelpRequestStatus(
   requestId: string,
   status: HelpRequest["status"],
+  adminReply?: string,
   adminCode?: string,
 ) {
   const session = getStoredSupabaseSession();
@@ -182,7 +184,7 @@ async function updateAdminHelpRequestStatus(
   const response = await fetch("/api/admin/overview", {
     method: "PATCH",
     headers,
-    body: JSON.stringify({ requestId, status }),
+    body: JSON.stringify({ requestId, status, adminReply }),
   });
 
   return parseJson<{ helpRequests: HelpRequest[] }>(response);
@@ -457,15 +459,17 @@ const localRepository: AppRepository = {
       source: "local",
     };
   },
-  updateHelpRequestStatus: async (requestId, status, adminCode) => {
-    const remoteResult = await updateAdminHelpRequestStatus(requestId, status, adminCode);
+  updateHelpRequestStatus: async (requestId, status, adminReply, adminCode) => {
+    const remoteResult = await updateAdminHelpRequestStatus(requestId, status, adminReply, adminCode);
     if (remoteResult?.helpRequests) {
       saveHelpRequests(remoteResult.helpRequests);
       return remoteResult.helpRequests;
     }
 
     const current = loadHelpRequests();
-    const next = current.map((item) => (item.id === requestId ? { ...item, status } : item));
+    const next = current.map((item) =>
+      item.id === requestId ? { ...item, status, adminReply: adminReply ?? item.adminReply ?? null } : item,
+    );
     saveHelpRequests(next);
     return next;
   },
@@ -592,8 +596,8 @@ const remoteRepository: AppRepository = {
     }
     return overview;
   },
-  updateHelpRequestStatus: async (requestId, status, adminCode) => {
-    const result = await updateAdminHelpRequestStatus(requestId, status, adminCode);
+  updateHelpRequestStatus: async (requestId, status, adminReply, adminCode) => {
+    const result = await updateAdminHelpRequestStatus(requestId, status, adminReply, adminCode);
     return result?.helpRequests ?? [];
   },
   ensureAdminUser: async () => null,

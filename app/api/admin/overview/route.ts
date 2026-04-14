@@ -46,6 +46,7 @@ type HelpRow = {
   message: string;
   created_at: string;
   status: HelpRequest["status"];
+  admin_reply: string | null;
 };
 
 function getSupabaseUrl() {
@@ -214,12 +215,13 @@ function toHelp(row: HelpRow): HelpRequest {
     message: row.message,
     createdAt: row.created_at,
     status: row.status,
+    adminReply: row.admin_reply,
   };
 }
 
 async function loadHelpRequestsWithService() {
   const helpResponse = await serviceFetch(
-    "/help_requests?select=id,email,name,subject,message,created_at,status&order=created_at.desc&limit=300",
+    "/help_requests?select=id,email,name,subject,message,created_at,status,admin_reply&order=created_at.desc&limit=300",
   );
 
   if (!helpResponse?.ok) return null;
@@ -254,7 +256,7 @@ export async function GET(request: NextRequest) {
     serviceFetch("/user_profiles?select=email,nome,avatar,premium,pontos,criado_em,idade,role&order=nome.asc"),
     serviceFetch("/user_progress?select=email,mode,challenge_id,attempts,best_score,last_score,best_time_seconds,completed,last_played_at,last_variation_index"),
     serviceFetch("/session_history?select=id,email,mode,challenge_id,score,time_seconds,completed,played_at&order=played_at.desc&limit=1000"),
-    serviceFetch("/help_requests?select=id,email,name,subject,message,created_at,status&order=created_at.desc&limit=300"),
+    serviceFetch("/help_requests?select=id,email,name,subject,message,created_at,status,admin_reply&order=created_at.desc&limit=300"),
   ]);
 
   if (!profilesResponse?.ok || !progressResponse?.ok || !historyResponse?.ok || !helpResponse?.ok) {
@@ -325,7 +327,11 @@ export async function PATCH(request: NextRequest) {
     );
   }
 
-  const body = (await request.json()) as { requestId?: string; status?: HelpRequest["status"] };
+  const body = (await request.json()) as {
+    requestId?: string;
+    status?: HelpRequest["status"];
+    adminReply?: string | null;
+  };
   if (!body.requestId || !body.status || !["aberta", "respondida"].includes(body.status)) {
     return NextResponse.json(
       {
@@ -341,7 +347,10 @@ export async function PATCH(request: NextRequest) {
     headers: {
       Prefer: "return=minimal",
     },
-    body: JSON.stringify({ status: body.status }),
+    body: JSON.stringify({
+      status: body.status,
+      admin_reply: body.adminReply?.trim() ? body.adminReply.trim() : null,
+    }),
   });
 
   if (!updateResponse?.ok) {

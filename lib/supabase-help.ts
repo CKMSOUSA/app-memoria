@@ -11,6 +11,7 @@ type SupabaseHelpRow = {
   message: string;
   created_at: string;
   status: HelpRequest["status"];
+  admin_reply: string | null;
 };
 
 function getSupabaseUrl() {
@@ -47,12 +48,13 @@ function toHelpRequest(row: SupabaseHelpRow): HelpRequest {
     message: row.message,
     createdAt: row.created_at,
     status: row.status,
+    adminReply: row.admin_reply,
   };
 }
 
 export async function loadSupabaseHelpRequests() {
   const response = await helpFetch(
-    "/help_requests?select=id,email,name,subject,message,created_at,status&order=created_at.desc&limit=200",
+    "/help_requests?select=id,email,name,subject,message,created_at,status,admin_reply&order=created_at.desc&limit=200",
     {
       method: "GET",
     },

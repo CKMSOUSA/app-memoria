@@ -11,7 +11,11 @@ type AdminScreenProps = {
   histories: Array<{ user: Usuario; history: SessionRecord[]; progress?: ProgressState }>;
   helpRequests: HelpRequest[];
   onBack: () => void;
-  onUpdateHelpStatus: (requestId: string, status: HelpRequest["status"]) => Promise<void>;
+  onUpdateHelpStatus: (
+    requestId: string,
+    status: HelpRequest["status"],
+    adminReply?: string,
+  ) => Promise<void>;
 };
 
 export function AdminScreen({ usuario, progressoAtual, histories, helpRequests, onBack, onUpdateHelpStatus }: AdminScreenProps) {
@@ -22,6 +26,7 @@ export function AdminScreen({ usuario, progressoAtual, histories, helpRequests, 
   const [search, setSearch] = useState("");
   const [helpStatusFilter, setHelpStatusFilter] = useState<"todas" | HelpRequest["status"]>("todas");
   const [updatingHelpId, setUpdatingHelpId] = useState<string | null>(null);
+  const [replyDrafts, setReplyDrafts] = useState<Record<string, string>>({});
 
   const filteredHistories = useMemo(() => {
     const query = search.trim().toLowerCase();
@@ -211,24 +216,48 @@ export function AdminScreen({ usuario, progressoAtual, histories, helpRequests, 
                     <span className="small-muted">{`${request.name} - ${request.status}`}</span>
                   </div>
                   <p className="muted">{request.message}</p>
+                  <label className="field field-compact">
+                    <span>Resposta do admin</span>
+                    <textarea
+                      className="text-input admin-reply-input"
+                      rows={4}
+                      value={replyDrafts[request.id] ?? request.adminReply ?? ""}
+                      onChange={(event) =>
+                        setReplyDrafts((current) => ({
+                          ...current,
+                          [request.id]: event.target.value,
+                        }))
+                      }
+                      placeholder="Escreva uma orientacao curta para o usuario."
+                    />
+                  </label>
+                  {request.adminReply ? (
+                    <p className="admin-reply-preview">
+                      <strong>Ultima resposta enviada:</strong> {request.adminReply}
+                    </p>
+                  ) : null}
                   <div className="button-row">
                     <button
                       className="btn btn-secondary"
-                      disabled={request.status === "respondida" || updatingHelpId === request.id}
+                      disabled={updatingHelpId === request.id}
                       onClick={async () => {
                         setUpdatingHelpId(request.id);
                         try {
-                          await onUpdateHelpStatus(request.id, "respondida");
+                          await onUpdateHelpStatus(
+                            request.id,
+                            "respondida",
+                            (replyDrafts[request.id] ?? request.adminReply ?? "").trim(),
+                          );
                         } finally {
                           setUpdatingHelpId(null);
                         }
                       }}
                     >
-                      {request.status === "respondida"
-                        ? "Ja respondida"
-                        : updatingHelpId === request.id
-                          ? "Atualizando..."
-                          : "Marcar como respondida"}
+                      {updatingHelpId === request.id
+                        ? "Atualizando..."
+                        : request.status === "respondida"
+                          ? "Atualizar resposta"
+                          : "Responder e marcar"}
                     </button>
                   </div>
                 </article>

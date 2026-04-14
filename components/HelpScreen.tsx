@@ -125,6 +125,12 @@ export function HelpScreen({ usuario, requests, onBack, onSubmit }: HelpScreenPr
                       <span className="small-muted">{request.status}</span>
                     </div>
                     <p className="muted">{request.message}</p>
+                    {request.adminReply ? (
+                      <div className="help-reply-box">
+                        <strong>Resposta da equipe</strong>
+                        <p className="muted">{request.adminReply}</p>
+                      </div>
+                    ) : null}
                   </article>
                 ))
               ) : (
