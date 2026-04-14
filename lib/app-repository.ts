@@ -70,6 +70,11 @@ type AppRepository = {
   loadHelpRequests: () => Promise<HelpRequest[]>;
   appendHelpRequest: (request: Omit<HelpRequest, "id" | "createdAt" | "status">) => Promise<HelpRequest[]>;
   loadAdminOverview: (adminCode?: string) => Promise<AdminOverview>;
+  updateHelpRequestStatus: (
+    requestId: string,
+    status: HelpRequest["status"],
+    adminCode?: string,
+  ) => Promise<HelpRequest[]>;
   ensureAdminUser: () => Promise<Usuario | null>;
   simulateRecovery: (email: string) => string;
 };
@@ -154,6 +159,33 @@ async function loadAdminOverviewFromApi(adminCode?: string) {
   });
 
   return parseJson<AdminOverview>(response);
+}
+
+async function updateAdminHelpRequestStatus(
+  requestId: string,
+  status: HelpRequest["status"],
+  adminCode?: string,
+) {
+  const session = getStoredSupabaseSession();
+  const headers = new Headers({
+    "Content-Type": "application/json",
+  });
+
+  if (adminCode?.trim()) {
+    headers.set("x-admin-code", adminCode.trim());
+  }
+
+  if (session?.access_token) {
+    headers.set("Authorization", `Bearer ${session.access_token}`);
+  }
+
+  const response = await fetch("/api/admin/overview", {
+    method: "PATCH",
+    headers,
+    body: JSON.stringify({ requestId, status }),
+  });
+
+  return parseJson<{ helpRequests: HelpRequest[] }>(response);
 }
 
 function mergeHelpRequests(localItems: HelpRequest[], remoteItems: HelpRequest[]) {
@@ -425,6 +457,18 @@ const localRepository: AppRepository = {
       source: "local",
     };
   },
+  updateHelpRequestStatus: async (requestId, status, adminCode) => {
+    const remoteResult = await updateAdminHelpRequestStatus(requestId, status, adminCode);
+    if (remoteResult?.helpRequests) {
+      saveHelpRequests(remoteResult.helpRequests);
+      return remoteResult.helpRequests;
+    }
+
+    const current = loadHelpRequests();
+    const next = current.map((item) => (item.id === requestId ? { ...item, status } : item));
+    saveHelpRequests(next);
+    return next;
+  },
   ensureAdminUser: async () => ensureAdminUser(),
   simulateRecovery: (email) => {
     if (hasSupabaseAuthConfig()) {
@@ -547,6 +591,10 @@ const remoteRepository: AppRepository = {
       throw new Error("Nao foi possivel carregar a visao administrativa online.");
     }
     return overview;
+  },
+  updateHelpRequestStatus: async (requestId, status, adminCode) => {
+    const result = await updateAdminHelpRequestStatus(requestId, status, adminCode);
+    return result?.helpRequests ?? [];
   },
   ensureAdminUser: async () => null,
   simulateRecovery: () =>

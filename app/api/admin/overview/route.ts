@@ -95,6 +95,32 @@ async function serviceFetch(path: string) {
   return response;
 }
 
+async function serviceMutate(path: string, init: RequestInit) {
+  const url = getSupabaseUrl();
+  const serviceKey = getServiceRoleKey();
+  if (!url || !serviceKey) return null;
+
+  const headers: Record<string, string> = {
+    apikey: serviceKey,
+    "Content-Type": "application/json",
+  };
+
+  if (!isOpaqueSecretKey(serviceKey)) {
+    headers.Authorization = `Bearer ${serviceKey}`;
+  }
+
+  const requestHeaders = new Headers(init.headers);
+  requestHeaders.forEach((value, key) => {
+    headers[key] = value;
+  });
+
+  return fetch(`${url}/rest/v1${path}`, {
+    ...init,
+    headers,
+    cache: "no-store",
+  });
+}
+
 async function loadUserFromToken(token: string) {
   const url = getSupabaseUrl();
   const anonKey = getSupabaseAnonKey();
@@ -191,6 +217,16 @@ function toHelp(row: HelpRow): HelpRequest {
   };
 }
 
+async function loadHelpRequestsWithService() {
+  const helpResponse = await serviceFetch(
+    "/help_requests?select=id,email,name,subject,message,created_at,status&order=created_at.desc&limit=300",
+  );
+
+  if (!helpResponse?.ok) return null;
+  const helpRows = (await helpResponse.json()) as HelpRow[];
+  return helpRows.map(toHelp);
+}
+
 export async function GET(request: NextRequest) {
   const serviceKey = getServiceRoleKey();
   if (!getSupabaseUrl() || !getSupabaseAnonKey() || !serviceKey) {
@@ -264,4 +300,73 @@ export async function GET(request: NextRequest) {
   };
 
   return NextResponse.json(overview);
+}
+
+export async function PATCH(request: NextRequest) {
+  const serviceKey = getServiceRoleKey();
+  if (!getSupabaseUrl() || !getSupabaseAnonKey() || !serviceKey) {
+    return NextResponse.json(
+      {
+        ok: false,
+        error: "Configuração administrativa do Supabase ainda incompleta.",
+      },
+      { status: 503 },
+    );
+  }
+
+  const authorized = await authorizeAdmin(request);
+  if (!authorized) {
+    return NextResponse.json(
+      {
+        ok: false,
+        error: "Acesso administrativo nao autorizado.",
+      },
+      { status: 403 },
+    );
+  }
+
+  const body = (await request.json()) as { requestId?: string; status?: HelpRequest["status"] };
+  if (!body.requestId || !body.status || !["aberta", "respondida"].includes(body.status)) {
+    return NextResponse.json(
+      {
+        ok: false,
+        error: "Dados invalidos para atualizar o pedido de ajuda.",
+      },
+      { status: 400 },
+    );
+  }
+
+  const updateResponse = await serviceMutate(`/help_requests?id=eq.${encodeURIComponent(body.requestId)}`, {
+    method: "PATCH",
+    headers: {
+      Prefer: "return=minimal",
+    },
+    body: JSON.stringify({ status: body.status }),
+  });
+
+  if (!updateResponse?.ok) {
+    return NextResponse.json(
+      {
+        ok: false,
+        error: "Nao foi possivel atualizar o status da duvida.",
+      },
+      { status: 500 },
+    );
+  }
+
+  const helpRequests = await loadHelpRequestsWithService();
+  if (!helpRequests) {
+    return NextResponse.json(
+      {
+        ok: false,
+        error: "A duvida foi atualizada, mas nao foi possivel recarregar a lista.",
+      },
+      { status: 500 },
+    );
+  }
+
+  return NextResponse.json({
+    ok: true,
+    helpRequests,
+  });
 }

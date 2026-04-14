@@ -11,15 +11,17 @@ type AdminScreenProps = {
   histories: Array<{ user: Usuario; history: SessionRecord[]; progress?: ProgressState }>;
   helpRequests: HelpRequest[];
   onBack: () => void;
+  onUpdateHelpStatus: (requestId: string, status: HelpRequest["status"]) => Promise<void>;
 };
 
-export function AdminScreen({ usuario, progressoAtual, histories, helpRequests, onBack }: AdminScreenProps) {
+export function AdminScreen({ usuario, progressoAtual, histories, helpRequests, onBack, onUpdateHelpStatus }: AdminScreenProps) {
   const normalizedHistories = useMemo(
     () => (histories.length > 0 ? histories : [{ user: usuario, history: [], progress: progressoAtual }]),
     [histories, progressoAtual, usuario],
   );
   const [search, setSearch] = useState("");
   const [helpStatusFilter, setHelpStatusFilter] = useState<"todas" | HelpRequest["status"]>("todas");
+  const [updatingHelpId, setUpdatingHelpId] = useState<string | null>(null);
 
   const filteredHistories = useMemo(() => {
     const query = search.trim().toLowerCase();
@@ -209,6 +211,26 @@ export function AdminScreen({ usuario, progressoAtual, histories, helpRequests, 
                     <span className="small-muted">{`${request.name} - ${request.status}`}</span>
                   </div>
                   <p className="muted">{request.message}</p>
+                  <div className="button-row">
+                    <button
+                      className="btn btn-secondary"
+                      disabled={request.status === "respondida" || updatingHelpId === request.id}
+                      onClick={async () => {
+                        setUpdatingHelpId(request.id);
+                        try {
+                          await onUpdateHelpStatus(request.id, "respondida");
+                        } finally {
+                          setUpdatingHelpId(null);
+                        }
+                      }}
+                    >
+                      {request.status === "respondida"
+                        ? "Ja respondida"
+                        : updatingHelpId === request.id
+                          ? "Atualizando..."
+                          : "Marcar como respondida"}
+                    </button>
+                  </div>
                 </article>
               ))
             ) : (

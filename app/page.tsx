@@ -196,6 +196,11 @@ export default function Page() {
     setHelpRequests(nextRequests);
   }
 
+  async function handleUpdateHelpStatus(requestId: string, status: HelpRequest["status"]) {
+    const nextRequests = await repository.updateHelpRequestStatus(requestId, status, adminAccessCode);
+    setHelpRequests(nextRequests);
+  }
+
   function persistResult(
     mode: SessionMode,
     challengeId: number,
@@ -446,6 +451,7 @@ export default function Page() {
         histories={adminHistories}
         helpRequests={helpRequests}
         onBack={() => setTela("dashboard")}
+        onUpdateHelpStatus={handleUpdateHelpStatus}
       />
     );
   }
