@@ -25,10 +25,10 @@ npm install
 npm run dev
 ```
 
-Se quiser preparar o app para backend remoto no futuro, copie o arquivo `.env.example` e ajuste:
+Se quiser preparar o app para operar online com Supabase, copie o arquivo `.env.example` e ajuste:
 
 ```bash
-NEXT_PUBLIC_APP_DATA_MODE=local
+NEXT_PUBLIC_APP_DATA_MODE=remote
 NEXT_PUBLIC_API_BASE_URL=/api
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
@@ -102,13 +102,13 @@ Depois disso, o app ja fica acessivel por link publico na internet.
 
 ## Observacao importante
 
-Esta versao MVP usa `localStorage`.
+Esta versao ja usa uma base hibrida.
 
 Isso significa:
 
-- cada usuario salva os dados apenas no proprio navegador
-- login, progresso e perfil nao ficam compartilhados entre dispositivos
-- a publicacao online funciona, mas ainda sem backend real
+- sem Supabase configurado, o app funciona localmente no navegador
+- com Supabase configurado, login, perfil, progresso, historico e ajuda passam a sincronizar online
+- ainda existe fallback local para evitar perda de usabilidade em caso de indisponibilidade parcial
 
 Para uma versao publica mais completa no futuro, o ideal e integrar um backend como Supabase ou Firebase.
 
@@ -217,7 +217,9 @@ E a tabela `help_requests` com:
 - data de envio
 - status do atendimento
 
-Por enquanto, o app segue em modo `local`, mas ja pode autenticar no Supabase e sincronizar:
+Com Supabase configurado, o app passa a operar em modo online por padrao, mas mantendo fallback local quando necessario.
+
+Ele ja sincroniza:
 
 - perfil do usuario
 - progresso das trilhas

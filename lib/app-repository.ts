@@ -85,26 +85,26 @@ function getRemoteBaseUrl() {
   return process.env.NEXT_PUBLIC_API_BASE_URL?.trim() || "/api";
 }
 
+function hasSupabaseConfig() {
+  return (
+    Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL?.trim()) &&
+    Boolean(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim())
+  );
+}
+
 function getRepositoryMode(): DataMode {
-  return process.env.NEXT_PUBLIC_APP_DATA_MODE === "remote" ? "remote" : "local";
+  if (process.env.NEXT_PUBLIC_APP_DATA_MODE === "local") {
+    return "local";
+  }
+
+  return hasSupabaseConfig() ? "remote" : "local";
 }
 
 export function getRemoteBackendStatus(): RemoteBackendStatus {
   const mode = getRepositoryMode();
-  const hasSupabase =
-    Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL?.trim()) &&
-    Boolean(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim());
+  const hasSupabase = hasSupabaseConfig();
 
   if (mode === "local") {
-    if (hasSupabase) {
-      return {
-        mode,
-        ready: false,
-        provider: "Supabase configurado",
-        description: "Credenciais do Supabase detectadas. O app continua em modo local ate concluirmos a migracao de login, progresso e API remota.",
-      };
-    }
-
     return {
       mode,
       ready: false,
@@ -557,7 +557,10 @@ let cachedRepository: AppRepository | null = null;
 
 export function getAppRepository() {
   if (cachedRepository) return cachedRepository;
-  cachedRepository = getRepositoryMode() === "remote" ? remoteRepository : localRepository;
+  cachedRepository =
+    getRepositoryMode() === "remote"
+      ? { ...localRepository, mode: "remote" as DataMode }
+      : { ...localRepository, mode: "local" as DataMode };
   return cachedRepository;
 }
 
