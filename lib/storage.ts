@@ -228,6 +228,10 @@ export function syncAuthUserProfile(profile: {
   nome?: string;
   avatar?: string;
   idade?: number;
+  premium?: boolean;
+  pontos?: number;
+  role?: Usuario["role"];
+  criadoEm?: string;
 }) {
   const users = readUsers();
   const existing = users.find((user) => user.email === profile.email);
@@ -241,6 +245,10 @@ export function syncAuthUserProfile(profile: {
             nome: profile.nome ?? user.nome,
             avatar: profile.avatar ?? user.avatar,
             idade: profile.idade ?? user.idade,
+            premium: typeof profile.premium === "boolean" ? profile.premium : user.premium,
+            pontos: typeof profile.pontos === "number" ? profile.pontos : user.pontos,
+            role: profile.role ?? user.role,
+            criadoEm: profile.criadoEm ?? user.criadoEm,
           },
     );
     writeUsers(nextUsers);
@@ -252,11 +260,11 @@ export function syncAuthUserProfile(profile: {
     email: profile.email,
     avatar: profile.avatar ?? AVATAR_OPTIONS[0],
     passwordHash: "__supabase__",
-    premium: false,
-    pontos: 0,
-    criadoEm: new Date().toISOString(),
+    premium: profile.premium ?? false,
+    pontos: profile.pontos ?? 0,
+    criadoEm: profile.criadoEm ?? new Date().toISOString(),
     idade: profile.idade ?? DEFAULT_IDADE,
-    role: "aluno",
+    role: profile.role ?? "aluno",
   };
 
   writeUsers([...users, created]);

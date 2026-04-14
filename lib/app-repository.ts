@@ -21,7 +21,7 @@ import {
   saveProgress,
   simulateRecovery,
   updateUserProfile,
-  updateUserPoints,
+  updateUserPoints as updateStoredUserPoints,
 } from "@/lib/storage";
 import {
   clearStoredSupabaseSession,
@@ -186,6 +186,14 @@ const localRepository: AppRepository = {
           typeof authSession.user.user_metadata?.idade === "number"
             ? authSession.user.user_metadata.idade
             : undefined,
+        premium:
+          typeof authSession.user.user_metadata?.premium === "boolean"
+            ? authSession.user.user_metadata.premium
+            : undefined,
+        pontos:
+          typeof authSession.user.user_metadata?.pontos === "number"
+            ? authSession.user.user_metadata.pontos
+            : undefined,
       });
     }
 
@@ -222,6 +230,10 @@ const localRepository: AppRepository = {
           nome: remoteProfile?.nome ?? "Jogador",
           avatar: remoteProfile?.avatar,
           idade: remoteProfile?.idade,
+          premium: remoteProfile?.premium,
+          pontos: remoteProfile?.pontos,
+          role: remoteProfile?.role,
+          criadoEm: remoteProfile?.criadoEm,
         });
         setActiveSession(user.email);
         return user;
@@ -256,6 +268,10 @@ const localRepository: AppRepository = {
         nome: remoteProfile.nome,
         avatar: remoteProfile.avatar,
         idade: remoteProfile.idade,
+        premium: remoteProfile.premium,
+        pontos: remoteProfile.pontos,
+        role: remoteProfile.role,
+        criadoEm: remoteProfile.criadoEm,
       });
 
       if (result.session) {
@@ -281,13 +297,45 @@ const localRepository: AppRepository = {
           nome: remoteUser.nome,
           avatar: remoteUser.avatar,
           idade: remoteUser.idade,
+          premium: remoteUser.premium,
+          pontos: remoteUser.pontos,
+          role: remoteUser.role,
+          criadoEm: remoteUser.criadoEm,
         });
       }
     }
 
     return localUser;
   },
-  updateUserPoints: async (email, delta) => updateUserPoints(email, delta),
+  updateUserPoints: async (email, delta) => {
+    const localUser: Usuario | null = updateStoredUserPoints(email, delta);
+
+    if (hasSupabaseAuthConfig()) {
+      const currentRemoteUser = await loadSupabaseProfileByEmail(email);
+      if (!currentRemoteUser) {
+        return localUser;
+      }
+
+      const remoteUser = await updateSupabaseProfile(email, {
+        pontos: currentRemoteUser.pontos + delta,
+      });
+
+      if (remoteUser) {
+        return syncAuthUserProfile({
+          email: remoteUser.email,
+          nome: remoteUser.nome,
+          avatar: remoteUser.avatar,
+          idade: remoteUser.idade,
+          premium: remoteUser.premium,
+          pontos: remoteUser.pontos,
+          role: remoteUser.role,
+          criadoEm: remoteUser.criadoEm,
+        });
+      }
+    }
+
+    return localUser;
+  },
   loadProgress: async (email) => {
     if (hasSupabaseAuthConfig()) {
       const remoteProgress = await loadSupabaseProgress(email);
