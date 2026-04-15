@@ -5,40 +5,69 @@ import { useCallback, useEffect, useState } from "react";
 const SOUND_STORAGE_KEY = "app_memoria_sons_v1";
 
 type SoundTone = "success" | "error" | "tap";
+type AudioWindow = Window & {
+  AudioContext?: typeof AudioContext;
+  webkitAudioContext?: typeof AudioContext;
+};
+
+let sharedAudioContext: AudioContext | null = null;
 
 function canUseAudio() {
-  return typeof window !== "undefined" && typeof window.AudioContext !== "undefined";
+  if (typeof window === "undefined") return false;
+  const audioWindow = window as AudioWindow;
+  return typeof audioWindow.AudioContext !== "undefined" || typeof audioWindow.webkitAudioContext !== "undefined";
+}
+
+async function getAudioContext() {
+  if (!canUseAudio()) return;
+
+  const audioWindow = window as AudioWindow;
+  const AudioContextClass = audioWindow.AudioContext ?? audioWindow.webkitAudioContext;
+  if (!AudioContextClass) return;
+
+  if (!sharedAudioContext || sharedAudioContext.state === "closed") {
+    sharedAudioContext = new AudioContextClass();
+  }
+
+  if (sharedAudioContext.state === "suspended") {
+    await sharedAudioContext.resume();
+  }
+
+  return sharedAudioContext;
 }
 
 function playTone(kind: SoundTone) {
-  if (!canUseAudio()) return;
+  void getAudioContext()
+    .then((context) => {
+      if (!context) return;
 
-  const AudioContextClass = window.AudioContext;
-  const context = new AudioContextClass();
-  const oscillator = context.createOscillator();
-  const gain = context.createGain();
-  const now = context.currentTime;
+      const oscillator = context.createOscillator();
+      const gain = context.createGain();
+      const now = context.currentTime;
 
-  oscillator.type = "sine";
-  const startFrequency = kind === "success" ? 660 : kind === "tap" ? 520 : 220;
-  const endFrequency = kind === "success" ? 880 : kind === "tap" ? 620 : 150;
-  const duration = kind === "tap" ? 0.09 : 0.24;
+      oscillator.type = "sine";
+      const startFrequency = kind === "success" ? 660 : kind === "tap" ? 520 : 220;
+      const endFrequency = kind === "success" ? 880 : kind === "tap" ? 620 : 150;
+      const duration = kind === "tap" ? 0.09 : 0.24;
 
-  oscillator.frequency.setValueAtTime(startFrequency, now);
-  oscillator.frequency.exponentialRampToValueAtTime(endFrequency, now + Math.max(0.06, duration - 0.04));
+      oscillator.frequency.setValueAtTime(startFrequency, now);
+      oscillator.frequency.exponentialRampToValueAtTime(endFrequency, now + Math.max(0.06, duration - 0.04));
 
-  gain.gain.setValueAtTime(0.0001, now);
-  gain.gain.exponentialRampToValueAtTime(0.08, now + 0.02);
-  gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+      gain.gain.setValueAtTime(0.0001, now);
+      gain.gain.exponentialRampToValueAtTime(0.08, now + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
 
-  oscillator.connect(gain);
-  gain.connect(context.destination);
-  oscillator.start(now);
-  oscillator.stop(now + duration + 0.02);
+      oscillator.connect(gain);
+      gain.connect(context.destination);
+      oscillator.start(now);
+      oscillator.stop(now + duration + 0.02);
 
-  window.setTimeout(() => {
-    void context.close();
-  }, (duration + 0.12) * 1000);
+      window.setTimeout(() => {
+        oscillator.disconnect();
+        gain.disconnect();
+      }, (duration + 0.12) * 1000);
+    })
+    .catch(() => undefined);
 }
 
 export function useSoundFeedback() {

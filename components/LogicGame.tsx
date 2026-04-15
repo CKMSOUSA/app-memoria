@@ -126,6 +126,16 @@ export function LogicGame({ usuario, progresso, onBack, onRememberVariation, onS
     setReview(null);
   }
 
+  function advanceRound() {
+    const nextChallenge = logicChallenges.find((item) => item.id > challenge.id);
+    if (review?.completed && nextChallenge) {
+      setSelectedId(nextChallenge.id);
+      return;
+    }
+
+    resetRound();
+  }
+
   function handleAnswer(answer: string) {
     if (phase !== "playing") return;
 
@@ -227,6 +237,9 @@ export function LogicGame({ usuario, progresso, onBack, onRememberVariation, onS
             <div className="button-row">
               <button className="btn btn-primary" onClick={startRound}>
                 Tentar novamente
+              </button>
+              <button className="btn btn-secondary" onClick={advanceRound}>
+                Avançar
               </button>
               <button className="btn btn-secondary" onClick={resetRound}>
                 Trocar rodada

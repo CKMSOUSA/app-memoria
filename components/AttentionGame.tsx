@@ -194,6 +194,16 @@ export function AttentionGame({ usuario, progresso, onBack, onRememberVariation,
     setGrid(shuffle(nextGridBase.slice(0, ageProfile.visibleCells)));
   }
 
+  function advanceRound() {
+    const nextChallenge = attentionChallenges.find((item) => item.id > challenge.id);
+    if (review?.completed && nextChallenge) {
+      setSelectedId(nextChallenge.id);
+      return;
+    }
+
+    resetRound();
+  }
+
   function handleCellClick(index: number) {
     if (phase !== "playing") return;
     if (foundTargets.includes(index)) return;
@@ -334,6 +344,9 @@ export function AttentionGame({ usuario, progresso, onBack, onRememberVariation,
             <div className="button-row">
               <button className="btn btn-primary" onClick={startRound}>
                 Jogar novamente
+              </button>
+              <button className="btn btn-secondary" onClick={advanceRound}>
+                Avançar
               </button>
               <button className="btn btn-secondary" onClick={resetRound}>
                 Trocar rodada

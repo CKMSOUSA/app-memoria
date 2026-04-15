@@ -109,6 +109,16 @@ export function ComparisonGame({
     setReview(null);
   }
 
+  function advanceRound() {
+    const nextChallenge = comparisonChallenges.find((item) => item.id > challenge.id);
+    if (review?.completed && nextChallenge) {
+      setSelectedId(nextChallenge.id);
+      return;
+    }
+
+    resetRound();
+  }
+
   const finishRound = useCallback((answers: Array<"left" | "right">) => {
     const expectedAnswers = rounds.map((item) => item.correct);
     const elapsedSeconds = Math.max(difficulty.tempoLimite - timeLeft, 0);
@@ -257,6 +267,9 @@ export function ComparisonGame({
             <div className="button-row">
               <button className="btn btn-primary" onClick={startRound}>
                 Tentar novamente
+              </button>
+              <button className="btn btn-secondary" onClick={advanceRound}>
+                Avançar
               </button>
               <button className="btn btn-secondary" onClick={resetRound}>
                 Trocar rodada

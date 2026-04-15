@@ -173,6 +173,16 @@ export function MemoryGame({ usuario, progresso, onBack, onRememberVariation, on
     setVariationIndex((current) => getNextVariationIndex(baseVariacoes.length, current));
   }
 
+  function advanceRound() {
+    const nextChallenge = memoryChallenges.find((item) => item.id > challenge.id);
+    if (review?.completed && nextChallenge) {
+      setSelectedId(nextChallenge.id);
+      return;
+    }
+
+    resetRound();
+  }
+
   function startChallenge() {
     setPhase("memorizing");
     setCountdown(dificuldade.tempoMemorizacao);
@@ -329,6 +339,9 @@ export function MemoryGame({ usuario, progresso, onBack, onRememberVariation, on
             <div className="button-row">
               <button className="btn btn-primary btn-round-retry" onClick={startChallenge}>
                 Tentar novamente
+              </button>
+              <button className="btn btn-secondary" onClick={advanceRound}>
+                Avançar
               </button>
               <button className="btn btn-secondary btn-round-swap" onClick={resetRound}>
                 Trocar rodada

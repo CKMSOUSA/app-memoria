@@ -107,6 +107,17 @@ export function AudienceGame({ usuario, progresso, onBack, onRememberVariation, 
     answerStartedAtRef.current = null;
   }
 
+  function advanceRound() {
+    const currentIndex = audienceChallenges.findIndex((item) => item.id === challenge.id);
+    const nextChallenge = audienceChallenges[currentIndex + 1];
+    if (review && review.hits.length >= challenge.minimoParaConcluir && nextChallenge) {
+      setSelectedId(nextChallenge.id);
+      return;
+    }
+
+    resetRound();
+  }
+
   function isAudienceChallengeUnlocked(challengeId: number) {
     const currentIndex = audienceChallenges.findIndex((item) => item.id === challengeId);
     if (currentIndex <= 0) return true;
@@ -266,6 +277,9 @@ export function AudienceGame({ usuario, progresso, onBack, onRememberVariation, 
             <div className="button-row">
               <button className="btn btn-primary" onClick={startRound}>
                 Tentar novamente
+              </button>
+              <button className="btn btn-secondary" onClick={advanceRound}>
+                Avançar
               </button>
               <button className="btn btn-secondary" onClick={resetRound}>
                 Trocar rodada

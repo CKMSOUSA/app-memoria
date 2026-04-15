@@ -165,6 +165,16 @@ export function SpatialGame({ usuario, progresso, onBack, onRememberVariation, o
     setReview(null);
   }
 
+  function advanceRound() {
+    const nextChallenge = spatialChallenges.find((item) => item.id > challenge.id);
+    if (review?.completed && nextChallenge) {
+      setSelectedId(nextChallenge.id);
+      return;
+    }
+
+    resetRound();
+  }
+
   function pushMove(move: string) {
     if (phase !== "answering") return;
 
@@ -319,6 +329,9 @@ export function SpatialGame({ usuario, progresso, onBack, onRememberVariation, o
             <div className="button-row">
               <button className="btn btn-primary" onClick={startRound}>
                 Tentar novamente
+              </button>
+              <button className="btn btn-secondary" onClick={advanceRound}>
+                Avançar
               </button>
               <button className="btn btn-secondary" onClick={resetRound}>
                 Trocar rota

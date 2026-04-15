@@ -184,6 +184,16 @@ export function VisualMemoryGame({
     setReview(null);
   }
 
+  function advanceRound() {
+    const nextChallenge = visualChallenges.find((item) => item.id > challenge.id);
+    if (review?.completed && nextChallenge) {
+      setSelectedId(nextChallenge.id);
+      return;
+    }
+
+    resetRound();
+  }
+
   function handleCardClick(index: number) {
     if (phase !== "playing" || lockRef.current) return;
     if (flippedIndexes.includes(index) || cards[index]?.matched) return;
@@ -310,6 +320,9 @@ export function VisualMemoryGame({
             <div className="button-row">
               <button className="btn btn-primary" onClick={startRound}>
                 Tentar novamente
+              </button>
+              <button className="btn btn-secondary" onClick={advanceRound}>
+                Avançar
               </button>
               <button className="btn btn-secondary" onClick={resetRound}>
                 Trocar rodada
