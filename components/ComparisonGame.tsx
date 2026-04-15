@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ChildVisualBadge } from "@/components/ChildVisualBadge";
 import { GameGuide } from "@/components/GameGuide";
 import { ReviewMetrics } from "@/components/ReviewMetrics";
+import { SoundToggle, useSoundFeedback } from "@/components/SoundToggle";
 import { comparisonChallenges } from "@/lib/game-data-v3";
 import { evaluateComparisonRound, getNextVariationIndex } from "@/lib/game-logic";
 import {
@@ -51,6 +52,7 @@ export function ComparisonGame({
     score: number;
     completed: boolean;
   } | null>(null);
+  const { soundEnabled, toggleSound, playResultSound } = useSoundFeedback();
 
   const progressRef = useRef(progresso);
   const challenge = useMemo(
@@ -125,12 +127,14 @@ export function ComparisonGame({
         : `Voce acertou ${result.hits.length} comparacao(oes). Precisa de ${difficulty.minimoParaConcluir} para concluir.`,
     );
     setReview(result);
+    playResultSound(result.completed);
     onSaveResult(challenge.id, result.score, elapsedSeconds, result.completed, variationIndex);
   }, [
     challenge.id,
     difficulty.minimoParaConcluir,
     difficulty.tempoLimite,
     onSaveResult,
+    playResultSound,
     timeLeft,
     rounds,
     variationIndex,
@@ -172,9 +176,12 @@ export function ComparisonGame({
               Esta trilha treina comparacao de tamanho, quantidade, ordem e valor com fases progressivas.
             </p>
           </div>
-          <button className="btn btn-secondary" onClick={onBack}>
-            Voltar ao painel
-          </button>
+          <div className="button-row">
+            <SoundToggle enabled={soundEnabled} onToggle={toggleSound} />
+            <button className="btn btn-secondary" onClick={onBack}>
+              Voltar ao painel
+            </button>
+          </div>
         </header>
 
         <section className="panel">
@@ -221,6 +228,11 @@ export function ComparisonGame({
               ]}
               note="Leia sempre o criterio da fase antes de responder. Em comparacao, o erro mais comum e escolher rapido sem conferir a regra."
             />
+            {!review.completed && review.mistakes.length > 0 ? (
+              <p className="review-note">
+                {`Onde errou: revise a(s) comparacao(oes) ${review.mistakes.map((item) => item + 1).join(", ")}. Elas mostram sua resposta, a correta e o motivo.`}
+              </p>
+            ) : null}
 
             <div className="review-grid">
               {rounds.map((round, index) => {

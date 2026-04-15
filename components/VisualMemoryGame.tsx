@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { GameGuide } from "@/components/GameGuide";
 import { ReviewMetrics } from "@/components/ReviewMetrics";
+import { SoundToggle, useSoundFeedback } from "@/components/SoundToggle";
 import { visualChallenges } from "@/lib/game-data-v3";
 import { evaluateVisualRound, getNextVariationIndex } from "@/lib/game-logic";
 import { getAgeLabel, getAudienceFromAge, getNivel, isChallengeUnlocked } from "@/lib/scoring";
@@ -67,6 +68,7 @@ export function VisualMemoryGame({
     score: number;
     completed: boolean;
   } | null>(null);
+  const { soundEnabled, toggleSound, playResultSound } = useSoundFeedback();
 
   const progressRef = useRef(progresso);
   const lockRef = useRef(false);
@@ -129,6 +131,7 @@ export function VisualMemoryGame({
         ? `Voce encontrou ${result.pairsFound} pares e concluiu a fase visual.`
         : `Voce encontrou ${result.pairsFound} pares. Precisa de ${challenge.minimoParaConcluir} para concluir.`,
     );
+    playResultSound(result.completed);
     onSaveResult(challenge.id, result.score, elapsedSeconds, result.completed, variationIndex);
   }, [
     challenge.id,
@@ -136,6 +139,7 @@ export function VisualMemoryGame({
     challenge.tempoLimite,
     elapsedSeconds,
     onSaveResult,
+    playResultSound,
     symbols.length,
     variationIndex,
     wrongMatches,
@@ -226,9 +230,12 @@ export function VisualMemoryGame({
             <h1>Encontre os pares de figuras</h1>
             <p className="muted">Treino visual com cartas de animais, flores, objetos e outras imagens ilustradas.</p>
           </div>
-          <button className="btn btn-secondary" onClick={onBack}>
-            Voltar ao painel
-          </button>
+          <div className="button-row">
+            <SoundToggle enabled={soundEnabled} onToggle={toggleSound} />
+            <button className="btn btn-secondary" onClick={onBack}>
+              Voltar ao painel
+            </button>
+          </div>
         </header>
 
         <section className="panel">
@@ -274,6 +281,11 @@ export function VisualMemoryGame({
               ]}
               note="Na memoria visual, o ideal e observar posicao e categoria da figura antes das cartas virarem."
             />
+            {!review.completed ? (
+              <p className="review-note">
+                {`Onde errou: faltaram ${Math.max(review.totalPairs - review.pairsFound, 0)} par(es) e houve ${review.wrongMatches} tentativa(s) incorreta(s). Repare nas figuras da fase antes de repetir.`}
+              </p>
+            ) : null}
             <div className="review-grid">
               <div className="review-column review-good">
                 <strong>Pares encontrados</strong>

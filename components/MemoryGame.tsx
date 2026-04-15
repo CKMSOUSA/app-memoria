@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { GameGuide } from "@/components/GameGuide";
 import { ReviewMetrics } from "@/components/ReviewMetrics";
+import { SoundToggle, useSoundFeedback } from "@/components/SoundToggle";
 import { getChildVisual } from "@/lib/child-visuals";
 import { memoryChallenges } from "@/lib/game-data-v3";
 import { evaluateMemoryRound, getNextVariationIndex } from "@/lib/game-logic";
@@ -102,6 +103,7 @@ export function MemoryGame({ usuario, progresso, onBack, onRememberVariation, on
     score: number;
     completed: boolean;
   } | null>(null);
+  const { soundEnabled, toggleSound, playResultSound } = useSoundFeedback();
 
   const challenge = useMemo(
     () => memoryChallenges.find((item) => item.id === selectedId) ?? memoryChallenges[0],
@@ -206,6 +208,7 @@ export function MemoryGame({ usuario, progresso, onBack, onRememberVariation, on
         : `Voce acertou ${result.hits.length} figura(s). Precisa de ${dificuldade.minimoParaConcluir} para concluir este desafio.`,
     );
     setReview(result);
+    playResultSound(result.completed);
     onSaveResult(challenge.id, result.score, answerSeconds, result.completed, variationIndex);
   }
 
@@ -220,9 +223,12 @@ export function MemoryGame({ usuario, progresso, onBack, onRememberVariation, on
               Cada rodada tem uma unica correcao. Pontos extras so entram quando voce melhora seu recorde anterior.
             </p>
           </div>
-          <button className="btn btn-secondary" onClick={onBack}>
-            Voltar ao painel
-          </button>
+          <div className="button-row">
+            <SoundToggle enabled={soundEnabled} onToggle={toggleSound} />
+            <button className="btn btn-secondary" onClick={onBack}>
+              Voltar ao painel
+            </button>
+          </div>
         </header>
 
         <section className="panel">
@@ -272,7 +278,9 @@ export function MemoryGame({ usuario, progresso, onBack, onRememberVariation, on
                 note={
                   review.completed
                     ? "Excelente. Agora tente repetir mantendo a mesma precisao."
-                    : "Compare as figuras faltantes e tente reconstruir melhor a proxima rodada."
+                    : review.missedWords.length > 0
+                      ? `Onde errou: faltou lembrar ${review.missedWords.length} figura(s). Observe a coluna "Faltaram" antes de tentar de novo.`
+                      : "Onde errou: havia selecao extra. Compare os erros marcados com as figuras corretas."
                 }
               />
 

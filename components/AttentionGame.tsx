@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { ChildVisualBadge } from "@/components/ChildVisualBadge";
 import { GameGuide } from "@/components/GameGuide";
 import { ReviewMetrics } from "@/components/ReviewMetrics";
+import { SoundToggle, useSoundFeedback } from "@/components/SoundToggle";
 import { attentionChallenges } from "@/lib/game-data-v3";
 import { evaluateAttentionRound, getNextVariationIndex } from "@/lib/game-logic";
 import {
@@ -61,6 +62,7 @@ export function AttentionGame({ usuario, progresso, onBack, onRememberVariation,
     hits: string[];
     errors: string[];
   } | null>(null);
+  const { soundEnabled, toggleSound, playResultSound } = useSoundFeedback();
 
   const challenge = useMemo(
     () => attentionChallenges.find((item) => item.id === selectedId) ?? attentionChallenges[0],
@@ -118,13 +120,14 @@ export function AttentionGame({ usuario, progresso, onBack, onRememberVariation,
           ? `Voce encontrou ${result.foundCount} alvo(s) e concluiu o desafio. Score da rodada: ${result.score}.`
           : `Voce encontrou ${result.foundCount} de ${result.totalTargets} alvo(s). Precisa de ${dificuldade.minimoParaConcluir} para concluir.`,
       );
+      playResultSound(result.completed);
       onSaveResult(challenge.id, result.score, result.elapsedSeconds, result.completed, variationIndex);
       return;
     }
 
     const timeout = window.setTimeout(() => setTimeLeft((value) => value - 1), 1000);
     return () => window.clearTimeout(timeout);
-  }, [activeTarget, challenge.id, dificuldade.minimoParaConcluir, dificuldade.tempoLimite, foundTargets.length, onSaveResult, phase, targetIndexes.length, timeLeft, variationIndex, wrongClicks, wrongSelections]);
+  }, [activeTarget, challenge.id, dificuldade.minimoParaConcluir, dificuldade.tempoLimite, foundTargets.length, onSaveResult, phase, playResultSound, targetIndexes.length, timeLeft, variationIndex, wrongClicks, wrongSelections]);
 
   useEffect(() => {
     setGrid(shuffle(gradeVisivel));
@@ -159,9 +162,10 @@ export function AttentionGame({ usuario, progresso, onBack, onRememberVariation,
           ? `Voce encontrou ${result.foundCount} alvo(s) e concluiu o desafio. Score da rodada: ${result.score}.`
           : `Voce encontrou ${result.foundCount} de ${result.totalTargets} alvo(s). Precisa de ${dificuldade.minimoParaConcluir} para concluir.`,
       );
+      playResultSound(result.completed);
       onSaveResult(challenge.id, result.score, result.elapsedSeconds, result.completed, variationIndex);
     }
-  }, [activeTarget, challenge.id, dificuldade.minimoParaConcluir, dificuldade.tempoLimite, foundTargets, onSaveResult, phase, targetIndexes, timeLeft, variationIndex, wrongClicks, wrongSelections]);
+  }, [activeTarget, challenge.id, dificuldade.minimoParaConcluir, dificuldade.tempoLimite, foundTargets, onSaveResult, phase, playResultSound, targetIndexes, timeLeft, variationIndex, wrongClicks, wrongSelections]);
 
   function startRound() {
     setGrid(shuffle(gradeVisivel));
@@ -223,9 +227,12 @@ export function AttentionGame({ usuario, progresso, onBack, onRememberVariation,
               Velocidade ajuda, mas cliques errados reduzem seu score. A ideia aqui e treinar foco seletivo.
             </p>
           </div>
-          <button className="btn btn-secondary" onClick={onBack}>
-            Voltar ao painel
-          </button>
+          <div className="button-row">
+            <SoundToggle enabled={soundEnabled} onToggle={toggleSound} />
+            <button className="btn btn-secondary" onClick={onBack}>
+              Voltar ao painel
+            </button>
+          </div>
         </header>
 
         <section className="panel">
@@ -270,8 +277,15 @@ export function AttentionGame({ usuario, progresso, onBack, onRememberVariation,
                   { label: "Erros", value: String(review.wrongClicks) },
                   { label: "Tempo", value: `${review.elapsedSeconds}s` },
                 ]}
-                note="Observe se voce perdeu por pressa ou por clicar no simbolo errado. O foco seletivo melhora quando erro e velocidade entram em equilibrio."
-              />
+              note="Observe se voce perdeu por pressa ou por clicar no simbolo errado. O foco seletivo melhora quando erro e velocidade entram em equilibrio."
+            />
+            {!review.completed ? (
+              <p className="review-note">
+                {review.wrongClicks > 0
+                  ? `Onde errou: houve ${review.wrongClicks} clique(s) fora do alvo ${variacaoAtual.alvo}.`
+                  : `Onde errou: faltaram ${Math.max(review.totalTargets - review.foundCount, 0)} alvo(s) para completar a meta.`}
+              </p>
+            ) : null}
 
             <div className="review-grid">
               <div className="review-column review-good">

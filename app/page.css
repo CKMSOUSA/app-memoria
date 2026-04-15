@@ -263,6 +263,18 @@ h2 {
   border: 1px solid var(--line);
 }
 
+.sound-toggle {
+  background: rgba(255, 255, 255, 0.72);
+  color: #27536f;
+  border: 1px solid rgba(44, 99, 135, 0.22);
+}
+
+.sound-toggle-active {
+  background: linear-gradient(135deg, #2c6387 0%, #4a89b2 100%);
+  color: white;
+  box-shadow: 0 12px 22px rgba(44, 99, 135, 0.18);
+}
+
 .btn-link {
   padding: 0;
   background: transparent;

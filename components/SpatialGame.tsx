@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { ChildVisualBadge } from "@/components/ChildVisualBadge";
 import { GameGuide } from "@/components/GameGuide";
 import { ReviewMetrics } from "@/components/ReviewMetrics";
+import { SoundToggle, useSoundFeedback } from "@/components/SoundToggle";
 import { spatialChallenges } from "@/lib/game-data-v3";
 import { evaluateSpatialRound, getNextVariationIndex } from "@/lib/game-logic";
 import {
@@ -90,6 +91,7 @@ export function SpatialGame({ usuario, progresso, onBack, onRememberVariation, o
     score: number;
     completed: boolean;
   } | null>(null);
+  const { soundEnabled, toggleSound, playResultSound } = useSoundFeedback();
 
   const progressoRef = useRef(progresso);
   const challenge = useMemo(
@@ -185,6 +187,7 @@ export function SpatialGame({ usuario, progresso, onBack, onRememberVariation, o
           ? `Voce reconstruiu ${result.hits.length} direcao(oes) corretamente e concluiu a rota.`
           : `Voce acertou ${result.hits.length} movimento(s). Precisa de ${difficulty.minimoParaConcluir} para concluir.`,
       );
+      playResultSound(result.completed);
       onSaveResult(challenge.id, result.score, answerSeconds, result.completed, variationIndex);
     }
   }
@@ -200,9 +203,12 @@ export function SpatialGame({ usuario, progresso, onBack, onRememberVariation, o
               Este treino trabalha referencia espacial, esquerda e direita, e memoria de deslocamento em sequencia.
             </p>
           </div>
-          <button className="btn btn-secondary" onClick={onBack}>
-            Voltar ao painel
-          </button>
+          <div className="button-row">
+            <SoundToggle enabled={soundEnabled} onToggle={toggleSound} />
+            <button className="btn btn-secondary" onClick={onBack}>
+              Voltar ao painel
+            </button>
+          </div>
         </header>
 
         <section className="panel">
@@ -249,6 +255,11 @@ export function SpatialGame({ usuario, progresso, onBack, onRememberVariation, o
               ]}
               note="Compare a rota correta com a sua rota. Isso ajuda a perceber onde a referencia espacial se perdeu."
             />
+            {!review.completed && review.wrongMoves.length > 0 ? (
+              <p className="review-note">
+                {`Onde errou: a rota desviou em ${review.wrongMoves.length} passo(s). Compare os mapas abaixo para localizar o ponto da troca.`}
+              </p>
+            ) : null}
 
             <div className="review-grid">
               <div className="review-column review-good">

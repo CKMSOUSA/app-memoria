@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ChildVisualBadge } from "@/components/ChildVisualBadge";
 import { GameGuide } from "@/components/GameGuide";
 import { ReviewMetrics } from "@/components/ReviewMetrics";
+import { SoundToggle, useSoundFeedback } from "@/components/SoundToggle";
 import { logicChallenges } from "@/lib/game-data-v3";
 import { evaluateLogicRound, getNextVariationIndex } from "@/lib/game-logic";
 import { getAgeLabel, getAudienceFromAge, getNivel, isChallengeUnlocked } from "@/lib/scoring";
@@ -39,6 +40,7 @@ export function LogicGame({ usuario, progresso, onBack, onRememberVariation, onS
     score: number;
     completed: boolean;
   } | null>(null);
+  const { soundEnabled, toggleSound, playResultSound } = useSoundFeedback();
 
   const progressRef = useRef(progresso);
   const challenge = useMemo(
@@ -88,9 +90,10 @@ export function LogicGame({ usuario, progresso, onBack, onRememberVariation, onS
           : `Voce acertou ${result.hits.length} sequencia(s). Precisa de ${challenge.minimoParaConcluir} para concluir.`,
       );
       setReview(result);
+      playResultSound(result.completed);
       onSaveResult(challenge.id, result.score, elapsedSeconds, result.completed, variationIndex);
     },
-    [challenge.id, challenge.minimoParaConcluir, challenge.tempoLimite, onSaveResult, timeLeft, variation.rounds, variationIndex],
+    [challenge.id, challenge.minimoParaConcluir, challenge.tempoLimite, onSaveResult, playResultSound, timeLeft, variation.rounds, variationIndex],
   );
 
   useEffect(() => {
@@ -145,9 +148,12 @@ export function LogicGame({ usuario, progresso, onBack, onRememberVariation, onS
             <h1>Descubra a regra e escolha o proximo termo</h1>
             <p className="muted">Essa trilha trabalha raciocinio sequencial, padroes e previsao de proximo passo.</p>
           </div>
-          <button className="btn btn-secondary" onClick={onBack}>
-            Voltar ao painel
-          </button>
+          <div className="button-row">
+            <SoundToggle enabled={soundEnabled} onToggle={toggleSound} />
+            <button className="btn btn-secondary" onClick={onBack}>
+              Voltar ao painel
+            </button>
+          </div>
         </header>
 
         <section className="panel">
@@ -194,6 +200,11 @@ export function LogicGame({ usuario, progresso, onBack, onRememberVariation, onS
               ]}
               note="Leia a explicacao correta depois de cada rodada. Isso ajuda a reconhecer o padrao com mais rapidez na proxima tentativa."
             />
+            {!review.completed && review.mistakes.length > 0 ? (
+              <p className="review-note">
+                {`Onde errou: a(s) sequencia(s) ${review.mistakes.map((item) => item + 1).join(", ")} precisam de revisao. Veja a regra explicada em cada card.`}
+              </p>
+            ) : null}
 
             <div className="review-grid">
               {variation.rounds.map((round, index) => {

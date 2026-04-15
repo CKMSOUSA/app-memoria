@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { ChildVisualBadge } from "@/components/ChildVisualBadge";
 import { GameGuide } from "@/components/GameGuide";
 import { ReviewMetrics } from "@/components/ReviewMetrics";
+import { SoundToggle, useSoundFeedback } from "@/components/SoundToggle";
 import { exclusiveChallenges } from "@/lib/game-data-v3";
 import { evaluateAudienceRound, getNextVariationIndex } from "@/lib/game-logic";
 import { getAgeLabel, getAudienceFromAge, getAudienceLabel } from "@/lib/scoring";
@@ -43,6 +44,7 @@ export function AudienceGame({ usuario, progresso, onBack, onRememberVariation, 
     missedItems: string[];
     score: number;
   } | null>(null);
+  const { soundEnabled, toggleSound, playResultSound } = useSoundFeedback();
 
   const challenge = useMemo(
     () => audienceChallenges.find((item) => item.id === selectedId) ?? audienceChallenges[0] ?? exclusiveChallenges[0],
@@ -141,6 +143,7 @@ export function AudienceGame({ usuario, progresso, onBack, onRememberVariation, 
       missedItems: currentVariation.sequence.filter((item) => !result.hits.includes(item)),
       score: result.score,
     });
+    playResultSound(result.completed);
     onSaveResult(challenge.id, result.score, answerSeconds, result.completed, variationIndex);
   }
 
@@ -154,9 +157,12 @@ export function AudienceGame({ usuario, progresso, onBack, onRememberVariation, 
             <p className="small-muted">{`Fase ${phaseNumber} - ${challenge.difficultyLabel}`}</p>
             <p className="muted">{`${getAudienceLabel(audience)} - ${getAgeLabel(usuario.idade)} - ${challenge.descricao}`}</p>
           </div>
-          <button className="btn btn-secondary" onClick={onBack}>
-            Voltar ao painel
-          </button>
+          <div className="button-row">
+            <SoundToggle enabled={soundEnabled} onToggle={toggleSound} />
+            <button className="btn btn-secondary" onClick={onBack}>
+              Voltar ao painel
+            </button>
+          </div>
         </header>
 
         <section className="panel exclusive-panel">
@@ -203,6 +209,11 @@ export function AudienceGame({ usuario, progresso, onBack, onRememberVariation, 
               ]}
               note="Aqui a ordem importa. Mesmo acertando o item, ele precisa aparecer na posicao certa para contar."
             />
+            {review.wrongItems.length > 0 || review.missedItems.length > 0 ? (
+              <p className="review-note">
+                {`Onde errou: ${review.wrongItems.length} item(ns) ficaram fora da ordem e ${review.missedItems.length} item(ns) faltaram na resposta.`}
+              </p>
+            ) : null}
 
             <div className="review-grid">
               <div className="review-column review-good">
