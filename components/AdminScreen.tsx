@@ -100,12 +100,11 @@ export function AdminScreen({
         <header className="game-header">
           <div>
             <p className="eyebrow">Area administrativa</p>
-            <h1>Acompanhe usuarios, progresso e sessoes</h1>
             <p className="muted">
               Painel de acompanhamento com resumo por aluno, ultima atividade, modo de treino mais forte e central de ajuda.
             </p>
           </div>
-          <button className="btn btn-secondary" onClick={onBack}>
+          <button className="btn btn-admin-back" onClick={onBack}>
             Voltar ao painel
           </button>
         </header>

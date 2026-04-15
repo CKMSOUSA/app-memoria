@@ -92,9 +92,16 @@
   box-shadow: 0 14px 24px rgba(45, 138, 84, 0.2);
 }
 
+.btn-admin-back {
+  background: linear-gradient(135deg, #2c6387 0%, #4a89b2 100%);
+  color: white;
+  box-shadow: 0 14px 24px rgba(44, 99, 135, 0.2);
+}
+
 .btn-topbar-admin,
 .btn-topbar-profile,
-.btn-topbar-help {
+.btn-topbar-help,
+.btn-admin-back {
   padding: 10px 14px;
   min-height: 44px;
   border-radius: 14px;
