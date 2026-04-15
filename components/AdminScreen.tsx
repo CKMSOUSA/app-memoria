@@ -99,7 +99,7 @@ export function AdminScreen({
       <section className="game-card">
         <header className="game-header">
           <div>
-            <p className="eyebrow">Area administrativa</p>
+            <p className="eyebrow admin-area-title">Area administrativa</p>
             <p className="muted">
               Painel de acompanhamento com resumo por aluno, ultima atividade, modo de treino mais forte e central de ajuda.
             </p>

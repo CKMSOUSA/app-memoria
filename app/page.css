@@ -144,6 +144,12 @@
   font-weight: 700;
 }
 
+.admin-area-title {
+  font-size: 22px;
+  line-height: 1.2;
+  letter-spacing: 0.08em;
+}
+
 h1,
 h2,
 h3,
