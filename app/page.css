@@ -1494,6 +1494,55 @@ h2 {
   gap: 16px;
 }
 
+.admin-status-panel {
+  display: grid;
+  gap: 16px;
+}
+
+.admin-status-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+}
+
+.admin-status-card {
+  display: grid;
+  gap: 6px;
+  padding: 16px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.82);
+  border: 1px solid var(--line);
+}
+
+.admin-status-card strong {
+  color: var(--ink-strong);
+  font-size: 30px;
+  line-height: 1;
+}
+
+.admin-status-card span {
+  color: var(--ink-soft);
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-size: 12px;
+}
+
+.admin-status-card-active {
+  border-color: rgba(45, 138, 84, 0.26);
+  background: rgba(229, 245, 234, 0.9);
+}
+
+.admin-status-card-blocked {
+  border-color: rgba(194, 134, 35, 0.26);
+  background: rgba(255, 248, 230, 0.92);
+}
+
+.admin-status-card-deleted {
+  border-color: rgba(184, 75, 75, 0.2);
+  background: rgba(250, 237, 237, 0.92);
+}
+
 .admin-toolbar-grid {
   display: grid;
   gap: 14px;
@@ -1523,6 +1572,33 @@ h2 {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
+}
+
+.admin-user-status {
+  display: inline-flex;
+  width: fit-content;
+  align-items: center;
+  justify-content: center;
+  min-height: 30px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.admin-user-status-ativo {
+  background: rgba(45, 138, 84, 0.14);
+  color: var(--success);
+}
+
+.admin-user-status-bloqueado {
+  background: rgba(194, 134, 35, 0.14);
+  color: var(--warning);
+}
+
+.admin-user-status-excluido {
+  background: rgba(184, 75, 75, 0.12);
+  color: var(--danger);
 }
 
 .admin-progress-grid {

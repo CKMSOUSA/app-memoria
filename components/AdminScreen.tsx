@@ -19,6 +19,12 @@ type AdminScreenProps = {
   onUpdateUserStatus: (email: string, status: Usuario["status"]) => Promise<void>;
 };
 
+const userStatusLabels: Record<Usuario["status"], string> = {
+  ativo: "Ativo",
+  bloqueado: "Bloqueado",
+  excluido: "Excluido",
+};
+
 export function AdminScreen({
   usuario,
   progressoAtual,
@@ -33,19 +39,34 @@ export function AdminScreen({
     [histories, progressoAtual, usuario],
   );
   const [search, setSearch] = useState("");
+  const [userStatusFilter, setUserStatusFilter] = useState<"todos" | Usuario["status"]>("todos");
   const [helpStatusFilter, setHelpStatusFilter] = useState<"todas" | HelpRequest["status"]>("todas");
   const [updatingHelpId, setUpdatingHelpId] = useState<string | null>(null);
   const [updatingUserEmail, setUpdatingUserEmail] = useState<string | null>(null);
   const [replyDrafts, setReplyDrafts] = useState<Record<string, string>>({});
+  const userStatusSummary = useMemo(
+    () => ({
+      ativo: normalizedHistories.filter(({ user }) => user.status === "ativo").length,
+      bloqueado: normalizedHistories.filter(({ user }) => user.status === "bloqueado").length,
+      excluido: normalizedHistories.filter(({ user }) => user.status === "excluido").length,
+    }),
+    [normalizedHistories],
+  );
 
   const filteredHistories = useMemo(() => {
     const query = search.trim().toLowerCase();
-    if (!query) return normalizedHistories;
 
     return normalizedHistories.filter(({ user, history }) => {
+      if (userStatusFilter !== "todos" && user.status !== userStatusFilter) {
+        return false;
+      }
+
+      if (!query) return true;
+
       const matchesUser =
         user.nome.toLowerCase().includes(query) ||
-        user.email.toLowerCase().includes(query);
+        user.email.toLowerCase().includes(query) ||
+        user.status.toLowerCase().includes(query);
       const matchesHistory = history.some(
         (entry) =>
           getSessionModeLabel(entry.mode).toLowerCase().includes(query) ||
@@ -54,7 +75,7 @@ export function AdminScreen({
 
       return matchesUser || matchesHistory;
     });
-  }, [normalizedHistories, search]);
+  }, [normalizedHistories, search, userStatusFilter]);
 
   const filteredHelpRequests = useMemo(() => {
     const query = search.trim().toLowerCase();
@@ -112,6 +133,27 @@ export function AdminScreen({
           </article>
         </section>
 
+        <section className="panel admin-status-panel">
+          <div className="section-head">
+            <h3>Status dos usuarios</h3>
+            <span className="small-muted">Controle rapido de acesso ao aplicativo</span>
+          </div>
+          <div className="admin-status-grid">
+            <div className="admin-status-card admin-status-card-active">
+              <strong>{userStatusSummary.ativo}</strong>
+              <span>Ativos</span>
+            </div>
+            <div className="admin-status-card admin-status-card-blocked">
+              <strong>{userStatusSummary.bloqueado}</strong>
+              <span>Bloqueados</span>
+            </div>
+            <div className="admin-status-card admin-status-card-deleted">
+              <strong>{userStatusSummary.excluido}</strong>
+              <span>Excluidos</span>
+            </div>
+          </div>
+        </section>
+
         <section className="panel admin-toolbar">
           <div className="section-head">
             <h3>Busca e filtros</h3>
@@ -126,6 +168,20 @@ export function AdminScreen({
                 onChange={(event) => setSearch(event.target.value)}
                 placeholder="Ex.: Ana, user@email.com, memoria ou fase 3"
               />
+            </label>
+
+            <label className="field">
+              <span>Status do usuario</span>
+              <select
+                className="text-input"
+                value={userStatusFilter}
+                onChange={(event) => setUserStatusFilter(event.target.value as "todos" | Usuario["status"])}
+              >
+                <option value="todos">Todos</option>
+                <option value="ativo">Ativos</option>
+                <option value="bloqueado">Bloqueados</option>
+                <option value="excluido">Excluidos</option>
+              </select>
             </label>
 
             <label className="field">
@@ -165,7 +221,9 @@ export function AdminScreen({
                   <div className="admin-chip-grid">
                     <div className="phase-chip">
                       <strong>Status</strong>
-                      <span>{user.status}</span>
+                      <span className={`admin-user-status admin-user-status-${user.status}`}>
+                        {userStatusLabels[user.status]}
+                      </span>
                     </div>
                     <div className="phase-chip">
                       <strong>Pontos</strong>
@@ -188,7 +246,7 @@ export function AdminScreen({
                   <div className="button-row">
                     <button
                       className="btn btn-secondary"
-                      disabled={updatingUserEmail === user.email || user.role === "admin"}
+                      disabled={updatingUserEmail === user.email || user.role === "admin" || user.status === "excluido"}
                       onClick={async () => {
                         setUpdatingUserEmail(user.email);
                         try {
@@ -200,6 +258,8 @@ export function AdminScreen({
                     >
                       {updatingUserEmail === user.email
                         ? "Atualizando..."
+                        : user.status === "excluido"
+                          ? "Usuario excluido"
                         : user.status === "bloqueado"
                           ? "Desbloquear usuario"
                           : "Bloquear usuario"}
@@ -208,6 +268,11 @@ export function AdminScreen({
                       className="btn btn-secondary"
                       disabled={updatingUserEmail === user.email || user.role === "admin" || user.status === "excluido"}
                       onClick={async () => {
+                        const confirmed = window.confirm(
+                          `Excluir ${user.nome}? O usuario perdera progresso, historico e pedidos de ajuda salvos.`,
+                        );
+                        if (!confirmed) return;
+
                         setUpdatingUserEmail(user.email);
                         try {
                           await onUpdateUserStatus(user.email, "excluido");
