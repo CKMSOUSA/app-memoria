@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 
 const SOUND_STORAGE_KEY = "app_memoria_sons_v1";
 
-type SoundTone = "success" | "error";
+type SoundTone = "success" | "error" | "tap";
 
 function canUseAudio() {
   return typeof window !== "undefined" && typeof window.AudioContext !== "undefined";
@@ -20,21 +20,25 @@ function playTone(kind: SoundTone) {
   const now = context.currentTime;
 
   oscillator.type = "sine";
-  oscillator.frequency.setValueAtTime(kind === "success" ? 660 : 220, now);
-  oscillator.frequency.exponentialRampToValueAtTime(kind === "success" ? 880 : 150, now + 0.18);
+  const startFrequency = kind === "success" ? 660 : kind === "tap" ? 520 : 220;
+  const endFrequency = kind === "success" ? 880 : kind === "tap" ? 620 : 150;
+  const duration = kind === "tap" ? 0.09 : 0.24;
+
+  oscillator.frequency.setValueAtTime(startFrequency, now);
+  oscillator.frequency.exponentialRampToValueAtTime(endFrequency, now + Math.max(0.06, duration - 0.04));
 
   gain.gain.setValueAtTime(0.0001, now);
   gain.gain.exponentialRampToValueAtTime(0.08, now + 0.02);
-  gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.22);
+  gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
 
   oscillator.connect(gain);
   gain.connect(context.destination);
   oscillator.start(now);
-  oscillator.stop(now + 0.24);
+  oscillator.stop(now + duration + 0.02);
 
   window.setTimeout(() => {
     void context.close();
-  }, 320);
+  }, (duration + 0.12) * 1000);
 }
 
 export function useSoundFeedback() {
@@ -64,7 +68,12 @@ export function useSoundFeedback() {
     [enabled],
   );
 
-  return { soundEnabled: enabled, toggleSound, playResultSound };
+  const playAnswerSound = useCallback(() => {
+    if (!enabled) return;
+    playTone("tap");
+  }, [enabled]);
+
+  return { soundEnabled: enabled, toggleSound, playResultSound, playAnswerSound };
 }
 
 export function SoundToggle({

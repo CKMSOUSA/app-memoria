@@ -103,7 +103,7 @@ export function MemoryGame({ usuario, progresso, onBack, onRememberVariation, on
     score: number;
     completed: boolean;
   } | null>(null);
-  const { soundEnabled, toggleSound, playResultSound } = useSoundFeedback();
+  const { soundEnabled, toggleSound, playResultSound, playAnswerSound } = useSoundFeedback();
 
   const challenge = useMemo(
     () => memoryChallenges.find((item) => item.id === selectedId) ?? memoryChallenges[0],
@@ -185,6 +185,7 @@ export function MemoryGame({ usuario, progresso, onBack, onRememberVariation, on
   function toggleItem(item: string) {
     if (phase !== "answering") return;
 
+    playAnswerSound();
     setSelectedItems((current) =>
       current.includes(item) ? current.filter((token) => token !== item) : [...current, item],
     );

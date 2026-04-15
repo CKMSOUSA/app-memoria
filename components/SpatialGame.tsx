@@ -91,7 +91,7 @@ export function SpatialGame({ usuario, progresso, onBack, onRememberVariation, o
     score: number;
     completed: boolean;
   } | null>(null);
-  const { soundEnabled, toggleSound, playResultSound } = useSoundFeedback();
+  const { soundEnabled, toggleSound, playResultSound, playAnswerSound } = useSoundFeedback();
 
   const progressoRef = useRef(progresso);
   const challenge = useMemo(
@@ -168,6 +168,7 @@ export function SpatialGame({ usuario, progresso, onBack, onRememberVariation, o
   function pushMove(move: string) {
     if (phase !== "answering") return;
 
+    playAnswerSound();
     const nextMoves = [...selectedMoves, move];
     setSelectedMoves(nextMoves);
 

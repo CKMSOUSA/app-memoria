@@ -68,7 +68,7 @@ export function VisualMemoryGame({
     score: number;
     completed: boolean;
   } | null>(null);
-  const { soundEnabled, toggleSound, playResultSound } = useSoundFeedback();
+  const { soundEnabled, toggleSound, playResultSound, playAnswerSound } = useSoundFeedback();
 
   const progressRef = useRef(progresso);
   const lockRef = useRef(false);
@@ -188,6 +188,7 @@ export function VisualMemoryGame({
     if (phase !== "playing" || lockRef.current) return;
     if (flippedIndexes.includes(index) || cards[index]?.matched) return;
 
+    playAnswerSound();
     const nextFlipped = [...flippedIndexes, index];
     setFlippedIndexes(nextFlipped);
 

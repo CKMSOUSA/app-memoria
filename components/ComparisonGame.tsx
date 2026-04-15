@@ -52,7 +52,7 @@ export function ComparisonGame({
     score: number;
     completed: boolean;
   } | null>(null);
-  const { soundEnabled, toggleSound, playResultSound } = useSoundFeedback();
+  const { soundEnabled, toggleSound, playResultSound, playAnswerSound } = useSoundFeedback();
 
   const progressRef = useRef(progresso);
   const challenge = useMemo(
@@ -154,6 +154,7 @@ export function ComparisonGame({
   function handleAnswer(answer: "left" | "right") {
     if (phase !== "playing") return;
 
+    playAnswerSound();
     const nextAnswers = [...selectedAnswers, answer];
     setSelectedAnswers(nextAnswers);
 

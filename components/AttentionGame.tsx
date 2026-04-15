@@ -62,7 +62,7 @@ export function AttentionGame({ usuario, progresso, onBack, onRememberVariation,
     hits: string[];
     errors: string[];
   } | null>(null);
-  const { soundEnabled, toggleSound, playResultSound } = useSoundFeedback();
+  const { soundEnabled, toggleSound, playResultSound, playAnswerSound } = useSoundFeedback();
 
   const challenge = useMemo(
     () => attentionChallenges.find((item) => item.id === selectedId) ?? attentionChallenges[0],
@@ -198,6 +198,7 @@ export function AttentionGame({ usuario, progresso, onBack, onRememberVariation,
     if (phase !== "playing") return;
     if (foundTargets.includes(index)) return;
 
+    playAnswerSound();
     if (grid[index] === activeTarget) {
       setFoundTargets((current) => [...current, index]);
       return;

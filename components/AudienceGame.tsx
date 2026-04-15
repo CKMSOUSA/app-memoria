@@ -44,7 +44,7 @@ export function AudienceGame({ usuario, progresso, onBack, onRememberVariation, 
     missedItems: string[];
     score: number;
   } | null>(null);
-  const { soundEnabled, toggleSound, playResultSound } = useSoundFeedback();
+  const { soundEnabled, toggleSound, playResultSound, playAnswerSound } = useSoundFeedback();
 
   const challenge = useMemo(
     () => audienceChallenges.find((item) => item.id === selectedId) ?? audienceChallenges[0] ?? exclusiveChallenges[0],
@@ -116,6 +116,7 @@ export function AudienceGame({ usuario, progresso, onBack, onRememberVariation, 
 
   function submitAnswer() {
     if (phase !== "answering") return;
+    playAnswerSound();
     const selectedSequence = response
       .split(/[;,\n\s]+/)
       .map((item) => item.trim())
