@@ -429,13 +429,6 @@ export function MemoryGame({
                   {phase === "answering" ? `${answerSeconds}s respondendo` : "Aguardando rodada"}
                 </span>
               </div>
-              <div className="response-timer-row">
-                <TimerDisplay
-                  label={phase === "memorizing" ? "Memorizacao" : phase === "answering" ? "Resposta" : "Tempo"}
-                  value={phase === "memorizing" ? `${countdown}s` : phase === "answering" ? `${answerSeconds}s` : "--"}
-                  tone={phase === "memorizing" || phase === "answering" ? "active" : "neutral"}
-                />
-              </div>
               <div className="memory-task-card">
                 <strong className="memory-task-title">
                   {!isAdvancedMode && audience === "infantil" && challenge.nomeInfantil ? challenge.nomeInfantil : challenge.nome}
@@ -455,6 +448,14 @@ export function MemoryGame({
                 <button className="btn btn-secondary btn-round-swap" onClick={resetRound}>
                   Trocar rodada
                 </button>
+              </div>
+
+              <div className="response-timer-row response-timer-row-near-board">
+                <TimerDisplay
+                  label={phase === "memorizing" ? "Memorizacao" : phase === "answering" ? "Resposta" : "Tempo"}
+                  value={phase === "memorizing" ? `${countdown}s` : phase === "answering" ? `${answerSeconds}s` : "--"}
+                  tone={phase === "memorizing" || phase === "answering" ? "active" : "neutral"}
+                />
               </div>
 
               <div className="memory-answer-board">

@@ -451,14 +451,6 @@ export function AttentionGame({
                   {foundTargets.length}/{targetIndexes.length} alvo(s) encontrados
                 </span>
               </div>
-              <div className="response-timer-row">
-                <TimerDisplay
-                  label="Tempo"
-                  value={phase === "playing" ? `${timeLeft}s` : "--"}
-                  tone={phase === "playing" && timeLeft <= 10 ? "warning" : phase === "playing" ? "active" : "neutral"}
-                />
-              </div>
-
               <div className="round-task-card">
                 <strong className="round-task-title">
                   {!isAdvancedMode && audience === "infantil" && challenge.nomeInfantil ? challenge.nomeInfantil : challenge.nome}
@@ -480,6 +472,14 @@ export function AttentionGame({
                 <button className="btn btn-secondary btn-round-swap" onClick={resetRound}>
                   Trocar rodada
                 </button>
+              </div>
+
+              <div className="response-timer-row response-timer-row-near-board">
+                <TimerDisplay
+                  label="Tempo"
+                  value={phase === "playing" ? `${timeLeft}s` : "--"}
+                  tone={phase === "playing" && timeLeft <= 10 ? "warning" : phase === "playing" ? "active" : "neutral"}
+                />
               </div>
 
               <div className="attention-grid">

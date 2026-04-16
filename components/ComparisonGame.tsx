@@ -370,14 +370,6 @@ export function ComparisonGame({
                   {phase === "playing" ? `${currentRoundIndex + 1}/${rounds.length}` : "Aguardando rodada"}
                 </span>
               </div>
-              <div className="response-timer-row">
-                <TimerDisplay
-                  label="Tempo"
-                  value={phase === "playing" ? `${timeLeft}s` : "--"}
-                  tone={phase === "playing" && timeLeft <= 10 ? "warning" : phase === "playing" ? "active" : "neutral"}
-                />
-              </div>
-
               <div className="comparison-task-card">
                 <strong className="comparison-task-title">
                   {!isAdvancedMode && audience === "infantil" && challenge.nomeInfantil ? challenge.nomeInfantil : challenge.nome}
@@ -399,6 +391,14 @@ export function ComparisonGame({
                 <button className="btn btn-secondary btn-round-swap" onClick={resetRound}>
                   Trocar rodada
                 </button>
+              </div>
+
+              <div className="response-timer-row response-timer-row-near-board">
+                <TimerDisplay
+                  label="Tempo"
+                  value={phase === "playing" ? `${timeLeft}s` : "--"}
+                  tone={phase === "playing" && timeLeft <= 10 ? "warning" : phase === "playing" ? "active" : "neutral"}
+                />
               </div>
 
               <div className="comparison-board">

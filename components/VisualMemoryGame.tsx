@@ -391,14 +391,6 @@ export function VisualMemoryGame({
                   {phase === "playing" ? "Encontre os pares iguais" : "Aguardando rodada"}
                 </span>
               </div>
-              <div className="response-timer-row">
-                <TimerDisplay
-                  label={phase === "showing" ? "Observacao" : "Tempo"}
-                  value={phase === "showing" || phase === "playing" ? `${timeLeft}s` : "--"}
-                  tone={phase === "playing" && timeLeft <= 10 ? "warning" : phase === "showing" || phase === "playing" ? "active" : "neutral"}
-                />
-              </div>
-
               <div className="round-task-card">
                 <strong className="round-task-title">
                   {audience === "infantil" && challenge.nomeInfantil ? challenge.nomeInfantil : challenge.nome}
@@ -416,6 +408,14 @@ export function VisualMemoryGame({
                 <button className="btn btn-secondary btn-round-swap" onClick={resetRound}>
                   Trocar rodada
                 </button>
+              </div>
+
+              <div className="response-timer-row response-timer-row-near-board">
+                <TimerDisplay
+                  label={phase === "showing" ? "Observacao" : "Tempo"}
+                  value={phase === "showing" || phase === "playing" ? `${timeLeft}s` : "--"}
+                  tone={phase === "playing" && timeLeft <= 10 ? "warning" : phase === "showing" || phase === "playing" ? "active" : "neutral"}
+                />
               </div>
 
               <div className="visual-grid">

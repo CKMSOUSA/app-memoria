@@ -231,6 +231,19 @@ h2 {
   margin-bottom: 10px;
 }
 
+.response-timer-row-near-board {
+  justify-content: flex-start;
+  margin-top: 6px;
+  margin-bottom: 14px;
+}
+
+.response-timer-row-near-board .timer-display {
+  min-width: 144px;
+  padding: 14px 18px;
+  border-width: 2px;
+  box-shadow: 0 14px 28px rgba(127, 79, 36, 0.12);
+}
+
 .field {
   display: grid;
   gap: 8px;

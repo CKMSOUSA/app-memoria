@@ -428,14 +428,6 @@ export function SpatialGame({
                   {phase === "answering" ? `${answerSeconds}s respondendo` : "Aguardando rodada"}
                 </span>
               </div>
-              <div className="response-timer-row">
-                <TimerDisplay
-                  label={phase === "showing" ? "Observacao" : phase === "answering" ? "Resposta" : "Tempo"}
-                  value={phase === "showing" ? `${revealLeft}s` : phase === "answering" ? `${answerSeconds}s` : "--"}
-                  tone={phase === "showing" || phase === "answering" ? "active" : "neutral"}
-                />
-              </div>
-
               <div className="round-task-card">
                 <strong className="round-task-title">
                   {!isAdvancedMode && audience === "infantil" && challenge.nomeInfantil ? challenge.nomeInfantil : challenge.nome}
@@ -457,6 +449,14 @@ export function SpatialGame({
                 <button className="btn btn-secondary btn-round-swap" onClick={resetRound}>
                   Trocar rota
                 </button>
+              </div>
+
+              <div className="response-timer-row response-timer-row-near-board">
+                <TimerDisplay
+                  label={phase === "showing" ? "Observacao" : phase === "answering" ? "Resposta" : "Tempo"}
+                  value={phase === "showing" ? `${revealLeft}s` : phase === "answering" ? `${answerSeconds}s` : "--"}
+                  tone={phase === "showing" || phase === "answering" ? "active" : "neutral"}
+                />
               </div>
 
               <div className={`${isAdvancedMode ? "status-row compact-status-row" : ""}`}>
