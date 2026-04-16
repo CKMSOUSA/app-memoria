@@ -16,7 +16,7 @@ export const advancedMemoryChallenges: MemoryChallenge[] = [
       ["prato", "trato", "trapo", "praga", "prazo", "prumo", "prisma", "prado"],
       ["linha", "linda", "limbo", "livro", "lirio", "lixa", "lente", "lombo"],
     ],
-    tempoMemorizacao: 7,
+    tempoMemorizacao: 17,
     minimoParaConcluir: 6,
   },
   {
@@ -28,7 +28,7 @@ export const advancedMemoryChallenges: MemoryChallenge[] = [
       ["LA3", "MB8", "NC1", "OD7", "PE4", "QF9", "RG2", "SH6", "TI5"],
       ["UZ4", "VY1", "WX8", "XV3", "YU9", "ZT2", "AS7", "BR5", "CQ6"],
     ],
-    tempoMemorizacao: 6,
+    tempoMemorizacao: 16,
     minimoParaConcluir: 7,
   },
   {
@@ -40,7 +40,7 @@ export const advancedMemoryChallenges: MemoryChallenge[] = [
       ["vetor", "setor", "motor", "mentor", "menor", "tenor", "vapor", "valor", "calor", "cobor"],
       ["trama", "grama", "drama", "chama", "clama", "pluma", "prumo", "rumo", "sumo", "tumor"],
     ],
-    tempoMemorizacao: 5,
+    tempoMemorizacao: 15,
     minimoParaConcluir: 8,
   },
 ];
@@ -67,7 +67,7 @@ export const advancedAttentionChallenges: AttentionChallenge[] = [
         grade: ["KQ", "KO", "QK", "KQ", "KG", "KQ", "KR", "KQ", "XQ", "QK", "KQ", "K0", "KQ", "KC", "QK", "KQ"],
       },
     ],
-    tempoLimite: 12,
+    tempoLimite: 22,
     minimoParaConcluir: 6,
   },
   {
@@ -91,7 +91,7 @@ export const advancedAttentionChallenges: AttentionChallenge[] = [
         grade: ["C9", "G9", "9C", "C9", "C0", "C9", "CQ", "C9", "O9", "9C", "C9", "D9", "C9", "C8", "C9", "Q9", "9C", "C9"],
       },
     ],
-    tempoLimite: 11,
+    tempoLimite: 21,
     minimoParaConcluir: 7,
   },
   {
@@ -115,7 +115,7 @@ export const advancedAttentionChallenges: AttentionChallenge[] = [
         grade: ["QF4", "FQ4", "QF9", "QF4", "QE4", "QF4", "QG4", "QF4", "QFA", "4FQ", "QF4", "QE9", "QF4", "QG9", "QF4", "QF?", "FQ4", "QF4", "QEA", "QF4"],
       },
     ],
-    tempoLimite: 10,
+    tempoLimite: 20,
     minimoParaConcluir: 8,
   },
 ];
@@ -145,7 +145,7 @@ export const advancedComparisonChallenges: ComparisonChallenge[] = [
         ],
       },
     ],
-    tempoLimite: 20,
+    tempoLimite: 30,
     minimoParaConcluir: 3,
   },
   {
@@ -172,7 +172,7 @@ export const advancedComparisonChallenges: ComparisonChallenge[] = [
         ],
       },
     ],
-    tempoLimite: 18,
+    tempoLimite: 28,
     minimoParaConcluir: 3,
   },
   {
@@ -199,7 +199,7 @@ export const advancedComparisonChallenges: ComparisonChallenge[] = [
         ],
       },
     ],
-    tempoLimite: 16,
+    tempoLimite: 26,
     minimoParaConcluir: 4,
   },
 ];
@@ -215,7 +215,7 @@ export const advancedSpatialChallenges: SpatialChallenge[] = [
       { prompt: "A sequência mistura avanço, retorno e inversão rápida.", sequence: ["baixo", "direita", "cima", "cima", "esquerda", "baixo", "direita", "direita"], revealSeconds: 7, options: ["cima", "baixo", "esquerda", "direita"] },
     ],
     minimoParaConcluir: 6,
-    tempoResposta: 16,
+    tempoResposta: 26,
   },
   {
     id: 102,
@@ -227,7 +227,7 @@ export const advancedSpatialChallenges: SpatialChallenge[] = [
       { prompt: "A rota alterna quadrantes e cria interferência de retorno.", sequence: ["direita", "baixo", "baixo", "esquerda", "cima", "direita", "cima", "esquerda", "esquerda"], revealSeconds: 6, options: ["cima", "baixo", "esquerda", "direita"] },
     ],
     minimoParaConcluir: 7,
-    tempoResposta: 15,
+    tempoResposta: 25,
   },
   {
     id: 103,
@@ -239,7 +239,7 @@ export const advancedSpatialChallenges: SpatialChallenge[] = [
       { prompt: "A sequência foi desenhada para confundir memória espacial serial.", sequence: ["direita", "cima", "esquerda", "cima", "direita", "baixo", "esquerda", "baixo", "direita", "direita"], revealSeconds: 5, options: ["cima", "baixo", "esquerda", "direita"] },
     ],
     minimoParaConcluir: 8,
-    tempoResposta: 14,
+    tempoResposta: 24,
   },
 ];
 
@@ -268,7 +268,7 @@ export const advancedLogicChallenges: LogicChallenge[] = [
         ],
       },
     ],
-    tempoLimite: 26,
+    tempoLimite: 36,
     minimoParaConcluir: 3,
   },
   {
@@ -295,7 +295,7 @@ export const advancedLogicChallenges: LogicChallenge[] = [
         ],
       },
     ],
-    tempoLimite: 22,
+    tempoLimite: 32,
     minimoParaConcluir: 3,
   },
   {
@@ -322,7 +322,7 @@ export const advancedLogicChallenges: LogicChallenge[] = [
         ],
       },
     ],
-    tempoLimite: 20,
+    tempoLimite: 30,
     minimoParaConcluir: 4,
   },
 ];
