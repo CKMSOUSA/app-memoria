@@ -5,6 +5,7 @@ import { ChildVisualBadge } from "@/components/ChildVisualBadge";
 import { GameGuide } from "@/components/GameGuide";
 import { ReviewMetrics } from "@/components/ReviewMetrics";
 import { SoundToggle, useSoundFeedback } from "@/components/SoundToggle";
+import { TimerDisplay } from "@/components/TimerDisplay";
 import { advancedAttentionChallenges } from "@/lib/advanced-game-data";
 import { attentionChallenges } from "@/lib/game-data-v3";
 import { evaluateAttentionRound, getNextVariationIndex } from "@/lib/game-logic";
@@ -269,6 +270,11 @@ export function AttentionGame({
             </p>
           </div>
           <div className="button-row">
+            <TimerDisplay
+              label="Tempo"
+              value={phase === "playing" ? `${timeLeft}s` : "--"}
+              tone={phase === "playing" && timeLeft <= 10 ? "warning" : phase === "playing" ? "active" : "neutral"}
+            />
             <SoundToggle enabled={soundEnabled} onToggle={toggleSound} />
             <button className="btn btn-secondary" onClick={onBack}>
               Voltar ao painel

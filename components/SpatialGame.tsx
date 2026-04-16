@@ -5,6 +5,7 @@ import { ChildVisualBadge } from "@/components/ChildVisualBadge";
 import { GameGuide } from "@/components/GameGuide";
 import { ReviewMetrics } from "@/components/ReviewMetrics";
 import { SoundToggle, useSoundFeedback } from "@/components/SoundToggle";
+import { TimerDisplay } from "@/components/TimerDisplay";
 import { advancedSpatialChallenges } from "@/lib/advanced-game-data";
 import { spatialChallenges } from "@/lib/game-data-v3";
 import { evaluateSpatialRound, getNextVariationIndex } from "@/lib/game-logic";
@@ -237,6 +238,11 @@ export function SpatialGame({
             </p>
           </div>
           <div className="button-row">
+            <TimerDisplay
+              label={phase === "showing" ? "Observacao" : phase === "answering" ? "Resposta" : "Tempo"}
+              value={phase === "showing" ? `${revealLeft}s` : phase === "answering" ? `${answerSeconds}s` : "--"}
+              tone={phase === "showing" || phase === "answering" ? "active" : "neutral"}
+            />
             <SoundToggle enabled={soundEnabled} onToggle={toggleSound} />
             <button className="btn btn-secondary" onClick={onBack}>
               Voltar ao painel

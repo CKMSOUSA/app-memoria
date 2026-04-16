@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { GameGuide } from "@/components/GameGuide";
 import { ReviewMetrics } from "@/components/ReviewMetrics";
 import { SoundToggle, useSoundFeedback } from "@/components/SoundToggle";
+import { TimerDisplay } from "@/components/TimerDisplay";
 import { getChildVisual } from "@/lib/child-visuals";
 import { advancedMemoryChallenges } from "@/lib/advanced-game-data";
 import { memoryChallenges } from "@/lib/game-data-v3";
@@ -262,6 +263,11 @@ export function MemoryGame({
             </p>
           </div>
           <div className="button-row">
+            <TimerDisplay
+              label={phase === "memorizing" ? "Memorizacao" : phase === "answering" ? "Resposta" : "Tempo"}
+              value={phase === "memorizing" ? `${countdown}s` : phase === "answering" ? `${answerSeconds}s` : "--"}
+              tone={phase === "memorizing" || phase === "answering" ? "active" : "neutral"}
+            />
             <SoundToggle enabled={soundEnabled} onToggle={toggleSound} />
             <button className="btn btn-secondary" onClick={onBack}>
               Voltar ao painel

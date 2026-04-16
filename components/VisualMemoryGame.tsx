@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { GameGuide } from "@/components/GameGuide";
 import { ReviewMetrics } from "@/components/ReviewMetrics";
 import { SoundToggle, useSoundFeedback } from "@/components/SoundToggle";
+import { TimerDisplay } from "@/components/TimerDisplay";
 import { visualChallenges } from "@/lib/game-data-v3";
 import { evaluateVisualRound, getNextVariationIndex } from "@/lib/game-logic";
 import { getAgeLabel, getAudienceFromAge, getNivel, isChallengeUnlocked } from "@/lib/scoring";
@@ -242,6 +243,11 @@ export function VisualMemoryGame({
             <p className="muted">Treino visual com cartas de animais, flores, objetos e outras imagens ilustradas.</p>
           </div>
           <div className="button-row">
+            <TimerDisplay
+              label={phase === "showing" ? "Observacao" : phase === "playing" ? "Tempo" : "Tempo"}
+              value={phase === "showing" || phase === "playing" ? `${timeLeft}s` : "--"}
+              tone={phase === "playing" && timeLeft <= 10 ? "warning" : phase === "showing" || phase === "playing" ? "active" : "neutral"}
+            />
             <SoundToggle enabled={soundEnabled} onToggle={toggleSound} />
             <button className="btn btn-secondary" onClick={onBack}>
               Voltar ao painel
