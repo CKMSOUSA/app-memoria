@@ -263,11 +263,6 @@ export function MemoryGame({
             </p>
           </div>
           <div className="button-row">
-            <TimerDisplay
-              label={phase === "memorizing" ? "Memorizacao" : phase === "answering" ? "Resposta" : "Tempo"}
-              value={phase === "memorizing" ? `${countdown}s` : phase === "answering" ? `${answerSeconds}s` : "--"}
-              tone={phase === "memorizing" || phase === "answering" ? "active" : "neutral"}
-            />
             <SoundToggle enabled={soundEnabled} onToggle={toggleSound} />
             <button className="btn btn-secondary" onClick={onBack}>
               Voltar ao painel
@@ -433,6 +428,13 @@ export function MemoryGame({
                 <span className="small-muted">
                   {phase === "answering" ? `${answerSeconds}s respondendo` : "Aguardando rodada"}
                 </span>
+              </div>
+              <div className="response-timer-row">
+                <TimerDisplay
+                  label={phase === "memorizing" ? "Memorizacao" : phase === "answering" ? "Resposta" : "Tempo"}
+                  value={phase === "memorizing" ? `${countdown}s` : phase === "answering" ? `${answerSeconds}s` : "--"}
+                  tone={phase === "memorizing" || phase === "answering" ? "active" : "neutral"}
+                />
               </div>
               <div className="memory-task-card">
                 <strong className="memory-task-title">

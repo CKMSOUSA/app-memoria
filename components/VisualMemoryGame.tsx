@@ -243,11 +243,6 @@ export function VisualMemoryGame({
             <p className="muted">Treino visual com cartas de animais, flores, objetos e outras imagens ilustradas.</p>
           </div>
           <div className="button-row">
-            <TimerDisplay
-              label={phase === "showing" ? "Observacao" : phase === "playing" ? "Tempo" : "Tempo"}
-              value={phase === "showing" || phase === "playing" ? `${timeLeft}s` : "--"}
-              tone={phase === "playing" && timeLeft <= 10 ? "warning" : phase === "showing" || phase === "playing" ? "active" : "neutral"}
-            />
             <SoundToggle enabled={soundEnabled} onToggle={toggleSound} />
             <button className="btn btn-secondary" onClick={onBack}>
               Voltar ao painel
@@ -395,6 +390,13 @@ export function VisualMemoryGame({
                 <span className="small-muted">
                   {phase === "playing" ? "Encontre os pares iguais" : "Aguardando rodada"}
                 </span>
+              </div>
+              <div className="response-timer-row">
+                <TimerDisplay
+                  label={phase === "showing" ? "Observacao" : "Tempo"}
+                  value={phase === "showing" || phase === "playing" ? `${timeLeft}s` : "--"}
+                  tone={phase === "playing" && timeLeft <= 10 ? "warning" : phase === "showing" || phase === "playing" ? "active" : "neutral"}
+                />
               </div>
 
               <div className="round-task-card">

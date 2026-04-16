@@ -238,11 +238,6 @@ export function SpatialGame({
             </p>
           </div>
           <div className="button-row">
-            <TimerDisplay
-              label={phase === "showing" ? "Observacao" : phase === "answering" ? "Resposta" : "Tempo"}
-              value={phase === "showing" ? `${revealLeft}s` : phase === "answering" ? `${answerSeconds}s` : "--"}
-              tone={phase === "showing" || phase === "answering" ? "active" : "neutral"}
-            />
             <SoundToggle enabled={soundEnabled} onToggle={toggleSound} />
             <button className="btn btn-secondary" onClick={onBack}>
               Voltar ao painel
@@ -432,6 +427,13 @@ export function SpatialGame({
                 <span className="small-muted">
                   {phase === "answering" ? `${answerSeconds}s respondendo` : "Aguardando rodada"}
                 </span>
+              </div>
+              <div className="response-timer-row">
+                <TimerDisplay
+                  label={phase === "showing" ? "Observacao" : phase === "answering" ? "Resposta" : "Tempo"}
+                  value={phase === "showing" ? `${revealLeft}s` : phase === "answering" ? `${answerSeconds}s` : "--"}
+                  tone={phase === "showing" || phase === "answering" ? "active" : "neutral"}
+                />
               </div>
 
               <div className="round-task-card">

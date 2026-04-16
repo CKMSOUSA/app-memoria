@@ -270,11 +270,6 @@ export function AttentionGame({
             </p>
           </div>
           <div className="button-row">
-            <TimerDisplay
-              label="Tempo"
-              value={phase === "playing" ? `${timeLeft}s` : "--"}
-              tone={phase === "playing" && timeLeft <= 10 ? "warning" : phase === "playing" ? "active" : "neutral"}
-            />
             <SoundToggle enabled={soundEnabled} onToggle={toggleSound} />
             <button className="btn btn-secondary" onClick={onBack}>
               Voltar ao painel
@@ -455,6 +450,13 @@ export function AttentionGame({
                 <span className="small-muted">
                   {foundTargets.length}/{targetIndexes.length} alvo(s) encontrados
                 </span>
+              </div>
+              <div className="response-timer-row">
+                <TimerDisplay
+                  label="Tempo"
+                  value={phase === "playing" ? `${timeLeft}s` : "--"}
+                  tone={phase === "playing" && timeLeft <= 10 ? "warning" : phase === "playing" ? "active" : "neutral"}
+                />
               </div>
 
               <div className="round-task-card">
