@@ -64,7 +64,7 @@ export function LogicGame({
   const variation = challenge.variacoes[variationIndex] ?? challenge.variacoes[0];
   const currentRound = variation.rounds[currentRoundIndex] ?? variation.rounds[0];
   const challengeNumber = challengeIds.indexOf(challenge.id) + 1;
-  const ageDescription = isAdvancedMode ? "Teste avancado sem adaptacao por idade" : getAgeLabel(usuario.idade);
+  const ageDescription = getAgeLabel(usuario.idade);
 
   useEffect(() => {
     setSelectedId((current) => (challengeIds.includes(current) ? current : firstChallengeId));
@@ -333,10 +333,12 @@ export function LogicGame({
                   {!isAdvancedMode && audience === "infantil" && challenge.nomeInfantil ? challenge.nomeInfantil : challenge.nome}
                 </strong>
                 <span className="round-task-meta">{`Fase ${challengeNumber} - ${challenge.difficultyLabel}`}</span>
-                <p className="round-task-description">
-                  {`${ageDescription} - ${
-                    !isAdvancedMode && audience === "infantil" && variation.promptInfantil ? variation.promptInfantil : variation.prompt
-                  }`}
+                <p className={`round-task-description ${isAdvancedMode ? "advanced-task-description" : ""}`}>
+                  {isAdvancedMode
+                    ? variation.prompt
+                    : `${ageDescription} - ${
+                        audience === "infantil" && variation.promptInfantil ? variation.promptInfantil : variation.prompt
+                      }`}
                 </p>
               </div>
 

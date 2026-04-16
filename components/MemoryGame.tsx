@@ -146,7 +146,7 @@ export function MemoryGame({
         progress: progresso[selectedId],
       });
   const challengeNumber = challengeIds.indexOf(challenge.id) + 1;
-  const ageDescription = isAdvancedMode ? "Teste avancado sem adaptacao por idade" : getAgeLabel(usuario.idade);
+  const ageDescription = getAgeLabel(usuario.idade);
 
   useEffect(() => {
     setSelectedId((current) => (challengeIds.includes(current) ? current : firstChallengeId));
@@ -433,8 +433,10 @@ export function MemoryGame({
                   {!isAdvancedMode && audience === "infantil" && challenge.nomeInfantil ? challenge.nomeInfantil : challenge.nome}
                 </strong>
                 <span className="memory-task-meta">{`Fase ${challengeNumber} - ${challenge.difficultyLabel}`}</span>
-                <p className="memory-task-description">
-                  {`${ageDescription} - Lembre pelo menos ${dificuldade.minimoParaConcluir} de ${palavrasVisiveis.length} figuras desta rodada.`}
+                <p className={`memory-task-description ${isAdvancedMode ? "advanced-task-description" : ""}`}>
+                  {isAdvancedMode
+                    ? `Lembre pelo menos ${dificuldade.minimoParaConcluir} de ${palavrasVisiveis.length} figuras desta rodada.`
+                    : `${ageDescription} - Lembre pelo menos ${dificuldade.minimoParaConcluir} de ${palavrasVisiveis.length} figuras desta rodada.`}
                 </p>
               </div>
 

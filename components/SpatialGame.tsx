@@ -124,7 +124,7 @@ export function SpatialGame({
   const expectedPath = useMemo(() => buildBoardPath(currentVariation.sequence), [currentVariation.sequence]);
   const userPath = useMemo(() => buildBoardPath(selectedMoves), [selectedMoves]);
   const challengeNumber = challengeIds.indexOf(challenge.id) + 1;
-  const ageDescription = isAdvancedMode ? "Teste avancado sem adaptacao por idade" : getAgeLabel(usuario.idade);
+  const ageDescription = getAgeLabel(usuario.idade);
 
   useEffect(() => {
     setSelectedId((current) => (challengeIds.includes(current) ? current : firstChallengeId));
@@ -361,29 +361,33 @@ export function SpatialGame({
             </div>
           </section>
         ) : (
-          <div className="game-grid">
+          <div className={`game-grid ${isAdvancedMode ? "spatial-advanced-grid" : ""}`}>
             <section className="panel">
               <div className="section-head">
                 <h3>{!isAdvancedMode && audience === "infantil" && challenge.nomeInfantil ? challenge.nomeInfantil : challenge.nome}</h3>
                 <span className="small-muted">{`Fase ${challengeNumber} - ${challenge.difficultyLabel}`}</span>
               </div>
 
-              <GameGuide
-                title="Como jogar"
-                objective="Observe o caminho no tabuleiro e depois repita os movimentos na mesma ordem usando somente os botoes de direcao."
-                steps={[
-                  "Clique em Iniciar rodada para mostrar a rota.",
-                  "Use os numeros do tabuleiro como guia: 0 e o inicio, 1 e o primeiro passo, 2 e o segundo, e assim por diante.",
-                  "Quando a rota sumir, responda clicando em Cima, Baixo, Esquerda e Direita.",
-                  "Na correcao final, compare a rota certa com a rota que voce montou.",
-                ]}
-                tip={
-                  isAdvancedMode
-                    ? "No modo avancado, acompanhe a troca de eixo mentalmente. O erro costuma aparecer nos retornos parciais."
-                    : "Voce nao precisa clicar no tabuleiro. O tabuleiro serve apenas para mostrar o caminho visualmente."
-                }
-                isChild={!isAdvancedMode && usuario.idade <= 10}
-              />
+              {isAdvancedMode ? (
+                <div className="round-task-card compact-task-card">
+                  <strong className="round-task-title">Observacao da rota</strong>
+                  <span className="round-task-meta">{`Fase ${challengeNumber} - ${challenge.difficultyLabel}`}</span>
+                  <p className="round-task-description advanced-task-description">{currentVariation.prompt}</p>
+                </div>
+              ) : (
+                <GameGuide
+                  title="Como jogar"
+                  objective="Observe o caminho no tabuleiro e depois repita os movimentos na mesma ordem usando somente os botoes de direcao."
+                  steps={[
+                    "Clique em Iniciar rodada para mostrar a rota.",
+                    "Use os numeros do tabuleiro como guia: 0 e o inicio, 1 e o primeiro passo, 2 e o segundo, e assim por diante.",
+                    "Quando a rota sumir, responda clicando em Cima, Baixo, Esquerda e Direita.",
+                    "Na correcao final, compare a rota certa com a rota que voce montou.",
+                  ]}
+                  tip="Voce nao precisa clicar no tabuleiro. O tabuleiro serve apenas para mostrar o caminho visualmente."
+                  isChild={!isAdvancedMode && usuario.idade <= 10}
+                />
+              )}
 
               <div className="phase-summary">
                 <div className="phase-chip">
@@ -400,9 +404,17 @@ export function SpatialGame({
                 </div>
               </div>
 
-              <div className="meter-box">
-                <strong>Tempo de observacao</strong>
-                <span>{phase === "showing" ? `${revealLeft}s restantes` : `${currentVariation.revealSeconds}s por rodada`}</span>
+              <div className={`${isAdvancedMode ? "status-row compact-status-row" : ""}`}>
+                <div className="meter-box">
+                  <strong>Tempo de observacao</strong>
+                  <span>{phase === "showing" ? `${revealLeft}s restantes` : `${currentVariation.revealSeconds}s por rodada`}</span>
+                </div>
+                {isAdvancedMode ? (
+                  <div className="meter-box">
+                    <strong>Modo</strong>
+                    <span>Resposta imediata ao lado</span>
+                  </div>
+                ) : null}
               </div>
 
               <SpatialBoard path={phase === "showing" ? expectedPath : buildBoardPath([])} masked={phase !== "showing"} />
@@ -421,10 +433,12 @@ export function SpatialGame({
                   {!isAdvancedMode && audience === "infantil" && challenge.nomeInfantil ? challenge.nomeInfantil : challenge.nome}
                 </strong>
                 <span className="round-task-meta">{`Fase ${challengeNumber} - ${challenge.difficultyLabel}`}</span>
-                <p className="round-task-description">
-                  {`${ageDescription} - ${
-                    !isAdvancedMode && audience === "infantil" && currentVariation.promptInfantil ? currentVariation.promptInfantil : currentVariation.prompt
-                  }`}
+                <p className={`round-task-description ${isAdvancedMode ? "advanced-task-description" : ""}`}>
+                  {isAdvancedMode
+                    ? currentVariation.prompt
+                    : `${ageDescription} - ${
+                        audience === "infantil" && currentVariation.promptInfantil ? currentVariation.promptInfantil : currentVariation.prompt
+                      }`}
                 </p>
               </div>
 
@@ -437,9 +451,11 @@ export function SpatialGame({
                 </button>
               </div>
 
-              <div className="meter-box">
-                <strong>Objetivo da rodada</strong>
-                <span>{`Repita ${currentVariation.sequence.length} movimentos na mesma ordem usando Cima, Baixo, Esquerda e Direita.`}</span>
+              <div className={`${isAdvancedMode ? "status-row compact-status-row" : ""}`}>
+                <div className="meter-box">
+                  <strong>Objetivo da rodada</strong>
+                  <span>{`Repita ${currentVariation.sequence.length} movimentos na mesma ordem usando Cima, Baixo, Esquerda e Direita.`}</span>
+                </div>
               </div>
 
               <div className="selected-sequence">

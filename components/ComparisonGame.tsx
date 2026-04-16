@@ -79,7 +79,7 @@ export function ComparisonGame({
         progress: progresso[selectedId],
       });
   const challengeNumber = challengeIds.indexOf(challenge.id) + 1;
-  const ageDescription = isAdvancedMode ? "Teste avancado sem adaptacao por idade" : getAgeLabel(usuario.idade);
+  const ageDescription = getAgeLabel(usuario.idade);
 
   useEffect(() => {
     setSelectedId((current) => (challengeIds.includes(current) ? current : firstChallengeId));
@@ -375,8 +375,12 @@ export function ComparisonGame({
                   {!isAdvancedMode && audience === "infantil" && challenge.nomeInfantil ? challenge.nomeInfantil : challenge.nome}
                 </strong>
                 <span className="comparison-task-meta">{`Fase ${challengeNumber} - ${challenge.difficultyLabel}`}</span>
-                <p className="comparison-task-description">
-                  {!isAdvancedMode && audience === "infantil" && variation.promptInfantil ? variation.promptInfantil : variation.prompt}
+                <p className={`comparison-task-description ${isAdvancedMode ? "advanced-task-description" : ""}`}>
+                  {isAdvancedMode
+                    ? variation.prompt
+                    : `${ageDescription} - ${
+                        audience === "infantil" && variation.promptInfantil ? variation.promptInfantil : variation.prompt
+                      }`}
                 </p>
               </div>
 

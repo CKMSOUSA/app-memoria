@@ -101,7 +101,7 @@ export function AttentionGame({
         progress: progresso[selectedId],
       });
   const challengeNumber = challengeIds.indexOf(challenge.id) + 1;
-  const ageDescription = isAdvancedMode ? "Teste avancado sem adaptacao por idade" : getAgeLabel(usuario.idade);
+  const ageDescription = getAgeLabel(usuario.idade);
 
   const activeTarget = showChildVisuals && variacaoAtual.gradeInfantil?.includes(variacaoAtual.alvo) ? variacaoAtual.alvo : variacaoAtual.alvo;
   const targetIndexes = useMemo(
@@ -456,10 +456,12 @@ export function AttentionGame({
                   {!isAdvancedMode && audience === "infantil" && challenge.nomeInfantil ? challenge.nomeInfantil : challenge.nome}
                 </strong>
                 <span className="round-task-meta">{`Fase ${challengeNumber} - ${challenge.difficultyLabel}`}</span>
-                <p className="round-task-description">
-                  {`${ageDescription} - ${
-                    !isAdvancedMode && audience === "infantil" && variacaoAtual.instrucaoInfantil ? variacaoAtual.instrucaoInfantil : variacaoAtual.instrucao
-                  }`}
+                <p className={`round-task-description ${isAdvancedMode ? "advanced-task-description" : ""}`}>
+                  {isAdvancedMode
+                    ? variacaoAtual.instrucao
+                    : `${ageDescription} - ${
+                        audience === "infantil" && variacaoAtual.instrucaoInfantil ? variacaoAtual.instrucaoInfantil : variacaoAtual.instrucao
+                      }`}
                 </p>
               </div>
 
