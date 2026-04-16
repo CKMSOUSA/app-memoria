@@ -5,6 +5,7 @@ import { ChildVisualBadge } from "@/components/ChildVisualBadge";
 import { GameGuide } from "@/components/GameGuide";
 import { ReviewMetrics } from "@/components/ReviewMetrics";
 import { SoundToggle, useSoundFeedback } from "@/components/SoundToggle";
+import { advancedSpatialChallenges } from "@/lib/advanced-game-data";
 import { spatialChallenges } from "@/lib/game-data-v3";
 import { evaluateSpatialRound, getNextVariationIndex } from "@/lib/game-logic";
 import {
@@ -12,9 +13,9 @@ import {
   getAudienceFromAge,
   getNivel,
   getSpatialDifficulty,
-  isChallengeUnlocked,
+  isChallengeUnlockedInOrder,
 } from "@/lib/scoring";
-import type { ProgressState, Usuario } from "@/lib/types";
+import type { ProgressState, SpatialChallenge, Usuario } from "@/lib/types";
 
 type SpatialGameProps = {
   usuario: Usuario;
@@ -28,6 +29,7 @@ type SpatialGameProps = {
     completed: boolean,
     variationIndex: number,
   ) => void;
+  isAdvancedMode?: boolean;
 };
 
 type Phase = "idle" | "showing" | "answering" | "result";
@@ -76,8 +78,18 @@ function buildBoardPath(sequence: string[]) {
   return steps;
 }
 
-export function SpatialGame({ usuario, progresso, onBack, onRememberVariation, onSaveResult }: SpatialGameProps) {
-  const [selectedId, setSelectedId] = useState(1);
+export function SpatialGame({
+  usuario,
+  progresso,
+  onBack,
+  onRememberVariation,
+  onSaveResult,
+  isAdvancedMode = false,
+}: SpatialGameProps) {
+  const challengeList: SpatialChallenge[] = isAdvancedMode ? advancedSpatialChallenges : spatialChallenges;
+  const challengeIds = challengeList.map((item) => item.id);
+  const firstChallengeId = challengeList[0]?.id ?? 1;
+  const [selectedId, setSelectedId] = useState(firstChallengeId);
   const [variationIndex, setVariationIndex] = useState(0);
   const [phase, setPhase] = useState<Phase>("idle");
   const [revealLeft, setRevealLeft] = useState(0);
@@ -95,20 +107,28 @@ export function SpatialGame({ usuario, progresso, onBack, onRememberVariation, o
 
   const progressoRef = useRef(progresso);
   const challenge = useMemo(
-    () => spatialChallenges.find((item) => item.id === selectedId) ?? spatialChallenges[0],
-    [selectedId],
+    () => challengeList.find((item) => item.id === selectedId) ?? challengeList[0],
+    [challengeList, selectedId],
   );
   const audience = getAudienceFromAge(usuario.idade);
-  const showChildVisuals = usuario.idade <= 10;
+  const showChildVisuals = !isAdvancedMode && usuario.idade <= 10;
   const currentVariation = challenge.variacoes[variationIndex] ?? challenge.variacoes[0];
-  const difficulty = getSpatialDifficulty({
-    tempoBase: challenge.tempoResposta,
-    minimoBase: challenge.minimoParaConcluir,
-    idade: usuario.idade,
-    progress: progresso[selectedId],
-  });
+  const difficulty = isAdvancedMode
+    ? { tempoResposta: challenge.tempoResposta, minimoParaConcluir: challenge.minimoParaConcluir }
+    : getSpatialDifficulty({
+        tempoBase: challenge.tempoResposta,
+        minimoBase: challenge.minimoParaConcluir,
+        idade: usuario.idade,
+        progress: progresso[selectedId],
+      });
   const expectedPath = useMemo(() => buildBoardPath(currentVariation.sequence), [currentVariation.sequence]);
   const userPath = useMemo(() => buildBoardPath(selectedMoves), [selectedMoves]);
+  const challengeNumber = challengeIds.indexOf(challenge.id) + 1;
+  const ageDescription = isAdvancedMode ? "Teste avancado sem adaptacao por idade" : getAgeLabel(usuario.idade);
+
+  useEffect(() => {
+    setSelectedId((current) => (challengeIds.includes(current) ? current : firstChallengeId));
+  }, [challengeIds, firstChallengeId]);
 
   useEffect(() => {
     progressoRef.current = progresso;
@@ -166,7 +186,7 @@ export function SpatialGame({ usuario, progresso, onBack, onRememberVariation, o
   }
 
   function advanceRound() {
-    const nextChallenge = spatialChallenges.find((item) => item.id > challenge.id);
+    const nextChallenge = challengeList.find((item) => item.id > challenge.id);
     if (review?.completed && nextChallenge) {
       setSelectedId(nextChallenge.id);
       return;
@@ -208,10 +228,12 @@ export function SpatialGame({ usuario, progresso, onBack, onRememberVariation, o
       <section className="game-card">
         <header className="game-header">
           <div>
-            <p className="eyebrow">Trilha de orientacao espacial</p>
-            <h1>Observe a rota e monte o caminho</h1>
+            <p className="eyebrow">{isAdvancedMode ? "Testes Avancados" : "Trilha de orientacao espacial"}</p>
+            <h1>{isAdvancedMode ? "Orientacao espacial extrema" : "Observe a rota e monte o caminho"}</h1>
             <p className="muted">
-              Este treino trabalha referencia espacial, esquerda e direita, e memoria de deslocamento em sequencia.
+              {isAdvancedMode
+                ? "As rotas avancadas sao mais longas, com retorno parcial e menos tempo de observacao."
+                : "Este treino trabalha referencia espacial, esquerda e direita, e memoria de deslocamento em sequencia."}
             </p>
           </div>
           <div className="button-row">
@@ -228,8 +250,8 @@ export function SpatialGame({ usuario, progresso, onBack, onRememberVariation, o
             <span className="small-muted">Nivel atual: {getNivel(usuario.pontos)}</span>
           </div>
           <div className="tabs-grid">
-            {spatialChallenges.map((item) => {
-              const unlocked = isChallengeUnlocked(progresso, item.id);
+            {challengeList.map((item, index) => {
+              const unlocked = isChallengeUnlockedInOrder(progresso, challengeIds, item.id);
               const progress = progresso[item.id];
               const status = progress.completed ? "Concluido" : unlocked ? "Liberado" : "Bloqueado";
 
@@ -240,7 +262,7 @@ export function SpatialGame({ usuario, progresso, onBack, onRememberVariation, o
                   disabled={!unlocked}
                   onClick={() => setSelectedId(item.id)}
                 >
-                  <strong>{`Fase ${item.id} - ${item.difficultyLabel}`}</strong>
+                  <strong>{`Fase ${index + 1} - ${item.difficultyLabel}`}</strong>
                   <span>{item.nome}</span>
                   <small>{`${status} - Melhor ${progress.bestScore}`}</small>
                 </button>
@@ -342,8 +364,8 @@ export function SpatialGame({ usuario, progresso, onBack, onRememberVariation, o
           <div className="game-grid">
             <section className="panel">
               <div className="section-head">
-                <h3>{audience === "infantil" && challenge.nomeInfantil ? challenge.nomeInfantil : challenge.nome}</h3>
-                <span className="small-muted">{`Fase ${challenge.id} - ${challenge.difficultyLabel}`}</span>
+                <h3>{!isAdvancedMode && audience === "infantil" && challenge.nomeInfantil ? challenge.nomeInfantil : challenge.nome}</h3>
+                <span className="small-muted">{`Fase ${challengeNumber} - ${challenge.difficultyLabel}`}</span>
               </div>
 
               <GameGuide
@@ -355,14 +377,18 @@ export function SpatialGame({ usuario, progresso, onBack, onRememberVariation, o
                   "Quando a rota sumir, responda clicando em Cima, Baixo, Esquerda e Direita.",
                   "Na correcao final, compare a rota certa com a rota que voce montou.",
                 ]}
-                tip="Voce nao precisa clicar no tabuleiro. O tabuleiro serve apenas para mostrar o caminho visualmente."
-                isChild={usuario.idade <= 10}
+                tip={
+                  isAdvancedMode
+                    ? "No modo avancado, acompanhe a troca de eixo mentalmente. O erro costuma aparecer nos retornos parciais."
+                    : "Voce nao precisa clicar no tabuleiro. O tabuleiro serve apenas para mostrar o caminho visualmente."
+                }
+                isChild={!isAdvancedMode && usuario.idade <= 10}
               />
 
               <div className="phase-summary">
                 <div className="phase-chip">
                   <strong>Fase</strong>
-                  <span>{`${challenge.id} de ${spatialChallenges.length}`}</span>
+                  <span>{`${challengeNumber} de ${challengeList.length}`}</span>
                 </div>
                 <div className="phase-chip">
                   <strong>Meta</strong>
@@ -392,12 +418,12 @@ export function SpatialGame({ usuario, progresso, onBack, onRememberVariation, o
 
               <div className="round-task-card">
                 <strong className="round-task-title">
-                  {audience === "infantil" && challenge.nomeInfantil ? challenge.nomeInfantil : challenge.nome}
+                  {!isAdvancedMode && audience === "infantil" && challenge.nomeInfantil ? challenge.nomeInfantil : challenge.nome}
                 </strong>
-                <span className="round-task-meta">{`Fase ${challenge.id} - ${challenge.difficultyLabel}`}</span>
+                <span className="round-task-meta">{`Fase ${challengeNumber} - ${challenge.difficultyLabel}`}</span>
                 <p className="round-task-description">
-                  {`${getAgeLabel(usuario.idade)} - ${
-                    audience === "infantil" && currentVariation.promptInfantil ? currentVariation.promptInfantil : currentVariation.prompt
+                  {`${ageDescription} - ${
+                    !isAdvancedMode && audience === "infantil" && currentVariation.promptInfantil ? currentVariation.promptInfantil : currentVariation.prompt
                   }`}
                 </p>
               </div>

@@ -5,6 +5,7 @@ import { ChildVisualBadge } from "@/components/ChildVisualBadge";
 import { GameGuide } from "@/components/GameGuide";
 import { ReviewMetrics } from "@/components/ReviewMetrics";
 import { SoundToggle, useSoundFeedback } from "@/components/SoundToggle";
+import { advancedComparisonChallenges } from "@/lib/advanced-game-data";
 import { comparisonChallenges } from "@/lib/game-data-v3";
 import { evaluateComparisonRound, getNextVariationIndex } from "@/lib/game-logic";
 import {
@@ -12,9 +13,9 @@ import {
   getAudienceFromAge,
   getComparisonDifficulty,
   getNivel,
-  isChallengeUnlocked,
+  isChallengeUnlockedInOrder,
 } from "@/lib/scoring";
-import type { ProgressState, Usuario } from "@/lib/types";
+import type { ComparisonChallenge, ProgressState, Usuario } from "@/lib/types";
 
 type ComparisonGameProps = {
   usuario: Usuario;
@@ -28,6 +29,7 @@ type ComparisonGameProps = {
     completed: boolean,
     variationIndex: number,
   ) => void;
+  isAdvancedMode?: boolean;
 };
 
 type Phase = "idle" | "playing" | "result";
@@ -38,8 +40,12 @@ export function ComparisonGame({
   onBack,
   onRememberVariation,
   onSaveResult,
+  isAdvancedMode = false,
 }: ComparisonGameProps) {
-  const [selectedId, setSelectedId] = useState(1);
+  const challengeList: ComparisonChallenge[] = isAdvancedMode ? advancedComparisonChallenges : comparisonChallenges;
+  const challengeIds = challengeList.map((item) => item.id);
+  const firstChallengeId = challengeList[0]?.id ?? 1;
+  const [selectedId, setSelectedId] = useState(firstChallengeId);
   const [variationIndex, setVariationIndex] = useState(0);
   const [phase, setPhase] = useState<Phase>("idle");
   const [timeLeft, setTimeLeft] = useState(0);
@@ -56,20 +62,28 @@ export function ComparisonGame({
 
   const progressRef = useRef(progresso);
   const challenge = useMemo(
-    () => comparisonChallenges.find((item) => item.id === selectedId) ?? comparisonChallenges[0],
-    [selectedId],
+    () => challengeList.find((item) => item.id === selectedId) ?? challengeList[0],
+    [challengeList, selectedId],
   );
   const audience = getAudienceFromAge(usuario.idade);
-  const showChildVisuals = usuario.idade <= 10;
+  const showChildVisuals = !isAdvancedMode && usuario.idade <= 10;
   const variation = challenge.variacoes[variationIndex] ?? challenge.variacoes[0];
-  const rounds = usuario.idade <= 10 && variation.roundsAte10?.length ? variation.roundsAte10 : variation.rounds;
+  const rounds = !isAdvancedMode && usuario.idade <= 10 && variation.roundsAte10?.length ? variation.roundsAte10 : variation.rounds;
   const currentRound = rounds[currentRoundIndex] ?? rounds[0];
-  const difficulty = getComparisonDifficulty({
-    tempoBase: challenge.tempoLimite,
-    minimoBase: challenge.minimoParaConcluir,
-    idade: usuario.idade,
-    progress: progresso[selectedId],
-  });
+  const difficulty = isAdvancedMode
+    ? { tempoLimite: challenge.tempoLimite, minimoParaConcluir: challenge.minimoParaConcluir }
+    : getComparisonDifficulty({
+        tempoBase: challenge.tempoLimite,
+        minimoBase: challenge.minimoParaConcluir,
+        idade: usuario.idade,
+        progress: progresso[selectedId],
+      });
+  const challengeNumber = challengeIds.indexOf(challenge.id) + 1;
+  const ageDescription = isAdvancedMode ? "Teste avancado sem adaptacao por idade" : getAgeLabel(usuario.idade);
+
+  useEffect(() => {
+    setSelectedId((current) => (challengeIds.includes(current) ? current : firstChallengeId));
+  }, [challengeIds, firstChallengeId]);
 
   useEffect(() => {
     progressRef.current = progresso;
@@ -110,7 +124,7 @@ export function ComparisonGame({
   }
 
   function advanceRound() {
-    const nextChallenge = comparisonChallenges.find((item) => item.id > challenge.id);
+    const nextChallenge = challengeList.find((item) => item.id > challenge.id);
     if (review?.completed && nextChallenge) {
       setSelectedId(nextChallenge.id);
       return;
@@ -181,10 +195,12 @@ export function ComparisonGame({
       <section className="game-card">
         <header className="game-header">
           <div>
-            <p className="eyebrow">Trilha de comparacao</p>
-            <h1>Compare e escolha a opcao correta</h1>
+            <p className="eyebrow">{isAdvancedMode ? "Testes Avancados" : "Trilha de comparacao"}</p>
+            <h1>{isAdvancedMode ? "Comparacao de criterio composto" : "Compare e escolha a opcao correta"}</h1>
             <p className="muted">
-              Esta trilha treina comparacao de tamanho, quantidade, ordem e valor com fases progressivas.
+              {isAdvancedMode
+                ? "As fases avancadas misturam calculo mental, regra secundaria e comparacao abstrata."
+                : "Esta trilha treina comparacao de tamanho, quantidade, ordem e valor com fases progressivas."}
             </p>
           </div>
           <div className="button-row">
@@ -201,8 +217,8 @@ export function ComparisonGame({
             <span className="small-muted">Nivel atual: {getNivel(usuario.pontos)}</span>
           </div>
           <div className="tabs-grid">
-            {comparisonChallenges.map((item) => {
-              const unlocked = isChallengeUnlocked(progresso, item.id);
+            {challengeList.map((item, index) => {
+              const unlocked = isChallengeUnlockedInOrder(progresso, challengeIds, item.id);
               const progress = progresso[item.id];
               const status = progress.completed ? "Concluido" : unlocked ? "Liberado" : "Bloqueado";
 
@@ -213,8 +229,8 @@ export function ComparisonGame({
                   disabled={!unlocked}
                   onClick={() => setSelectedId(item.id)}
                 >
-                  <strong>{`Fase ${item.id} - ${item.difficultyLabel}`}</strong>
-                  <span>{audience === "infantil" && item.nomeInfantil ? item.nomeInfantil : item.nome}</span>
+                  <strong>{`Fase ${index + 1} - ${item.difficultyLabel}`}</strong>
+                  <span>{!isAdvancedMode && audience === "infantil" && item.nomeInfantil ? item.nomeInfantil : item.nome}</span>
                   <small>{`${status} - Melhor ${progress.bestScore}`}</small>
                 </button>
               );
@@ -280,13 +296,13 @@ export function ComparisonGame({
           <div className="game-grid">
             <section className="panel">
               <div className="section-head">
-                <h3>{audience === "infantil" && challenge.nomeInfantil ? challenge.nomeInfantil : challenge.nome}</h3>
-                <span className="small-muted">{`Fase ${challenge.id} - ${challenge.difficultyLabel}`}</span>
+                <h3>{!isAdvancedMode && audience === "infantil" && challenge.nomeInfantil ? challenge.nomeInfantil : challenge.nome}</h3>
+                <span className="small-muted">{`Fase ${challengeNumber} - ${challenge.difficultyLabel}`}</span>
               </div>
 
               <p className="muted">
-                {`${getAgeLabel(usuario.idade)} - ${
-                  audience === "infantil" && variation.promptInfantil ? variation.promptInfantil : variation.prompt
+                {`${ageDescription} - ${
+                  !isAdvancedMode && audience === "infantil" && variation.promptInfantil ? variation.promptInfantil : variation.prompt
                 }`}
               </p>
 
@@ -299,14 +315,18 @@ export function ComparisonGame({
                   "Escolha entre a opcao esquerda e a direita em cada rodada.",
                   "No fim, compare suas respostas com a correcao explicada.",
                 ]}
-                tip="Algumas fases pedem o maior valor, outras o menor, a palavra mais longa ou o que vem antes. O criterio da fase e o mais importante."
-                isChild={usuario.idade <= 10}
+                tip={
+                  isAdvancedMode
+                    ? "No modo avancado, leia a regra duas vezes. Algumas rodadas usam criterio principal e criterio de desempate."
+                    : "Algumas fases pedem o maior valor, outras o menor, a palavra mais longa ou o que vem antes. O criterio da fase e o mais importante."
+                }
+                isChild={!isAdvancedMode && usuario.idade <= 10}
               />
 
               <div className="phase-summary">
                 <div className="phase-chip">
                   <strong>Fase</strong>
-                  <span>{`${challenge.id} de ${comparisonChallenges.length}`}</span>
+                  <span>{`${challengeNumber} de ${challengeList.length}`}</span>
                 </div>
                 <div className="phase-chip">
                   <strong>Meta</strong>
@@ -352,11 +372,11 @@ export function ComparisonGame({
 
               <div className="comparison-task-card">
                 <strong className="comparison-task-title">
-                  {audience === "infantil" && challenge.nomeInfantil ? challenge.nomeInfantil : challenge.nome}
+                  {!isAdvancedMode && audience === "infantil" && challenge.nomeInfantil ? challenge.nomeInfantil : challenge.nome}
                 </strong>
-                <span className="comparison-task-meta">{`Fase ${challenge.id} - ${challenge.difficultyLabel}`}</span>
+                <span className="comparison-task-meta">{`Fase ${challengeNumber} - ${challenge.difficultyLabel}`}</span>
                 <p className="comparison-task-description">
-                  {audience === "infantil" && variation.promptInfantil ? variation.promptInfantil : variation.prompt}
+                  {!isAdvancedMode && audience === "infantil" && variation.promptInfantil ? variation.promptInfantil : variation.prompt}
                 </p>
               </div>
 

@@ -5,10 +5,11 @@ import { ChildVisualBadge } from "@/components/ChildVisualBadge";
 import { GameGuide } from "@/components/GameGuide";
 import { ReviewMetrics } from "@/components/ReviewMetrics";
 import { SoundToggle, useSoundFeedback } from "@/components/SoundToggle";
+import { advancedLogicChallenges } from "@/lib/advanced-game-data";
 import { logicChallenges } from "@/lib/game-data-v3";
 import { evaluateLogicRound, getNextVariationIndex } from "@/lib/game-logic";
-import { getAgeLabel, getAudienceFromAge, getNivel, isChallengeUnlocked } from "@/lib/scoring";
-import type { ProgressState, Usuario } from "@/lib/types";
+import { getAgeLabel, getAudienceFromAge, getNivel, isChallengeUnlockedInOrder } from "@/lib/scoring";
+import type { LogicChallenge, ProgressState, Usuario } from "@/lib/types";
 
 type LogicGameProps = {
   usuario: Usuario;
@@ -22,12 +23,23 @@ type LogicGameProps = {
     completed: boolean,
     variationIndex: number,
   ) => void;
+  isAdvancedMode?: boolean;
 };
 
 type Phase = "idle" | "playing" | "result";
 
-export function LogicGame({ usuario, progresso, onBack, onRememberVariation, onSaveResult }: LogicGameProps) {
-  const [selectedId, setSelectedId] = useState(1);
+export function LogicGame({
+  usuario,
+  progresso,
+  onBack,
+  onRememberVariation,
+  onSaveResult,
+  isAdvancedMode = false,
+}: LogicGameProps) {
+  const challengeList: LogicChallenge[] = isAdvancedMode ? advancedLogicChallenges : logicChallenges;
+  const challengeIds = challengeList.map((item) => item.id);
+  const firstChallengeId = challengeList[0]?.id ?? 1;
+  const [selectedId, setSelectedId] = useState(firstChallengeId);
   const [variationIndex, setVariationIndex] = useState(0);
   const [phase, setPhase] = useState<Phase>("idle");
   const [timeLeft, setTimeLeft] = useState(0);
@@ -44,13 +56,19 @@ export function LogicGame({ usuario, progresso, onBack, onRememberVariation, onS
 
   const progressRef = useRef(progresso);
   const challenge = useMemo(
-    () => logicChallenges.find((item) => item.id === selectedId) ?? logicChallenges[0],
-    [selectedId],
+    () => challengeList.find((item) => item.id === selectedId) ?? challengeList[0],
+    [challengeList, selectedId],
   );
   const audience = getAudienceFromAge(usuario.idade);
-  const showChildVisuals = usuario.idade <= 10;
+  const showChildVisuals = !isAdvancedMode && usuario.idade <= 10;
   const variation = challenge.variacoes[variationIndex] ?? challenge.variacoes[0];
   const currentRound = variation.rounds[currentRoundIndex] ?? variation.rounds[0];
+  const challengeNumber = challengeIds.indexOf(challenge.id) + 1;
+  const ageDescription = isAdvancedMode ? "Teste avancado sem adaptacao por idade" : getAgeLabel(usuario.idade);
+
+  useEffect(() => {
+    setSelectedId((current) => (challengeIds.includes(current) ? current : firstChallengeId));
+  }, [challengeIds, firstChallengeId]);
 
   useEffect(() => {
     progressRef.current = progresso;
@@ -127,7 +145,7 @@ export function LogicGame({ usuario, progresso, onBack, onRememberVariation, onS
   }
 
   function advanceRound() {
-    const nextChallenge = logicChallenges.find((item) => item.id > challenge.id);
+    const nextChallenge = challengeList.find((item) => item.id > challenge.id);
     if (review?.completed && nextChallenge) {
       setSelectedId(nextChallenge.id);
       return;
@@ -156,9 +174,13 @@ export function LogicGame({ usuario, progresso, onBack, onRememberVariation, onS
       <section className="game-card">
         <header className="game-header">
           <div>
-            <p className="eyebrow">Trilha de logica</p>
-            <h1>Descubra a regra e escolha o proximo termo</h1>
-            <p className="muted">Essa trilha trabalha raciocinio sequencial, padroes e previsao de proximo passo.</p>
+            <p className="eyebrow">{isAdvancedMode ? "Testes Avancados" : "Trilha de logica"}</p>
+            <h1>{isAdvancedMode ? "Logica em nivel extremo" : "Descubra a regra e escolha o proximo termo"}</h1>
+            <p className="muted">
+              {isAdvancedMode
+                ? "As fases avancadas combinam duas ou tres regras ao mesmo tempo e reduzem a margem para resposta por impulso."
+                : "Essa trilha trabalha raciocinio sequencial, padroes e previsao de proximo passo."}
+            </p>
           </div>
           <div className="button-row">
             <SoundToggle enabled={soundEnabled} onToggle={toggleSound} />
@@ -174,8 +196,8 @@ export function LogicGame({ usuario, progresso, onBack, onRememberVariation, onS
             <span className="small-muted">Nivel atual: {getNivel(usuario.pontos)}</span>
           </div>
           <div className="tabs-grid">
-            {logicChallenges.map((item) => {
-              const unlocked = isChallengeUnlocked(progresso, item.id);
+            {challengeList.map((item, index) => {
+              const unlocked = isChallengeUnlockedInOrder(progresso, challengeIds, item.id);
               const progress = progresso[item.id];
               const status = progress.completed ? "Concluido" : unlocked ? "Liberado" : "Bloqueado";
 
@@ -186,8 +208,8 @@ export function LogicGame({ usuario, progresso, onBack, onRememberVariation, onS
                   disabled={!unlocked}
                   onClick={() => setSelectedId(item.id)}
                 >
-                  <strong>{`Fase ${item.id} - ${item.difficultyLabel}`}</strong>
-                  <span>{audience === "infantil" && item.nomeInfantil ? item.nomeInfantil : item.nome}</span>
+                  <strong>{`Fase ${index + 1} - ${item.difficultyLabel}`}</strong>
+                  <span>{!isAdvancedMode && audience === "infantil" && item.nomeInfantil ? item.nomeInfantil : item.nome}</span>
                   <small>{`${status} - Melhor ${progress.bestScore}`}</small>
                 </button>
               );
@@ -250,8 +272,8 @@ export function LogicGame({ usuario, progresso, onBack, onRememberVariation, onS
           <div className="game-grid">
             <section className="panel">
               <div className="section-head">
-                <h3>{audience === "infantil" && challenge.nomeInfantil ? challenge.nomeInfantil : challenge.nome}</h3>
-                <span className="small-muted">{`Fase ${challenge.id} - ${challenge.difficultyLabel}`}</span>
+                <h3>{!isAdvancedMode && audience === "infantil" && challenge.nomeInfantil ? challenge.nomeInfantil : challenge.nome}</h3>
+                <span className="small-muted">{`Fase ${challengeNumber} - ${challenge.difficultyLabel}`}</span>
               </div>
 
               <GameGuide
@@ -263,14 +285,18 @@ export function LogicGame({ usuario, progresso, onBack, onRememberVariation, onS
                   "Escolha a melhor opcao para completar a sequencia.",
                   "Ao final, compare sua resposta com a explicacao correta.",
                 ]}
-                tip="Nem toda sequencia cresce de 1 em 1. Algumas alternam, dobram ou pulam letras."
-                isChild={usuario.idade <= 10}
+                tip={
+                  isAdvancedMode
+                    ? "Nos testes avancados, procure mais de uma regra. Se uma explicacao parecer simples demais, provavelmente ha outra camada."
+                    : "Nem toda sequencia cresce de 1 em 1. Algumas alternam, dobram ou pulam letras."
+                }
+                isChild={!isAdvancedMode && usuario.idade <= 10}
               />
 
               <div className="phase-summary">
                 <div className="phase-chip">
                   <strong>Fase</strong>
-                  <span>{`${challenge.id} de ${logicChallenges.length}`}</span>
+                  <span>{`${challengeNumber} de ${challengeList.length}`}</span>
                 </div>
                 <div className="phase-chip">
                   <strong>Meta</strong>
@@ -304,12 +330,12 @@ export function LogicGame({ usuario, progresso, onBack, onRememberVariation, onS
 
               <div className="round-task-card">
                 <strong className="round-task-title">
-                  {audience === "infantil" && challenge.nomeInfantil ? challenge.nomeInfantil : challenge.nome}
+                  {!isAdvancedMode && audience === "infantil" && challenge.nomeInfantil ? challenge.nomeInfantil : challenge.nome}
                 </strong>
-                <span className="round-task-meta">{`Fase ${challenge.id} - ${challenge.difficultyLabel}`}</span>
+                <span className="round-task-meta">{`Fase ${challengeNumber} - ${challenge.difficultyLabel}`}</span>
                 <p className="round-task-description">
-                  {`${getAgeLabel(usuario.idade)} - ${
-                    audience === "infantil" && variation.promptInfantil ? variation.promptInfantil : variation.prompt
+                  {`${ageDescription} - ${
+                    !isAdvancedMode && audience === "infantil" && variation.promptInfantil ? variation.promptInfantil : variation.prompt
                   }`}
                 </p>
               </div>

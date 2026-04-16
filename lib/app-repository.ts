@@ -94,6 +94,12 @@ function getRemoteBaseUrl() {
   return process.env.NEXT_PUBLIC_API_BASE_URL?.trim() || "/api";
 }
 
+function isLocalAdminCodeValid(adminCode?: string) {
+  const expectedCode = process.env.NEXT_PUBLIC_ADMIN_CONFIRM_CODE?.trim() || "";
+  if (!expectedCode) return true;
+  return adminCode?.trim() === expectedCode;
+}
+
 function hasSupabaseConfig() {
   return (
     Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL?.trim()) &&
@@ -511,6 +517,9 @@ const localRepository: AppRepository = {
   loadAdminOverview: async (adminCode) => {
     const remoteOverview = await loadAdminOverviewFromApi(adminCode);
     if (remoteOverview) return remoteOverview;
+    if (!isLocalAdminCodeValid(adminCode)) {
+      throw new Error("Acesso administrativo nao autorizado.");
+    }
 
     const users = listUsers();
     const localHistories = loadAllHistories().map((item) => ({
@@ -535,6 +544,9 @@ const localRepository: AppRepository = {
       }
       return;
     }
+    if (!isLocalAdminCodeValid(adminCode)) {
+      throw new Error("Acesso administrativo nao autorizado.");
+    }
 
     if (status === "excluido") {
       excludeUser(email);
@@ -548,6 +560,9 @@ const localRepository: AppRepository = {
     if (remoteResult?.helpRequests) {
       saveHelpRequests(remoteResult.helpRequests);
       return remoteResult.helpRequests;
+    }
+    if (!isLocalAdminCodeValid(adminCode)) {
+      throw new Error("Acesso administrativo nao autorizado.");
     }
 
     const current = loadHelpRequests();

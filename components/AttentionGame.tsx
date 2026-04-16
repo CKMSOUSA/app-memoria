@@ -5,6 +5,7 @@ import { ChildVisualBadge } from "@/components/ChildVisualBadge";
 import { GameGuide } from "@/components/GameGuide";
 import { ReviewMetrics } from "@/components/ReviewMetrics";
 import { SoundToggle, useSoundFeedback } from "@/components/SoundToggle";
+import { advancedAttentionChallenges } from "@/lib/advanced-game-data";
 import { attentionChallenges } from "@/lib/game-data-v3";
 import { evaluateAttentionRound, getNextVariationIndex } from "@/lib/game-logic";
 import {
@@ -13,9 +14,9 @@ import {
   getAttentionDifficulty,
   getAudienceFromAge,
   getNivel,
-  isChallengeUnlocked,
+  isChallengeUnlockedInOrder,
 } from "@/lib/scoring";
-import type { ProgressState, Usuario } from "@/lib/types";
+import type { AttentionChallenge, ProgressState, Usuario } from "@/lib/types";
 
 type AttentionGameProps = {
   usuario: Usuario;
@@ -29,6 +30,7 @@ type AttentionGameProps = {
     completed: boolean,
     variationIndex: number,
   ) => void;
+  isAdvancedMode?: boolean;
 };
 
 type Phase = "idle" | "playing" | "result";
@@ -42,8 +44,18 @@ function shuffle<T>(items: T[]) {
   return copy;
 }
 
-export function AttentionGame({ usuario, progresso, onBack, onRememberVariation, onSaveResult }: AttentionGameProps) {
-  const [selectedId, setSelectedId] = useState(1);
+export function AttentionGame({
+  usuario,
+  progresso,
+  onBack,
+  onRememberVariation,
+  onSaveResult,
+  isAdvancedMode = false,
+}: AttentionGameProps) {
+  const challengeList: AttentionChallenge[] = isAdvancedMode ? advancedAttentionChallenges : attentionChallenges;
+  const challengeIds = challengeList.map((item) => item.id);
+  const firstChallengeId = challengeList[0]?.id ?? 1;
+  const [selectedId, setSelectedId] = useState(firstChallengeId);
   const [variationIndex, setVariationIndex] = useState(0);
   const [phase, setPhase] = useState<Phase>("idle");
   const [timeLeft, setTimeLeft] = useState(0);
@@ -65,32 +77,41 @@ export function AttentionGame({ usuario, progresso, onBack, onRememberVariation,
   const { soundEnabled, toggleSound, playResultSound, playAnswerSound } = useSoundFeedback();
 
   const challenge = useMemo(
-    () => attentionChallenges.find((item) => item.id === selectedId) ?? attentionChallenges[0],
-    [selectedId],
+    () => challengeList.find((item) => item.id === selectedId) ?? challengeList[0],
+    [challengeList, selectedId],
   );
   const progressoRef = useRef(progresso);
+  const resultSubmittedRef = useRef(false);
   const audience = getAudienceFromAge(usuario.idade);
-  const showChildVisuals = usuario.idade <= 10;
+  const showChildVisuals = !isAdvancedMode && usuario.idade <= 10;
   const variacaoAtual = challenge.variacoes[variationIndex] ?? challenge.variacoes[0];
   const ageProfile = getAttentionAgeProfile(usuario.idade);
   const gradeBase =
-    audience === "infantil" && variacaoAtual.gradeInfantil?.length ? variacaoAtual.gradeInfantil : variacaoAtual.grade;
+    !isAdvancedMode && audience === "infantil" && variacaoAtual.gradeInfantil?.length ? variacaoAtual.gradeInfantil : variacaoAtual.grade;
   const gradeVisivel = useMemo(
-    () => gradeBase.slice(0, ageProfile.visibleCells),
-    [ageProfile.visibleCells, gradeBase],
+    () => (isAdvancedMode ? gradeBase : gradeBase.slice(0, ageProfile.visibleCells)),
+    [ageProfile.visibleCells, gradeBase, isAdvancedMode],
   );
-  const dificuldade = getAttentionDifficulty({
-    tempoBase: challenge.tempoLimite,
-    minimoBase: challenge.minimoParaConcluir,
-    idade: usuario.idade,
-    progress: progresso[selectedId],
-  });
+  const dificuldade = isAdvancedMode
+    ? { tempoLimite: challenge.tempoLimite, minimoParaConcluir: challenge.minimoParaConcluir }
+    : getAttentionDifficulty({
+        tempoBase: challenge.tempoLimite,
+        minimoBase: challenge.minimoParaConcluir,
+        idade: usuario.idade,
+        progress: progresso[selectedId],
+      });
+  const challengeNumber = challengeIds.indexOf(challenge.id) + 1;
+  const ageDescription = isAdvancedMode ? "Teste avancado sem adaptacao por idade" : getAgeLabel(usuario.idade);
 
   const activeTarget = showChildVisuals && variacaoAtual.gradeInfantil?.includes(variacaoAtual.alvo) ? variacaoAtual.alvo : variacaoAtual.alvo;
   const targetIndexes = useMemo(
     () => grid.map((item, index) => (item === activeTarget ? index : -1)).filter((value) => value >= 0),
     [activeTarget, grid],
   );
+
+  useEffect(() => {
+    setSelectedId((current) => (challengeIds.includes(current) ? current : firstChallengeId));
+  }, [challengeIds, firstChallengeId]);
 
   useEffect(() => {
     progressoRef.current = progresso;
@@ -109,6 +130,8 @@ export function AttentionGame({ usuario, progresso, onBack, onRememberVariation,
         minimumToComplete: dificuldade.minimoParaConcluir,
       });
 
+      if (resultSubmittedRef.current) return;
+      resultSubmittedRef.current = true;
       setPhase("result");
       setReview({
         ...result,
@@ -138,10 +161,13 @@ export function AttentionGame({ usuario, progresso, onBack, onRememberVariation,
     setFeedback("");
     setWrongSelections([]);
     setReview(null);
+    resultSubmittedRef.current = false;
   }, [challenge.id, variationIndex, gradeVisivel]);
 
   useEffect(() => {
     if (phase === "playing" && targetIndexes.length > 0 && foundTargets.length === targetIndexes.length) {
+      if (resultSubmittedRef.current) return;
+      resultSubmittedRef.current = true;
       const result = evaluateAttentionRound({
         foundCount: foundTargets.length,
         totalTargets: targetIndexes.length,
@@ -175,6 +201,7 @@ export function AttentionGame({ usuario, progresso, onBack, onRememberVariation,
     setFeedback("");
     setWrongSelections([]);
     setReview(null);
+    resultSubmittedRef.current = false;
     setPhase("playing");
   }
 
@@ -182,7 +209,7 @@ export function AttentionGame({ usuario, progresso, onBack, onRememberVariation,
     const nextVariationIndex = getNextVariationIndex(challenge.variacoes.length, variationIndex);
     const nextVariation = challenge.variacoes[nextVariationIndex];
     const nextGridBase =
-      audience === "infantil" && nextVariation.gradeInfantil?.length ? nextVariation.gradeInfantil : nextVariation.grade;
+      !isAdvancedMode && audience === "infantil" && nextVariation.gradeInfantil?.length ? nextVariation.gradeInfantil : nextVariation.grade;
     setVariationIndex(nextVariationIndex);
     setPhase("idle");
     setTimeLeft(0);
@@ -191,11 +218,12 @@ export function AttentionGame({ usuario, progresso, onBack, onRememberVariation,
     setFeedback("");
     setWrongSelections([]);
     setReview(null);
-    setGrid(shuffle(nextGridBase.slice(0, ageProfile.visibleCells)));
+    resultSubmittedRef.current = false;
+    setGrid(shuffle(isAdvancedMode ? nextGridBase : nextGridBase.slice(0, ageProfile.visibleCells)));
   }
 
   function advanceRound() {
-    const nextChallenge = attentionChallenges.find((item) => item.id > challenge.id);
+    const nextChallenge = challengeList.find((item) => item.id > challenge.id);
     if (review?.completed && nextChallenge) {
       setSelectedId(nextChallenge.id);
       return;
@@ -232,10 +260,12 @@ export function AttentionGame({ usuario, progresso, onBack, onRememberVariation,
       <section className="game-card">
         <header className="game-header">
           <div>
-            <p className="eyebrow">Trilha de atencao</p>
-            <h1>Encontre apenas o estimulo correto</h1>
+            <p className="eyebrow">{isAdvancedMode ? "Testes Avancados" : "Trilha de atencao"}</p>
+            <h1>{isAdvancedMode ? "Atencao seletiva extrema" : "Encontre apenas o estimulo correto"}</h1>
             <p className="muted">
-              Velocidade ajuda, mas cliques errados reduzem seu score. A ideia aqui e treinar foco seletivo.
+              {isAdvancedMode
+                ? "A grade usa distratores muito parecidos e nao reduz carga visual por idade."
+                : "Velocidade ajuda, mas cliques errados reduzem seu score. A ideia aqui e treinar foco seletivo."}
             </p>
           </div>
           <div className="button-row">
@@ -252,8 +282,8 @@ export function AttentionGame({ usuario, progresso, onBack, onRememberVariation,
             <span className="small-muted">Nivel atual: {getNivel(usuario.pontos)}</span>
           </div>
           <div className="tabs-grid">
-            {attentionChallenges.map((item) => {
-              const unlocked = isChallengeUnlocked(progresso, item.id);
+            {challengeList.map((item, index) => {
+              const unlocked = isChallengeUnlockedInOrder(progresso, challengeIds, item.id);
               const progress = progresso[item.id];
               const status = progress.completed ? "Concluido" : unlocked ? "Liberado" : "Bloqueado";
 
@@ -264,7 +294,7 @@ export function AttentionGame({ usuario, progresso, onBack, onRememberVariation,
                   disabled={!unlocked}
                   onClick={() => setSelectedId(item.id)}
                 >
-                  <strong>{`Fase ${item.id} - ${item.difficultyLabel}`}</strong>
+                  <strong>{`Fase ${index + 1} - ${item.difficultyLabel}`}</strong>
                   <span>{item.nome}</span>
                   <small>{`${status} - Melhor ${progress.bestScore}`}</small>
                 </button>
@@ -357,8 +387,8 @@ export function AttentionGame({ usuario, progresso, onBack, onRememberVariation,
           <div className="game-grid">
             <section className="panel">
               <div className="section-head">
-                <h3>{audience === "infantil" && challenge.nomeInfantil ? challenge.nomeInfantil : challenge.nome}</h3>
-                <span className="small-muted">{`Fase ${challenge.id} - ${challenge.difficultyLabel}`}</span>
+                <h3>{!isAdvancedMode && audience === "infantil" && challenge.nomeInfantil ? challenge.nomeInfantil : challenge.nome}</h3>
+                <span className="small-muted">{`Fase ${challengeNumber} - ${challenge.difficultyLabel}`}</span>
               </div>
 
               <GameGuide
@@ -370,14 +400,18 @@ export function AttentionGame({ usuario, progresso, onBack, onRememberVariation,
                   "Toque apenas nas celulas com o alvo correto antes do tempo acabar.",
                   "No final, veja quantos alvos encontrou e quantos erros cometeu.",
                 ]}
-                tip="Quanto menos erros e quanto mais rapido voce encontrar os alvos, melhor sera o score da fase."
-                isChild={usuario.idade <= 10}
+                tip={
+                  isAdvancedMode
+                    ? "No modo avancado, a maior parte da dificuldade esta nos quase-acertos. Olhe duas vezes antes de clicar."
+                    : "Quanto menos erros e quanto mais rapido voce encontrar os alvos, melhor sera o score da fase."
+                }
+                isChild={!isAdvancedMode && usuario.idade <= 10}
               />
 
               <div className="phase-summary">
                 <div className="phase-chip">
                   <strong>Fase</strong>
-                  <span>{`${challenge.id} de ${attentionChallenges.length}`}</span>
+                  <span>{`${challengeNumber} de ${challengeList.length}`}</span>
                 </div>
                 <div className="phase-chip">
                   <strong>Meta</strong>
@@ -419,12 +453,12 @@ export function AttentionGame({ usuario, progresso, onBack, onRememberVariation,
 
               <div className="round-task-card">
                 <strong className="round-task-title">
-                  {audience === "infantil" && challenge.nomeInfantil ? challenge.nomeInfantil : challenge.nome}
+                  {!isAdvancedMode && audience === "infantil" && challenge.nomeInfantil ? challenge.nomeInfantil : challenge.nome}
                 </strong>
-                <span className="round-task-meta">{`Fase ${challenge.id} - ${challenge.difficultyLabel}`}</span>
+                <span className="round-task-meta">{`Fase ${challengeNumber} - ${challenge.difficultyLabel}`}</span>
                 <p className="round-task-description">
-                  {`${getAgeLabel(usuario.idade)} - ${
-                    audience === "infantil" && variacaoAtual.instrucaoInfantil ? variacaoAtual.instrucaoInfantil : variacaoAtual.instrucao
+                  {`${ageDescription} - ${
+                    !isAdvancedMode && audience === "infantil" && variacaoAtual.instrucaoInfantil ? variacaoAtual.instrucaoInfantil : variacaoAtual.instrucao
                   }`}
                 </p>
               </div>

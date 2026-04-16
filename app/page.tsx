@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { AttentionGame } from "@/components/AttentionGame";
+import { AdvancedTestsPanel } from "@/components/AdvancedTestsPanel";
 import { AdminConfirmScreen } from "@/components/AdminConfirmScreen";
 import { AdminScreen } from "@/components/AdminScreen";
 import { AudienceGame } from "@/components/AudienceGame";
@@ -135,8 +136,8 @@ export default function Page() {
     if (updatedUser) setUsuario(updatedUser);
   }
 
-  async function openAdminArea() {
-    const overview = await repository.loadAdminOverview(adminAccessCode);
+  async function openAdminArea(accessCode = adminAccessCode) {
+    const overview = await repository.loadAdminOverview(accessCode);
     setAdminHistories(overview.histories);
     setHelpRequests(overview.helpRequests);
     setTela("admin");
@@ -153,7 +154,7 @@ export default function Page() {
       return;
     }
 
-    await openAdminArea();
+    await openAdminArea(adminAccessCode);
   }
 
   async function hydrateUserSession(activeUser: Usuario) {
@@ -176,19 +177,22 @@ export default function Page() {
   }
 
   async function handleAdminCodeConfirm(code: string) {
-    const expectedCode = (process.env.NEXT_PUBLIC_ADMIN_CONFIRM_CODE?.trim() || "@72446066#").trim();
-    if (code !== expectedCode) return false;
-
     if (!usuario) {
       const adminUser = await repository.ensureAdminUser();
       if (!adminUser) return false;
       await hydrateUserSession(adminUser);
     }
 
-    setAdminConfirmed(true);
-    setAdminAccessCode(code);
-    void openAdminArea();
-    return true;
+    try {
+      setAdminConfirmed(true);
+      setAdminAccessCode(code);
+      await openAdminArea(code);
+      return true;
+    } catch {
+      setAdminConfirmed(false);
+      setAdminAccessCode("");
+      return false;
+    }
   }
 
   async function handleSubmitHelpRequest(request: { email: string; name: string; subject: string; message: string }) {
@@ -307,12 +311,18 @@ export default function Page() {
       <AuthScreen
         tela={
           tela === "dashboard" ||
+          tela === "testesAvancados" ||
           tela === "memoria" ||
+          tela === "memoriaAvancada" ||
           tela === "visual" ||
           tela === "atencao" ||
+          tela === "atencaoAvancada" ||
           tela === "comparacao" ||
+          tela === "comparacaoAvancada" ||
           tela === "espacial" ||
+          tela === "espacialAvancada" ||
           tela === "logica" ||
+          tela === "logicaAvancada" ||
           tela === "perfil" ||
           tela === "especial" ||
           tela === "ajuda" ||
@@ -340,6 +350,23 @@ export default function Page() {
         onSaveResult={(challengeId, score, timeSeconds, completed, variationIndex) =>
           persistResult("memoria", challengeId, score, timeSeconds, completed, variationIndex)
         }
+      />
+    );
+  }
+
+  if (tela === "memoriaAvancada") {
+    return (
+      <MemoryGame
+        usuario={usuario}
+        progresso={progresso.memoria}
+        onBack={() => setTela("testesAvancados")}
+        onRememberVariation={(challengeId, variationIndex) =>
+          persistVariation("memoria", challengeId, variationIndex)
+        }
+        onSaveResult={(challengeId, score, timeSeconds, completed, variationIndex) =>
+          persistResult("memoria", challengeId, score, timeSeconds, completed, variationIndex)
+        }
+        isAdvancedMode
       />
     );
   }
@@ -374,6 +401,23 @@ export default function Page() {
     );
   }
 
+  if (tela === "atencaoAvancada") {
+    return (
+      <AttentionGame
+        usuario={usuario}
+        progresso={progresso.atencao}
+        onBack={() => setTela("testesAvancados")}
+        onRememberVariation={(challengeId, variationIndex) =>
+          persistVariation("atencao", challengeId, variationIndex)
+        }
+        onSaveResult={(challengeId, score, timeSeconds, completed, variationIndex) =>
+          persistResult("atencao", challengeId, score, timeSeconds, completed, variationIndex)
+        }
+        isAdvancedMode
+      />
+    );
+  }
+
   if (tela === "comparacao") {
     return (
       <ComparisonGame
@@ -386,6 +430,23 @@ export default function Page() {
         onSaveResult={(challengeId, score, timeSeconds, completed, variationIndex) =>
           persistResult("comparacao", challengeId, score, timeSeconds, completed, variationIndex)
         }
+      />
+    );
+  }
+
+  if (tela === "comparacaoAvancada") {
+    return (
+      <ComparisonGame
+        usuario={usuario}
+        progresso={progresso.comparacao}
+        onBack={() => setTela("testesAvancados")}
+        onRememberVariation={(challengeId, variationIndex) =>
+          persistVariation("comparacao", challengeId, variationIndex)
+        }
+        onSaveResult={(challengeId, score, timeSeconds, completed, variationIndex) =>
+          persistResult("comparacao", challengeId, score, timeSeconds, completed, variationIndex)
+        }
+        isAdvancedMode
       />
     );
   }
@@ -406,6 +467,23 @@ export default function Page() {
     );
   }
 
+  if (tela === "espacialAvancada") {
+    return (
+      <SpatialGame
+        usuario={usuario}
+        progresso={progresso.espacial}
+        onBack={() => setTela("testesAvancados")}
+        onRememberVariation={(challengeId, variationIndex) =>
+          persistVariation("espacial", challengeId, variationIndex)
+        }
+        onSaveResult={(challengeId, score, timeSeconds, completed, variationIndex) =>
+          persistResult("espacial", challengeId, score, timeSeconds, completed, variationIndex)
+        }
+        isAdvancedMode
+      />
+    );
+  }
+
   if (tela === "logica") {
     return (
       <LogicGame
@@ -416,6 +494,21 @@ export default function Page() {
         onSaveResult={(challengeId, score, timeSeconds, completed, variationIndex) =>
           persistResult("logica", challengeId, score, timeSeconds, completed, variationIndex)
         }
+      />
+    );
+  }
+
+  if (tela === "logicaAvancada") {
+    return (
+      <LogicGame
+        usuario={usuario}
+        progresso={progresso.logica}
+        onBack={() => setTela("testesAvancados")}
+        onRememberVariation={(challengeId, variationIndex) => persistVariation("logica", challengeId, variationIndex)}
+        onSaveResult={(challengeId, score, timeSeconds, completed, variationIndex) =>
+          persistResult("logica", challengeId, score, timeSeconds, completed, variationIndex)
+        }
+        isAdvancedMode
       />
     );
   }
@@ -438,6 +531,19 @@ export default function Page() {
 
   if (tela === "perfil") {
     return <ProfileScreen usuario={usuario} onBack={() => setTela("dashboard")} onSaveProfile={handleSaveProfile} />;
+  }
+
+  if (tela === "testesAvancados") {
+    return (
+      <AdvancedTestsPanel
+        onBack={() => setTela("dashboard")}
+        onOpenMemory={() => setTela("memoriaAvancada")}
+        onOpenAttention={() => setTela("atencaoAvancada")}
+        onOpenComparison={() => setTela("comparacaoAvancada")}
+        onOpenSpatial={() => setTela("espacialAvancada")}
+        onOpenLogic={() => setTela("logicaAvancada")}
+      />
+    );
   }
 
   if (tela === "adminConfirm") {
@@ -488,6 +594,7 @@ export default function Page() {
       onOpenLogic={() => setTela("logica")}
       onOpenProfile={() => setTela("perfil")}
       onOpenSpecial={() => setTela("especial")}
+      onOpenAdvanced={() => setTela("testesAvancados")}
       onOpenHelp={() => setTela("ajuda")}
       onOpenAdmin={handleOpenAdmin}
       onLogout={handleLogout}

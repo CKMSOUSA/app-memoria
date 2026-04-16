@@ -39,6 +39,7 @@ type DashboardProps = {
   onOpenLogic: () => void;
   onOpenProfile: () => void;
   onOpenSpecial: () => void;
+  onOpenAdvanced: () => void;
   onOpenHelp: () => void;
   onOpenAdmin: () => void;
   onLogout: () => void;
@@ -162,6 +163,7 @@ export function Dashboard({
   onOpenLogic,
   onOpenProfile,
   onOpenSpecial,
+  onOpenAdvanced,
   onOpenHelp,
   onOpenAdmin,
   onLogout,
@@ -266,6 +268,9 @@ export function Dashboard({
         <button className="btn btn-side" onClick={onOpenSpecial}>
           Trilha exclusiva
         </button>
+        <button className="btn btn-side" onClick={onOpenAdvanced}>
+          Testes Avancados
+        </button>
         <button className="btn btn-side" onClick={onOpenProfile}>
           Perfil
         </button>
@@ -312,6 +317,9 @@ export function Dashboard({
               </button>
               <button className="btn btn-secondary" onClick={onOpenLogic}>
                 Logica
+              </button>
+              <button className="btn btn-secondary" onClick={onOpenAdvanced}>
+                Testes Avancados
               </button>
             </div>
           </div>

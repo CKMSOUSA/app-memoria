@@ -1,4 +1,11 @@
 import {
+  advancedAttentionChallenges,
+  advancedComparisonChallenges,
+  advancedLogicChallenges,
+  advancedMemoryChallenges,
+  advancedSpatialChallenges,
+} from "@/lib/advanced-game-data";
+import {
   attentionChallenges,
   comparisonChallenges,
   exclusiveChallenges,
@@ -22,13 +29,19 @@ function defaultChallengeProgress() {
 }
 
 export function createDefaultProgress(): ProgressState {
+  const memoryCatalog = [...memoryChallenges, ...advancedMemoryChallenges];
+  const attentionCatalog = [...attentionChallenges, ...advancedAttentionChallenges];
+  const comparisonCatalog = [...comparisonChallenges, ...advancedComparisonChallenges];
+  const spatialCatalog = [...spatialChallenges, ...advancedSpatialChallenges];
+  const logicCatalog = [...logicChallenges, ...advancedLogicChallenges];
+
   return {
-    memoria: Object.fromEntries(memoryChallenges.map((challenge) => [challenge.id, defaultChallengeProgress()])),
+    memoria: Object.fromEntries(memoryCatalog.map((challenge) => [challenge.id, defaultChallengeProgress()])),
     visual: Object.fromEntries(visualChallenges.map((challenge) => [challenge.id, defaultChallengeProgress()])),
-    atencao: Object.fromEntries(attentionChallenges.map((challenge) => [challenge.id, defaultChallengeProgress()])),
-    comparacao: Object.fromEntries(comparisonChallenges.map((challenge) => [challenge.id, defaultChallengeProgress()])),
-    espacial: Object.fromEntries(spatialChallenges.map((challenge) => [challenge.id, defaultChallengeProgress()])),
-    logica: Object.fromEntries(logicChallenges.map((challenge) => [challenge.id, defaultChallengeProgress()])),
+    atencao: Object.fromEntries(attentionCatalog.map((challenge) => [challenge.id, defaultChallengeProgress()])),
+    comparacao: Object.fromEntries(comparisonCatalog.map((challenge) => [challenge.id, defaultChallengeProgress()])),
+    espacial: Object.fromEntries(spatialCatalog.map((challenge) => [challenge.id, defaultChallengeProgress()])),
+    logica: Object.fromEntries(logicCatalog.map((challenge) => [challenge.id, defaultChallengeProgress()])),
     especial: Object.fromEntries(exclusiveChallenges.map((challenge) => [challenge.id, defaultChallengeProgress()])),
   };
 }
@@ -36,7 +49,7 @@ export function createDefaultProgress(): ProgressState {
 export function mergeProgress(saved?: Partial<ProgressState> | null): ProgressState {
   const base = createDefaultProgress();
 
-  for (const challenge of memoryChallenges) {
+  for (const challenge of [...memoryChallenges, ...advancedMemoryChallenges]) {
     base.memoria[challenge.id] = {
       ...base.memoria[challenge.id],
       ...(saved?.memoria?.[challenge.id] ?? {}),
@@ -50,28 +63,28 @@ export function mergeProgress(saved?: Partial<ProgressState> | null): ProgressSt
     };
   }
 
-  for (const challenge of attentionChallenges) {
+  for (const challenge of [...attentionChallenges, ...advancedAttentionChallenges]) {
     base.atencao[challenge.id] = {
       ...base.atencao[challenge.id],
       ...(saved?.atencao?.[challenge.id] ?? {}),
     };
   }
 
-  for (const challenge of comparisonChallenges) {
+  for (const challenge of [...comparisonChallenges, ...advancedComparisonChallenges]) {
     base.comparacao[challenge.id] = {
       ...base.comparacao[challenge.id],
       ...(saved?.comparacao?.[challenge.id] ?? {}),
     };
   }
 
-  for (const challenge of spatialChallenges) {
+  for (const challenge of [...spatialChallenges, ...advancedSpatialChallenges]) {
     base.espacial[challenge.id] = {
       ...base.espacial[challenge.id],
       ...(saved?.espacial?.[challenge.id] ?? {}),
     };
   }
 
-  for (const challenge of logicChallenges) {
+  for (const challenge of [...logicChallenges, ...advancedLogicChallenges]) {
     base.logica[challenge.id] = {
       ...base.logica[challenge.id],
       ...(saved?.logica?.[challenge.id] ?? {}),
@@ -158,6 +171,17 @@ export function isChallengeUnlocked(
 ) {
   if (challengeId === 1) return true;
   return progressMap[challengeId - 1]?.completed ?? false;
+}
+
+export function isChallengeUnlockedInOrder(
+  progressMap: Record<number, { completed: boolean }>,
+  challengeIds: number[],
+  challengeId: number,
+) {
+  const challengeIndex = challengeIds.indexOf(challengeId);
+  if (challengeIndex <= 0) return true;
+  const previousId = challengeIds[challengeIndex - 1];
+  return progressMap[previousId]?.completed ?? false;
 }
 
 export function normalizeText(value: string) {

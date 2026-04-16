@@ -5,6 +5,7 @@ import { GameGuide } from "@/components/GameGuide";
 import { ReviewMetrics } from "@/components/ReviewMetrics";
 import { SoundToggle, useSoundFeedback } from "@/components/SoundToggle";
 import { getChildVisual } from "@/lib/child-visuals";
+import { advancedMemoryChallenges } from "@/lib/advanced-game-data";
 import { memoryChallenges } from "@/lib/game-data-v3";
 import { evaluateMemoryRound, getNextVariationIndex } from "@/lib/game-logic";
 import {
@@ -13,9 +14,9 @@ import {
   getMemoryAgeProfile,
   getMemoryDifficulty,
   getNivel,
-  isChallengeUnlocked,
+  isChallengeUnlockedInOrder,
 } from "@/lib/scoring";
-import type { ProgressState, Usuario } from "@/lib/types";
+import type { MemoryChallenge, ProgressState, Usuario } from "@/lib/types";
 
 type MemoryGameProps = {
   usuario: Usuario;
@@ -29,6 +30,7 @@ type MemoryGameProps = {
     completed: boolean,
     variationIndex: number,
   ) => void;
+  isAdvancedMode?: boolean;
 };
 
 type Phase = "idle" | "memorizing" | "answering" | "result";
@@ -88,8 +90,18 @@ function MemoryFigureCard({ token }: { token: string }) {
   );
 }
 
-export function MemoryGame({ usuario, progresso, onBack, onRememberVariation, onSaveResult }: MemoryGameProps) {
-  const [selectedId, setSelectedId] = useState(1);
+export function MemoryGame({
+  usuario,
+  progresso,
+  onBack,
+  onRememberVariation,
+  onSaveResult,
+  isAdvancedMode = false,
+}: MemoryGameProps) {
+  const challengeList: MemoryChallenge[] = isAdvancedMode ? advancedMemoryChallenges : memoryChallenges;
+  const challengeIds = challengeList.map((item) => item.id);
+  const firstChallengeId = challengeList[0]?.id ?? 1;
+  const [selectedId, setSelectedId] = useState(firstChallengeId);
   const [variationIndex, setVariationIndex] = useState(0);
   const [phase, setPhase] = useState<Phase>("idle");
   const [countdown, setCountdown] = useState(0);
@@ -106,26 +118,39 @@ export function MemoryGame({ usuario, progresso, onBack, onRememberVariation, on
   const { soundEnabled, toggleSound, playResultSound, playAnswerSound } = useSoundFeedback();
 
   const challenge = useMemo(
-    () => memoryChallenges.find((item) => item.id === selectedId) ?? memoryChallenges[0],
-    [selectedId],
+    () => challengeList.find((item) => item.id === selectedId) ?? challengeList[0],
+    [challengeList, selectedId],
   );
   const progressoRef = useRef(progresso);
   const audience = getAudienceFromAge(usuario.idade);
   const baseVariacoes =
-    audience === "infantil" && challenge.variacoesInfantis?.length ? challenge.variacoesInfantis : challenge.variacoes;
+    isAdvancedMode || !(audience === "infantil" && challenge.variacoesInfantis?.length)
+      ? challenge.variacoes
+      : challenge.variacoesInfantis;
   const palavrasDaRodada = baseVariacoes[variationIndex] ?? baseVariacoes[0];
   const ageProfile = getMemoryAgeProfile(usuario.idade);
-  const palavrasVisiveis = palavrasDaRodada.slice(0, ageProfile.visibleWords);
+  const palavrasVisiveis = isAdvancedMode ? palavrasDaRodada : palavrasDaRodada.slice(0, ageProfile.visibleWords);
   const visualChoices = useMemo(
     () => getStableVisualChoices(palavrasVisiveis, baseVariacoes, challenge.id, variationIndex),
     [baseVariacoes, challenge.id, palavrasVisiveis, variationIndex],
   );
-  const dificuldade = getMemoryDifficulty({
-    tempoBase: challenge.tempoMemorizacao,
-    minimoBase: challenge.minimoParaConcluir,
-    idade: usuario.idade,
-    progress: progresso[selectedId],
-  });
+  const dificuldade = isAdvancedMode
+    ? {
+        tempoMemorizacao: challenge.tempoMemorizacao,
+        minimoParaConcluir: challenge.minimoParaConcluir,
+      }
+    : getMemoryDifficulty({
+        tempoBase: challenge.tempoMemorizacao,
+        minimoBase: challenge.minimoParaConcluir,
+        idade: usuario.idade,
+        progress: progresso[selectedId],
+      });
+  const challengeNumber = challengeIds.indexOf(challenge.id) + 1;
+  const ageDescription = isAdvancedMode ? "Teste avancado sem adaptacao por idade" : getAgeLabel(usuario.idade);
+
+  useEffect(() => {
+    setSelectedId((current) => (challengeIds.includes(current) ? current : firstChallengeId));
+  }, [challengeIds, firstChallengeId]);
 
   useEffect(() => {
     progressoRef.current = progresso;
@@ -174,7 +199,7 @@ export function MemoryGame({ usuario, progresso, onBack, onRememberVariation, on
   }
 
   function advanceRound() {
-    const nextChallenge = memoryChallenges.find((item) => item.id > challenge.id);
+    const nextChallenge = challengeList.find((item) => item.id > challenge.id);
     if (review?.completed && nextChallenge) {
       setSelectedId(nextChallenge.id);
       return;
@@ -228,10 +253,12 @@ export function MemoryGame({ usuario, progresso, onBack, onRememberVariation, on
       <section className="game-card">
         <header className="game-header">
           <div>
-            <p className="eyebrow">Trilha de memoria</p>
-            <h1>Memorize, oculte e recupere</h1>
+            <p className="eyebrow">{isAdvancedMode ? "Testes Avancados" : "Trilha de memoria"}</p>
+            <h1>{isAdvancedMode ? "Memoria de altissima carga" : "Memorize, oculte e recupere"}</h1>
             <p className="muted">
-              Cada rodada tem uma unica correcao. Pontos extras so entram quando voce melhora seu recorde anterior.
+              {isAdvancedMode
+                ? "Estas fases usam listas maiores, codigos parecidos e nenhuma reducao por idade."
+                : "Cada rodada tem uma unica correcao. Pontos extras so entram quando voce melhora seu recorde anterior."}
             </p>
           </div>
           <div className="button-row">
@@ -248,8 +275,8 @@ export function MemoryGame({ usuario, progresso, onBack, onRememberVariation, on
             <span className="small-muted">Nivel atual: {getNivel(usuario.pontos)}</span>
           </div>
           <div className="tabs-grid">
-            {memoryChallenges.map((item) => {
-              const unlocked = isChallengeUnlocked(progresso, item.id);
+            {challengeList.map((item, index) => {
+              const unlocked = isChallengeUnlockedInOrder(progresso, challengeIds, item.id);
               const progress = progresso[item.id];
               const status = progress.completed ? "Concluido" : unlocked ? "Liberado" : "Bloqueado";
 
@@ -262,7 +289,7 @@ export function MemoryGame({ usuario, progresso, onBack, onRememberVariation, on
                     setSelectedId(item.id);
                   }}
                 >
-                  <strong>{`Fase ${item.id} - ${item.difficultyLabel}`}</strong>
+                  <strong>{`Fase ${index + 1} - ${item.difficultyLabel}`}</strong>
                   <span>{item.nome}</span>
                   <small>{`${status} - Melhor ${progress.bestScore}`}</small>
                 </button>
@@ -352,8 +379,8 @@ export function MemoryGame({ usuario, progresso, onBack, onRememberVariation, on
           <div className="game-grid">
             <section className="panel">
               <div className="section-head">
-                <h3>{audience === "infantil" && challenge.nomeInfantil ? challenge.nomeInfantil : challenge.nome}</h3>
-                <span className="small-muted">{`Fase ${challenge.id} - ${challenge.difficultyLabel}`}</span>
+                <h3>{!isAdvancedMode && audience === "infantil" && challenge.nomeInfantil ? challenge.nomeInfantil : challenge.nome}</h3>
+                <span className="small-muted">{`Fase ${challengeNumber} - ${challenge.difficultyLabel}`}</span>
               </div>
 
               <GameGuide
@@ -365,14 +392,18 @@ export function MemoryGame({ usuario, progresso, onBack, onRememberVariation, on
                   "Quando as figuras sumirem, selecione no painel ao lado o que voce lembrar.",
                   "Use Corrigir rodada para ver acertos, erros e figuras faltantes.",
                 ]}
-                tip="Cada rodada vale uma correcao. Para subir pontos, voce precisa superar o seu melhor score nesta fase."
-                isChild={usuario.idade <= 10}
+                tip={
+                  isAdvancedMode
+                    ? "No modo avancado, a diferenca entre itens e minima. Vale conferir com calma antes de responder."
+                    : "Cada rodada vale uma correcao. Para subir pontos, voce precisa superar o seu melhor score nesta fase."
+                }
+                isChild={!isAdvancedMode && usuario.idade <= 10}
               />
 
               <div className="phase-summary">
                 <div className="phase-chip">
                   <strong>Fase</strong>
-                  <span>{`${challenge.id} de ${memoryChallenges.length}`}</span>
+                  <span>{`${challengeNumber} de ${challengeList.length}`}</span>
                 </div>
                 <div className="phase-chip">
                   <strong>Meta</strong>
@@ -399,11 +430,11 @@ export function MemoryGame({ usuario, progresso, onBack, onRememberVariation, on
               </div>
               <div className="memory-task-card">
                 <strong className="memory-task-title">
-                  {audience === "infantil" && challenge.nomeInfantil ? challenge.nomeInfantil : challenge.nome}
+                  {!isAdvancedMode && audience === "infantil" && challenge.nomeInfantil ? challenge.nomeInfantil : challenge.nome}
                 </strong>
-                <span className="memory-task-meta">{`Fase ${challenge.id} - ${challenge.difficultyLabel}`}</span>
+                <span className="memory-task-meta">{`Fase ${challengeNumber} - ${challenge.difficultyLabel}`}</span>
                 <p className="memory-task-description">
-                  {`${getAgeLabel(usuario.idade)} - Lembre pelo menos ${dificuldade.minimoParaConcluir} de ${palavrasVisiveis.length} figuras desta rodada.`}
+                  {`${ageDescription} - Lembre pelo menos ${dificuldade.minimoParaConcluir} de ${palavrasVisiveis.length} figuras desta rodada.`}
                 </p>
               </div>
 

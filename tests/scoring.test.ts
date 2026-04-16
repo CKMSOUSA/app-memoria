@@ -12,6 +12,13 @@ import {
   mergeProgress,
 } from "@/lib/scoring";
 import {
+  advancedAttentionChallenges,
+  advancedComparisonChallenges,
+  advancedLogicChallenges,
+  advancedMemoryChallenges,
+  advancedSpatialChallenges,
+} from "@/lib/advanced-game-data";
+import {
   attentionChallenges,
   comparisonChallenges,
   exclusiveChallenges,
@@ -43,6 +50,16 @@ test("expanded tracks expose the requested amount of phases", () => {
   assert.equal(exclusiveChallenges.filter((item) => item.audience === "infantil").length, 10);
   assert.equal(exclusiveChallenges.filter((item) => item.audience === "adolescente").length, 10);
   assert.equal(exclusiveChallenges.filter((item) => item.audience === "adulto").length, 10);
+});
+
+test("advanced tracks are also registered in progress maps", () => {
+  const progress = createDefaultProgress();
+
+  assert.equal(progress.memoria[advancedMemoryChallenges[0].id].attempts, 0);
+  assert.equal(progress.atencao[advancedAttentionChallenges[0].id].attempts, 0);
+  assert.equal(progress.comparacao[advancedComparisonChallenges[0].id].attempts, 0);
+  assert.equal(progress.espacial[advancedSpatialChallenges[0].id].attempts, 0);
+  assert.equal(progress.logica[advancedLogicChallenges[0].id].attempts, 0);
 });
 
 test("mergeProgress preserves saved data while filling missing challenges", () => {
@@ -122,5 +139,5 @@ test("completion rate reflects finished items", () => {
   progress[1].completed = true;
   progress[2].completed = true;
 
-  assert.equal(getCompletionRate(progress), 13);
+  assert.equal(getCompletionRate(progress), 11);
 });
