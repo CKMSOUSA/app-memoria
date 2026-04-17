@@ -371,3 +371,25 @@ export function getSpatialDifficulty({
 
   return { tempoResposta, minimoParaConcluir };
 }
+
+export function getLogicDifficulty({
+  tempoBase,
+  minimoBase,
+  idade,
+  progress,
+}: {
+  tempoBase: number;
+  minimoBase: number;
+  idade: number;
+  progress: { attempts: number; completed: boolean; bestScore: number };
+}) {
+  const ageProfile = getAttentionAgeProfile(idade);
+  let tempoLimite = tempoBase + Math.max(-1, ageProfile.timeOffset - 1);
+  let minimoParaConcluir = Math.min(minimoBase, Math.max(2, ageProfile.minimumCap - 2));
+
+  if (progress.completed && progress.bestScore >= 22) tempoLimite = Math.max(9, tempoBase - 2);
+  if (progress.completed && progress.bestScore >= 28) minimoParaConcluir += 1;
+  if (!progress.completed && progress.attempts >= 3) tempoLimite += 2;
+
+  return { tempoLimite, minimoParaConcluir };
+}

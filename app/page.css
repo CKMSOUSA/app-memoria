@@ -1579,6 +1579,77 @@ h2 {
   font-size: 14px;
 }
 
+.diagnostic-panel {
+  display: grid;
+  gap: 14px;
+}
+
+.diagnostic-chip-grid,
+.insight-grid,
+.trend-grid,
+.guided-plan-grid {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+
+.phase-chip-wide {
+  align-items: start;
+  min-height: 86px;
+}
+
+.insight-card,
+.trend-card,
+.guided-plan-card {
+  display: grid;
+  gap: 12px;
+  padding: 18px;
+  border-radius: 22px;
+  border: 1px solid var(--line);
+  background: rgba(255, 251, 244, 0.96);
+}
+
+.insight-card-top,
+.trend-metrics {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.insight-card-forte {
+  border-color: rgba(45, 138, 84, 0.24);
+  background: rgba(236, 247, 240, 0.94);
+}
+
+.insight-card-estavel {
+  border-color: rgba(74, 137, 178, 0.22);
+  background: rgba(240, 247, 252, 0.94);
+}
+
+.insight-card-prioridade {
+  border-color: rgba(207, 95, 60, 0.24);
+  background: rgba(255, 245, 239, 0.96);
+}
+
+.trend-card-subindo {
+  border-color: rgba(45, 138, 84, 0.24);
+}
+
+.trend-card-caindo {
+  border-color: rgba(207, 95, 60, 0.24);
+}
+
+.guided-plan-card .clean-list {
+  margin: 0;
+}
+
+.quick-card-highlight {
+  border-color: rgba(74, 137, 178, 0.24);
+  background: linear-gradient(135deg, rgba(239, 247, 252, 0.96) 0%, rgba(255, 251, 244, 0.96) 100%);
+}
+
 .metrics-strip::-webkit-scrollbar {
   height: 8px;
 }

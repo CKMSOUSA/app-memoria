@@ -34,6 +34,7 @@ type SpatialGameProps = {
 };
 
 type Phase = "idle" | "showing" | "answering" | "result";
+type AdaptiveTuning = { responseBonus: number; revealBonus: number; stepDelta: number; minimumDelta: number };
 
 type BoardStep = {
   row: number;
@@ -97,6 +98,12 @@ export function SpatialGame({
   const [answerSeconds, setAnswerSeconds] = useState(0);
   const [selectedMoves, setSelectedMoves] = useState<string[]>([]);
   const [feedback, setFeedback] = useState("");
+  const [adaptiveTuning, setAdaptiveTuning] = useState<AdaptiveTuning>({
+    responseBonus: 0,
+    revealBonus: 0,
+    stepDelta: 0,
+    minimumDelta: 0,
+  });
   const [review, setReview] = useState<{
     hits: string[];
     mistakes: string[];
@@ -122,7 +129,18 @@ export function SpatialGame({
         idade: usuario.idade,
         progress: progresso[selectedId],
       });
-  const expectedPath = useMemo(() => buildBoardPath(currentVariation.sequence), [currentVariation.sequence]);
+  const activeStepCount = isAdvancedMode
+    ? currentVariation.sequence.length
+    : Math.max(2, Math.min(currentVariation.sequence.length, currentVariation.sequence.length + adaptiveTuning.stepDelta));
+  const activeSequence = currentVariation.sequence.slice(0, activeStepCount);
+  const adaptiveDifficulty = isAdvancedMode
+    ? { ...difficulty, revealSeconds: currentVariation.revealSeconds }
+    : {
+        tempoResposta: Math.max(8, difficulty.tempoResposta + adaptiveTuning.responseBonus),
+        minimoParaConcluir: Math.max(2, Math.min(activeSequence.length, difficulty.minimoParaConcluir + adaptiveTuning.minimumDelta)),
+        revealSeconds: Math.max(3, currentVariation.revealSeconds + adaptiveTuning.revealBonus),
+      };
+  const expectedPath = useMemo(() => buildBoardPath(activeSequence), [activeSequence]);
   const userPath = useMemo(() => buildBoardPath(selectedMoves), [selectedMoves]);
   const challengeNumber = challengeIds.indexOf(challenge.id) + 1;
   const ageDescription = getAgeLabel(usuario.idade);
@@ -160,6 +178,7 @@ export function SpatialGame({
     setAnswerSeconds(0);
     setSelectedMoves([]);
     setFeedback("");
+    setAdaptiveTuning({ responseBonus: 0, revealBonus: 0, stepDelta: 0, minimumDelta: 0 });
     setReview(null);
   }, [selectedId, challenge.variacoes.length]);
 
@@ -168,7 +187,7 @@ export function SpatialGame({
   }, [challenge.id, onRememberVariation, variationIndex]);
 
   function startRound() {
-    setRevealLeft(currentVariation.revealSeconds);
+    setRevealLeft(adaptiveDifficulty.revealSeconds);
     setAnswerSeconds(0);
     setSelectedMoves([]);
     setFeedback("");
@@ -203,21 +222,43 @@ export function SpatialGame({
     const nextMoves = [...selectedMoves, move];
     setSelectedMoves(nextMoves);
 
-    if (nextMoves.length === currentVariation.sequence.length) {
+    if (nextMoves.length === activeSequence.length) {
       const result = evaluateSpatialRound({
-        expectedSequence: currentVariation.sequence,
+        expectedSequence: activeSequence,
         selectedSequence: nextMoves,
         answerSeconds,
-        responseSeconds: difficulty.tempoResposta,
-        minimumToComplete: difficulty.minimoParaConcluir,
+        responseSeconds: adaptiveDifficulty.tempoResposta,
+        minimumToComplete: adaptiveDifficulty.minimoParaConcluir,
       });
+
+      if (!isAdvancedMode) {
+        setAdaptiveTuning((current) => {
+          if (result.completed && result.wrongMoves.length === 0 && answerSeconds <= Math.max(4, adaptiveDifficulty.tempoResposta - 2)) {
+            return {
+              responseBonus: Math.max(-2, current.responseBonus - 1),
+              revealBonus: Math.max(-1, current.revealBonus - 1),
+              stepDelta: Math.min(2, current.stepDelta + 1),
+              minimumDelta: Math.min(1, current.minimumDelta + 1),
+            };
+          }
+          if (!result.completed || result.wrongMoves.length >= 2) {
+            return {
+              responseBonus: Math.min(4, current.responseBonus + 1),
+              revealBonus: Math.min(2, current.revealBonus + 1),
+              stepDelta: Math.max(-2, current.stepDelta - 1),
+              minimumDelta: Math.max(-1, current.minimumDelta - 1),
+            };
+          }
+          return current;
+        });
+      }
 
       setPhase("result");
       setReview(result);
       setFeedback(
         result.completed
           ? `Voce reconstruiu ${result.hits.length} direcao(oes) corretamente e concluiu a rota.`
-          : `Voce acertou ${result.hits.length} movimento(s). Precisa de ${difficulty.minimoParaConcluir} para concluir.`,
+          : `Voce acertou ${result.hits.length} movimento(s). Precisa de ${adaptiveDifficulty.minimoParaConcluir} para concluir.`,
       );
       playResultSound(result.completed);
       onSaveResult(challenge.id, result.score, answerSeconds, result.completed, variationIndex);
@@ -285,7 +326,7 @@ export function SpatialGame({
               items={[
                 { label: "Corretos", value: String(review.hits.length) },
                 { label: "Erros", value: String(review.wrongMoves.length) },
-                { label: "Passos", value: String(currentVariation.sequence.length) },
+                { label: "Passos", value: String(activeSequence.length) },
               ]}
               note="Compare a rota correta com a sua rota. Isso ajuda a perceber onde a referencia espacial se perdeu."
             />
@@ -329,7 +370,7 @@ export function SpatialGame({
               <div className="review-column">
                 <strong>Movimentos esperados</strong>
                 <div className="review-tags">
-                  {currentVariation.sequence.map((item, index) => (
+                  {activeSequence.map((item, index) => (
                     <span key={`${item}-${index}`} className="review-tag">
                       {directionLabelMap[item]}
                     </span>
@@ -397,18 +438,22 @@ export function SpatialGame({
                 </div>
                 <div className="phase-chip">
                   <strong>Meta</strong>
-                  <span>{`${difficulty.minimoParaConcluir} movimentos certos`}</span>
+                  <span>{`${adaptiveDifficulty.minimoParaConcluir} movimentos certos`}</span>
                 </div>
                 <div className="phase-chip">
                   <strong>Rota</strong>
-                  <span>{`${currentVariation.sequence.length} passos`}</span>
+                  <span>{`${activeSequence.length} passos`}</span>
+                </div>
+                <div className="phase-chip">
+                  <strong>Adaptacao</strong>
+                  <span>{`${adaptiveDifficulty.tempoResposta}s para responder`}</span>
                 </div>
               </div>
 
               <div className={`${isAdvancedMode ? "status-row compact-status-row" : ""}`}>
                 <div className="meter-box">
                   <strong>Tempo de observacao</strong>
-                  <span>{phase === "showing" ? `${revealLeft}s restantes` : `${currentVariation.revealSeconds}s por rodada`}</span>
+                  <span>{phase === "showing" ? `${revealLeft}s restantes` : `${adaptiveDifficulty.revealSeconds}s por rodada`}</span>
                 </div>
                 {isAdvancedMode ? (
                   <div className="meter-box">
@@ -462,7 +507,7 @@ export function SpatialGame({
               <div className={`${isAdvancedMode ? "status-row compact-status-row" : ""}`}>
                 <div className="meter-box">
                   <strong>Objetivo da rodada</strong>
-                  <span>{`Repita ${currentVariation.sequence.length} movimentos na mesma ordem usando Cima, Baixo, Esquerda e Direita.`}</span>
+                  <span>{`Repita ${activeSequence.length} movimentos na mesma ordem usando Cima, Baixo, Esquerda e Direita.`}</span>
                 </div>
               </div>
 
@@ -482,7 +527,7 @@ export function SpatialGame({
                     key={option}
                     className="exclusive-option"
                     onClick={() => pushMove(option)}
-                    disabled={phase !== "answering" || selectedMoves.length >= currentVariation.sequence.length}
+                    disabled={phase !== "answering" || selectedMoves.length >= activeSequence.length}
                   >
                     {showChildVisuals ? <ChildVisualBadge token={directionLabelMap[option]} compact /> : directionLabelMap[option]}
                   </button>

@@ -24,6 +24,13 @@ import {
   getSessionModeLabel,
   isChallengeUnlocked,
 } from "@/lib/scoring";
+import {
+  getAbilityInsights,
+  getAutomaticDiagnostic,
+  getGuidedSessions,
+  getPerformanceTrends,
+  getSmartRecommendation,
+} from "@/lib/training-insights";
 import type { ProgressState, SessionRecord, Usuario } from "@/lib/types";
 
 type TrailMode = "memoria" | "visual" | "atencao" | "comparacao" | "espacial" | "logica";
@@ -131,6 +138,95 @@ function CompactMetricCard({ label, value, caption }: { label: string; value: st
   );
 }
 
+function AbilityCard({
+  title,
+  score,
+  level,
+  summary,
+}: {
+  title: string;
+  score: number;
+  level: "forte" | "estavel" | "prioridade";
+  summary: string;
+}) {
+  return (
+    <article className={`insight-card insight-card-${level}`}>
+      <div className="insight-card-top">
+        <p className="small-muted">{title}</p>
+        <span className="pill">{score}/100</span>
+      </div>
+      <h3>{level === "forte" ? "Forte" : level === "estavel" ? "Estavel" : "Prioridade"}</h3>
+      <p className="muted">{summary}</p>
+    </article>
+  );
+}
+
+function TrendCard({
+  label,
+  direction,
+  scoreDelta,
+  completionDelta,
+  summary,
+}: {
+  label: string;
+  direction: "subindo" | "estavel" | "caindo";
+  scoreDelta: number;
+  completionDelta: number;
+  summary: string;
+}) {
+  const signal = direction === "subindo" ? "Em melhora" : direction === "caindo" ? "Em queda" : "Estavel";
+  return (
+    <article className={`trend-card trend-card-${direction}`}>
+      <div className="section-head">
+        <h3>{label}</h3>
+        <span className="pill">{signal}</span>
+      </div>
+      <p className="muted">{summary}</p>
+      <div className="trend-metrics">
+        <span>{`${scoreDelta >= 0 ? "+" : ""}${scoreDelta} score`}</span>
+        <span>{`${completionDelta >= 0 ? "+" : ""}${completionDelta}% conclusao`}</span>
+      </div>
+    </article>
+  );
+}
+
+function GuidedPlanCard({
+  title,
+  durationLabel,
+  objective,
+  cadence,
+  steps,
+  onOpen,
+}: {
+  title: string;
+  durationLabel: string;
+  objective: string;
+  cadence: string;
+  steps: string[];
+  onOpen: () => void;
+}) {
+  return (
+    <article className="guided-plan-card">
+      <div className="section-head">
+        <div>
+          <p className="small-muted">{durationLabel}</p>
+          <h3>{title}</h3>
+        </div>
+      </div>
+      <p className="muted">{objective}</p>
+      <p className="small-muted">{cadence}</p>
+      <ul className="clean-list">
+        {steps.map((step) => (
+          <li key={step}>{step}</li>
+        ))}
+      </ul>
+      <button className="btn btn-secondary" onClick={onOpen}>
+        Abrir trilha principal
+      </button>
+    </article>
+  );
+}
+
 function TrackCard({
   title,
   audience,
@@ -200,6 +296,11 @@ export function Dashboard({
     (item) => item.id === getRecommendedChallengeId(progresso.logica, logicChallenges.map((challenge) => challenge.id)),
   );
   const resumo = getReportSummary(history);
+  const abilityInsights = getAbilityInsights(history, progresso);
+  const performanceTrends = getPerformanceTrends(history);
+  const diagnostic = getAutomaticDiagnostic(usuario.idade, history, progresso);
+  const smartRecommendation = getSmartRecommendation(history, progresso);
+  const guidedSessions = getGuidedSessions(usuario.idade, history, progresso);
   const [activeTrailTab, setActiveTrailTab] = useState<TrailMode>("memoria");
   const trailTabs: Array<{
     id: TrailMode;
@@ -234,6 +335,14 @@ export function Dashboard({
     { id: "logica", label: "Logica", title: "Trilha de logica", rate: getCompletionRate(progresso.logica), progressMap: progresso.logica },
   ];
   const activeTrail = trailTabs.find((trail) => trail.id === activeTrailTab) ?? trailTabs[0];
+  const openMode = (mode: TrailMode) => {
+    if (mode === "memoria") return onOpenMemory();
+    if (mode === "visual") return onOpenVisual();
+    if (mode === "atencao") return onOpenAttention();
+    if (mode === "comparacao") return onOpenComparison();
+    if (mode === "espacial") return onOpenSpatial();
+    return onOpenLogic();
+  };
 
   return (
     <main className="shell shell-dashboard">
@@ -414,6 +523,60 @@ export function Dashboard({
           </div>
         </section>
 
+        <section className="panel diagnostic-panel">
+          <div className="section-head">
+            <h3>{diagnostic.title}</h3>
+            <span className="pill">{diagnostic.readinessLabel}</span>
+          </div>
+          <p className="muted">{diagnostic.summary}</p>
+          <p className="small-muted">{diagnostic.focusLabel}</p>
+          <div className="diagnostic-chip-grid">
+            {diagnostic.starters.map((starter) => (
+              <article key={`${starter.mode}-${starter.challengeId}`} className="phase-chip phase-chip-wide">
+                <strong>{getSessionModeLabel(starter.mode)}</strong>
+                <span>{`Fase ${starter.challengeId} - ${starter.challengeName}`}</span>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        <section className="panel">
+          <div className="section-head">
+            <h3>Relatorios por habilidade</h3>
+            <span className="small-muted">Leitura separada de memoria, atencao, velocidade e raciocinio</span>
+          </div>
+          <div className="insight-grid">
+            {abilityInsights.map((insight) => (
+              <AbilityCard
+                key={insight.key}
+                title={insight.title}
+                score={insight.score}
+                level={insight.level}
+                summary={insight.summary}
+              />
+            ))}
+          </div>
+        </section>
+
+        <section className="panel">
+          <div className="section-head">
+            <h3>Historico semanal e mensal</h3>
+            <span className="small-muted">Tendencia de melhora ou queda no ritmo recente</span>
+          </div>
+          <div className="trend-grid">
+            {performanceTrends.map((trend) => (
+              <TrendCard
+                key={trend.label}
+                label={trend.label}
+                direction={trend.direction}
+                scoreDelta={trend.scoreDelta}
+                completionDelta={trend.completionDelta}
+                summary={trend.summary}
+              />
+            ))}
+          </div>
+        </section>
+
         {usuario.role === "admin" ? (
           <section className="panel backend-panel">
             <div className="section-head">
@@ -466,6 +629,15 @@ export function Dashboard({
         </section>
 
         <section className="panel quick-grid">
+          <article className="quick-card quick-card-highlight">
+            <p className="small-muted">Recomendacao inteligente</p>
+            <h3>{smartRecommendation.title}</h3>
+            <p className="muted">{smartRecommendation.reason}</p>
+            <p className="small-muted">{`${smartRecommendation.objective} Proxima fase: ${smartRecommendation.challengeName}.`}</p>
+            <button className="btn btn-primary" onClick={() => openMode(smartRecommendation.mode)}>
+              Abrir atividade sugerida
+            </button>
+          </article>
           <article className="quick-card">
             <p className="small-muted">Recomendacao de memoria</p>
             <h3>{memoriaRecomendada?.nome ?? "Primeira fase"}</h3>
@@ -528,12 +700,32 @@ export function Dashboard({
               <h3>Rotina sugerida</h3>
             </div>
             <ul className="clean-list">
+              <li>{`Prioridade principal: ${smartRecommendation.challengeName} em ${getSessionModeLabel(smartRecommendation.mode)}`}</li>
               <li>{`Memoria: priorize "${memoriaRecomendada?.nome ?? "primeiro desafio"}" na proxima sessao`}</li>
               <li>{`Atencao: priorize "${atencaoRecomendada?.nome ?? "primeiro desafio"}" para variar o treino`}</li>
               <li>{`Comparacao: priorize "${comparacaoRecomendada?.nome ?? "primeiro desafio"}" para ampliar o raciocinio comparativo`}</li>
-              <li>Inclua uma rodada de orientacao espacial para treinar esquerda, direita e rotas em sequencia</li>
               <li>As fases liberam em ordem, entao concluir bem a atual ajuda a manter a trilha pedagogica</li>
             </ul>
+          </div>
+        </section>
+
+        <section className="panel">
+          <div className="section-head">
+            <h3>Sessoes guiadas por objetivo</h3>
+            <span className="small-muted">Planos curtos e progressivos para usar sem montar a rotina manualmente</span>
+          </div>
+          <div className="guided-plan-grid">
+            {guidedSessions.map((plan) => (
+              <GuidedPlanCard
+                key={plan.id}
+                title={plan.title}
+                durationLabel={plan.durationLabel}
+                objective={plan.objective}
+                cadence={plan.cadence}
+                steps={plan.steps}
+                onOpen={() => openMode(plan.primaryMode)}
+              />
+            ))}
           </div>
         </section>
 

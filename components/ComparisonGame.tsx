@@ -34,6 +34,7 @@ type ComparisonGameProps = {
 };
 
 type Phase = "idle" | "playing" | "result";
+type AdaptiveTuning = { timeBonus: number; roundDelta: number; minimumDelta: number };
 
 export function ComparisonGame({
   usuario,
@@ -53,6 +54,7 @@ export function ComparisonGame({
   const [currentRoundIndex, setCurrentRoundIndex] = useState(0);
   const [selectedAnswers, setSelectedAnswers] = useState<Array<"left" | "right">>([]);
   const [feedback, setFeedback] = useState("");
+  const [adaptiveTuning, setAdaptiveTuning] = useState<AdaptiveTuning>({ timeBonus: 0, roundDelta: 0, minimumDelta: 0 });
   const [review, setReview] = useState<{
     hits: number[];
     mistakes: number[];
@@ -69,7 +71,11 @@ export function ComparisonGame({
   const audience = getAudienceFromAge(usuario.idade);
   const showChildVisuals = !isAdvancedMode && usuario.idade <= 10;
   const variation = challenge.variacoes[variationIndex] ?? challenge.variacoes[0];
-  const rounds = !isAdvancedMode && usuario.idade <= 10 && variation.roundsAte10?.length ? variation.roundsAte10 : variation.rounds;
+  const baseRounds = !isAdvancedMode && usuario.idade <= 10 && variation.roundsAte10?.length ? variation.roundsAte10 : variation.rounds;
+  const roundCount = isAdvancedMode
+    ? baseRounds.length
+    : Math.max(2, Math.min(baseRounds.length, baseRounds.length + adaptiveTuning.roundDelta));
+  const rounds = baseRounds.slice(0, roundCount);
   const currentRound = rounds[currentRoundIndex] ?? rounds[0];
   const difficulty = isAdvancedMode
     ? { tempoLimite: challenge.tempoLimite, minimoParaConcluir: challenge.minimoParaConcluir }
@@ -79,6 +85,12 @@ export function ComparisonGame({
         idade: usuario.idade,
         progress: progresso[selectedId],
       });
+  const adaptiveDifficulty = isAdvancedMode
+    ? difficulty
+    : {
+        tempoLimite: Math.max(8, difficulty.tempoLimite + adaptiveTuning.timeBonus),
+        minimoParaConcluir: Math.max(1, Math.min(rounds.length, difficulty.minimoParaConcluir + adaptiveTuning.minimumDelta)),
+      };
   const challengeNumber = challengeIds.indexOf(challenge.id) + 1;
   const ageDescription = getAgeLabel(usuario.idade);
 
@@ -98,6 +110,7 @@ export function ComparisonGame({
     setCurrentRoundIndex(0);
     setSelectedAnswers([]);
     setFeedback("");
+    setAdaptiveTuning({ timeBonus: 0, roundDelta: 0, minimumDelta: 0 });
     setReview(null);
   }, [challenge.variacoes.length, selectedId]);
 
@@ -107,7 +120,7 @@ export function ComparisonGame({
 
   function startRound() {
     setPhase("playing");
-    setTimeLeft(difficulty.tempoLimite);
+    setTimeLeft(adaptiveDifficulty.tempoLimite);
     setCurrentRoundIndex(0);
     setSelectedAnswers([]);
     setFeedback("");
@@ -136,28 +149,49 @@ export function ComparisonGame({
 
   const finishRound = useCallback((answers: Array<"left" | "right">) => {
     const expectedAnswers = rounds.map((item) => item.correct);
-    const elapsedSeconds = Math.max(difficulty.tempoLimite - timeLeft, 0);
+    const elapsedSeconds = Math.max(adaptiveDifficulty.tempoLimite - timeLeft, 0);
     const result = evaluateComparisonRound({
       expectedAnswers,
       selectedAnswers: answers,
       answerSeconds: elapsedSeconds,
-      timeLimit: difficulty.tempoLimite,
-      minimumToComplete: difficulty.minimoParaConcluir,
+      timeLimit: adaptiveDifficulty.tempoLimite,
+      minimumToComplete: adaptiveDifficulty.minimoParaConcluir,
     });
+
+    if (!isAdvancedMode) {
+      setAdaptiveTuning((current) => {
+        if (result.completed && result.mistakes.length === 0 && elapsedSeconds <= Math.max(4, adaptiveDifficulty.tempoLimite - 2)) {
+          return {
+            timeBonus: Math.max(-2, current.timeBonus - 1),
+            roundDelta: 0,
+            minimumDelta: Math.min(1, current.minimumDelta + 1),
+          };
+        }
+        if (!result.completed || result.mistakes.length >= 2) {
+          return {
+            timeBonus: Math.min(4, current.timeBonus + 1),
+            roundDelta: Math.max(-2, current.roundDelta - 1),
+            minimumDelta: Math.max(-1, current.minimumDelta - 1),
+          };
+        }
+        return current;
+      });
+    }
 
     setPhase("result");
     setFeedback(
       result.completed
         ? `Voce acertou ${result.hits.length} comparacao(oes) e concluiu a fase.`
-        : `Voce acertou ${result.hits.length} comparacao(oes). Precisa de ${difficulty.minimoParaConcluir} para concluir.`,
+        : `Voce acertou ${result.hits.length} comparacao(oes). Precisa de ${adaptiveDifficulty.minimoParaConcluir} para concluir.`,
     );
     setReview(result);
     playResultSound(result.completed);
     onSaveResult(challenge.id, result.score, elapsedSeconds, result.completed, variationIndex);
   }, [
     challenge.id,
-    difficulty.minimoParaConcluir,
-    difficulty.tempoLimite,
+    adaptiveDifficulty.minimoParaConcluir,
+    adaptiveDifficulty.tempoLimite,
+    isAdvancedMode,
     onSaveResult,
     playResultSound,
     timeLeft,
@@ -331,11 +365,15 @@ export function ComparisonGame({
                 </div>
                 <div className="phase-chip">
                   <strong>Meta</strong>
-                  <span>{`${difficulty.minimoParaConcluir} acertos`}</span>
+                  <span>{`${adaptiveDifficulty.minimoParaConcluir} acertos`}</span>
                 </div>
                 <div className="phase-chip">
                   <strong>Rodadas</strong>
                   <span>{rounds.length}</span>
+                </div>
+                <div className="phase-chip">
+                  <strong>Adaptacao</strong>
+                  <span>{`${adaptiveDifficulty.tempoLimite}s totais`}</span>
                 </div>
               </div>
 
@@ -346,7 +384,7 @@ export function ComparisonGame({
                 </div>
                 <div className="meter-box">
                   <strong>Meta da fase</strong>
-                  <span>{`${difficulty.minimoParaConcluir}/${rounds.length} acertos`}</span>
+                  <span>{`${adaptiveDifficulty.minimoParaConcluir}/${rounds.length} acertos`}</span>
                 </div>
               </div>
 

@@ -35,6 +35,7 @@ type AttentionGameProps = {
 };
 
 type Phase = "idle" | "playing" | "result";
+type AdaptiveTuning = { timeBonus: number; cellDelta: number; minimumDelta: number };
 
 function shuffle<T>(items: T[]) {
   const copy = [...items];
@@ -65,6 +66,7 @@ export function AttentionGame({
   const [feedback, setFeedback] = useState("");
   const [grid, setGrid] = useState<string[]>([]);
   const [wrongSelections, setWrongSelections] = useState<string[]>([]);
+  const [adaptiveTuning, setAdaptiveTuning] = useState<AdaptiveTuning>({ timeBonus: 0, cellDelta: 0, minimumDelta: 0 });
   const [review, setReview] = useState<{
     foundCount: number;
     totalTargets: number;
@@ -89,9 +91,12 @@ export function AttentionGame({
   const ageProfile = getAttentionAgeProfile(usuario.idade);
   const gradeBase =
     !isAdvancedMode && audience === "infantil" && variacaoAtual.gradeInfantil?.length ? variacaoAtual.gradeInfantil : variacaoAtual.grade;
+  const visibleCellCount = isAdvancedMode
+    ? gradeBase.length
+    : Math.max(6, Math.min(gradeBase.length, ageProfile.visibleCells + adaptiveTuning.cellDelta));
   const gradeVisivel = useMemo(
-    () => (isAdvancedMode ? gradeBase : gradeBase.slice(0, ageProfile.visibleCells)),
-    [ageProfile.visibleCells, gradeBase, isAdvancedMode],
+    () => (isAdvancedMode ? gradeBase : gradeBase.slice(0, visibleCellCount)),
+    [gradeBase, isAdvancedMode, visibleCellCount],
   );
   const dificuldade = isAdvancedMode
     ? { tempoLimite: challenge.tempoLimite, minimoParaConcluir: challenge.minimoParaConcluir }
@@ -101,6 +106,12 @@ export function AttentionGame({
         idade: usuario.idade,
         progress: progresso[selectedId],
       });
+  const adaptiveDifficulty = isAdvancedMode
+    ? dificuldade
+    : {
+        tempoLimite: Math.max(8, dificuldade.tempoLimite + adaptiveTuning.timeBonus),
+        minimoParaConcluir: Math.max(2, dificuldade.minimoParaConcluir + adaptiveTuning.minimumDelta),
+      };
   const challengeNumber = challengeIds.indexOf(challenge.id) + 1;
   const ageDescription = getAgeLabel(usuario.idade);
 
@@ -127,8 +138,8 @@ export function AttentionGame({
         totalTargets: targetIndexes.length,
         wrongClicks,
         timeLeft,
-        timeLimit: dificuldade.tempoLimite,
-        minimumToComplete: dificuldade.minimoParaConcluir,
+        timeLimit: adaptiveDifficulty.tempoLimite,
+        minimumToComplete: adaptiveDifficulty.minimoParaConcluir,
       });
 
       if (resultSubmittedRef.current) return;
@@ -142,8 +153,27 @@ export function AttentionGame({
       setFeedback(
         result.completed
           ? `Voce encontrou ${result.foundCount} alvo(s) e concluiu o desafio. Score da rodada: ${result.score}.`
-          : `Voce encontrou ${result.foundCount} de ${result.totalTargets} alvo(s). Precisa de ${dificuldade.minimoParaConcluir} para concluir.`,
+          : `Voce encontrou ${result.foundCount} de ${result.totalTargets} alvo(s). Precisa de ${adaptiveDifficulty.minimoParaConcluir} para concluir.`,
       );
+      if (!isAdvancedMode) {
+        setAdaptiveTuning((current) => {
+          if (result.completed && wrongClicks === 0 && timeLeft >= 4) {
+            return {
+              timeBonus: Math.max(-2, current.timeBonus - 1),
+              cellDelta: Math.min(4, current.cellDelta + 1),
+              minimumDelta: Math.min(2, current.minimumDelta + 1),
+            };
+          }
+          if (!result.completed || wrongClicks >= 2) {
+            return {
+              timeBonus: Math.min(4, current.timeBonus + 1),
+              cellDelta: Math.max(-3, current.cellDelta - 1),
+              minimumDelta: Math.max(-1, current.minimumDelta - 1),
+            };
+          }
+          return current;
+        });
+      }
       playResultSound(result.completed);
       onSaveResult(challenge.id, result.score, result.elapsedSeconds, result.completed, variationIndex);
       return;
@@ -151,7 +181,7 @@ export function AttentionGame({
 
     const timeout = window.setTimeout(() => setTimeLeft((value) => value - 1), 1000);
     return () => window.clearTimeout(timeout);
-  }, [activeTarget, challenge.id, dificuldade.minimoParaConcluir, dificuldade.tempoLimite, foundTargets.length, onSaveResult, phase, playResultSound, targetIndexes.length, timeLeft, variationIndex, wrongClicks, wrongSelections]);
+  }, [activeTarget, adaptiveDifficulty.minimoParaConcluir, adaptiveDifficulty.tempoLimite, challenge.id, foundTargets.length, isAdvancedMode, onSaveResult, phase, playResultSound, targetIndexes.length, timeLeft, variationIndex, wrongClicks, wrongSelections]);
 
   useEffect(() => {
     setGrid(shuffle(gradeVisivel));
@@ -161,6 +191,7 @@ export function AttentionGame({
     setFoundTargets([]);
     setFeedback("");
     setWrongSelections([]);
+    setAdaptiveTuning({ timeBonus: 0, cellDelta: 0, minimumDelta: 0 });
     setReview(null);
     resultSubmittedRef.current = false;
   }, [challenge.id, variationIndex, gradeVisivel]);
@@ -174,8 +205,8 @@ export function AttentionGame({
         totalTargets: targetIndexes.length,
         wrongClicks,
         timeLeft,
-        timeLimit: dificuldade.tempoLimite,
-        minimumToComplete: dificuldade.minimoParaConcluir,
+        timeLimit: adaptiveDifficulty.tempoLimite,
+        minimumToComplete: adaptiveDifficulty.minimoParaConcluir,
       });
 
       setPhase("result");
@@ -187,16 +218,35 @@ export function AttentionGame({
       setFeedback(
         result.completed
           ? `Voce encontrou ${result.foundCount} alvo(s) e concluiu o desafio. Score da rodada: ${result.score}.`
-          : `Voce encontrou ${result.foundCount} de ${result.totalTargets} alvo(s). Precisa de ${dificuldade.minimoParaConcluir} para concluir.`,
+          : `Voce encontrou ${result.foundCount} de ${result.totalTargets} alvo(s). Precisa de ${adaptiveDifficulty.minimoParaConcluir} para concluir.`,
       );
+      if (!isAdvancedMode) {
+        setAdaptiveTuning((current) => {
+          if (result.completed && wrongClicks === 0 && timeLeft >= 4) {
+            return {
+              timeBonus: Math.max(-2, current.timeBonus - 1),
+              cellDelta: Math.min(4, current.cellDelta + 1),
+              minimumDelta: Math.min(2, current.minimumDelta + 1),
+            };
+          }
+          if (!result.completed || wrongClicks >= 2) {
+            return {
+              timeBonus: Math.min(4, current.timeBonus + 1),
+              cellDelta: Math.max(-3, current.cellDelta - 1),
+              minimumDelta: Math.max(-1, current.minimumDelta - 1),
+            };
+          }
+          return current;
+        });
+      }
       playResultSound(result.completed);
       onSaveResult(challenge.id, result.score, result.elapsedSeconds, result.completed, variationIndex);
     }
-  }, [activeTarget, challenge.id, dificuldade.minimoParaConcluir, dificuldade.tempoLimite, foundTargets, onSaveResult, phase, playResultSound, targetIndexes, timeLeft, variationIndex, wrongClicks, wrongSelections]);
+  }, [activeTarget, adaptiveDifficulty.minimoParaConcluir, adaptiveDifficulty.tempoLimite, challenge.id, foundTargets, isAdvancedMode, onSaveResult, phase, playResultSound, targetIndexes, timeLeft, variationIndex, wrongClicks, wrongSelections]);
 
   function startRound() {
     setGrid(shuffle(gradeVisivel));
-    setTimeLeft(dificuldade.tempoLimite);
+    setTimeLeft(adaptiveDifficulty.tempoLimite);
     setWrongClicks(0);
     setFoundTargets([]);
     setFeedback("");
@@ -220,7 +270,7 @@ export function AttentionGame({
     setWrongSelections([]);
     setReview(null);
     resultSubmittedRef.current = false;
-    setGrid(shuffle(isAdvancedMode ? nextGridBase : nextGridBase.slice(0, ageProfile.visibleCells)));
+    setGrid(shuffle(isAdvancedMode ? nextGridBase : nextGridBase.slice(0, visibleCellCount)));
   }
 
   function advanceRound() {
@@ -416,11 +466,15 @@ export function AttentionGame({
                 </div>
                 <div className="phase-chip">
                   <strong>Meta</strong>
-                  <span>{`${dificuldade.minimoParaConcluir} alvos`}</span>
+                  <span>{`${adaptiveDifficulty.minimoParaConcluir} alvos`}</span>
                 </div>
                 <div className="phase-chip">
                   <strong>Grade</strong>
                   <span>{`${gradeVisivel.length} celulas`}</span>
+                </div>
+                <div className="phase-chip">
+                  <strong>Adaptacao</strong>
+                  <span>{`${adaptiveDifficulty.tempoLimite}s de foco`}</span>
                 </div>
               </div>
 

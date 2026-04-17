@@ -9,7 +9,7 @@ import { TimerDisplay } from "@/components/TimerDisplay";
 import { advancedLogicChallenges } from "@/lib/advanced-game-data";
 import { logicChallenges } from "@/lib/game-data-v3";
 import { evaluateLogicRound, getNextVariationIndex } from "@/lib/game-logic";
-import { getAgeLabel, getAudienceFromAge, getNivel, isChallengeUnlockedInOrder } from "@/lib/scoring";
+import { getAgeLabel, getAudienceFromAge, getLogicDifficulty, getNivel, isChallengeUnlockedInOrder } from "@/lib/scoring";
 import type { LogicChallenge, ProgressState, Usuario } from "@/lib/types";
 
 type LogicGameProps = {
@@ -28,6 +28,7 @@ type LogicGameProps = {
 };
 
 type Phase = "idle" | "playing" | "result";
+type AdaptiveTuning = { timeBonus: number; roundDelta: number; minimumDelta: number };
 
 export function LogicGame({
   usuario,
@@ -47,6 +48,7 @@ export function LogicGame({
   const [currentRoundIndex, setCurrentRoundIndex] = useState(0);
   const [selectedAnswers, setSelectedAnswers] = useState<string[]>([]);
   const [feedback, setFeedback] = useState("");
+  const [adaptiveTuning, setAdaptiveTuning] = useState<AdaptiveTuning>({ timeBonus: 0, roundDelta: 0, minimumDelta: 0 });
   const [review, setReview] = useState<{
     hits: number[];
     mistakes: number[];
@@ -63,7 +65,25 @@ export function LogicGame({
   const audience = getAudienceFromAge(usuario.idade);
   const showChildVisuals = !isAdvancedMode && usuario.idade <= 10;
   const variation = challenge.variacoes[variationIndex] ?? challenge.variacoes[0];
-  const currentRound = variation.rounds[currentRoundIndex] ?? variation.rounds[0];
+  const activeRoundCount = isAdvancedMode
+    ? variation.rounds.length
+    : Math.max(2, Math.min(variation.rounds.length, variation.rounds.length + adaptiveTuning.roundDelta));
+  const activeRounds = variation.rounds.slice(0, activeRoundCount);
+  const currentRound = activeRounds[currentRoundIndex] ?? activeRounds[0];
+  const baseDifficulty = isAdvancedMode
+    ? { tempoLimite: challenge.tempoLimite, minimoParaConcluir: challenge.minimoParaConcluir }
+    : getLogicDifficulty({
+        tempoBase: challenge.tempoLimite,
+        minimoBase: challenge.minimoParaConcluir,
+        idade: usuario.idade,
+        progress: progresso[selectedId],
+      });
+  const adaptiveDifficulty = isAdvancedMode
+    ? baseDifficulty
+    : {
+        tempoLimite: Math.max(8, baseDifficulty.tempoLimite + adaptiveTuning.timeBonus),
+        minimoParaConcluir: Math.max(1, Math.min(activeRounds.length, baseDifficulty.minimoParaConcluir + adaptiveTuning.minimumDelta)),
+      };
   const challengeNumber = challengeIds.indexOf(challenge.id) + 1;
   const ageDescription = getAgeLabel(usuario.idade);
 
@@ -83,6 +103,7 @@ export function LogicGame({
     setCurrentRoundIndex(0);
     setSelectedAnswers([]);
     setFeedback("");
+    setAdaptiveTuning({ timeBonus: 0, roundDelta: 0, minimumDelta: 0 });
     setReview(null);
   }, [challenge.variacoes.length, selectedId]);
 
@@ -92,27 +113,47 @@ export function LogicGame({
 
   const finishRound = useCallback(
     (answers: string[]) => {
-      const expectedAnswers = variation.rounds.map((item) => item.correctAnswer);
-      const elapsedSeconds = Math.max(challenge.tempoLimite - timeLeft, 0);
+      const expectedAnswers = activeRounds.map((item) => item.correctAnswer);
+      const elapsedSeconds = Math.max(adaptiveDifficulty.tempoLimite - timeLeft, 0);
       const result = evaluateLogicRound({
         expectedAnswers,
         selectedAnswers: answers,
         answerSeconds: elapsedSeconds,
-        timeLimit: challenge.tempoLimite,
-        minimumToComplete: challenge.minimoParaConcluir,
+        timeLimit: adaptiveDifficulty.tempoLimite,
+        minimumToComplete: adaptiveDifficulty.minimoParaConcluir,
       });
+
+      if (!isAdvancedMode) {
+        setAdaptiveTuning((current) => {
+          if (result.completed && result.mistakes.length === 0 && elapsedSeconds <= Math.max(4, adaptiveDifficulty.tempoLimite - 2)) {
+            return {
+              timeBonus: Math.max(-2, current.timeBonus - 1),
+              roundDelta: 0,
+              minimumDelta: Math.min(1, current.minimumDelta + 1),
+            };
+          }
+          if (!result.completed || result.mistakes.length >= 2) {
+            return {
+              timeBonus: Math.min(4, current.timeBonus + 1),
+              roundDelta: Math.max(-2, current.roundDelta - 1),
+              minimumDelta: Math.max(-1, current.minimumDelta - 1),
+            };
+          }
+          return current;
+        });
+      }
 
       setPhase("result");
       setFeedback(
         result.completed
           ? `Voce acertou ${result.hits.length} sequencia(s) e concluiu a fase.`
-          : `Voce acertou ${result.hits.length} sequencia(s). Precisa de ${challenge.minimoParaConcluir} para concluir.`,
+          : `Voce acertou ${result.hits.length} sequencia(s). Precisa de ${adaptiveDifficulty.minimoParaConcluir} para concluir.`,
       );
       setReview(result);
       playResultSound(result.completed);
       onSaveResult(challenge.id, result.score, elapsedSeconds, result.completed, variationIndex);
     },
-    [challenge.id, challenge.minimoParaConcluir, challenge.tempoLimite, onSaveResult, playResultSound, timeLeft, variation.rounds, variationIndex],
+    [activeRounds, adaptiveDifficulty.minimoParaConcluir, adaptiveDifficulty.tempoLimite, challenge.id, isAdvancedMode, onSaveResult, playResultSound, timeLeft, variationIndex],
   );
 
   useEffect(() => {
@@ -128,7 +169,7 @@ export function LogicGame({
 
   function startRound() {
     setPhase("playing");
-    setTimeLeft(challenge.tempoLimite);
+    setTimeLeft(adaptiveDifficulty.tempoLimite);
     setCurrentRoundIndex(0);
     setSelectedAnswers([]);
     setFeedback("");
@@ -162,7 +203,7 @@ export function LogicGame({
     const nextAnswers = [...selectedAnswers, answer];
     setSelectedAnswers(nextAnswers);
 
-    if (currentRoundIndex >= variation.rounds.length - 1) {
+    if (currentRoundIndex >= activeRounds.length - 1) {
       finishRound(nextAnswers);
       return;
     }
@@ -231,7 +272,7 @@ export function LogicGame({
               items={[
                 { label: "Acertos", value: String(review.hits.length) },
                 { label: "Erros", value: String(review.mistakes.length) },
-                { label: "Sequencias", value: String(variation.rounds.length) },
+                { label: "Sequencias", value: String(activeRounds.length) },
               ]}
               note="Leia a explicacao correta depois de cada rodada. Isso ajuda a reconhecer o padrao com mais rapidez na proxima tentativa."
             />
@@ -242,7 +283,7 @@ export function LogicGame({
             ) : null}
 
             <div className="review-grid">
-              {variation.rounds.map((round, index) => {
+              {activeRounds.map((round, index) => {
                 const userAnswer = selectedAnswers[index];
                 const correct = review.hits.includes(index);
                 return (
@@ -301,11 +342,15 @@ export function LogicGame({
                 </div>
                 <div className="phase-chip">
                   <strong>Meta</strong>
-                  <span>{`${challenge.minimoParaConcluir} acertos`}</span>
+                  <span>{`${adaptiveDifficulty.minimoParaConcluir} acertos`}</span>
                 </div>
                 <div className="phase-chip">
                   <strong>Rodadas</strong>
-                  <span>{variation.rounds.length}</span>
+                  <span>{activeRounds.length}</span>
+                </div>
+                <div className="phase-chip">
+                  <strong>Adaptacao</strong>
+                  <span>{`${adaptiveDifficulty.tempoLimite}s totais`}</span>
                 </div>
               </div>
 
@@ -316,7 +361,7 @@ export function LogicGame({
                 </div>
                 <div className="meter-box">
                   <strong>Meta da fase</strong>
-                  <span>{`${challenge.minimoParaConcluir}/${variation.rounds.length} acertos`}</span>
+                  <span>{`${adaptiveDifficulty.minimoParaConcluir}/${activeRounds.length} acertos`}</span>
                 </div>
               </div>
             </section>
@@ -325,7 +370,7 @@ export function LogicGame({
               <div className="section-head">
                 <h3>Sequencia atual</h3>
                 <span className="small-muted">
-                  {phase === "playing" ? `${currentRoundIndex + 1}/${variation.rounds.length}` : "Aguardando rodada"}
+                  {phase === "playing" ? `${currentRoundIndex + 1}/${activeRounds.length}` : "Aguardando rodada"}
                 </span>
               </div>
               <div className="round-task-card">

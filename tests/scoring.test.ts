@@ -6,11 +6,19 @@ import {
   getAttentionDifficulty,
   getAudienceFromAge,
   getCompletionRate,
+  getLogicDifficulty,
   getMemoryDifficulty,
   getRecommendedChallengeId,
   isChallengeUnlocked,
   mergeProgress,
 } from "@/lib/scoring";
+import {
+  getAbilityInsights,
+  getAutomaticDiagnostic,
+  getGuidedSessions,
+  getPerformanceTrends,
+  getSmartRecommendation,
+} from "@/lib/training-insights";
 import {
   advancedAttentionChallenges,
   advancedComparisonChallenges,
@@ -121,6 +129,18 @@ test("attention difficulty gets stricter after strong performance", () => {
   assert.equal(difficulty.minimoParaConcluir, 5);
 });
 
+test("logic difficulty also adapts to age and strong performance", () => {
+  const difficulty = getLogicDifficulty({
+    tempoBase: 14,
+    minimoBase: 4,
+    idade: 26,
+    progress: { attempts: 4, completed: true, bestScore: 29 },
+  });
+
+  assert.equal(difficulty.tempoLimite, 12);
+  assert.equal(difficulty.minimoParaConcluir, 5);
+});
+
 test("challenge unlock and recommendation respect progression order", () => {
   const progress = createDefaultProgress().memoria;
   progress[1].completed = true;
@@ -140,4 +160,61 @@ test("completion rate reflects finished items", () => {
   progress[2].completed = true;
 
   assert.equal(getCompletionRate(progress), 11);
+});
+
+test("insights expose abilities, trends, recommendation and guided plans", () => {
+  const progress = createDefaultProgress();
+  progress.memoria[1].attempts = 3;
+  progress.memoria[1].completed = false;
+  progress.atencao[1].attempts = 4;
+  progress.atencao[1].completed = false;
+  progress.logica[1].attempts = 2;
+  progress.logica[1].completed = true;
+  const now = Date.now();
+  const daysAgo = (days: number) => new Date(now - days * 24 * 60 * 60 * 1000).toISOString();
+
+  const history = [
+    {
+      id: "1",
+      email: "aluno@example.com",
+      mode: "atencao" as const,
+      challengeId: 1,
+      score: 8,
+      timeSeconds: 18,
+      completed: false,
+      playedAt: daysAgo(1),
+    },
+    {
+      id: "2",
+      email: "aluno@example.com",
+      mode: "memoria" as const,
+      challengeId: 1,
+      score: 10,
+      timeSeconds: 15,
+      completed: false,
+      playedAt: daysAgo(2),
+    },
+    {
+      id: "3",
+      email: "aluno@example.com",
+      mode: "logica" as const,
+      challengeId: 1,
+      score: 24,
+      timeSeconds: 9,
+      completed: true,
+      playedAt: daysAgo(22),
+    },
+  ];
+
+  const abilities = getAbilityInsights(history, progress);
+  const trends = getPerformanceTrends(history);
+  const recommendation = getSmartRecommendation(history, progress);
+  const diagnostic = getAutomaticDiagnostic(12, history, progress);
+  const plans = getGuidedSessions(12, history, progress);
+
+  assert.equal(abilities.length, 4);
+  assert.equal(trends.length, 2);
+  assert.equal(recommendation.mode, "atencao");
+  assert.equal(diagnostic.starters.length, 5);
+  assert.equal(plans.length, 3);
 });
