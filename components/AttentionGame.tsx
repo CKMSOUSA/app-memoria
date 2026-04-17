@@ -6,6 +6,7 @@ import { GameGuide } from "@/components/GameGuide";
 import { ReviewMetrics } from "@/components/ReviewMetrics";
 import { SoundToggle, useSoundFeedback } from "@/components/SoundToggle";
 import { TimerDisplay } from "@/components/TimerDisplay";
+import { getSessionAdjustments, useAppSettingsState } from "@/lib/app-settings";
 import { advancedAttentionChallenges } from "@/lib/advanced-game-data";
 import { attentionChallenges } from "@/lib/game-data-v3";
 import { evaluateAttentionRound, getNextVariationIndex } from "@/lib/game-logic";
@@ -78,6 +79,8 @@ export function AttentionGame({
     errors: string[];
   } | null>(null);
   const { soundEnabled, toggleSound, playResultSound, playAnswerSound } = useSoundFeedback();
+  const { settings } = useAppSettingsState();
+  const sessionAdjustments = getSessionAdjustments(settings);
 
   const challenge = useMemo(
     () => challengeList.find((item) => item.id === selectedId) ?? challengeList[0],
@@ -93,7 +96,10 @@ export function AttentionGame({
     !isAdvancedMode && audience === "infantil" && variacaoAtual.gradeInfantil?.length ? variacaoAtual.gradeInfantil : variacaoAtual.grade;
   const visibleCellCount = isAdvancedMode
     ? gradeBase.length
-    : Math.max(6, Math.min(gradeBase.length, ageProfile.visibleCells + adaptiveTuning.cellDelta));
+    : Math.max(
+        6,
+        Math.min(gradeBase.length, ageProfile.visibleCells + adaptiveTuning.cellDelta + sessionAdjustments.attentionCellDelta),
+      );
   const gradeVisivel = useMemo(
     () => (isAdvancedMode ? gradeBase : gradeBase.slice(0, visibleCellCount)),
     [gradeBase, isAdvancedMode, visibleCellCount],
@@ -111,6 +117,12 @@ export function AttentionGame({
     : {
         tempoLimite: Math.max(8, dificuldade.tempoLimite + adaptiveTuning.timeBonus),
         minimoParaConcluir: Math.max(2, dificuldade.minimoParaConcluir + adaptiveTuning.minimumDelta),
+      };
+  const sessionDifficulty = isAdvancedMode
+    ? adaptiveDifficulty
+    : {
+        tempoLimite: adaptiveDifficulty.tempoLimite + sessionAdjustments.timeBonusSeconds,
+        minimoParaConcluir: Math.max(1, adaptiveDifficulty.minimoParaConcluir + sessionAdjustments.minimumDelta),
       };
   const challengeNumber = challengeIds.indexOf(challenge.id) + 1;
   const ageDescription = getAgeLabel(usuario.idade);
@@ -138,8 +150,8 @@ export function AttentionGame({
         totalTargets: targetIndexes.length,
         wrongClicks,
         timeLeft,
-        timeLimit: adaptiveDifficulty.tempoLimite,
-        minimumToComplete: adaptiveDifficulty.minimoParaConcluir,
+        timeLimit: sessionDifficulty.tempoLimite,
+        minimumToComplete: sessionDifficulty.minimoParaConcluir,
       });
 
       if (resultSubmittedRef.current) return;
@@ -153,7 +165,7 @@ export function AttentionGame({
       setFeedback(
         result.completed
           ? `Voce encontrou ${result.foundCount} alvo(s) e concluiu o desafio. Score da rodada: ${result.score}.`
-          : `Voce encontrou ${result.foundCount} de ${result.totalTargets} alvo(s). Precisa de ${adaptiveDifficulty.minimoParaConcluir} para concluir.`,
+          : `Voce encontrou ${result.foundCount} de ${result.totalTargets} alvo(s). Precisa de ${sessionDifficulty.minimoParaConcluir} para concluir.`,
       );
       if (!isAdvancedMode) {
         setAdaptiveTuning((current) => {
@@ -181,7 +193,7 @@ export function AttentionGame({
 
     const timeout = window.setTimeout(() => setTimeLeft((value) => value - 1), 1000);
     return () => window.clearTimeout(timeout);
-  }, [activeTarget, adaptiveDifficulty.minimoParaConcluir, adaptiveDifficulty.tempoLimite, challenge.id, foundTargets.length, isAdvancedMode, onSaveResult, phase, playResultSound, targetIndexes.length, timeLeft, variationIndex, wrongClicks, wrongSelections]);
+  }, [activeTarget, challenge.id, foundTargets.length, isAdvancedMode, onSaveResult, phase, playResultSound, sessionDifficulty.minimoParaConcluir, sessionDifficulty.tempoLimite, targetIndexes.length, timeLeft, variationIndex, wrongClicks, wrongSelections]);
 
   useEffect(() => {
     setGrid(shuffle(gradeVisivel));
@@ -205,8 +217,8 @@ export function AttentionGame({
         totalTargets: targetIndexes.length,
         wrongClicks,
         timeLeft,
-        timeLimit: adaptiveDifficulty.tempoLimite,
-        minimumToComplete: adaptiveDifficulty.minimoParaConcluir,
+        timeLimit: sessionDifficulty.tempoLimite,
+        minimumToComplete: sessionDifficulty.minimoParaConcluir,
       });
 
       setPhase("result");
@@ -218,7 +230,7 @@ export function AttentionGame({
       setFeedback(
         result.completed
           ? `Voce encontrou ${result.foundCount} alvo(s) e concluiu o desafio. Score da rodada: ${result.score}.`
-          : `Voce encontrou ${result.foundCount} de ${result.totalTargets} alvo(s). Precisa de ${adaptiveDifficulty.minimoParaConcluir} para concluir.`,
+          : `Voce encontrou ${result.foundCount} de ${result.totalTargets} alvo(s). Precisa de ${sessionDifficulty.minimoParaConcluir} para concluir.`,
       );
       if (!isAdvancedMode) {
         setAdaptiveTuning((current) => {
@@ -242,11 +254,11 @@ export function AttentionGame({
       playResultSound(result.completed);
       onSaveResult(challenge.id, result.score, result.elapsedSeconds, result.completed, variationIndex);
     }
-  }, [activeTarget, adaptiveDifficulty.minimoParaConcluir, adaptiveDifficulty.tempoLimite, challenge.id, foundTargets, isAdvancedMode, onSaveResult, phase, playResultSound, targetIndexes, timeLeft, variationIndex, wrongClicks, wrongSelections]);
+  }, [activeTarget, challenge.id, foundTargets, isAdvancedMode, onSaveResult, phase, playResultSound, sessionDifficulty.minimoParaConcluir, sessionDifficulty.tempoLimite, targetIndexes, timeLeft, variationIndex, wrongClicks, wrongSelections]);
 
   function startRound() {
     setGrid(shuffle(gradeVisivel));
-    setTimeLeft(adaptiveDifficulty.tempoLimite);
+    setTimeLeft(sessionDifficulty.tempoLimite);
     setWrongClicks(0);
     setFoundTargets([]);
     setFeedback("");
@@ -466,7 +478,7 @@ export function AttentionGame({
                 </div>
                 <div className="phase-chip">
                   <strong>Meta</strong>
-                  <span>{`${adaptiveDifficulty.minimoParaConcluir} alvos`}</span>
+                  <span>{`${sessionDifficulty.minimoParaConcluir} alvos`}</span>
                 </div>
                 <div className="phase-chip">
                   <strong>Grade</strong>
@@ -474,7 +486,7 @@ export function AttentionGame({
                 </div>
                 <div className="phase-chip">
                   <strong>Adaptacao</strong>
-                  <span>{`${adaptiveDifficulty.tempoLimite}s de foco`}</span>
+                  <span>{`${sessionDifficulty.tempoLimite}s de foco`}</span>
                 </div>
               </div>
 

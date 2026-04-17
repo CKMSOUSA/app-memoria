@@ -10,6 +10,7 @@ import { AuthScreen } from "@/components/AuthScreen";
 import { ComparisonGame } from "@/components/ComparisonGame";
 import { Dashboard } from "@/components/Dashboard";
 import { HelpScreen } from "@/components/HelpScreen";
+import { applyAppSettingsToDocument, registerOfflineSupport, useAppSettingsState } from "@/lib/app-settings";
 import { LogicGame } from "@/components/LogicGame";
 import type { HelpRequest } from "@/lib/types";
 import { MemoryGame } from "@/components/MemoryGame";
@@ -33,6 +34,8 @@ export default function Page() {
   const [adminAccessCode, setAdminAccessCode] = useState("");
   const [dataMode, setDataMode] = useState<DataMode>(repository.mode);
   const [ready, setReady] = useState(false);
+  const [isOffline, setIsOffline] = useState(false);
+  const { settings, updateSettings } = useAppSettingsState();
 
   useEffect(() => {
     let isMounted = true;
@@ -72,6 +75,24 @@ export default function Page() {
 
     return () => {
       isMounted = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    applyAppSettingsToDocument(settings);
+  }, [settings]);
+
+  useEffect(() => {
+    registerOfflineSupport();
+    if (typeof window === "undefined") return;
+
+    const syncOffline = () => setIsOffline(!window.navigator.onLine);
+    syncOffline();
+    window.addEventListener("online", syncOffline);
+    window.addEventListener("offline", syncOffline);
+    return () => {
+      window.removeEventListener("online", syncOffline);
+      window.removeEventListener("offline", syncOffline);
     };
   }, []);
 
@@ -586,6 +607,9 @@ export default function Page() {
       usuario={usuario}
       progresso={progresso}
       history={history}
+      settings={settings}
+      isOffline={isOffline}
+      onUpdateSettings={updateSettings}
       onOpenMemory={() => setTela("memoria")}
       onOpenVisual={() => setTela("visual")}
       onOpenAttention={() => setTela("atencao")}

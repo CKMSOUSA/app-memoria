@@ -5,6 +5,7 @@ import { ChildVisualBadge } from "@/components/ChildVisualBadge";
 import { GameGuide } from "@/components/GameGuide";
 import { ReviewMetrics } from "@/components/ReviewMetrics";
 import { SoundToggle, useSoundFeedback } from "@/components/SoundToggle";
+import { getSessionAdjustments, useAppSettingsState } from "@/lib/app-settings";
 import { exclusiveChallenges } from "@/lib/game-data-v3";
 import { evaluateAudienceRound, getNextVariationIndex } from "@/lib/game-logic";
 import { getAgeLabel, getAudienceFromAge, getAudienceLabel } from "@/lib/scoring";
@@ -45,12 +46,19 @@ export function AudienceGame({ usuario, progresso, onBack, onRememberVariation, 
     score: number;
   } | null>(null);
   const { soundEnabled, toggleSound, playResultSound, playAnswerSound } = useSoundFeedback();
+  const { settings } = useAppSettingsState();
+  const sessionAdjustments = getSessionAdjustments(settings);
 
   const challenge = useMemo(
     () => audienceChallenges.find((item) => item.id === selectedId) ?? audienceChallenges[0] ?? exclusiveChallenges[0],
     [audienceChallenges, selectedId],
   );
   const currentVariation = challenge.variacoes[variationIndex] ?? challenge.variacoes[0];
+  const activeSequence = currentVariation.sequence.slice(
+    0,
+    Math.max(2, currentVariation.sequence.length + sessionAdjustments.exclusiveSequenceDelta),
+  );
+  const activeMinimum = Math.max(1, challenge.minimoParaConcluir + sessionAdjustments.minimumDelta);
   const showChildVisuals = usuario.idade <= 10;
   const progressoRef = useRef(progresso);
   const answerStartedAtRef = useRef<number | null>(null);
@@ -110,7 +118,7 @@ export function AudienceGame({ usuario, progresso, onBack, onRememberVariation, 
   function advanceRound() {
     const currentIndex = audienceChallenges.findIndex((item) => item.id === challenge.id);
     const nextChallenge = audienceChallenges[currentIndex + 1];
-    if (review && review.hits.length >= challenge.minimoParaConcluir && nextChallenge) {
+    if (review && review.hits.length >= activeMinimum && nextChallenge) {
       setSelectedId(nextChallenge.id);
       return;
     }
@@ -136,23 +144,23 @@ export function AudienceGame({ usuario, progresso, onBack, onRememberVariation, 
       ? Math.max(1, Math.round((Date.now() - answerStartedAtRef.current) / 1000))
       : 0;
     const result = evaluateAudienceRound({
-      expectedSequence: currentVariation.sequence,
+      expectedSequence: activeSequence,
       selectedSequence,
       answerSeconds,
-      revealSeconds: currentVariation.revealSeconds,
-      minimumToComplete: challenge.minimoParaConcluir,
+      revealSeconds: currentVariation.revealSeconds + sessionAdjustments.revealBonusSeconds,
+      minimumToComplete: activeMinimum,
     });
 
     setPhase("result");
     setFeedback(
       result.completed
         ? `Voce reconstruiu ${result.hits.length} item(ns) na ordem certa e concluiu a fase.`
-        : `Voce acertou ${result.hits.length} item(ns). Precisa de ${challenge.minimoParaConcluir} para concluir esta fase.`,
+        : `Voce acertou ${result.hits.length} item(ns). Precisa de ${activeMinimum} para concluir esta fase.`,
     );
     setReview({
       hits: result.hits,
       wrongItems: result.misses,
-      missedItems: currentVariation.sequence.filter((item) => !result.hits.includes(item)),
+      missedItems: activeSequence.filter((item) => !result.hits.includes(item)),
       score: result.score,
     });
     playResultSound(result.completed);
@@ -234,7 +242,7 @@ export function AudienceGame({ usuario, progresso, onBack, onRememberVariation, 
                   {review.hits.length > 0 ? (
                     review.hits.map((item, index) => (
                       <span key={`${item}-${index}`} className="review-tag">
-                        {item}
+                      {item}
                       </span>
                     ))
                   ) : (
@@ -287,25 +295,13 @@ export function AudienceGame({ usuario, progresso, onBack, onRememberVariation, 
             </div>
           </section>
         ) : (
-          <div className="game-grid">
+          <>
+          <div className="game-grid exclusive-play-grid">
             <section className="panel exclusive-panel">
               <div className="section-head">
-                <h3>Como funciona</h3>
-                <span className="small-muted">Meta: {challenge.minimoParaConcluir} acertos em ordem</span>
+                <h3>Dados da rodada</h3>
+                <span className="small-muted">Meta: {activeMinimum} acertos em ordem</span>
               </div>
-
-              <GameGuide
-                title="Como jogar"
-                objective="Veja a sequencia uma vez, esconda e depois reescreva os itens na mesma ordem."
-                steps={[
-                  "Clique em Iniciar rodada para mostrar a sequencia.",
-                  "Leia os itens com calma e memorize a ordem em que aparecem.",
-                  "Clique em Ocultar e responder para entrar no modo de resposta.",
-                  "Digite os itens na mesma ordem e corrija a rodada.",
-                ]}
-                tip="A fase so conta como concluida quando voce atinge a meta de itens certos em ordem."
-                isChild={usuario.idade <= 10}
-              />
 
               <div className="phase-summary">
                 <div className="phase-chip">
@@ -314,11 +310,15 @@ export function AudienceGame({ usuario, progresso, onBack, onRememberVariation, 
                 </div>
                 <div className="phase-chip">
                   <strong>Meta</strong>
-                  <span>{`${challenge.minimoParaConcluir} itens certos`}</span>
+                  <span>{`${activeMinimum} itens certos`}</span>
                 </div>
                 <div className="phase-chip">
                   <strong>Sequencia</strong>
-                  <span>{`${currentVariation.sequence.length} itens`}</span>
+                  <span>{`${activeSequence.length} itens`}</span>
+                </div>
+                <div className="phase-chip">
+                  <strong>Modo</strong>
+                  <span>{settings.therapeuticMode ? "Terapeutico" : "Padrao"}</span>
                 </div>
               </div>
 
@@ -336,12 +336,12 @@ export function AudienceGame({ usuario, progresso, onBack, onRememberVariation, 
               {phase === "showing" ? (
                 showChildVisuals ? (
                   <div className="word-box exclusive-word-box child-visual-grid-box">
-                    {currentVariation.sequence.map((item) => (
+                    {activeSequence.map((item) => (
                       <ChildVisualBadge key={item} token={item} />
                     ))}
                   </div>
                 ) : (
-                  <div className="word-box exclusive-word-box">{currentVariation.sequence.join(" - ")}</div>
+                  <div className="word-box exclusive-word-box">{activeSequence.join(" - ")}</div>
                 )
               ) : (
                 <div className="word-box word-box-hidden exclusive-word-box">
@@ -383,6 +383,7 @@ export function AudienceGame({ usuario, progresso, onBack, onRememberVariation, 
                 disabled={phase !== "answering"}
                 onChange={(event) => setResponse(event.target.value)}
                 rows={7}
+                aria-label="Resposta da sequencia exclusiva"
               />
 
               <div className="button-row">
@@ -392,6 +393,26 @@ export function AudienceGame({ usuario, progresso, onBack, onRememberVariation, 
               </div>
             </section>
           </div>
+          
+          <section className="panel exclusive-guide-panel">
+            <GameGuide
+              title="Como jogar"
+              objective="Veja a sequencia uma vez, esconda e depois reescreva os itens na mesma ordem."
+              steps={[
+                "Clique em Iniciar rodada para mostrar a sequencia.",
+                "Leia os itens com calma e memorize a ordem em que aparecem.",
+                "Clique em Ocultar e responder para entrar no modo de resposta.",
+                "Digite os itens na mesma ordem e corrija a rodada.",
+              ]}
+              tip={
+                settings.therapeuticMode
+                  ? "No modo terapeutico, a sequencia fica mais curta e a carga visual fica mais controlada."
+                  : "A fase so conta como concluida quando voce atinge a meta de itens certos em ordem."
+              }
+              isChild={usuario.idade <= 10}
+            />
+          </section>
+          </>
         )}
       </section>
     </main>

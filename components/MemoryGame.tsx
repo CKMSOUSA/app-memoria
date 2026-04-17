@@ -5,6 +5,7 @@ import { GameGuide } from "@/components/GameGuide";
 import { ReviewMetrics } from "@/components/ReviewMetrics";
 import { SoundToggle, useSoundFeedback } from "@/components/SoundToggle";
 import { TimerDisplay } from "@/components/TimerDisplay";
+import { getSessionAdjustments, useAppSettingsState } from "@/lib/app-settings";
 import { getChildVisual } from "@/lib/child-visuals";
 import { advancedMemoryChallenges } from "@/lib/advanced-game-data";
 import { memoryChallenges } from "@/lib/game-data-v3";
@@ -119,6 +120,8 @@ export function MemoryGame({
     completed: boolean;
   } | null>(null);
   const { soundEnabled, toggleSound, playResultSound, playAnswerSound } = useSoundFeedback();
+  const { settings } = useAppSettingsState();
+  const sessionAdjustments = getSessionAdjustments(settings);
 
   const challenge = useMemo(
     () => challengeList.find((item) => item.id === selectedId) ?? challengeList[0],
@@ -134,7 +137,13 @@ export function MemoryGame({
   const ageProfile = getMemoryAgeProfile(usuario.idade);
   const visibleWordCount = isAdvancedMode
     ? palavrasDaRodada.length
-    : Math.max(2, Math.min(palavrasDaRodada.length, ageProfile.visibleWords + adaptiveTuning.itemDelta));
+    : Math.max(
+        2,
+        Math.min(
+          palavrasDaRodada.length,
+          ageProfile.visibleWords + adaptiveTuning.itemDelta + sessionAdjustments.memoryItemDelta,
+        ),
+      );
   const palavrasVisiveis = isAdvancedMode ? palavrasDaRodada : palavrasDaRodada.slice(0, visibleWordCount);
   const visualChoices = useMemo(
     () => getStableVisualChoices(palavrasVisiveis, baseVariacoes, challenge.id, variationIndex),
@@ -159,6 +168,12 @@ export function MemoryGame({
           2,
           Math.min(palavrasVisiveis.length, dificuldade.minimoParaConcluir + adaptiveTuning.minimumDelta),
         ),
+      };
+  const sessionDifficulty = isAdvancedMode
+    ? adaptiveDifficulty
+    : {
+        tempoMemorizacao: adaptiveDifficulty.tempoMemorizacao + sessionAdjustments.timeBonusSeconds,
+        minimoParaConcluir: Math.max(1, adaptiveDifficulty.minimoParaConcluir + sessionAdjustments.minimumDelta),
       };
   const challengeNumber = challengeIds.indexOf(challenge.id) + 1;
   const ageDescription = getAgeLabel(usuario.idade);
@@ -226,7 +241,7 @@ export function MemoryGame({
 
   function startChallenge() {
     setPhase("memorizing");
-    setCountdown(adaptiveDifficulty.tempoMemorizacao);
+    setCountdown(sessionDifficulty.tempoMemorizacao);
     setAnswerSeconds(0);
     setSelectedItems([]);
     setFeedback("");
@@ -249,13 +264,13 @@ export function MemoryGame({
       expectedWords: palavrasVisiveis,
       response: selectedItems.join(", "),
       answerSeconds,
-      memorizationSeconds: adaptiveDifficulty.tempoMemorizacao,
-      minimumToComplete: adaptiveDifficulty.minimoParaConcluir,
+      memorizationSeconds: sessionDifficulty.tempoMemorizacao,
+      minimumToComplete: sessionDifficulty.minimoParaConcluir,
     });
 
     if (!isAdvancedMode) {
       setAdaptiveTuning((current) => {
-        if (result.completed && result.wrongWords.length === 0 && answerSeconds <= Math.max(4, adaptiveDifficulty.tempoMemorizacao - 2)) {
+        if (result.completed && result.wrongWords.length === 0 && answerSeconds <= Math.max(4, sessionDifficulty.tempoMemorizacao - 2)) {
           return {
             timeBonus: Math.max(-2, current.timeBonus - 1),
             itemDelta: Math.min(2, current.itemDelta + 1),
@@ -282,7 +297,7 @@ export function MemoryGame({
     setFeedback(
       result.completed
         ? `Voce acertou ${result.hits.length} figura(s) e concluiu o desafio. Score da rodada: ${result.score}.`
-        : `Voce acertou ${result.hits.length} figura(s). Precisa de ${adaptiveDifficulty.minimoParaConcluir} para concluir este desafio.`,
+        : `Voce acertou ${result.hits.length} figura(s). Precisa de ${sessionDifficulty.minimoParaConcluir} para concluir este desafio.`,
     );
     setReview(result);
     playResultSound(result.completed);
@@ -448,7 +463,7 @@ export function MemoryGame({
                 </div>
                 <div className="phase-chip">
                   <strong>Meta</strong>
-                  <span>{`${adaptiveDifficulty.minimoParaConcluir} acertos`}</span>
+                  <span>{`${sessionDifficulty.minimoParaConcluir} acertos`}</span>
                 </div>
                 <div className="phase-chip">
                   <strong>Figuras</strong>
@@ -456,7 +471,7 @@ export function MemoryGame({
                 </div>
                 <div className="phase-chip">
                   <strong>Adaptacao</strong>
-                  <span>{`${adaptiveDifficulty.tempoMemorizacao}s de memorizacao`}</span>
+                  <span>{`${sessionDifficulty.tempoMemorizacao}s de memorizacao`}</span>
                 </div>
               </div>
 
@@ -480,8 +495,8 @@ export function MemoryGame({
                 <span className="memory-task-meta">{`Fase ${challengeNumber} - ${challenge.difficultyLabel}`}</span>
                 <p className={`memory-task-description ${isAdvancedMode ? "advanced-task-description" : ""}`}>
                   {isAdvancedMode
-                    ? `Lembre pelo menos ${adaptiveDifficulty.minimoParaConcluir} de ${palavrasVisiveis.length} figuras desta rodada.`
-                    : `${ageDescription} - Lembre pelo menos ${adaptiveDifficulty.minimoParaConcluir} de ${palavrasVisiveis.length} figuras desta rodada.`}
+                    ? `Lembre pelo menos ${sessionDifficulty.minimoParaConcluir} de ${palavrasVisiveis.length} figuras desta rodada.`
+                    : `${ageDescription} - Lembre pelo menos ${sessionDifficulty.minimoParaConcluir} de ${palavrasVisiveis.length} figuras desta rodada.`}
                 </p>
               </div>
 

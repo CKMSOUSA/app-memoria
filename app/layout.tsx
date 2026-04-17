@@ -5,6 +5,7 @@ import "./page.css";
 export const metadata: Metadata = {
   title: "NeuroApp Memoria",
   description: "Aplicativo de treino de memoria, atencao, comparacao e orientacao espacial.",
+  manifest: "/manifest.webmanifest",
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {

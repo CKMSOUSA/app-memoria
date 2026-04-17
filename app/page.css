@@ -329,6 +329,15 @@ h2 {
   box-shadow: 0 12px 22px rgba(44, 99, 135, 0.18);
 }
 
+.guide-actions {
+  align-items: center;
+}
+
+.btn-guide-narrate {
+  min-height: 38px;
+  padding: 8px 12px;
+}
+
 .btn-link {
   padding: 0;
   background: transparent;
@@ -1035,6 +1044,14 @@ h2 {
   background: #fffefb;
 }
 
+.exclusive-play-grid {
+  align-items: start;
+}
+
+.exclusive-guide-panel {
+  margin-top: 16px;
+}
+
 .exclusive-word-box {
   background: #fff7ef;
   color: #7f3419;
@@ -1648,6 +1665,39 @@ h2 {
 .quick-card-highlight {
   border-color: rgba(74, 137, 178, 0.24);
   background: linear-gradient(135deg, rgba(239, 247, 252, 0.96) 0%, rgba(255, 251, 244, 0.96) 100%);
+}
+
+.settings-grid {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+
+.setting-toggle-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  padding: 16px;
+  border-radius: 20px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.82);
+  text-align: left;
+}
+
+.setting-toggle-card-active {
+  border-color: rgba(45, 138, 84, 0.22);
+  background: rgba(236, 247, 240, 0.94);
+}
+
+.assistant-card {
+  display: grid;
+  gap: 12px;
+  padding: 18px;
+  border-radius: 22px;
+  border: 1px solid rgba(74, 137, 178, 0.22);
+  background: linear-gradient(135deg, rgba(240, 247, 252, 0.95) 0%, rgba(255, 251, 244, 0.96) 100%);
 }
 
 .metrics-strip::-webkit-scrollbar {

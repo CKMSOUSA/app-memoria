@@ -2,7 +2,10 @@
 
 import { useState } from "react";
 
+import { AppPreferencesPanel } from "@/components/AppPreferencesPanel";
+import { InternalAssistant } from "@/components/InternalAssistant";
 import { getRemoteBackendStatus } from "@/lib/app-repository";
+import type { AppSettings } from "@/lib/app-settings";
 import {
   attentionChallenges,
   comparisonChallenges,
@@ -51,6 +54,9 @@ type DashboardProps = {
   onOpenAdmin: () => void;
   onLogout: () => void;
   history: SessionRecord[];
+  settings: AppSettings;
+  isOffline: boolean;
+  onUpdateSettings: (partial: Partial<AppSettings>) => void;
 };
 
 function ProgressList({
@@ -264,6 +270,9 @@ export function Dashboard({
   onOpenAdmin,
   onLogout,
   history,
+  settings,
+  isOffline,
+  onUpdateSettings,
 }: DashboardProps) {
   const backendStatus = getRemoteBackendStatus();
   const memoriaRate = getCompletionRate(progresso.memoria);
@@ -509,6 +518,20 @@ export function Dashboard({
             />
           </div>
         </section>
+
+        <AppPreferencesPanel settings={settings} isOffline={isOffline} onUpdateSettings={onUpdateSettings} />
+
+        <InternalAssistant
+          usuario={usuario}
+          progresso={progresso}
+          history={history}
+          onOpenMemory={onOpenMemory}
+          onOpenAttention={onOpenAttention}
+          onOpenComparison={onOpenComparison}
+          onOpenSpatial={onOpenSpatial}
+          onOpenLogic={onOpenLogic}
+          onOpenSpecial={onOpenSpecial}
+        />
 
         <section className="panel report-panel">
           <div className="section-head">

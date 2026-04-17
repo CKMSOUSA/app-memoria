@@ -6,6 +6,7 @@ import { GameGuide } from "@/components/GameGuide";
 import { ReviewMetrics } from "@/components/ReviewMetrics";
 import { SoundToggle, useSoundFeedback } from "@/components/SoundToggle";
 import { TimerDisplay } from "@/components/TimerDisplay";
+import { getSessionAdjustments, useAppSettingsState } from "@/lib/app-settings";
 import { advancedSpatialChallenges } from "@/lib/advanced-game-data";
 import { spatialChallenges } from "@/lib/game-data-v3";
 import { evaluateSpatialRound, getNextVariationIndex } from "@/lib/game-logic";
@@ -112,6 +113,8 @@ export function SpatialGame({
     completed: boolean;
   } | null>(null);
   const { soundEnabled, toggleSound, playResultSound, playAnswerSound } = useSoundFeedback();
+  const { settings } = useAppSettingsState();
+  const sessionAdjustments = getSessionAdjustments(settings);
 
   const progressoRef = useRef(progresso);
   const challenge = useMemo(
@@ -131,7 +134,13 @@ export function SpatialGame({
       });
   const activeStepCount = isAdvancedMode
     ? currentVariation.sequence.length
-    : Math.max(2, Math.min(currentVariation.sequence.length, currentVariation.sequence.length + adaptiveTuning.stepDelta));
+    : Math.max(
+        2,
+        Math.min(
+          currentVariation.sequence.length,
+          currentVariation.sequence.length + adaptiveTuning.stepDelta + sessionAdjustments.spatialStepDelta,
+        ),
+      );
   const activeSequence = currentVariation.sequence.slice(0, activeStepCount);
   const adaptiveDifficulty = isAdvancedMode
     ? { ...difficulty, revealSeconds: currentVariation.revealSeconds }
@@ -139,6 +148,13 @@ export function SpatialGame({
         tempoResposta: Math.max(8, difficulty.tempoResposta + adaptiveTuning.responseBonus),
         minimoParaConcluir: Math.max(2, Math.min(activeSequence.length, difficulty.minimoParaConcluir + adaptiveTuning.minimumDelta)),
         revealSeconds: Math.max(3, currentVariation.revealSeconds + adaptiveTuning.revealBonus),
+      };
+  const sessionDifficulty = isAdvancedMode
+    ? adaptiveDifficulty
+    : {
+        tempoResposta: adaptiveDifficulty.tempoResposta + sessionAdjustments.timeBonusSeconds,
+        minimoParaConcluir: Math.max(1, adaptiveDifficulty.minimoParaConcluir + sessionAdjustments.minimumDelta),
+        revealSeconds: adaptiveDifficulty.revealSeconds + sessionAdjustments.revealBonusSeconds,
       };
   const expectedPath = useMemo(() => buildBoardPath(activeSequence), [activeSequence]);
   const userPath = useMemo(() => buildBoardPath(selectedMoves), [selectedMoves]);
@@ -187,7 +203,7 @@ export function SpatialGame({
   }, [challenge.id, onRememberVariation, variationIndex]);
 
   function startRound() {
-    setRevealLeft(adaptiveDifficulty.revealSeconds);
+    setRevealLeft(sessionDifficulty.revealSeconds);
     setAnswerSeconds(0);
     setSelectedMoves([]);
     setFeedback("");
@@ -227,13 +243,13 @@ export function SpatialGame({
         expectedSequence: activeSequence,
         selectedSequence: nextMoves,
         answerSeconds,
-        responseSeconds: adaptiveDifficulty.tempoResposta,
-        minimumToComplete: adaptiveDifficulty.minimoParaConcluir,
+        responseSeconds: sessionDifficulty.tempoResposta,
+        minimumToComplete: sessionDifficulty.minimoParaConcluir,
       });
 
       if (!isAdvancedMode) {
         setAdaptiveTuning((current) => {
-          if (result.completed && result.wrongMoves.length === 0 && answerSeconds <= Math.max(4, adaptiveDifficulty.tempoResposta - 2)) {
+          if (result.completed && result.wrongMoves.length === 0 && answerSeconds <= Math.max(4, sessionDifficulty.tempoResposta - 2)) {
             return {
               responseBonus: Math.max(-2, current.responseBonus - 1),
               revealBonus: Math.max(-1, current.revealBonus - 1),
@@ -258,7 +274,7 @@ export function SpatialGame({
       setFeedback(
         result.completed
           ? `Voce reconstruiu ${result.hits.length} direcao(oes) corretamente e concluiu a rota.`
-          : `Voce acertou ${result.hits.length} movimento(s). Precisa de ${adaptiveDifficulty.minimoParaConcluir} para concluir.`,
+          : `Voce acertou ${result.hits.length} movimento(s). Precisa de ${sessionDifficulty.minimoParaConcluir} para concluir.`,
       );
       playResultSound(result.completed);
       onSaveResult(challenge.id, result.score, answerSeconds, result.completed, variationIndex);
@@ -438,7 +454,7 @@ export function SpatialGame({
                 </div>
                 <div className="phase-chip">
                   <strong>Meta</strong>
-                  <span>{`${adaptiveDifficulty.minimoParaConcluir} movimentos certos`}</span>
+                  <span>{`${sessionDifficulty.minimoParaConcluir} movimentos certos`}</span>
                 </div>
                 <div className="phase-chip">
                   <strong>Rota</strong>
@@ -446,14 +462,14 @@ export function SpatialGame({
                 </div>
                 <div className="phase-chip">
                   <strong>Adaptacao</strong>
-                  <span>{`${adaptiveDifficulty.tempoResposta}s para responder`}</span>
+                  <span>{`${sessionDifficulty.tempoResposta}s para responder`}</span>
                 </div>
               </div>
 
               <div className={`${isAdvancedMode ? "status-row compact-status-row" : ""}`}>
                 <div className="meter-box">
                   <strong>Tempo de observacao</strong>
-                  <span>{phase === "showing" ? `${revealLeft}s restantes` : `${adaptiveDifficulty.revealSeconds}s por rodada`}</span>
+                  <span>{phase === "showing" ? `${revealLeft}s restantes` : `${sessionDifficulty.revealSeconds}s por rodada`}</span>
                 </div>
                 {isAdvancedMode ? (
                   <div className="meter-box">

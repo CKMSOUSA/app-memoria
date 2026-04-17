@@ -6,6 +6,7 @@ import { GameGuide } from "@/components/GameGuide";
 import { ReviewMetrics } from "@/components/ReviewMetrics";
 import { SoundToggle, useSoundFeedback } from "@/components/SoundToggle";
 import { TimerDisplay } from "@/components/TimerDisplay";
+import { getSessionAdjustments, useAppSettingsState } from "@/lib/app-settings";
 import { advancedComparisonChallenges } from "@/lib/advanced-game-data";
 import { comparisonChallenges } from "@/lib/game-data-v3";
 import { evaluateComparisonRound, getNextVariationIndex } from "@/lib/game-logic";
@@ -62,6 +63,8 @@ export function ComparisonGame({
     completed: boolean;
   } | null>(null);
   const { soundEnabled, toggleSound, playResultSound, playAnswerSound } = useSoundFeedback();
+  const { settings } = useAppSettingsState();
+  const sessionAdjustments = getSessionAdjustments(settings);
 
   const progressRef = useRef(progresso);
   const challenge = useMemo(
@@ -74,7 +77,10 @@ export function ComparisonGame({
   const baseRounds = !isAdvancedMode && usuario.idade <= 10 && variation.roundsAte10?.length ? variation.roundsAte10 : variation.rounds;
   const roundCount = isAdvancedMode
     ? baseRounds.length
-    : Math.max(2, Math.min(baseRounds.length, baseRounds.length + adaptiveTuning.roundDelta));
+    : Math.max(
+        2,
+        Math.min(baseRounds.length, baseRounds.length + adaptiveTuning.roundDelta + sessionAdjustments.comparisonRoundDelta),
+      );
   const rounds = baseRounds.slice(0, roundCount);
   const currentRound = rounds[currentRoundIndex] ?? rounds[0];
   const difficulty = isAdvancedMode
@@ -90,6 +96,12 @@ export function ComparisonGame({
     : {
         tempoLimite: Math.max(8, difficulty.tempoLimite + adaptiveTuning.timeBonus),
         minimoParaConcluir: Math.max(1, Math.min(rounds.length, difficulty.minimoParaConcluir + adaptiveTuning.minimumDelta)),
+      };
+  const sessionDifficulty = isAdvancedMode
+    ? adaptiveDifficulty
+    : {
+        tempoLimite: adaptiveDifficulty.tempoLimite + sessionAdjustments.timeBonusSeconds,
+        minimoParaConcluir: Math.max(1, adaptiveDifficulty.minimoParaConcluir + sessionAdjustments.minimumDelta),
       };
   const challengeNumber = challengeIds.indexOf(challenge.id) + 1;
   const ageDescription = getAgeLabel(usuario.idade);
@@ -120,7 +132,7 @@ export function ComparisonGame({
 
   function startRound() {
     setPhase("playing");
-    setTimeLeft(adaptiveDifficulty.tempoLimite);
+    setTimeLeft(sessionDifficulty.tempoLimite);
     setCurrentRoundIndex(0);
     setSelectedAnswers([]);
     setFeedback("");
@@ -149,18 +161,18 @@ export function ComparisonGame({
 
   const finishRound = useCallback((answers: Array<"left" | "right">) => {
     const expectedAnswers = rounds.map((item) => item.correct);
-    const elapsedSeconds = Math.max(adaptiveDifficulty.tempoLimite - timeLeft, 0);
+    const elapsedSeconds = Math.max(sessionDifficulty.tempoLimite - timeLeft, 0);
     const result = evaluateComparisonRound({
       expectedAnswers,
       selectedAnswers: answers,
       answerSeconds: elapsedSeconds,
-      timeLimit: adaptiveDifficulty.tempoLimite,
-      minimumToComplete: adaptiveDifficulty.minimoParaConcluir,
+      timeLimit: sessionDifficulty.tempoLimite,
+      minimumToComplete: sessionDifficulty.minimoParaConcluir,
     });
 
     if (!isAdvancedMode) {
       setAdaptiveTuning((current) => {
-        if (result.completed && result.mistakes.length === 0 && elapsedSeconds <= Math.max(4, adaptiveDifficulty.tempoLimite - 2)) {
+        if (result.completed && result.mistakes.length === 0 && elapsedSeconds <= Math.max(4, sessionDifficulty.tempoLimite - 2)) {
           return {
             timeBonus: Math.max(-2, current.timeBonus - 1),
             roundDelta: 0,
@@ -182,18 +194,18 @@ export function ComparisonGame({
     setFeedback(
       result.completed
         ? `Voce acertou ${result.hits.length} comparacao(oes) e concluiu a fase.`
-        : `Voce acertou ${result.hits.length} comparacao(oes). Precisa de ${adaptiveDifficulty.minimoParaConcluir} para concluir.`,
+        : `Voce acertou ${result.hits.length} comparacao(oes). Precisa de ${sessionDifficulty.minimoParaConcluir} para concluir.`,
     );
     setReview(result);
     playResultSound(result.completed);
     onSaveResult(challenge.id, result.score, elapsedSeconds, result.completed, variationIndex);
   }, [
     challenge.id,
-    adaptiveDifficulty.minimoParaConcluir,
-    adaptiveDifficulty.tempoLimite,
     isAdvancedMode,
     onSaveResult,
     playResultSound,
+    sessionDifficulty.minimoParaConcluir,
+    sessionDifficulty.tempoLimite,
     timeLeft,
     rounds,
     variationIndex,
@@ -365,7 +377,7 @@ export function ComparisonGame({
                 </div>
                 <div className="phase-chip">
                   <strong>Meta</strong>
-                  <span>{`${adaptiveDifficulty.minimoParaConcluir} acertos`}</span>
+                  <span>{`${sessionDifficulty.minimoParaConcluir} acertos`}</span>
                 </div>
                 <div className="phase-chip">
                   <strong>Rodadas</strong>
@@ -373,7 +385,7 @@ export function ComparisonGame({
                 </div>
                 <div className="phase-chip">
                   <strong>Adaptacao</strong>
-                  <span>{`${adaptiveDifficulty.tempoLimite}s totais`}</span>
+                  <span>{`${sessionDifficulty.tempoLimite}s totais`}</span>
                 </div>
               </div>
 
@@ -384,7 +396,7 @@ export function ComparisonGame({
                 </div>
                 <div className="meter-box">
                   <strong>Meta da fase</strong>
-                  <span>{`${adaptiveDifficulty.minimoParaConcluir}/${rounds.length} acertos`}</span>
+                  <span>{`${sessionDifficulty.minimoParaConcluir}/${rounds.length} acertos`}</span>
                 </div>
               </div>
 
