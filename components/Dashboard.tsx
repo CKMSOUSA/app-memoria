@@ -6,6 +6,7 @@ import { AppPreferencesPanel } from "@/components/AppPreferencesPanel";
 import { InternalAssistant } from "@/components/InternalAssistant";
 import { getRemoteBackendStatus } from "@/lib/app-repository";
 import type { AppSettings } from "@/lib/app-settings";
+import type { OfflineSyncStatus } from "@/lib/offline-store";
 import {
   attentionChallenges,
   comparisonChallenges,
@@ -56,6 +57,7 @@ type DashboardProps = {
   history: SessionRecord[];
   settings: AppSettings;
   isOffline: boolean;
+  offlineSyncStatus: OfflineSyncStatus;
   onUpdateSettings: (partial: Partial<AppSettings>) => void;
 };
 
@@ -272,6 +274,7 @@ export function Dashboard({
   history,
   settings,
   isOffline,
+  offlineSyncStatus,
   onUpdateSettings,
 }: DashboardProps) {
   const backendStatus = getRemoteBackendStatus();
@@ -519,7 +522,12 @@ export function Dashboard({
           </div>
         </section>
 
-        <AppPreferencesPanel settings={settings} isOffline={isOffline} onUpdateSettings={onUpdateSettings} />
+        <AppPreferencesPanel
+          settings={settings}
+          isOffline={isOffline}
+          offlineSyncStatus={offlineSyncStatus}
+          onUpdateSettings={onUpdateSettings}
+        />
 
         <InternalAssistant
           usuario={usuario}

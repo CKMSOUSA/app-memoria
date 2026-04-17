@@ -1679,6 +1679,13 @@ h2 {
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
 }
 
+.offline-sync-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
 .setting-toggle-card {
   display: flex;
   align-items: center;

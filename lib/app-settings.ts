@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { persistSettingsSnapshot } from "@/lib/offline-store";
 
 export type AppSettings = {
   highContrast: boolean;
@@ -12,7 +13,7 @@ export type AppSettings = {
   screenReaderHints: boolean;
 };
 
-const APP_SETTINGS_KEY = "app_memoria_settings_v1";
+export const APP_SETTINGS_KEY = "app_memoria_settings_v1";
 const SETTINGS_EVENT = "app-memoria-settings-updated";
 
 export const DEFAULT_APP_SETTINGS: AppSettings = {
@@ -44,6 +45,7 @@ export function loadAppSettings(): AppSettings {
 export function saveAppSettings(settings: AppSettings) {
   if (typeof window === "undefined") return;
   window.localStorage.setItem(APP_SETTINGS_KEY, JSON.stringify(settings));
+  void persistSettingsSnapshot(settings as Record<string, unknown>);
   window.dispatchEvent(new Event(SETTINGS_EVENT));
 }
 

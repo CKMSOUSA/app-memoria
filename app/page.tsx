@@ -11,6 +11,7 @@ import { ComparisonGame } from "@/components/ComparisonGame";
 import { Dashboard } from "@/components/Dashboard";
 import { HelpScreen } from "@/components/HelpScreen";
 import { applyAppSettingsToDocument, registerOfflineSupport, useAppSettingsState } from "@/lib/app-settings";
+import { getOfflineSyncStatus, subscribeOfflineSyncStatus, type OfflineSyncStatus } from "@/lib/offline-store";
 import { LogicGame } from "@/components/LogicGame";
 import type { HelpRequest } from "@/lib/types";
 import { MemoryGame } from "@/components/MemoryGame";
@@ -35,6 +36,13 @@ export default function Page() {
   const [dataMode, setDataMode] = useState<DataMode>(repository.mode);
   const [ready, setReady] = useState(false);
   const [isOffline, setIsOffline] = useState(false);
+  const [offlineSyncStatus, setOfflineSyncStatus] = useState<OfflineSyncStatus>({
+    isSupported: true,
+    pendingCount: 0,
+    isSyncing: false,
+    lastSyncedAt: null,
+    lastError: null,
+  });
   const { settings, updateSettings } = useAppSettingsState();
 
   useEffect(() => {
@@ -86,11 +94,20 @@ export default function Page() {
     registerOfflineSupport();
     if (typeof window === "undefined") return;
 
-    const syncOffline = () => setIsOffline(!window.navigator.onLine);
+    const syncOffline = () => {
+      const offline = !window.navigator.onLine;
+      setIsOffline(offline);
+      if (!offline) {
+        void repository.syncOfflineData().then(setOfflineSyncStatus).catch(() => undefined);
+      }
+    };
+    void getOfflineSyncStatus().then(setOfflineSyncStatus).catch(() => undefined);
+    const unsubscribe = subscribeOfflineSyncStatus(setOfflineSyncStatus);
     syncOffline();
     window.addEventListener("online", syncOffline);
     window.addEventListener("offline", syncOffline);
     return () => {
+      unsubscribe();
       window.removeEventListener("online", syncOffline);
       window.removeEventListener("offline", syncOffline);
     };
@@ -617,6 +634,7 @@ export default function Page() {
       history={history}
       settings={settings}
       isOffline={isOffline}
+      offlineSyncStatus={offlineSyncStatus}
       onUpdateSettings={updateSettings}
       onOpenMemory={() => setTela("memoria")}
       onOpenVisual={() => setTela("visual")}

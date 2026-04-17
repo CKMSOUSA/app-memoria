@@ -3,11 +3,11 @@
 import { createDefaultProgress, mergeProgress } from "@/lib/scoring";
 import type { HelpRequest, ProgressState, SessionRecord, Usuario, UsuarioPersistido, UserStatus } from "@/lib/types";
 
-const USERS_KEY = "app_memoria_usuarios_v2";
-const SESSION_KEY = "app_memoria_usuario_ativo_v2";
-const PROGRESS_PREFIX = "app_memoria_progresso_v2";
-const HISTORY_PREFIX = "app_memoria_historico_v1";
-const HELP_REQUESTS_KEY = "app_memoria_ajuda_v1";
+export const USERS_KEY = "app_memoria_usuarios_v2";
+export const SESSION_KEY = "app_memoria_usuario_ativo_v2";
+export const PROGRESS_PREFIX = "app_memoria_progresso_v2";
+export const HISTORY_PREFIX = "app_memoria_historico_v1";
+export const HELP_REQUESTS_KEY = "app_memoria_ajuda_v1";
 export const AVATAR_OPTIONS = ["🧠", "🚀", "🦊", "🐼", "🦁", "🧩"];
 
 type RegisterResult = {

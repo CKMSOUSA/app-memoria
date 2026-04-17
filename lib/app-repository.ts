@@ -40,6 +40,23 @@ import {
 } from "@/lib/supabase-profile";
 import { appendSupabaseHelpRequest, loadSupabaseHelpRequests } from "@/lib/supabase-help";
 import { appendSupabaseSessionHistory, loadSupabaseSessionHistory } from "@/lib/supabase-history";
+import {
+  enqueuePendingSyncOperation,
+  getOfflineSyncStatus,
+  initializeOfflineStore,
+  listPendingSyncOperations,
+  loadHelpRequestsSnapshot,
+  loadProgressSnapshot,
+  loadSessionHistorySnapshot,
+  persistHelpRequestsSnapshot,
+  persistProgressSnapshot,
+  persistSessionHistorySnapshot,
+  persistSessionSnapshot,
+  persistUsersSnapshot,
+  removePendingSyncOperation,
+  updateOfflineSyncStatus,
+  type OfflineSyncStatus,
+} from "@/lib/offline-store";
 import { loadSupabaseProgress, saveSupabaseProgress } from "@/lib/supabase-progress";
 import type { AdminOverview, DataMode, HelpRequest, ProgressState, SessionRecord, Usuario } from "@/lib/types";
 
@@ -53,6 +70,8 @@ type AppRepository = {
   bootstrap: () => Promise<void>;
   getActiveSession: () => Usuario | null;
   clearActiveSession: () => void;
+  getOfflineSyncStatus: () => Promise<OfflineSyncStatus>;
+  syncOfflineData: () => Promise<OfflineSyncStatus>;
   loginUser: (email: string, password: string) => Promise<Usuario | null>;
   registerUser: (
     email: string,
@@ -119,6 +138,86 @@ function resolveStoredRole(email: string, remoteRole?: Usuario["role"]) {
 function resolveStoredTurma(email: string, turma?: string | null) {
   const storedTurma = listUsers().find((item) => item.email === email)?.turma ?? null;
   return turma ?? storedTurma;
+}
+
+async function persistUsersToOfflineStore() {
+  await persistUsersSnapshot(listUsers());
+}
+
+async function persistSessionToOfflineStore(email: string | null) {
+  await persistSessionSnapshot(email);
+}
+
+async function syncQueuedOfflineOperations() {
+  const unsupportedStatus = await getOfflineSyncStatus();
+  if (!unsupportedStatus.isSupported) return unsupportedStatus;
+  if (!hasSupabaseAuthConfig() || typeof window === "undefined" || !window.navigator.onLine) {
+    return getOfflineSyncStatus();
+  }
+
+  const queue = await listPendingSyncOperations();
+  if (queue.length === 0) {
+    return getOfflineSyncStatus();
+  }
+
+  let lastError: string | null = null;
+  await updateOfflineSyncStatus({ isSyncing: true, lastError: null, pendingCount: queue.length });
+
+  for (const item of queue) {
+    try {
+      if (item.type === "saveProgress") {
+        await saveSupabaseProgress(item.email, item.progress);
+      } else if (item.type === "appendSessionHistory") {
+        const remoteHistory = await appendSupabaseSessionHistory(item.email, item.record);
+        if (remoteHistory) {
+          saveSessionHistory(item.email, remoteHistory);
+          await persistSessionHistorySnapshot(item.email, remoteHistory);
+        }
+      } else if (item.type === "appendHelpRequest") {
+        const remoteHelp = await appendSupabaseHelpRequest(item.request);
+        if (remoteHelp) {
+          const merged = mergeHelpRequests(loadHelpRequests(), remoteHelp);
+          saveHelpRequests(merged);
+          await persistHelpRequestsSnapshot(merged);
+        }
+      } else if (item.type === "updateUserProfile") {
+        const remoteUser = await updateSupabaseProfile(item.email, {
+          nome: item.profile.nome,
+          avatar: item.profile.avatar,
+          idade: item.profile.idade,
+          role: item.profile.role ? getRemoteCompatibleRole(item.profile.role) : undefined,
+        });
+        if (remoteUser) {
+          syncAuthUserProfile({
+            email: remoteUser.email,
+            nome: remoteUser.nome,
+            avatar: remoteUser.avatar,
+            idade: remoteUser.idade,
+            premium: remoteUser.premium,
+            pontos: remoteUser.pontos,
+            role: item.profile.role ?? resolveStoredRole(remoteUser.email, remoteUser.role),
+            status: remoteUser.status,
+            criadoEm: remoteUser.criadoEm,
+            turma: item.profile.turma ?? resolveStoredTurma(remoteUser.email),
+          });
+          await persistUsersToOfflineStore();
+        }
+      }
+
+      await removePendingSyncOperation(item.id);
+    } catch (error) {
+      lastError = error instanceof Error ? error.message : "Falha ao sincronizar dados offline.";
+      break;
+    }
+  }
+
+  const status = await getOfflineSyncStatus();
+  return updateOfflineSyncStatus({
+    ...status,
+    isSyncing: false,
+    lastSyncedAt: lastError ? status.lastSyncedAt : new Date().toISOString(),
+    lastError,
+  });
 }
 
 function hasSupabaseConfig() {
@@ -288,11 +387,23 @@ const localRepository: AppRepository = {
   mode: "local",
   bootstrap: async () => {
     await bootstrapStorage();
+    await initializeOfflineStore();
+    await persistUsersToOfflineStore();
     const session = getStoredSupabaseSession();
     const email = session?.user?.email?.trim().toLowerCase();
-    if (!email || !hasSupabaseAuthConfig()) return;
+    await persistSessionToOfflineStore(getActiveSession()?.email ?? email ?? null);
+    if (!email || !hasSupabaseAuthConfig()) {
+      await syncQueuedOfflineOperations();
+      return;
+    }
 
-    const remoteProfile = await loadSupabaseProfileByEmail(email);
+    let remoteProfile: Awaited<ReturnType<typeof loadSupabaseProfileByEmail>> = null;
+    try {
+      remoteProfile = await loadSupabaseProfileByEmail(email);
+    } catch {
+      await syncQueuedOfflineOperations();
+      return;
+    }
     if (remoteProfile) {
       syncAuthUserProfile({
         email: remoteProfile.email,
@@ -311,7 +422,11 @@ const localRepository: AppRepository = {
         clearActiveSession();
       }
     }
+    await persistUsersToOfflineStore();
+    await syncQueuedOfflineOperations();
   },
+  getOfflineSyncStatus: async () => getOfflineSyncStatus(),
+  syncOfflineData: async () => syncQueuedOfflineOperations(),
   getActiveSession: () => {
     const authSession = getStoredSupabaseSession();
     if (authSession?.user?.email && hasSupabaseAuthConfig()) {
@@ -345,6 +460,7 @@ const localRepository: AppRepository = {
   clearActiveSession: () => {
     clearActiveSession();
     clearStoredSupabaseSession();
+    void persistSessionToOfflineStore(null);
   },
   loginUser: async (email, password) => {
     if (hasSupabaseAuthConfig()) {
@@ -388,11 +504,18 @@ const localRepository: AppRepository = {
           turma: resolveStoredTurma(result.session.user.email),
         });
         setActiveSession(user.email);
+        await persistUsersToOfflineStore();
+        await persistSessionToOfflineStore(user.email);
         return user;
       }
     }
 
-    return loginUser(email, password);
+    const user = await loginUser(email, password);
+    if (user) {
+      await persistUsersToOfflineStore();
+      await persistSessionToOfflineStore(user.email);
+    }
+    return user;
   },
   registerUser: async (email, password, idade, nome, avatar, role = "aluno", turma = null) => {
     if (hasSupabaseAuthConfig()) {
@@ -434,6 +557,9 @@ const localRepository: AppRepository = {
       if (result.session) {
         setActiveSession(user.email);
       }
+      await persistUsersToOfflineStore();
+      await persistSessionToOfflineStore(result.session ? user.email : null);
+      await syncQueuedOfflineOperations();
 
       return {
         error: null,
@@ -441,31 +567,44 @@ const localRepository: AppRepository = {
       };
     }
 
-    return registerStoredUser(email, password, idade, nome, avatar, role, turma);
+    const result = await registerStoredUser(email, password, idade, nome, avatar, role, turma);
+    await persistUsersToOfflineStore();
+    return result;
   },
   updateUserProfile: async (email, profile) => {
     const localUser = updateStoredUserProfile(email, profile);
     const resolvedTurma = resolveStoredTurma(email, profile.turma ?? null);
+    await persistUsersToOfflineStore();
 
     if (hasSupabaseAuthConfig()) {
-      const remoteUser = await updateSupabaseProfile(email, {
-        nome: profile.nome,
-        avatar: profile.avatar,
-        idade: profile.idade,
-        role: profile.role ? getRemoteCompatibleRole(profile.role) : undefined,
-      });
-      if (remoteUser) {
-        return syncAuthUserProfile({
-          email: remoteUser.email,
-          nome: remoteUser.nome,
-          avatar: remoteUser.avatar,
-          idade: remoteUser.idade,
-          premium: remoteUser.premium,
-          pontos: remoteUser.pontos,
-          role: profile.role ?? resolveStoredRole(remoteUser.email, remoteUser.role),
-          status: remoteUser.status,
-          criadoEm: remoteUser.criadoEm,
-          turma: resolvedTurma,
+      try {
+        const remoteUser = await updateSupabaseProfile(email, {
+          nome: profile.nome,
+          avatar: profile.avatar,
+          idade: profile.idade,
+          role: profile.role ? getRemoteCompatibleRole(profile.role) : undefined,
+        });
+        if (remoteUser) {
+          const synced = syncAuthUserProfile({
+            email: remoteUser.email,
+            nome: remoteUser.nome,
+            avatar: remoteUser.avatar,
+            idade: remoteUser.idade,
+            premium: remoteUser.premium,
+            pontos: remoteUser.pontos,
+            role: profile.role ?? resolveStoredRole(remoteUser.email, remoteUser.role),
+            status: remoteUser.status,
+            criadoEm: remoteUser.criadoEm,
+            turma: resolvedTurma,
+          });
+          await persistUsersToOfflineStore();
+          return synced;
+        }
+      } catch {
+        await enqueuePendingSyncOperation({
+          type: "updateUserProfile",
+          email,
+          profile,
         });
       }
     }
@@ -474,6 +613,7 @@ const localRepository: AppRepository = {
   },
   updateUserPoints: async (email, delta) => {
     const localUser: Usuario | null = updateStoredUserPoints(email, delta);
+    await persistUsersToOfflineStore();
 
     if (hasSupabaseAuthConfig()) {
       const currentRemoteUser = await loadSupabaseProfileByEmail(email);
@@ -486,7 +626,7 @@ const localRepository: AppRepository = {
       });
 
       if (remoteUser) {
-        return syncAuthUserProfile({
+        const synced = syncAuthUserProfile({
           email: remoteUser.email,
           nome: remoteUser.nome,
           avatar: remoteUser.avatar,
@@ -497,6 +637,8 @@ const localRepository: AppRepository = {
           status: remoteUser.status,
           criadoEm: remoteUser.criadoEm,
         });
+        await persistUsersToOfflineStore();
+        return synced;
       }
     }
 
@@ -504,57 +646,109 @@ const localRepository: AppRepository = {
   },
   loadProgress: async (email) => {
     if (hasSupabaseAuthConfig()) {
-      const remoteProgress = await loadSupabaseProgress(email);
-      if (remoteProgress) {
-        saveProgress(email, remoteProgress);
-        return remoteProgress;
+      try {
+        const remoteProgress = await loadSupabaseProgress(email);
+        if (remoteProgress) {
+          saveProgress(email, remoteProgress);
+          await persistProgressSnapshot(email, remoteProgress);
+          return remoteProgress;
+        }
+      } catch {
+        const offlineProgress = await loadProgressSnapshot(email);
+        if (offlineProgress) {
+          return offlineProgress;
+        }
       }
     }
 
-    return loadProgress(email);
+    const localProgress = loadProgress(email);
+    await persistProgressSnapshot(email, localProgress);
+    return localProgress;
   },
   saveProgress: async (email, progress) => {
     saveProgress(email, progress);
+    await persistProgressSnapshot(email, progress);
 
     if (hasSupabaseAuthConfig()) {
-      await saveSupabaseProgress(email, progress);
+      try {
+        await saveSupabaseProgress(email, progress);
+      } catch {
+        await enqueuePendingSyncOperation({
+          type: "saveProgress",
+          email,
+          progress,
+        });
+      }
     }
   },
   loadSessionHistory: async (email) => {
     if (hasSupabaseAuthConfig()) {
-      const remoteHistory = await loadSupabaseSessionHistory(email);
-      if (remoteHistory) {
-        saveSessionHistory(email, remoteHistory);
-        return remoteHistory;
+      try {
+        const remoteHistory = await loadSupabaseSessionHistory(email);
+        if (remoteHistory) {
+          saveSessionHistory(email, remoteHistory);
+          await persistSessionHistorySnapshot(email, remoteHistory);
+          return remoteHistory;
+        }
+      } catch {
+        const offlineHistory = await loadSessionHistorySnapshot(email);
+        if (offlineHistory) {
+          return offlineHistory;
+        }
       }
     }
 
-    return loadSessionHistory(email);
+    const localHistory = loadSessionHistory(email);
+    await persistSessionHistorySnapshot(email, localHistory);
+    return localHistory;
   },
   appendSessionHistory: async (email, record) => {
     const localHistory = appendSessionHistory(email, record);
+    await persistSessionHistorySnapshot(email, localHistory);
 
     if (hasSupabaseAuthConfig()) {
-      const remoteHistory = await appendSupabaseSessionHistory(email, record);
-      if (remoteHistory) {
-        saveSessionHistory(email, remoteHistory);
-        return remoteHistory;
+      try {
+        const remoteHistory = await appendSupabaseSessionHistory(email, record);
+        if (remoteHistory) {
+          saveSessionHistory(email, remoteHistory);
+          await persistSessionHistorySnapshot(email, remoteHistory);
+          return remoteHistory;
+        }
+      } catch {
+        await enqueuePendingSyncOperation({
+          type: "appendSessionHistory",
+          email,
+          record,
+        });
       }
     }
 
     return localHistory;
   },
-  listUsers: async () => listUsers(),
+  listUsers: async () => {
+    const users = listUsers();
+    await persistUsersToOfflineStore();
+    return users;
+  },
   loadAllHistories: async () => loadAllHistories(),
   loadHelpRequests: async () => {
     const localItems = loadHelpRequests();
+    await persistHelpRequestsSnapshot(localItems);
 
     if (hasSupabaseAuthConfig()) {
-      const remoteItems = await loadSupabaseHelpRequests();
-      if (remoteItems) {
-        const merged = mergeHelpRequests(localItems, remoteItems);
-        saveHelpRequests(merged);
-        return merged;
+      try {
+        const remoteItems = await loadSupabaseHelpRequests();
+        if (remoteItems) {
+          const merged = mergeHelpRequests(localItems, remoteItems);
+          saveHelpRequests(merged);
+          await persistHelpRequestsSnapshot(merged);
+          return merged;
+        }
+      } catch {
+        const offlineItems = await loadHelpRequestsSnapshot();
+        if (offlineItems.length > 0) {
+          return offlineItems;
+        }
       }
     }
 
@@ -562,13 +756,22 @@ const localRepository: AppRepository = {
   },
   appendHelpRequest: async (request) => {
     const localItems = appendHelpRequest(request);
+    await persistHelpRequestsSnapshot(localItems);
 
     if (hasSupabaseAuthConfig()) {
-      const remoteItems = await appendSupabaseHelpRequest(request);
-      if (remoteItems) {
-        const merged = mergeHelpRequests(localItems, remoteItems);
-        saveHelpRequests(merged);
-        return merged;
+      try {
+        const remoteItems = await appendSupabaseHelpRequest(request);
+        if (remoteItems) {
+          const merged = mergeHelpRequests(localItems, remoteItems);
+          saveHelpRequests(merged);
+          await persistHelpRequestsSnapshot(merged);
+          return merged;
+        }
+      } catch {
+        await enqueuePendingSyncOperation({
+          type: "appendHelpRequest",
+          request,
+        });
       }
     }
 
@@ -602,6 +805,7 @@ const localRepository: AppRepository = {
       } else {
         updateUserStatus(email, status);
       }
+      await persistUsersToOfflineStore();
       return;
     }
     if (!isLocalAdminCodeValid(adminCode)) {
@@ -610,15 +814,18 @@ const localRepository: AppRepository = {
 
     if (status === "excluido") {
       excludeUser(email);
+      await persistUsersToOfflineStore();
       return;
     }
 
     updateUserStatus(email, status);
+    await persistUsersToOfflineStore();
   },
   updateHelpRequestStatus: async (requestId, status, adminReply, adminCode) => {
     const remoteResult = await updateAdminHelpRequestStatus(requestId, status, adminReply, adminCode);
     if (remoteResult?.helpRequests) {
       saveHelpRequests(remoteResult.helpRequests);
+      await persistHelpRequestsSnapshot(remoteResult.helpRequests);
       return remoteResult.helpRequests;
     }
     if (!isLocalAdminCodeValid(adminCode)) {
@@ -630,6 +837,7 @@ const localRepository: AppRepository = {
       item.id === requestId ? { ...item, status, adminReply: adminReply ?? item.adminReply ?? null } : item,
     );
     saveHelpRequests(next);
+    await persistHelpRequestsSnapshot(next);
     return next;
   },
   ensureAdminUser: async () => ensureAdminUser(),
@@ -647,6 +855,8 @@ const remoteRepository: AppRepository = {
   bootstrap: async () => undefined,
   getActiveSession: () => null,
   clearActiveSession: () => undefined,
+  getOfflineSyncStatus: async () => getOfflineSyncStatus(),
+  syncOfflineData: async () => syncQueuedOfflineOperations(),
   loginUser: async (email, password) => {
     const response = await fetch(`${getRemoteBaseUrl()}/auth/login`, {
       method: "POST",

@@ -1,10 +1,12 @@
 "use client";
 
 import type { AppSettings } from "@/lib/app-settings";
+import type { OfflineSyncStatus } from "@/lib/offline-store";
 
 type AppPreferencesPanelProps = {
   settings: AppSettings;
   isOffline: boolean;
+  offlineSyncStatus: OfflineSyncStatus;
   onUpdateSettings: (partial: Partial<AppSettings>) => void;
 };
 
@@ -30,13 +32,37 @@ function SettingToggle({
   );
 }
 
-export function AppPreferencesPanel({ settings, isOffline, onUpdateSettings }: AppPreferencesPanelProps) {
+function getOfflineSummary(isOffline: boolean, offlineSyncStatus: OfflineSyncStatus) {
+  if (!offlineSyncStatus.isSupported) return "Offline basico no navegador atual";
+  if (offlineSyncStatus.isSyncing) return "Sincronizando dados salvos offline";
+  if (isOffline && offlineSyncStatus.pendingCount > 0) {
+    return `${offlineSyncStatus.pendingCount} acao(oes) aguardando envio`;
+  }
+  if (isOffline) return "Modo offline ativo";
+  if (offlineSyncStatus.pendingCount > 0) return `${offlineSyncStatus.pendingCount} item(ns) aguardando sincronizacao`;
+  if (offlineSyncStatus.lastSyncedAt) return `Sincronizado em ${new Date(offlineSyncStatus.lastSyncedAt).toLocaleTimeString("pt-BR")}`;
+  return "Offline pronto apos o primeiro acesso";
+}
+
+export function AppPreferencesPanel({ settings, isOffline, offlineSyncStatus, onUpdateSettings }: AppPreferencesPanelProps) {
   return (
     <section className="panel">
       <div className="section-head">
         <h3>Preferencias de acessibilidade e uso</h3>
-        <span className="small-muted">{isOffline ? "Modo offline ativo" : "Offline pronto apos o primeiro acesso"}</span>
+        <span className="small-muted">{getOfflineSummary(isOffline, offlineSyncStatus)}</span>
       </div>
+      <div className="offline-sync-strip">
+        <span className={`pill ${isOffline ? "pill-locked" : offlineSyncStatus.pendingCount > 0 ? "pill-neutral" : "pill-success"}`}>
+          {isOffline ? "Offline" : "Online"}
+        </span>
+        <span className={`pill ${offlineSyncStatus.pendingCount > 0 ? "pill-neutral" : "pill-success"}`}>
+          {offlineSyncStatus.pendingCount > 0 ? `${offlineSyncStatus.pendingCount} pendente(s)` : "Fila vazia"}
+        </span>
+        <span className={`pill ${offlineSyncStatus.lastError ? "pill-locked" : "pill-success"}`}>
+          {offlineSyncStatus.lastError ? "Sincronizacao com atencao" : "Sincronizacao estavel"}
+        </span>
+      </div>
+      {offlineSyncStatus.lastError ? <p className="small-muted">{offlineSyncStatus.lastError}</p> : null}
       <div className="settings-grid">
         <SettingToggle
           label="Contraste forte"
