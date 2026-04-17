@@ -276,7 +276,10 @@ export function SpatialGame({
           ? `Voce reconstruiu ${result.hits.length} direcao(oes) corretamente e concluiu a rota.`
           : `Voce acertou ${result.hits.length} movimento(s). Precisa de ${sessionDifficulty.minimoParaConcluir} para concluir.`,
       );
-      playResultSound(result.completed);
+      playResultSound(
+        result.completed,
+        result.completed ? "precision" : result.wrongMoves.length > 0 ? "spatial" : "default",
+      );
       onSaveResult(challenge.id, result.score, answerSeconds, result.completed, variationIndex);
     }
   }

@@ -300,7 +300,10 @@ export function MemoryGame({
         : `Voce acertou ${result.hits.length} figura(s). Precisa de ${sessionDifficulty.minimoParaConcluir} para concluir este desafio.`,
     );
     setReview(result);
-    playResultSound(result.completed);
+    playResultSound(
+      result.completed,
+      result.completed ? "precision" : result.missedWords.length > 0 || result.wrongWords.length > 0 ? "memory" : "default",
+    );
     onSaveResult(challenge.id, result.score, answerSeconds, result.completed, variationIndex);
   }
 

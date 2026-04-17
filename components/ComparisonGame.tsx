@@ -197,7 +197,7 @@ export function ComparisonGame({
         : `Voce acertou ${result.hits.length} comparacao(oes). Precisa de ${sessionDifficulty.minimoParaConcluir} para concluir.`,
     );
     setReview(result);
-    playResultSound(result.completed);
+    playResultSound(result.completed, result.completed ? "precision" : result.mistakes.length > 0 ? "logic" : "default");
     onSaveResult(challenge.id, result.score, elapsedSeconds, result.completed, variationIndex);
   }, [
     challenge.id,

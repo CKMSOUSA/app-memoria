@@ -132,7 +132,14 @@ export function VisualMemoryGame({
         ? `Voce encontrou ${result.pairsFound} pares e concluiu a fase visual.`
         : `Voce encontrou ${result.pairsFound} pares. Precisa de ${challenge.minimoParaConcluir} para concluir.`,
     );
-    playResultSound(result.completed);
+    playResultSound(
+      result.completed,
+      result.completed
+        ? "precision"
+        : result.wrongMatches > 0 || result.totalPairs - result.pairsFound > 0
+          ? "visual"
+          : "default",
+    );
     onSaveResult(challenge.id, result.score, elapsedSeconds, result.completed, variationIndex);
   }, [
     challenge.id,

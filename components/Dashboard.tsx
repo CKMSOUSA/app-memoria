@@ -32,9 +32,13 @@ import {
 import {
   getAbilityInsights,
   getAutomaticDiagnostic,
+  getCooperativeCycle,
+  getEngagementMissions,
   getGuidedSessions,
   getPerformanceTrends,
   getSmartRecommendation,
+  getThemedTracks,
+  getAchievementInsights,
 } from "@/lib/training-insights";
 import type { ProgressState, SessionRecord, Usuario } from "@/lib/types";
 
@@ -236,6 +240,136 @@ function GuidedPlanCard({
   );
 }
 
+function MissionCard({
+  cadence,
+  title,
+  summary,
+  progressLabel,
+  completed,
+  onOpen,
+}: {
+  cadence: "diaria" | "semanal";
+  title: string;
+  summary: string;
+  progressLabel: string;
+  completed: boolean;
+  onOpen: () => void;
+}) {
+  return (
+    <article className={`engagement-card mission-card ${completed ? "mission-card-complete" : ""}`}>
+      <div className="section-head">
+        <p className="engagement-tag">{cadence === "diaria" ? "Missao diaria" : "Missao semanal"}</p>
+        <span className={`pill ${completed ? "pill-success" : "pill-neutral"}`}>{completed ? "Cumprida" : "Em curso"}</span>
+      </div>
+      <h3>{title}</h3>
+      <p className="muted">{summary}</p>
+      <p className="engagement-highlight">{progressLabel}</p>
+      <button className="btn btn-secondary" onClick={onOpen}>
+        Abrir atividade
+      </button>
+    </article>
+  );
+}
+
+function AchievementCard({
+  title,
+  category,
+  unlocked,
+  summary,
+  highlight,
+}: {
+  title: string;
+  category: "consistencia" | "precisao" | "evolucao";
+  unlocked: boolean;
+  summary: string;
+  highlight: string;
+}) {
+  const categoryLabel =
+    category === "consistencia" ? "Consistencia" : category === "precisao" ? "Precisao" : "Evolucao";
+
+  return (
+    <article className={`engagement-card achievement-card ${unlocked ? "achievement-card-unlocked" : ""}`}>
+      <div className="section-head">
+        <p className="engagement-tag">{categoryLabel}</p>
+        <span className={`pill ${unlocked ? "pill-success" : "pill-locked"}`}>{unlocked ? "Desbloqueada" : "Em preparo"}</span>
+      </div>
+      <h3>{title}</h3>
+      <p className="muted">{summary}</p>
+      <p className="engagement-highlight">{highlight}</p>
+    </article>
+  );
+}
+
+function ThemedTrackCard({
+  title,
+  label,
+  summary,
+  audienceHint,
+  challengeName,
+  onOpen,
+}: {
+  title: string;
+  label: string;
+  summary: string;
+  audienceHint: string;
+  challengeName: string;
+  onOpen: () => void;
+}) {
+  return (
+    <article className="engagement-card themed-track-card">
+      <p className="engagement-tag">{label}</p>
+      <h3>{title}</h3>
+      <p className="muted">{summary}</p>
+      <p className="small-muted">{audienceHint}</p>
+      <p className="engagement-highlight">{`Comecar por ${challengeName}`}</p>
+      <button className="btn btn-secondary" onClick={onOpen}>
+        Abrir trilha
+      </button>
+    </article>
+  );
+}
+
+function CooperativeCard({
+  title,
+  summary,
+  partnerLabel,
+  cadence,
+  challengeName,
+  actions,
+  onOpen,
+}: {
+  title: string;
+  summary: string;
+  partnerLabel: string;
+  cadence: string;
+  challengeName: string;
+  actions: string[];
+  onOpen: () => void;
+}) {
+  return (
+    <article className="engagement-card cooperative-card">
+      <div className="section-head">
+        <div>
+          <p className="engagement-tag">Ciclo compartilhado</p>
+          <h3>{title}</h3>
+        </div>
+        <span className="pill">{partnerLabel}</span>
+      </div>
+      <p className="muted">{summary}</p>
+      <p className="engagement-highlight">{cadence}</p>
+      <p className="small-muted">{`Atividade-base: ${challengeName}`}</p>
+      <ul className="clean-list">
+        {actions.map((action) => (
+          <li key={action}>{action}</li>
+        ))}
+      </ul>
+      <button className="btn btn-primary" onClick={onOpen}>
+        Abrir ciclo sugerido
+      </button>
+    </article>
+  );
+}
+
 function TrackCard({
   title,
   audience,
@@ -314,6 +448,10 @@ export function Dashboard({
   const diagnostic = getAutomaticDiagnostic(usuario.idade, history, progresso);
   const smartRecommendation = getSmartRecommendation(history, progresso);
   const guidedSessions = getGuidedSessions(usuario.idade, history, progresso);
+  const engagementMissions = getEngagementMissions(history, progresso);
+  const achievementInsights = getAchievementInsights(history, progresso);
+  const themedTracks = getThemedTracks(usuario.idade, history, progresso);
+  const cooperativeCycle = getCooperativeCycle(usuario, history, progresso);
   function handleExportPdf() {
     exportUserReportPdf({
       usuario,
@@ -585,6 +723,26 @@ export function Dashboard({
           onOpenSpecial={onOpenSpecial}
         />
 
+        <section className="panel">
+          <div className="section-head">
+            <h3>Missoes diarias e semanais</h3>
+            <span className="small-muted">Metas curtas para manter frequencia e dar direcao ao proximo treino</span>
+          </div>
+          <div className="engagement-grid">
+            {engagementMissions.map((mission) => (
+              <MissionCard
+                key={mission.id}
+                cadence={mission.cadence}
+                title={mission.title}
+                summary={mission.summary}
+                progressLabel={mission.progressLabel}
+                completed={mission.completed}
+                onOpen={() => openMode(mission.primaryMode)}
+              />
+            ))}
+          </div>
+        </section>
+
         <section className="panel report-panel">
           <div className="section-head">
             <h3>Relatorio de desempenho</h3>
@@ -652,6 +810,25 @@ export function Dashboard({
                 scoreDelta={trend.scoreDelta}
                 completionDelta={trend.completionDelta}
                 summary={trend.summary}
+              />
+            ))}
+          </div>
+        </section>
+
+        <section className="panel">
+          <div className="section-head">
+            <h3>Conquistas visuais</h3>
+            <span className="small-muted">Reconhecimentos por consistencia, precisao e evolucao, nao so por pontuacao</span>
+          </div>
+          <div className="engagement-grid">
+            {achievementInsights.map((achievement) => (
+              <AchievementCard
+                key={achievement.id}
+                title={achievement.title}
+                category={achievement.category}
+                unlocked={achievement.unlocked}
+                summary={achievement.summary}
+                highlight={achievement.highlight}
               />
             ))}
           </div>
@@ -807,6 +984,42 @@ export function Dashboard({
               />
             ))}
           </div>
+        </section>
+
+        <section className="panel">
+          <div className="section-head">
+            <h3>Trilhas tematicas</h3>
+            <span className="small-muted">Atalhos prontos para foco escolar, agilidade mental, reabilitacao e desafio elite</span>
+          </div>
+          <div className="engagement-grid">
+            {themedTracks.map((track) => (
+              <ThemedTrackCard
+                key={track.id}
+                title={track.title}
+                label={track.label}
+                summary={track.summary}
+                audienceHint={track.audienceHint}
+                challengeName={track.challengeName}
+                onOpen={() => openMode(track.primaryMode)}
+              />
+            ))}
+          </div>
+        </section>
+
+        <section className="panel">
+          <div className="section-head">
+            <h3>Modo duelo ou cooperativo</h3>
+            <span className="small-muted">Mesmo ciclo para aluno e professor ou responsavel acompanharem juntos</span>
+          </div>
+          <CooperativeCard
+            title={cooperativeCycle.title}
+            summary={cooperativeCycle.summary}
+            partnerLabel={cooperativeCycle.partnerLabel}
+            cadence={cooperativeCycle.cadence}
+            challengeName={cooperativeCycle.challengeName}
+            actions={cooperativeCycle.actions}
+            onOpen={() => openMode(cooperativeCycle.primaryMode)}
+          />
         </section>
 
         <section className="panel trails-panel">

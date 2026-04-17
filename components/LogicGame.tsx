@@ -162,7 +162,7 @@ export function LogicGame({
           : `Voce acertou ${result.hits.length} sequencia(s). Precisa de ${sessionDifficulty.minimoParaConcluir} para concluir.`,
       );
       setReview(result);
-      playResultSound(result.completed);
+      playResultSound(result.completed, result.completed ? "precision" : result.mistakes.length > 0 ? "logic" : "default");
       onSaveResult(challenge.id, result.score, elapsedSeconds, result.completed, variationIndex);
     },
     [activeRounds, challenge.id, isAdvancedMode, onSaveResult, playResultSound, sessionDifficulty.minimoParaConcluir, sessionDifficulty.tempoLimite, timeLeft, variationIndex],

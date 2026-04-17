@@ -163,7 +163,12 @@ export function AudienceGame({ usuario, progresso, onBack, onRememberVariation, 
       missedItems: activeSequence.filter((item) => !result.hits.includes(item)),
       score: result.score,
     });
-    playResultSound(result.completed);
+    playResultSound(
+      result.completed,
+      result.completed || (result.misses.length === 0 && activeSequence.every((item) => result.hits.includes(item)))
+        ? "precision"
+        : "memory",
+    );
     onSaveResult(challenge.id, result.score, answerSeconds, result.completed, variationIndex);
   }
 

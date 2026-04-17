@@ -7,7 +7,7 @@ import {
   visualChallenges,
 } from "@/lib/game-data-v3";
 import { getAudienceFromAge, getRecommendedChallengeId, getSessionModeLabel } from "@/lib/scoring";
-import type { ProgressState, SessionMode, SessionRecord } from "@/lib/types";
+import type { ProgressState, SessionMode, SessionRecord, Usuario } from "@/lib/types";
 
 export type CoreMode = "memoria" | "visual" | "atencao" | "comparacao" | "espacial" | "logica";
 export type AbilityKey = "memoriaTrabalho" | "atencaoSustentada" | "velocidadeResposta" | "raciocinio";
@@ -62,6 +62,47 @@ export type GuidedSession = {
   steps: string[];
 };
 
+export type MissionInsight = {
+  id: string;
+  cadence: "diaria" | "semanal";
+  title: string;
+  summary: string;
+  progressLabel: string;
+  completed: boolean;
+  primaryMode: CoreMode;
+};
+
+export type AchievementInsight = {
+  id: string;
+  title: string;
+  category: "consistencia" | "precisao" | "evolucao";
+  unlocked: boolean;
+  summary: string;
+  highlight: string;
+};
+
+export type ThemedTrackInsight = {
+  id: string;
+  title: string;
+  label: string;
+  summary: string;
+  audienceHint: string;
+  primaryMode: CoreMode;
+  challengeId: number;
+  challengeName: string;
+};
+
+export type CooperativeCycleInsight = {
+  title: string;
+  summary: string;
+  partnerLabel: string;
+  cadence: string;
+  primaryMode: CoreMode;
+  challengeId: number;
+  challengeName: string;
+  actions: string[];
+};
+
 export type AdminAlertInsight = {
   email: string;
   name: string;
@@ -97,6 +138,46 @@ function clamp(value: number, min: number, max: number) {
 function average(values: number[]) {
   if (values.length === 0) return 0;
   return values.reduce((sum, value) => sum + value, 0) / values.length;
+}
+
+function startOfToday() {
+  const date = new Date();
+  date.setHours(0, 0, 0, 0);
+  return date.getTime();
+}
+
+function getRecentHistory(history: SessionRecord[], days: number) {
+  const threshold = Date.now() - days * 24 * 60 * 60 * 1000;
+  return history.filter((entry) => new Date(entry.playedAt).getTime() >= threshold);
+}
+
+function getDistinctDayCount(history: SessionRecord[]) {
+  return new Set(
+    history.map((entry) => {
+      const date = new Date(entry.playedAt);
+      date.setHours(0, 0, 0, 0);
+      return date.getTime();
+    }),
+  ).size;
+}
+
+function getCurrentStreak(history: SessionRecord[]) {
+  const playedDays = new Set(
+    history.map((entry) => {
+      const date = new Date(entry.playedAt);
+      date.setHours(0, 0, 0, 0);
+      return date.getTime();
+    }),
+  );
+  let cursor = startOfToday();
+  let streak = 0;
+
+  while (playedDays.has(cursor)) {
+    streak += 1;
+    cursor -= 24 * 60 * 60 * 1000;
+  }
+
+  return streak;
 }
 
 function getModeHistory(history: SessionRecord[], mode: SessionMode) {
@@ -466,6 +547,198 @@ export function getGuidedSessions(
       ],
     },
   ];
+}
+
+export function getEngagementMissions(history: SessionRecord[], progresso: ProgressState): MissionInsight[] {
+  const todayStart = startOfToday();
+  const todayHistory = history.filter((entry) => new Date(entry.playedAt).getTime() >= todayStart);
+  const weekHistory = getRecentHistory(history, 7);
+  const weeklyModes = new Set(weekHistory.map((entry) => entry.mode));
+  const recommendation = getSmartRecommendation(history, progresso);
+  const todayCompleted = todayHistory.filter((entry) => entry.completed).length;
+  const weeklyCompleted = weekHistory.filter((entry) => entry.completed).length;
+  const weeklyAverage = Math.round(average(weekHistory.map((entry) => entry.score)));
+  const recommendationDone = todayHistory.some(
+    (entry) => entry.mode === recommendation.mode && entry.challengeId === recommendation.challengeId,
+  );
+
+  return [
+    {
+      id: "daily-start",
+      cadence: "diaria",
+      title: "Missao diaria de arranque",
+      summary: "Concluir uma sessao curta no dia para manter frequencia e reduzir abandono.",
+      progressLabel: `${Math.min(todayCompleted, 1)}/1 sessao concluida hoje`,
+      completed: todayCompleted >= 1,
+      primaryMode: recommendation.mode,
+    },
+    {
+      id: "daily-smart",
+      cadence: "diaria",
+      title: "Missao diaria orientada",
+      summary: `Abrir a atividade sugerida hoje: ${recommendation.challengeName} em ${getSessionModeLabel(recommendation.mode)}.`,
+      progressLabel: recommendationDone ? "Atividade sugerida feita hoje" : "Falta concluir a atividade sugerida",
+      completed: recommendationDone,
+      primaryMode: recommendation.mode,
+    },
+    {
+      id: "weekly-variety",
+      cadence: "semanal",
+      title: "Missao semanal de variedade",
+      summary: "Alternar trilhas para treinar foco, evocacao e raciocinio dentro da mesma semana.",
+      progressLabel: `${Math.min(weeklyModes.size, 3)}/3 trilhas diferentes na semana`,
+      completed: weeklyModes.size >= 3,
+      primaryMode: "comparacao",
+    },
+    {
+      id: "weekly-consistency",
+      cadence: "semanal",
+      title: "Missao semanal de consistencia",
+      summary: "Completar pelo menos tres sessoes na semana e manter score medio em crescimento.",
+      progressLabel: `${Math.min(weeklyCompleted, 3)}/3 sessoes concluidas · media ${weeklyAverage}`,
+      completed: weeklyCompleted >= 3,
+      primaryMode: "memoria",
+    },
+  ];
+}
+
+export function getAchievementInsights(history: SessionRecord[], progresso: ProgressState): AchievementInsight[] {
+  const streak = getCurrentStreak(history);
+  const recentWeek = getRecentHistory(history, 7);
+  const precisionRate =
+    recentWeek.length > 0
+      ? Math.round((recentWeek.filter((entry) => entry.completed && entry.score >= 24).length / recentWeek.length) * 100)
+      : 0;
+  const recentMonth = getRecentHistory(history, 30);
+  const previousMonth = history.filter((entry) => {
+    const played = new Date(entry.playedAt).getTime();
+    const monthAgo = Date.now() - 30 * 24 * 60 * 60 * 1000;
+    const twoMonthsAgo = Date.now() - 60 * 24 * 60 * 60 * 1000;
+    return played < monthAgo && played >= twoMonthsAgo;
+  });
+  const evolutionDelta = Math.round(average(recentMonth.map((entry) => entry.score)) - average(previousMonth.map((entry) => entry.score)));
+  const completedModes = Object.entries(progresso).filter(([, progressMap]) =>
+    Object.values(progressMap).some((entry) => entry.completed),
+  ).length;
+
+  return [
+    {
+      id: "streak",
+      title: "Ritmo consistente",
+      category: "consistencia",
+      unlocked: streak >= 3 || getDistinctDayCount(recentWeek) >= 3,
+      summary: "Reconhece frequencia real de treino, mesmo com sessoes curtas.",
+      highlight: streak >= 3 ? `${streak} dias seguidos de treino` : `${getDistinctDayCount(recentWeek)} dias ativos na semana`,
+    },
+    {
+      id: "precision",
+      title: "Precisao em crescimento",
+      category: "precisao",
+      unlocked: precisionRate >= 60,
+      summary: "Valoriza acerto e controle de erro, nao so pontuacao bruta.",
+      highlight: `${precisionRate}% das sessoes recentes com boa precisao`,
+    },
+    {
+      id: "evolution",
+      title: "Evolucao cognitiva",
+      category: "evolucao",
+      unlocked: evolutionDelta >= 4 || completedModes >= 4,
+      summary: "Marca ampliacao de repertorio ou melhora consistente nas ultimas semanas.",
+      highlight: evolutionDelta >= 4 ? `Melhora de ${evolutionDelta} pontos no ultimo ciclo` : `${completedModes} trilhas ja tiveram conclusoes`,
+    },
+  ];
+}
+
+export function getThemedTracks(idade: number, history: SessionRecord[], progresso: ProgressState): ThemedTrackInsight[] {
+  const recommendation = getSmartRecommendation(history, progresso);
+  const audience = getAudienceFromAge(idade);
+  const memoryStarter = getModeStarter("memoria", idade, history, progresso.memoria);
+  const attentionStarter = getModeStarter("atencao", idade, history, progresso.atencao);
+  const spatialStarter = getModeStarter("espacial", idade, history, progresso.espacial);
+
+  return [
+    {
+      id: "foco-escolar",
+      title: "Foco escolar",
+      label: "Trilha tematica",
+      summary: "Combina atencao, comparacao e curta memoria de trabalho para melhorar permanencia na tarefa.",
+      audienceHint: audience === "infantil" ? "Boa para rotina escolar curta e guiada." : "Boa para estudo, revisao e organizacao mental.",
+      primaryMode: "atencao",
+      challengeId: attentionStarter.challengeId,
+      challengeName: attentionStarter.challengeName,
+    },
+    {
+      id: "agilidade-mental",
+      title: "Agilidade mental",
+      label: "Trilha tematica",
+      summary: "Prioriza velocidade de resposta com criterio antes de subir a carga mais densa.",
+      audienceHint: "Indicada quando o objetivo e responder com mais rapidez sem perder precisao.",
+      primaryMode: recommendation.mode,
+      challengeId: recommendation.challengeId,
+      challengeName: recommendation.challengeName,
+    },
+    {
+      id: "reabilitacao",
+      title: "Reabilitacao",
+      label: "Trilha tematica",
+      summary: "Usa sessoes controladas, memoria e orientacao espacial com menor carga e repeticao guiada.",
+      audienceHint: "Funciona bem em rotina terapeutica, retorno gradual ou dias de menor energia.",
+      primaryMode: "memoria",
+      challengeId: memoryStarter.challengeId,
+      challengeName: memoryStarter.challengeName,
+    },
+    {
+      id: "desafio-elite",
+      title: "Desafio elite",
+      label: "Trilha tematica",
+      summary: "Direciona para desafios de maior densidade e prepara a transicao para os testes avancados.",
+      audienceHint: "Pensada para quem ja sustenta boa constancia e quer acelerar complexidade.",
+      primaryMode: "espacial",
+      challengeId: spatialStarter.challengeId,
+      challengeName: spatialStarter.challengeName,
+    },
+  ];
+}
+
+export function getCooperativeCycle(
+  usuario: Usuario,
+  history: SessionRecord[],
+  progresso: ProgressState,
+): CooperativeCycleInsight {
+  const recommendation = getSmartRecommendation(history, progresso);
+  const weeklyTrend = getPerformanceTrends(history).find((item) => item.label === "Semanal");
+  const partnerLabel =
+    usuario.role === "professor"
+      ? "Aluno"
+      : usuario.role === "responsavel"
+        ? "Filho ou aluno"
+        : "Professor ou responsavel";
+  const cadence =
+    weeklyTrend?.direction === "caindo"
+      ? "Acompanhar duas vezes nesta semana, com revisao curta apos cada sessao."
+      : "Acompanhar uma vez por semana e revisar o bloco concluido no mesmo dia.";
+
+  return {
+    title: "Modo cooperativo guiado",
+    summary: "Organiza um mesmo ciclo entre aluno e adulto de referencia, sem precisar montar a rotina manualmente.",
+    partnerLabel,
+    cadence,
+    primaryMode: recommendation.mode,
+    challengeId: recommendation.challengeId,
+    challengeName: recommendation.challengeName,
+    actions:
+      usuario.role === "aluno"
+        ? [
+            `Fazer a atividade sugerida: ${recommendation.challengeName}.`,
+            "Registrar como se sentiu no final da rodada: facil, media ou pesada.",
+            "Mostrar o resultado para o professor ou responsavel no mesmo ciclo.",
+          ]
+        : [
+            `Acompanhar ${getSessionModeLabel(recommendation.mode)} em ${recommendation.challengeName}.`,
+            "Observar se o erro foi de impulso, memoria ou perda de regra antes de trocar a trilha.",
+            "Validar se a proxima sessao deve repetir a fase ou subir a complexidade.",
+          ],
+  };
 }
 
 function getDaysSinceLastSession(history: SessionRecord[]) {

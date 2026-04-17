@@ -186,7 +186,10 @@ export function AttentionGame({
           return current;
         });
       }
-      playResultSound(result.completed);
+      playResultSound(
+        result.completed,
+        result.completed ? "precision" : timeLeft <= 0 ? "timeout" : wrongClicks > 0 ? "warning" : "default",
+      );
       onSaveResult(challenge.id, result.score, result.elapsedSeconds, result.completed, variationIndex);
       return;
     }
@@ -251,7 +254,10 @@ export function AttentionGame({
           return current;
         });
       }
-      playResultSound(result.completed);
+      playResultSound(
+        result.completed,
+        result.completed ? "precision" : timeLeft <= 0 ? "timeout" : wrongClicks > 0 ? "warning" : "default",
+      );
       onSaveResult(challenge.id, result.score, result.elapsedSeconds, result.completed, variationIndex);
     }
   }, [activeTarget, challenge.id, foundTargets, isAdvancedMode, onSaveResult, phase, playResultSound, sessionDifficulty.minimoParaConcluir, sessionDifficulty.tempoLimite, targetIndexes, timeLeft, variationIndex, wrongClicks, wrongSelections]);
