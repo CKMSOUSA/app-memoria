@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 
 import { getCompletionRate, getReportSummary, getSessionModeLabel } from "@/lib/scoring";
+import { getAdminAlerts } from "@/lib/training-insights";
 import type { HelpRequest, ProgressState, SessionRecord, Usuario } from "@/lib/types";
 
 type AdminScreenProps = {
@@ -52,6 +53,7 @@ export function AdminScreen({
     }),
     [normalizedHistories],
   );
+  const adminAlerts = useMemo(() => getAdminAlerts(normalizedHistories), [normalizedHistories]);
 
   const filteredHistories = useMemo(() => {
     const query = search.trim().toLowerCase();
@@ -151,6 +153,32 @@ export function AdminScreen({
               <span>Excluidos</span>
             </div>
           </div>
+        </section>
+
+        <section className="panel admin-alerts-panel">
+          <div className="section-head">
+            <h3>Alertas inteligentes</h3>
+            <span className="small-muted">{adminAlerts.length} alerta(s) priorizados para acao</span>
+          </div>
+          {adminAlerts.length > 0 ? (
+            <div className="admin-alert-grid">
+              {adminAlerts.map((alert) => (
+                <article key={`${alert.email}-${alert.category}-${alert.title}`} className={`admin-alert-card admin-alert-${alert.severity}`}>
+                  <div className="section-head">
+                    <div>
+                      <h3>{alert.title}</h3>
+                      <p className="small-muted">{alert.name}</p>
+                    </div>
+                    <span className="pill">{alert.severity === "alta" ? "Alta" : alert.severity === "media" ? "Media" : "Baixa"}</span>
+                  </div>
+                  <p className="muted">{alert.summary}</p>
+                  <p className="small-muted">{alert.recommendation}</p>
+                </article>
+              ))}
+            </div>
+          ) : (
+            <p className="small-muted">Nenhum alerta critico agora. O grupo esta sem sinais fortes de abandono ou queda.</p>
+          )}
         </section>
 
         <section className="panel admin-toolbar">

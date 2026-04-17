@@ -14,6 +14,7 @@ import {
 } from "@/lib/scoring";
 import {
   getAbilityInsights,
+  getAdminAlerts,
   getAutomaticDiagnostic,
   getGuidedSessions,
   getPerformanceTrends,
@@ -217,4 +218,69 @@ test("insights expose abilities, trends, recommendation and guided plans", () =>
   assert.equal(recommendation.mode, "atencao");
   assert.equal(diagnostic.starters.length, 5);
   assert.equal(plans.length, 3);
+});
+
+test("admin alerts prioritize abandonment and decline", () => {
+  const progress = createDefaultProgress();
+  progress.atencao[1].attempts = 4;
+  progress.atencao[1].completed = false;
+  const now = Date.now();
+  const daysAgo = (days: number) => new Date(now - days * 24 * 60 * 60 * 1000).toISOString();
+
+  const alerts = getAdminAlerts([
+    {
+      user: {
+        nome: "Ana",
+        email: "ana@example.com",
+        idade: 12,
+        status: "ativo",
+      },
+      progress,
+      history: [
+        {
+          id: "1",
+          email: "ana@example.com",
+          mode: "atencao",
+          challengeId: 1,
+          score: 8,
+          timeSeconds: 18,
+          completed: false,
+          playedAt: daysAgo(11),
+        },
+        {
+          id: "2",
+          email: "ana@example.com",
+          mode: "atencao",
+          challengeId: 1,
+          score: 22,
+          timeSeconds: 12,
+          completed: true,
+          playedAt: daysAgo(9),
+        },
+        {
+          id: "3",
+          email: "ana@example.com",
+          mode: "memoria",
+          challengeId: 1,
+          score: 12,
+          timeSeconds: 14,
+          completed: false,
+          playedAt: daysAgo(12),
+        },
+        {
+          id: "4",
+          email: "ana@example.com",
+          mode: "memoria",
+          challengeId: 1,
+          score: 24,
+          timeSeconds: 10,
+          completed: true,
+          playedAt: daysAgo(15),
+        },
+      ],
+    },
+  ]);
+
+  assert.ok(alerts.length >= 2);
+  assert.equal(alerts.some((item) => item.severity === "alta"), true);
 });

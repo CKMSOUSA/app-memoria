@@ -62,6 +62,16 @@ export type GuidedSession = {
   steps: string[];
 };
 
+export type AdminAlertInsight = {
+  email: string;
+  name: string;
+  severity: "alta" | "media" | "baixa";
+  category: "abandono" | "queda" | "baixa_conclusao" | "intervencao";
+  title: string;
+  summary: string;
+  recommendation: string;
+};
+
 type ModeStats = {
   sessions: number;
   completionRate: number;
@@ -456,4 +466,88 @@ export function getGuidedSessions(
       ],
     },
   ];
+}
+
+function getDaysSinceLastSession(history: SessionRecord[]) {
+  if (history.length === 0) return Number.POSITIVE_INFINITY;
+  const lastPlayed = new Date(history[0].playedAt).getTime();
+  return Math.floor((Date.now() - lastPlayed) / (24 * 60 * 60 * 1000));
+}
+
+export function getAdminAlerts(
+  users: Array<{ user: { nome: string; email: string; idade: number; status: string }; history: SessionRecord[]; progress?: ProgressState }>,
+): AdminAlertInsight[] {
+  const alerts: AdminAlertInsight[] = [];
+
+  for (const entry of users) {
+    const progress = entry.progress;
+    if (!progress || entry.user.status !== "ativo") continue;
+
+    const trends = getPerformanceTrends(entry.history);
+    const weeklyTrend = trends.find((item) => item.label === "Semanal");
+    const recommendation = getSmartRecommendation(entry.history, progress);
+    const completionRate =
+      entry.history.length > 0
+        ? Math.round((entry.history.filter((item) => item.completed).length / entry.history.length) * 100)
+        : 0;
+    const daysSinceLastSession = getDaysSinceLastSession(entry.history);
+
+    if (daysSinceLastSession >= 10 && entry.history.length > 0) {
+      alerts.push({
+        email: entry.user.email,
+        name: entry.user.nome,
+        severity: "alta",
+        category: "abandono",
+        title: "Risco de abandono",
+        summary: `${entry.user.nome} esta sem treinar ha ${daysSinceLastSession} dias, apesar de ja ter historico no app.`,
+        recommendation: "Retomar com uma sessao curta guiada e contato ativo para recuperar a rotina.",
+      });
+    }
+
+    if (weeklyTrend?.direction === "caindo") {
+      alerts.push({
+        email: entry.user.email,
+        name: entry.user.nome,
+        severity: weeklyTrend.scoreDelta <= -10 ? "alta" : "media",
+        category: "queda",
+        title: "Queda recente de desempenho",
+        summary: `${entry.user.nome} entrou em tendencia de queda na semana, com ${weeklyTrend.scoreDelta} pontos no score e ${weeklyTrend.completionDelta}% em conclusao.`,
+        recommendation: `Priorizar ${getSessionModeLabel(recommendation.mode)} em ${recommendation.challengeName} para estabilizar o desempenho.`,
+      });
+    }
+
+    if (entry.history.length >= 4 && completionRate <= 40) {
+      alerts.push({
+        email: entry.user.email,
+        name: entry.user.nome,
+        severity: completionRate <= 25 ? "alta" : "media",
+        category: "baixa_conclusao",
+        title: "Baixa taxa de conclusao",
+        summary: `${entry.user.nome} concluiu apenas ${completionRate}% das sessoes registradas.`,
+        recommendation: "Rebaixar a carga da rotina e focar em blocos curtos com meta clara de acerto.",
+      });
+    }
+
+    if (entry.history.length >= 3 && recommendation.mode === "atencao") {
+      alerts.push({
+        email: entry.user.email,
+        name: entry.user.nome,
+        severity: "baixa",
+        category: "intervencao",
+        title: "Intervencao sugerida",
+        summary: `${entry.user.nome} esta acumulando erros de foco seletivo e pode se beneficiar de um bloco dirigido de atencao.`,
+        recommendation: `Abrir ${recommendation.challengeName} e acompanhar se os erros diminuem em duas rodadas seguidas.`,
+      });
+    }
+  }
+
+  const severityOrder: Record<AdminAlertInsight["severity"], number> = {
+    alta: 0,
+    media: 1,
+    baixa: 2,
+  };
+
+  return alerts
+    .sort((left, right) => severityOrder[left.severity] - severityOrder[right.severity])
+    .slice(0, 12);
 }
