@@ -18,11 +18,11 @@ import {
   saveHelpRequests,
   saveSessionHistory,
   loginUser,
-  registerUser,
+  registerUser as registerStoredUser,
   saveProgress,
   simulateRecovery,
   updateUserStatus,
-  updateUserProfile,
+  updateUserProfile as updateStoredUserProfile,
   updateUserPoints as updateStoredUserPoints,
 } from "@/lib/storage";
 import {
@@ -60,8 +60,13 @@ type AppRepository = {
     idade: number,
     nome: string,
     avatar: string,
+    role?: Usuario["role"],
+    turma?: string | null,
   ) => Promise<RegisterResult>;
-  updateUserProfile: (email: string, profile: Pick<Usuario, "idade" | "nome" | "avatar">) => Promise<Usuario | null>;
+  updateUserProfile: (
+    email: string,
+    profile: Pick<Usuario, "idade" | "nome" | "avatar"> & Partial<Pick<Usuario, "role" | "turma">>,
+  ) => Promise<Usuario | null>;
   updateUserPoints: (email: string, delta: number) => Promise<Usuario | null>;
   loadProgress: (email: string) => Promise<ProgressState>;
   saveProgress: (email: string, progress: ProgressState) => Promise<void>;
@@ -98,6 +103,22 @@ function isLocalAdminCodeValid(adminCode?: string) {
   const expectedCode = process.env.NEXT_PUBLIC_ADMIN_CONFIRM_CODE?.trim() || "";
   if (!expectedCode) return true;
   return adminCode?.trim() === expectedCode;
+}
+
+function getRemoteCompatibleRole(role: Usuario["role"]) {
+  return role === "admin" ? "admin" : "aluno";
+}
+
+function resolveStoredRole(email: string, remoteRole?: Usuario["role"]) {
+  const storedRole = listUsers().find((item) => item.email === email)?.role;
+  if (remoteRole === "admin") return "admin";
+  if (storedRole === "responsavel" || storedRole === "professor") return storedRole;
+  return remoteRole ?? storedRole ?? "aluno";
+}
+
+function resolveStoredTurma(email: string, turma?: string | null) {
+  const storedTurma = listUsers().find((item) => item.email === email)?.turma ?? null;
+  return turma ?? storedTurma;
 }
 
 function hasSupabaseConfig() {
@@ -236,6 +257,33 @@ function mergeHelpRequests(localItems: HelpRequest[], remoteItems: HelpRequest[]
   return Array.from(map.values()).sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1)).slice(0, 200);
 }
 
+function mergeLocalUserFields(users: Usuario[]) {
+  const localUsers = listUsers();
+  const localByEmail = new Map(localUsers.map((user) => [user.email, user]));
+
+  return users.map((user) => {
+    const localUser = localByEmail.get(user.email);
+    return localUser ? { ...user, turma: localUser.turma ?? user.turma ?? null } : user;
+  });
+}
+
+function mergeLocalOverviewFields(overview: AdminOverview): AdminOverview {
+  const localUsers = listUsers();
+  const localByEmail = new Map(localUsers.map((user) => [user.email, user]));
+
+  return {
+    ...overview,
+    users: overview.users.map((user) => {
+      const localUser = localByEmail.get(user.email);
+      return localUser ? { ...user, turma: localUser.turma ?? user.turma ?? null } : user;
+    }),
+    histories: overview.histories.map((entry) => {
+      const localUser = localByEmail.get(entry.user.email);
+      return localUser ? { ...entry, user: { ...entry.user, turma: localUser.turma ?? entry.user.turma ?? null } } : entry;
+    }),
+  };
+}
+
 const localRepository: AppRepository = {
   mode: "local",
   bootstrap: async () => {
@@ -334,9 +382,10 @@ const localRepository: AppRepository = {
           idade: remoteProfile?.idade,
           premium: remoteProfile?.premium,
           pontos: remoteProfile?.pontos,
-          role: remoteProfile?.role,
+          role: resolveStoredRole(result.session.user.email, remoteProfile?.role),
           status: remoteProfile?.status,
           criadoEm: remoteProfile?.criadoEm,
+          turma: resolveStoredTurma(result.session.user.email),
         });
         setActiveSession(user.email);
         return user;
@@ -345,7 +394,7 @@ const localRepository: AppRepository = {
 
     return loginUser(email, password);
   },
-  registerUser: async (email, password, idade, nome, avatar) => {
+  registerUser: async (email, password, idade, nome, avatar, role = "aluno", turma = null) => {
     if (hasSupabaseAuthConfig()) {
       const result = await signUpWithSupabase(email, password, { idade, nome, avatar });
       if (result.error) {
@@ -358,12 +407,15 @@ const localRepository: AppRepository = {
           nome,
           avatar,
           idade,
+          role: getRemoteCompatibleRole(role),
         })) ??
         syncAuthUserProfile({
           email: email.trim().toLowerCase(),
           nome,
           avatar,
           idade,
+          role,
+          turma,
         });
 
       const user = syncAuthUserProfile({
@@ -373,9 +425,10 @@ const localRepository: AppRepository = {
         idade: remoteProfile.idade,
         premium: remoteProfile.premium,
         pontos: remoteProfile.pontos,
-        role: remoteProfile.role,
+        role,
         status: remoteProfile.status,
         criadoEm: remoteProfile.criadoEm,
+        turma,
       });
 
       if (result.session) {
@@ -388,13 +441,19 @@ const localRepository: AppRepository = {
       };
     }
 
-    return registerUser(email, password, idade, nome, avatar);
+    return registerStoredUser(email, password, idade, nome, avatar, role, turma);
   },
   updateUserProfile: async (email, profile) => {
-    const localUser = updateUserProfile(email, profile);
+    const localUser = updateStoredUserProfile(email, profile);
+    const resolvedTurma = resolveStoredTurma(email, profile.turma ?? null);
 
     if (hasSupabaseAuthConfig()) {
-      const remoteUser = await updateSupabaseProfile(email, profile);
+      const remoteUser = await updateSupabaseProfile(email, {
+        nome: profile.nome,
+        avatar: profile.avatar,
+        idade: profile.idade,
+        role: profile.role ? getRemoteCompatibleRole(profile.role) : undefined,
+      });
       if (remoteUser) {
         return syncAuthUserProfile({
           email: remoteUser.email,
@@ -403,9 +462,10 @@ const localRepository: AppRepository = {
           idade: remoteUser.idade,
           premium: remoteUser.premium,
           pontos: remoteUser.pontos,
-          role: remoteUser.role,
+          role: profile.role ?? resolveStoredRole(remoteUser.email, remoteUser.role),
           status: remoteUser.status,
           criadoEm: remoteUser.criadoEm,
+          turma: resolvedTurma,
         });
       }
     }
@@ -516,7 +576,7 @@ const localRepository: AppRepository = {
   },
   loadAdminOverview: async (adminCode) => {
     const remoteOverview = await loadAdminOverviewFromApi(adminCode);
-    if (remoteOverview) return remoteOverview;
+    if (remoteOverview) return mergeLocalOverviewFields(remoteOverview);
     if (!isLocalAdminCodeValid(adminCode)) {
       throw new Error("Acesso administrativo nao autorizado.");
     }
@@ -595,15 +655,16 @@ const remoteRepository: AppRepository = {
     });
     return parseJson<Usuario>(response);
   },
-  registerUser: async (email, password, idade, nome, avatar) => {
+  registerUser: async (email, password, idade, nome, avatar, role = "aluno", turma = null) => {
     const response = await fetch(`${getRemoteBaseUrl()}/auth/register`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password, idade, nome, avatar }),
+      body: JSON.stringify({ email, password, idade, nome, avatar, role, turma }),
     });
 
     const result = await parseJson<RegisterResult>(response);
-    return result ?? { error: "Nao foi possivel cadastrar no backend remoto.", user: null };
+    if (!result?.user) return result ?? { error: "Nao foi possivel cadastrar no backend remoto.", user: null };
+    return { ...result, user: { ...result.user, turma } };
   },
   updateUserProfile: async (email, profile) => {
     const response = await fetch(`${getRemoteBaseUrl()}/users/${encodeURIComponent(email)}`, {
@@ -611,7 +672,8 @@ const remoteRepository: AppRepository = {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(profile),
     });
-    return parseJson<Usuario>(response);
+    const user = await parseJson<Usuario>(response);
+    return user ? { ...user, turma: profile.turma ?? user.turma ?? null } : null;
   },
   updateUserPoints: async (email, delta) => {
     const response = await fetch(`${getRemoteBaseUrl()}/users/${encodeURIComponent(email)}/points`, {
@@ -662,7 +724,8 @@ const remoteRepository: AppRepository = {
       headers: { "Content-Type": "application/json" },
       cache: "no-store",
     });
-    return (await parseJson<Usuario[]>(response)) ?? [];
+    const users = (await parseJson<Usuario[]>(response)) ?? [];
+    return mergeLocalUserFields(users);
   },
   loadAllHistories: async () => {
     const response = await fetch(`${getRemoteBaseUrl()}/admin/histories`, {

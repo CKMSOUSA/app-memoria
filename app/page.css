@@ -250,6 +250,12 @@ h2 {
   margin-top: 16px;
 }
 
+.form-grid {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
 .field-compact {
   margin-top: 10px;
 }
@@ -1720,6 +1726,11 @@ h2 {
   gap: 16px;
 }
 
+.admin-class-panel {
+  display: grid;
+  gap: 16px;
+}
+
 .admin-status-panel {
   display: grid;
   gap: 16px;
@@ -1736,6 +1747,12 @@ h2 {
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
 }
 
+.admin-class-grid {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+}
+
 .admin-alert-card {
   display: grid;
   gap: 10px;
@@ -1743,6 +1760,34 @@ h2 {
   border-radius: 20px;
   border: 1px solid var(--line);
   background: rgba(255, 251, 244, 0.96);
+}
+
+.admin-class-card {
+  display: grid;
+  gap: 12px;
+  padding: 18px;
+  border-radius: 20px;
+  border: 1px solid rgba(74, 137, 178, 0.18);
+  background: linear-gradient(135deg, rgba(240, 247, 252, 0.95) 0%, rgba(255, 251, 244, 0.96) 100%);
+}
+
+.admin-class-metrics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.admin-class-metrics span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 34px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.82);
+  border: 1px solid rgba(74, 137, 178, 0.14);
+  color: var(--ink-strong);
+  font-size: 13px;
+  font-weight: 700;
 }
 
 .admin-alert-alta {

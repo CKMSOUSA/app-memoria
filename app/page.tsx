@@ -134,8 +134,16 @@ export default function Page() {
     return activeUser;
   }
 
-  async function handleRegister(email: string, password: string, idade: Usuario["idade"], nome: string, avatar: string) {
-    const result = await repository.registerUser(email, password, idade, nome, avatar);
+  async function handleRegister(
+    email: string,
+    password: string,
+    idade: Usuario["idade"],
+    nome: string,
+    avatar: string,
+    role: Exclude<Usuario["role"], "admin">,
+    turma: string | null,
+  ) {
+    const result = await repository.registerUser(email, password, idade, nome, avatar, role, turma);
     return result.error ?? null;
   }
 
@@ -151,7 +159,7 @@ export default function Page() {
     setTela("login");
   }
 
-  async function handleSaveProfile(profile: Pick<Usuario, "idade" | "nome" | "avatar">) {
+  async function handleSaveProfile(profile: Pick<Usuario, "idade" | "nome" | "avatar"> & Partial<Pick<Usuario, "role" | "turma">>) {
     if (!usuario) return;
     const updatedUser = await repository.updateUserProfile(usuario.email, profile);
     if (updatedUser) setUsuario(updatedUser);

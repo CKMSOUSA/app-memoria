@@ -43,6 +43,7 @@ function normalizeUser(user: UsuarioPersistido): UsuarioPersistido {
     idade: typeof legacyUser.idade === "number" ? legacyUser.idade : idadeLegada,
     role: user.role ?? "aluno",
     status: user.status ?? "ativo",
+    turma: typeof (user as UsuarioPersistido & { turma?: string | null }).turma === "string" ? (user as UsuarioPersistido & { turma?: string | null }).turma : null,
   };
 }
 
@@ -89,6 +90,7 @@ async function createSeedAdminUser() {
     idade: DEFAULT_IDADE,
     role: "admin",
     status: "ativo",
+    turma: "Equipe administrativa",
   };
 
   return seeded;
@@ -135,7 +137,15 @@ export async function loginUser(email: string, password: string) {
   return toPublicUser(found);
 }
 
-export async function registerUser(email: string, password: string, idade: number, nome: string, avatar: string): Promise<RegisterResult> {
+export async function registerUser(
+  email: string,
+  password: string,
+  idade: number,
+  nome: string,
+  avatar: string,
+  role: Usuario["role"] = "aluno",
+  turma: string | null = null,
+): Promise<RegisterResult> {
   const normalizedEmail = email.trim().toLowerCase();
   const users = readUsers();
 
@@ -152,8 +162,9 @@ export async function registerUser(email: string, password: string, idade: numbe
     pontos: 0,
     criadoEm: new Date().toISOString(),
     idade,
-    role: "aluno",
+    role,
     status: "ativo",
+    turma,
   };
 
   const nextUsers = [...users, createdUser];
@@ -216,7 +227,10 @@ export function updateUserAge(email: string, idade: number) {
   return updatedUser;
 }
 
-export function updateUserProfile(email: string, profile: Pick<Usuario, "idade" | "nome" | "avatar">) {
+export function updateUserProfile(
+  email: string,
+  profile: Pick<Usuario, "idade" | "nome" | "avatar"> & Partial<Pick<Usuario, "role" | "turma">>,
+) {
   const users = readUsers();
   let updatedUser: Usuario | null = null;
 
@@ -273,6 +287,7 @@ export function syncAuthUserProfile(profile: {
   role?: Usuario["role"];
   status?: Usuario["status"];
   criadoEm?: string;
+  turma?: string | null;
 }) {
   const users = readUsers();
   const existing = users.find((user) => user.email === profile.email);
@@ -291,6 +306,7 @@ export function syncAuthUserProfile(profile: {
             role: profile.role ?? user.role,
             status: profile.status ?? user.status,
             criadoEm: profile.criadoEm ?? user.criadoEm,
+            turma: profile.turma ?? user.turma ?? null,
           },
     );
     writeUsers(nextUsers);
@@ -308,6 +324,7 @@ export function syncAuthUserProfile(profile: {
     idade: profile.idade ?? DEFAULT_IDADE,
     role: profile.role ?? "aluno",
     status: profile.status ?? "ativo",
+    turma: profile.turma ?? null,
   };
 
   writeUsers([...users, created]);

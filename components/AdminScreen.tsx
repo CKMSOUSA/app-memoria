@@ -26,6 +26,13 @@ const userStatusLabels: Record<Usuario["status"], string> = {
   excluido: "Excluido",
 };
 
+const userRoleLabels: Record<Usuario["role"], string> = {
+  aluno: "Aluno",
+  responsavel: "Responsavel",
+  professor: "Professor",
+  admin: "Administrador",
+};
+
 export function AdminScreen({
   usuario,
   progressoAtual,
@@ -41,6 +48,7 @@ export function AdminScreen({
   );
   const [search, setSearch] = useState("");
   const [userStatusFilter, setUserStatusFilter] = useState<"todos" | Usuario["status"]>("todos");
+  const [userRoleFilter, setUserRoleFilter] = useState<"todos" | Usuario["role"]>("todos");
   const [helpStatusFilter, setHelpStatusFilter] = useState<"todas" | HelpRequest["status"]>("todas");
   const [updatingHelpId, setUpdatingHelpId] = useState<string | null>(null);
   const [updatingUserEmail, setUpdatingUserEmail] = useState<string | null>(null);
@@ -63,12 +71,18 @@ export function AdminScreen({
         return false;
       }
 
+      if (userRoleFilter !== "todos" && user.role !== userRoleFilter) {
+        return false;
+      }
+
       if (!query) return true;
 
       const matchesUser =
         user.nome.toLowerCase().includes(query) ||
         user.email.toLowerCase().includes(query) ||
-        user.status.toLowerCase().includes(query);
+        user.status.toLowerCase().includes(query) ||
+        userRoleLabels[user.role].toLowerCase().includes(query) ||
+        (user.turma ?? "").toLowerCase().includes(query);
       const matchesHistory = history.some(
         (entry) =>
           getSessionModeLabel(entry.mode).toLowerCase().includes(query) ||
@@ -77,7 +91,67 @@ export function AdminScreen({
 
       return matchesUser || matchesHistory;
     });
-  }, [normalizedHistories, search, userStatusFilter]);
+  }, [normalizedHistories, search, userRoleFilter, userStatusFilter]);
+
+  const turmaSummaries = useMemo(() => {
+    const grouped = new Map<
+      string,
+      {
+        name: string;
+        total: number;
+        alunos: number;
+        responsaveis: number;
+        professores: number;
+        admins: number;
+        averageScore: number;
+        completionRate: number;
+        latestActivity: string | null;
+      }
+    >();
+
+    for (const { user, history } of filteredHistories) {
+      const turmaNome = user.turma?.trim() || "Sem turma";
+      const current = grouped.get(turmaNome) ?? {
+        name: turmaNome,
+        total: 0,
+        alunos: 0,
+        responsaveis: 0,
+        professores: 0,
+        admins: 0,
+        averageScore: 0,
+        completionRate: 0,
+        latestActivity: null,
+      };
+
+      current.total += 1;
+      current.alunos += user.role === "aluno" ? 1 : 0;
+      current.responsaveis += user.role === "responsavel" ? 1 : 0;
+      current.professores += user.role === "professor" ? 1 : 0;
+      current.admins += user.role === "admin" ? 1 : 0;
+
+      const totalScore = history.reduce((sum, entry) => sum + entry.score, 0);
+      const averageScore = history.length > 0 ? Math.round(totalScore / history.length) : 0;
+      const completionRate =
+        history.length > 0 ? Math.round((history.filter((entry) => entry.completed).length / history.length) * 100) : 0;
+      current.averageScore += averageScore;
+      current.completionRate += completionRate;
+
+      const latestActivity = history[0]?.playedAt ?? null;
+      if (!current.latestActivity || (latestActivity && latestActivity > current.latestActivity)) {
+        current.latestActivity = latestActivity;
+      }
+
+      grouped.set(turmaNome, current);
+    }
+
+    return Array.from(grouped.values())
+      .map((item) => ({
+        ...item,
+        averageScore: item.total > 0 ? Math.round(item.averageScore / item.total) : 0,
+        completionRate: item.total > 0 ? Math.round(item.completionRate / item.total) : 0,
+      }))
+      .sort((left, right) => right.total - left.total || left.name.localeCompare(right.name));
+  }, [filteredHistories]);
 
   const filteredHelpRequests = useMemo(() => {
     const query = search.trim().toLowerCase();
@@ -193,7 +267,7 @@ export function AdminScreen({
               <input
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
-                placeholder="Ex.: Ana, user@email.com, memoria ou fase 3"
+                placeholder="Ex.: Ana, Turma Alfa, professor, memoria ou fase 3"
               />
             </label>
 
@@ -212,6 +286,21 @@ export function AdminScreen({
             </label>
 
             <label className="field">
+              <span>Perfil</span>
+              <select
+                className="text-input"
+                value={userRoleFilter}
+                onChange={(event) => setUserRoleFilter(event.target.value as "todos" | Usuario["role"])}
+              >
+                <option value="todos">Todos</option>
+                <option value="aluno">Alunos</option>
+                <option value="responsavel">Responsaveis</option>
+                <option value="professor">Professores</option>
+                <option value="admin">Administradores</option>
+              </select>
+            </label>
+
+            <label className="field">
               <span>Status da ajuda</span>
               <select
                 className="text-input"
@@ -226,10 +315,46 @@ export function AdminScreen({
           </div>
         </section>
 
+        <section className="panel admin-class-panel">
+          <div className="section-head">
+            <h3>Visao por turma</h3>
+            <span className="small-muted">{turmaSummaries.length} grupo(s) com usuarios nos filtros atuais</span>
+          </div>
+          {turmaSummaries.length > 0 ? (
+            <div className="admin-class-grid">
+              {turmaSummaries.map((turma) => (
+                <article key={turma.name} className="admin-class-card">
+                  <div className="section-head">
+                    <div>
+                      <h3>{turma.name}</h3>
+                      <p className="small-muted">{turma.total} perfil(is) vinculado(s)</p>
+                    </div>
+                    <span className="pill">{`${turma.completionRate}% conclusao`}</span>
+                  </div>
+                  <div className="admin-class-metrics">
+                    <span>{`${turma.alunos} aluno(s)`}</span>
+                    <span>{`${turma.professores} professor(es)`}</span>
+                    <span>{`${turma.responsaveis} responsavel(is)`}</span>
+                    {turma.admins > 0 ? <span>{`${turma.admins} admin`}</span> : null}
+                  </div>
+                  <p className="muted">{`Media consolidada da turma: ${turma.averageScore} pontos.`}</p>
+                  <p className="small-muted">
+                    {turma.latestActivity
+                      ? `Ultima atividade registrada em ${new Date(turma.latestActivity).toLocaleDateString("pt-BR")}.`
+                      : "Ainda sem sessoes registradas nesta turma."}
+                  </p>
+                </article>
+              ))}
+            </div>
+          ) : (
+            <p className="small-muted">Nenhuma turma corresponde aos filtros atuais.</p>
+          )}
+        </section>
+
         <section className="panel">
           <div className="section-head">
             <h3>Resumo por aluno</h3>
-            <span className="small-muted">{filteredHistories.length} aluno(s) encontrado(s)</span>
+            <span className="small-muted">{filteredHistories.length} perfil(is) encontrado(s)</span>
           </div>
           <div className="admin-grid">
             {filteredHistories.map(({ user, history, progress }) => {
@@ -242,10 +367,19 @@ export function AdminScreen({
                     <div>
                       <h3>{user.nome}</h3>
                       <p className="small-muted">{user.email}</p>
+                      <p className="small-muted">{`${userRoleLabels[user.role]}${user.turma ? ` - ${user.turma}` : ""}`}</p>
                     </div>
                   </div>
 
                   <div className="admin-chip-grid">
+                    <div className="phase-chip">
+                      <strong>Perfil</strong>
+                      <span>{userRoleLabels[user.role]}</span>
+                    </div>
+                    <div className="phase-chip">
+                      <strong>Turma</strong>
+                      <span>{user.turma?.trim() || "Sem turma"}</span>
+                    </div>
                     <div className="phase-chip">
                       <strong>Status</strong>
                       <span className={`admin-user-status admin-user-status-${user.status}`}>

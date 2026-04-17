@@ -8,16 +8,25 @@ import type { Usuario } from "@/lib/types";
 type ProfileScreenProps = {
   usuario: Usuario;
   onBack: () => void;
-  onSaveProfile: (profile: Pick<Usuario, "idade" | "nome" | "avatar">) => void | Promise<void>;
+  onSaveProfile: (profile: Pick<Usuario, "idade" | "nome" | "avatar"> & Partial<Pick<Usuario, "role" | "turma">>) => void | Promise<void>;
+};
+
+const roleLabels: Record<Usuario["role"], string> = {
+  aluno: "Aluno",
+  responsavel: "Responsavel",
+  professor: "Professor",
+  admin: "Administrador",
 };
 
 export function ProfileScreen({ usuario, onBack, onSaveProfile }: ProfileScreenProps) {
   const [nome, setNome] = useState(usuario.nome);
   const [idade, setIdade] = useState(String(usuario.idade));
   const [avatar, setAvatar] = useState(usuario.avatar);
+  const [role, setRole] = useState<Usuario["role"]>(usuario.role);
+  const [turma, setTurma] = useState(usuario.turma ?? "");
   const [mensagem, setMensagem] = useState("");
 
-  function handleSave() {
+  async function handleSave() {
     const idadeNumero = Number(idade);
     if (!Number.isInteger(idadeNumero) || idadeNumero < 6 || idadeNumero > 99) {
       setMensagem("Informe uma idade valida entre 6 e 99 anos.");
@@ -29,7 +38,13 @@ export function ProfileScreen({ usuario, onBack, onSaveProfile }: ProfileScreenP
       return;
     }
 
-    onSaveProfile({ idade: idadeNumero, nome: nome.trim(), avatar });
+    await onSaveProfile({
+      idade: idadeNumero,
+      nome: nome.trim(),
+      avatar,
+      role,
+      turma: turma.trim() || null,
+    });
     setMensagem("Perfil atualizado com sucesso.");
   }
 
@@ -80,6 +95,40 @@ export function ProfileScreen({ usuario, onBack, onSaveProfile }: ProfileScreenP
           />
         </label>
 
+        <div className="form-grid">
+          <label className="field">
+            <span>Perfil</span>
+            <select
+              className="text-input"
+              value={role}
+              disabled={usuario.role === "admin"}
+              onChange={(event) => {
+                setMensagem("");
+                setRole(event.target.value as Usuario["role"]);
+              }}
+            >
+              {Object.entries(roleLabels).map(([value, label]) => (
+                <option key={value} value={value}>
+                  {label}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <label className="field">
+            <span>Turma ou grupo</span>
+            <input
+              className="text-input"
+              placeholder="Ex.: Turma Alfa, Grupo da tarde"
+              value={turma}
+              onChange={(event) => {
+                setMensagem("");
+                setTurma(event.target.value);
+              }}
+            />
+          </label>
+        </div>
+
         <div className="avatar-picker avatar-picker-profile">
           {AVATAR_OPTIONS.map((option) => (
             <button
@@ -112,6 +161,14 @@ export function ProfileScreen({ usuario, onBack, onSaveProfile }: ProfileScreenP
           <div className="profile-chip">
             <strong>Trilha</strong>
             <span>{getAudienceLabel(getAudienceFromAge(idadePreview))}</span>
+          </div>
+          <div className="profile-chip">
+            <strong>Perfil</strong>
+            <span>{roleLabels[role]}</span>
+          </div>
+          <div className="profile-chip">
+            <strong>Turma</strong>
+            <span>{turma.trim() || "Sem turma"}</span>
           </div>
         </div>
 

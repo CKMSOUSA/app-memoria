@@ -8,9 +8,23 @@ type AuthScreenProps = {
   tela: Exclude<Tela, "dashboard" | "memoria" | "atencao" | "admin">;
   onChangeScreen: (screen: Exclude<Tela, "dashboard" | "memoria" | "atencao" | "admin">) => void;
   onLogin: (email: string, password: string) => Promise<Usuario | null>;
-  onRegister: (email: string, password: string, idade: number, nome: string, avatar: string) => Promise<string | null>;
+  onRegister: (
+    email: string,
+    password: string,
+    idade: number,
+    nome: string,
+    avatar: string,
+    role: Exclude<Usuario["role"], "admin">,
+    turma: string | null,
+  ) => Promise<string | null>;
   onRecover: (email: string) => string;
 };
+
+const registrationRoleOptions: Array<{ value: Exclude<Usuario["role"], "admin">; label: string }> = [
+  { value: "aluno", label: "Aluno" },
+  { value: "responsavel", label: "Responsavel" },
+  { value: "professor", label: "Professor" },
+];
 
 export function AuthScreen({
   tela,
@@ -24,6 +38,8 @@ export function AuthScreen({
   const [nome, setNome] = useState("");
   const [idade, setIdade] = useState("25");
   const [avatar, setAvatar] = useState(AVATAR_OPTIONS[0]);
+  const [role, setRole] = useState<Exclude<Usuario["role"], "admin">>("aluno");
+  const [turma, setTurma] = useState("");
   const [mensagem, setMensagem] = useState("");
   const [isPending, startTransition] = useTransition();
 
@@ -64,7 +80,7 @@ export function AuthScreen({
         return;
       }
 
-      const error = await onRegister(email, senha, idadeNumero, nome, avatar);
+      const error = await onRegister(email, senha, idadeNumero, nome, avatar, role, turma.trim() || null);
       setMensagem(error ?? "Cadastro realizado. Agora faca login para iniciar seus treinos.");
       if (!error) {
         setSenha("");
@@ -167,6 +183,41 @@ export function AuthScreen({
               }}
             />
           </label>
+        )}
+
+        {tela === "cadastro" && (
+          <div className="form-grid">
+            <label className="field">
+              <span>Perfil</span>
+              <select
+                className="text-input"
+                value={role}
+                onChange={(event) => {
+                  resetMessage();
+                  setRole(event.target.value as Exclude<Usuario["role"], "admin">);
+                }}
+              >
+                {registrationRoleOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            <label className="field">
+              <span>Turma ou grupo</span>
+              <input
+                className="text-input"
+                placeholder="Ex.: Turma Alfa, Grupo Manha"
+                value={turma}
+                onChange={(event) => {
+                  resetMessage();
+                  setTurma(event.target.value);
+                }}
+              />
+            </label>
+          </div>
         )}
 
         {tela === "login" && (
