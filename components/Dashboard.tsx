@@ -7,6 +7,7 @@ import { InternalAssistant } from "@/components/InternalAssistant";
 import { getRemoteBackendStatus } from "@/lib/app-repository";
 import type { AppSettings } from "@/lib/app-settings";
 import type { OfflineSyncStatus } from "@/lib/offline-store";
+import { exportUserReportPdf } from "@/lib/report-pdf";
 import {
   attentionChallenges,
   comparisonChallenges,
@@ -313,6 +314,49 @@ export function Dashboard({
   const diagnostic = getAutomaticDiagnostic(usuario.idade, history, progresso);
   const smartRecommendation = getSmartRecommendation(history, progresso);
   const guidedSessions = getGuidedSessions(usuario.idade, history, progresso);
+  function handleExportPdf() {
+    exportUserReportPdf({
+      usuario,
+      generatedAt: new Date().toLocaleString("pt-BR"),
+      summary: [
+        { label: "Sessoes", value: String(resumo.totalSessions), caption: "Rodadas registradas no historico" },
+        { label: "Concluidas", value: String(resumo.completedSessions), caption: "Sessoes com meta atingida" },
+        { label: "Media", value: String(resumo.averageScore), caption: "Pontuacao media por sessao" },
+        {
+          label: "Modo forte",
+          value: getSessionModeLabel(resumo.strongestMode),
+          caption: "Trilha com melhor desempenho acumulado",
+        },
+      ],
+      abilities: abilityInsights.map((item) => ({
+        title: item.title,
+        score: item.score,
+        level: item.level === "forte" ? "Forte" : item.level === "estavel" ? "Estavel" : "Prioridade",
+        summary: item.summary,
+      })),
+      trends: performanceTrends.map((item) => ({
+        label: item.label,
+        direction: item.direction === "subindo" ? "Em melhora" : item.direction === "caindo" ? "Em queda" : "Estavel",
+        summary: item.summary,
+      })),
+      diagnostic: {
+        title: diagnostic.title,
+        readinessLabel: diagnostic.readinessLabel,
+        summary: diagnostic.summary,
+        focusLabel: diagnostic.focusLabel,
+      },
+      recommendation: {
+        title: smartRecommendation.title,
+        summary: smartRecommendation.reason,
+        reason: smartRecommendation.reason,
+      },
+      guidedSessions: guidedSessions.map((item) => ({
+        title: item.title,
+        durationLabel: item.durationLabel,
+        summary: `${item.objective}. Ritmo sugerido: ${item.cadence}.`,
+      })),
+    });
+  }
   const [activeTrailTab, setActiveTrailTab] = useState<TrailMode>("memoria");
   const trailTabs: Array<{
     id: TrailMode;
@@ -544,7 +588,12 @@ export function Dashboard({
         <section className="panel report-panel">
           <div className="section-head">
             <h3>Relatorio de desempenho</h3>
-            <span className="small-muted">Resumo automatico das suas sessoes</span>
+            <div className="section-head-actions">
+              <span className="small-muted">Resumo automatico das suas sessoes</span>
+              <button className="btn btn-secondary btn-export-report" onClick={handleExportPdf}>
+                Exportar PDF
+              </button>
+            </div>
           </div>
           <div className="stats-grid">
             <StatCard label="Sessoes" value={String(resumo.totalSessions)} caption="Rodadas registradas no historico" />

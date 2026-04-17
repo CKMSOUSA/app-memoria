@@ -13,7 +13,7 @@ import { HelpScreen } from "@/components/HelpScreen";
 import { applyAppSettingsToDocument, registerOfflineSupport, useAppSettingsState } from "@/lib/app-settings";
 import { getOfflineSyncStatus, subscribeOfflineSyncStatus, type OfflineSyncStatus } from "@/lib/offline-store";
 import { LogicGame } from "@/components/LogicGame";
-import type { HelpRequest } from "@/lib/types";
+import type { ClinicalObservation, HelpRequest } from "@/lib/types";
 import { MemoryGame } from "@/components/MemoryGame";
 import { ProfileScreen } from "@/components/ProfileScreen";
 import { SpatialGame } from "@/components/SpatialGame";
@@ -30,6 +30,7 @@ export default function Page() {
   const [progresso, setProgresso] = useState<ProgressState>(mergeProgress());
   const [history, setHistory] = useState<SessionRecord[]>([]);
   const [helpRequests, setHelpRequests] = useState<HelpRequest[]>([]);
+  const [observations, setObservations] = useState<ClinicalObservation[]>([]);
   const [adminHistories, setAdminHistories] = useState<Array<{ user: Usuario; history: SessionRecord[]; progress?: ProgressState }>>([]);
   const [adminConfirmed, setAdminConfirmed] = useState(false);
   const [adminAccessCode, setAdminAccessCode] = useState("");
@@ -71,6 +72,11 @@ export default function Page() {
           setHelpRequests(await repository.loadHelpRequests());
         } catch {
           setHelpRequests([]);
+        }
+        try {
+          setObservations(await repository.loadClinicalObservations());
+        } catch {
+          setObservations([]);
         }
         setTela("dashboard");
       }
@@ -147,6 +153,11 @@ export default function Page() {
     } catch {
       setHelpRequests([]);
     }
+    try {
+      setObservations(await repository.loadClinicalObservations());
+    } catch {
+      setObservations([]);
+    }
     setTela("dashboard");
     return activeUser;
   }
@@ -172,6 +183,7 @@ export default function Page() {
     setProgresso(mergeProgress());
     setHistory([]);
     setHelpRequests([]);
+    setObservations([]);
     setAdminHistories([]);
     setTela("login");
   }
@@ -186,6 +198,7 @@ export default function Page() {
     const overview = await repository.loadAdminOverview(accessCode);
     setAdminHistories(overview.histories);
     setHelpRequests(overview.helpRequests);
+    setObservations(overview.observations);
     setTela("admin");
   }
 
@@ -219,6 +232,11 @@ export default function Page() {
       setHelpRequests(await repository.loadHelpRequests());
     } catch {
       setHelpRequests([]);
+    }
+    try {
+      setObservations(await repository.loadClinicalObservations());
+    } catch {
+      setObservations([]);
     }
   }
 
@@ -256,6 +274,22 @@ export default function Page() {
     const overview = await repository.loadAdminOverview(adminAccessCode);
     setAdminHistories(overview.histories);
     setHelpRequests(overview.helpRequests);
+    setObservations(overview.observations);
+  }
+
+  async function handleSaveObservation(
+    email: string,
+    category: ClinicalObservation["category"],
+    note: string,
+  ) {
+    if (!usuario) return;
+    const next = await repository.saveClinicalObservation({
+      email,
+      category,
+      note,
+      authorName: usuario.nome,
+    });
+    setObservations(next);
   }
 
   function persistResult(
@@ -609,9 +643,11 @@ export default function Page() {
         progressoAtual={progresso}
         histories={adminHistories}
         helpRequests={helpRequests}
+        observations={observations}
         onBack={() => setTela("dashboard")}
         onUpdateHelpStatus={handleUpdateHelpStatus}
         onUpdateUserStatus={handleUpdateUserStatus}
+        onSaveObservation={handleSaveObservation}
       />
     );
   }

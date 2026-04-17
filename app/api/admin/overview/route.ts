@@ -300,6 +300,7 @@ export async function GET(request: NextRequest) {
       progress: progressByEmail.get(user.email) ?? mergeProgress(),
     })),
     helpRequests: helpRows.map(toHelp),
+    observations: [],
     source: "supabase",
   };
 

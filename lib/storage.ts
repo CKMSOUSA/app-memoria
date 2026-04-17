@@ -1,13 +1,14 @@
 "use client";
 
 import { createDefaultProgress, mergeProgress } from "@/lib/scoring";
-import type { HelpRequest, ProgressState, SessionRecord, Usuario, UsuarioPersistido, UserStatus } from "@/lib/types";
+import type { ClinicalObservation, HelpRequest, ProgressState, SessionRecord, Usuario, UsuarioPersistido, UserStatus } from "@/lib/types";
 
 export const USERS_KEY = "app_memoria_usuarios_v2";
 export const SESSION_KEY = "app_memoria_usuario_ativo_v2";
 export const PROGRESS_PREFIX = "app_memoria_progresso_v2";
 export const HISTORY_PREFIX = "app_memoria_historico_v1";
 export const HELP_REQUESTS_KEY = "app_memoria_ajuda_v1";
+export const OBSERVATIONS_KEY = "app_memoria_observacoes_v1";
 export const AVATAR_OPTIONS = ["🧠", "🚀", "🦊", "🐼", "🦁", "🧩"];
 
 type RegisterResult = {
@@ -424,6 +425,65 @@ export function appendHelpRequest(request: Omit<HelpRequest, "id" | "createdAt" 
   ].slice(0, 200);
 
   saveHelpRequests(next);
+  return next;
+}
+
+export function loadClinicalObservations() {
+  if (!canUseStorage()) return [] as ClinicalObservation[];
+  const raw = localStorage.getItem(OBSERVATIONS_KEY);
+  if (!raw) return [] as ClinicalObservation[];
+
+  try {
+    return JSON.parse(raw) as ClinicalObservation[];
+  } catch {
+    return [] as ClinicalObservation[];
+  }
+}
+
+export function saveClinicalObservations(observations: ClinicalObservation[]) {
+  if (!canUseStorage()) return;
+  localStorage.setItem(OBSERVATIONS_KEY, JSON.stringify(observations.slice(0, 400)));
+}
+
+export function upsertClinicalObservation(input: {
+  email: string;
+  category: ClinicalObservation["category"];
+  note: string;
+  authorName: string;
+}) {
+  if (!canUseStorage()) return [] as ClinicalObservation[];
+
+  const current = loadClinicalObservations();
+  const normalizedNote = input.note.trim();
+  const now = new Date().toISOString();
+  const existing = current.find((item) => item.email === input.email && item.category === input.category);
+
+  const next =
+    existing
+      ? current.map((item) =>
+          item.id === existing.id
+            ? {
+                ...item,
+                note: normalizedNote,
+                authorName: input.authorName,
+                updatedAt: now,
+              }
+            : item,
+        )
+      : [
+          {
+            id: `${Date.now()}-${Math.random().toString(16).slice(2, 8)}`,
+            email: input.email,
+            category: input.category,
+            note: normalizedNote,
+            authorName: input.authorName,
+            createdAt: now,
+            updatedAt: now,
+          },
+          ...current,
+        ];
+
+  saveClinicalObservations(next);
   return next;
 }
 

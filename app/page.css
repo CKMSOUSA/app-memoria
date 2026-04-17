@@ -45,6 +45,14 @@
   flex-wrap: wrap;
 }
 
+.section-head-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
 .topbar-right {
   display: grid;
   gap: 12px;
@@ -1975,6 +1983,15 @@ h2 {
 .admin-reply-input {
   min-height: 110px;
   resize: vertical;
+}
+
+.admin-observation-grid {
+  display: grid;
+  gap: 12px;
+}
+
+.btn-export-report {
+  min-height: 42px;
 }
 
 .admin-reply-preview,

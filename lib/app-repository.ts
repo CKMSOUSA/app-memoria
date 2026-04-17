@@ -11,16 +11,19 @@ import {
   ensureAdminUser,
   getActiveSession,
   listUsers,
+  loadClinicalObservations,
   loadAllHistories,
   loadHelpRequests,
   loadProgress,
   loadSessionHistory,
+  saveClinicalObservations,
   saveHelpRequests,
   saveSessionHistory,
   loginUser,
   registerUser as registerStoredUser,
   saveProgress,
   simulateRecovery,
+  upsertClinicalObservation,
   updateUserStatus,
   updateUserProfile as updateStoredUserProfile,
   updateUserPoints as updateStoredUserPoints,
@@ -58,7 +61,7 @@ import {
   type OfflineSyncStatus,
 } from "@/lib/offline-store";
 import { loadSupabaseProgress, saveSupabaseProgress } from "@/lib/supabase-progress";
-import type { AdminOverview, DataMode, HelpRequest, ProgressState, SessionRecord, Usuario } from "@/lib/types";
+import type { AdminOverview, ClinicalObservation, DataMode, HelpRequest, ProgressState, SessionRecord, Usuario } from "@/lib/types";
 
 type RegisterResult = {
   error: string | null;
@@ -95,6 +98,13 @@ type AppRepository = {
   loadAllHistories: () => Promise<Array<{ user: Usuario; history: SessionRecord[] }>>;
   loadHelpRequests: () => Promise<HelpRequest[]>;
   appendHelpRequest: (request: Omit<HelpRequest, "id" | "createdAt" | "status">) => Promise<HelpRequest[]>;
+  loadClinicalObservations: () => Promise<ClinicalObservation[]>;
+  saveClinicalObservation: (input: {
+    email: string;
+    category: ClinicalObservation["category"];
+    note: string;
+    authorName: string;
+  }) => Promise<ClinicalObservation[]>;
   loadAdminOverview: (adminCode?: string) => Promise<AdminOverview>;
   updateManagedUserStatus: (email: string, status: Usuario["status"], adminCode?: string) => Promise<void>;
   updateHelpRequestStatus: (
@@ -380,6 +390,7 @@ function mergeLocalOverviewFields(overview: AdminOverview): AdminOverview {
       const localUser = localByEmail.get(entry.user.email);
       return localUser ? { ...entry, user: { ...entry.user, turma: localUser.turma ?? entry.user.turma ?? null } } : entry;
     }),
+    observations: loadClinicalObservations(),
   };
 }
 
@@ -777,6 +788,8 @@ const localRepository: AppRepository = {
 
     return localItems;
   },
+  loadClinicalObservations: async () => loadClinicalObservations(),
+  saveClinicalObservation: async (input) => upsertClinicalObservation(input),
   loadAdminOverview: async (adminCode) => {
     const remoteOverview = await loadAdminOverviewFromApi(adminCode);
     if (remoteOverview) return mergeLocalOverviewFields(remoteOverview);
@@ -794,6 +807,7 @@ const localRepository: AppRepository = {
       users,
       histories: localHistories,
       helpRequests: loadHelpRequests(),
+      observations: loadClinicalObservations(),
       source: "local",
     };
   },
@@ -961,6 +975,8 @@ const remoteRepository: AppRepository = {
     });
     return (await parseJson<HelpRequest[]>(response)) ?? [];
   },
+  loadClinicalObservations: async () => loadClinicalObservations(),
+  saveClinicalObservation: async (input) => upsertClinicalObservation(input),
   loadAdminOverview: async (adminCode) => {
     const overview = await loadAdminOverviewFromApi(adminCode);
     if (!overview) {

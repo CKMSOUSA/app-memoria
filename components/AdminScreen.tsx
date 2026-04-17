@@ -2,15 +2,17 @@
 
 import { useMemo, useState } from "react";
 
+import { exportAdminReportPdf } from "@/lib/report-pdf";
 import { getCompletionRate, getReportSummary, getSessionModeLabel } from "@/lib/scoring";
 import { getAdminAlerts } from "@/lib/training-insights";
-import type { HelpRequest, ProgressState, SessionRecord, Usuario } from "@/lib/types";
+import type { ClinicalObservation, HelpRequest, ProgressState, SessionRecord, Usuario } from "@/lib/types";
 
 type AdminScreenProps = {
   usuario: Usuario;
   progressoAtual: ProgressState;
   histories: Array<{ user: Usuario; history: SessionRecord[]; progress?: ProgressState }>;
   helpRequests: HelpRequest[];
+  observations: ClinicalObservation[];
   onBack: () => void;
   onUpdateHelpStatus: (
     requestId: string,
@@ -18,6 +20,11 @@ type AdminScreenProps = {
     adminReply?: string,
   ) => Promise<void>;
   onUpdateUserStatus: (email: string, status: Usuario["status"]) => Promise<void>;
+  onSaveObservation: (
+    email: string,
+    category: ClinicalObservation["category"],
+    note: string,
+  ) => Promise<void>;
 };
 
 const userStatusLabels: Record<Usuario["status"], string> = {
@@ -38,9 +45,11 @@ export function AdminScreen({
   progressoAtual,
   histories,
   helpRequests,
+  observations,
   onBack,
   onUpdateHelpStatus,
   onUpdateUserStatus,
+  onSaveObservation,
 }: AdminScreenProps) {
   const normalizedHistories = useMemo(
     () => (histories.length > 0 ? histories : [{ user: usuario, history: [], progress: progressoAtual }]),
@@ -52,7 +61,9 @@ export function AdminScreen({
   const [helpStatusFilter, setHelpStatusFilter] = useState<"todas" | HelpRequest["status"]>("todas");
   const [updatingHelpId, setUpdatingHelpId] = useState<string | null>(null);
   const [updatingUserEmail, setUpdatingUserEmail] = useState<string | null>(null);
+  const [savingObservationKey, setSavingObservationKey] = useState<string | null>(null);
   const [replyDrafts, setReplyDrafts] = useState<Record<string, string>>({});
+  const [observationDrafts, setObservationDrafts] = useState<Record<string, string>>({});
   const userStatusSummary = useMemo(
     () => ({
       ativo: normalizedHistories.filter(({ user }) => user.status === "ativo").length,
@@ -170,6 +181,24 @@ export function AdminScreen({
     });
   }, [helpRequests, helpStatusFilter, search]);
 
+  function getObservation(email: string, category: ClinicalObservation["category"]) {
+    return observations.find((item) => item.email === email && item.category === category) ?? null;
+  }
+
+  function getObservationDraft(email: string, category: ClinicalObservation["category"]) {
+    const key = `${email}:${category}`;
+    return observationDrafts[key] ?? getObservation(email, category)?.note ?? "";
+  }
+
+  function handleExportAdminPdf() {
+    exportAdminReportPdf({
+      generatedAt: new Date().toLocaleString("pt-BR"),
+      users: filteredHistories.map(({ user, history }) => ({ user, history })),
+      helpRequests: filteredHelpRequests,
+      observations,
+    });
+  }
+
   return (
     <main className="shell shell-center">
       <section className="game-card">
@@ -180,9 +209,14 @@ export function AdminScreen({
               Painel de acompanhamento com resumo por aluno, ultima atividade, modo de treino mais forte e central de ajuda.
             </p>
           </div>
-          <button className="btn btn-admin-back" onClick={onBack}>
-            Voltar ao painel
-          </button>
+          <div className="button-row">
+            <button className="btn btn-secondary btn-export-report" onClick={handleExportAdminPdf}>
+              Exportar PDF
+            </button>
+            <button className="btn btn-admin-back" onClick={onBack}>
+              Voltar ao painel
+            </button>
+          </div>
         </header>
 
         <section className="stats-grid">
@@ -469,6 +503,54 @@ export function AdminScreen({
                     ) : (
                       <p className="small-muted">Ainda nao ha sessoes registradas para este usuario.</p>
                     )}
+                  </div>
+
+                  <div className="admin-observation-grid">
+                    {(["clinica", "pedagogica"] as const).map((category) => {
+                      const key = `${user.email}:${category}`;
+                      const savedObservation = getObservation(user.email, category);
+                      return (
+                        <label key={key} className="field field-compact">
+                          <span>{category === "clinica" ? "Observacao clinica" : "Observacao pedagogica"}</span>
+                          <textarea
+                            className="text-input admin-reply-input"
+                            rows={4}
+                            value={getObservationDraft(user.email, category)}
+                            onChange={(event) =>
+                              setObservationDrafts((current) => ({
+                                ...current,
+                                [key]: event.target.value,
+                              }))
+                            }
+                            placeholder={
+                              category === "clinica"
+                                ? "Registre sinais clinicos, adaptacoes ou pontos de atencao."
+                                : "Registre estrategias pedagogicas, resposta a atividade e proximos passos."
+                            }
+                          />
+                          {savedObservation ? (
+                            <p className="small-muted">
+                              {`Atualizada em ${new Date(savedObservation.updatedAt).toLocaleDateString("pt-BR")} por ${savedObservation.authorName}.`}
+                            </p>
+                          ) : null}
+                          <button
+                            type="button"
+                            className="btn btn-secondary"
+                            disabled={savingObservationKey === key}
+                            onClick={async () => {
+                              setSavingObservationKey(key);
+                              try {
+                                await onSaveObservation(user.email, category, getObservationDraft(user.email, category));
+                              } finally {
+                                setSavingObservationKey(null);
+                              }
+                            }}
+                          >
+                            {savingObservationKey === key ? "Salvando..." : "Salvar observacao"}
+                          </button>
+                        </label>
+                      );
+                    })}
                   </div>
                 </article>
               );

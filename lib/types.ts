@@ -87,10 +87,21 @@ export type HelpRequest = {
   adminReply?: string | null;
 };
 
+export type ClinicalObservation = {
+  id: string;
+  email: string;
+  category: "clinica" | "pedagogica";
+  note: string;
+  authorName: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
 export type AdminOverview = {
   users: Usuario[];
   histories: Array<{ user: Usuario; history: SessionRecord[]; progress?: ProgressState }>;
   helpRequests: HelpRequest[];
+  observations: ClinicalObservation[];
   source: "local" | "supabase";
 };
 
