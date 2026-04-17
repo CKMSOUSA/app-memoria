@@ -160,7 +160,7 @@ function AbilityCard({
   return (
     <article className={`insight-card insight-card-${level}`}>
       <div className="insight-card-top">
-        <p className="small-muted">{title}</p>
+        <p className="ability-card-title">{title}</p>
         <span className="pill">{score}/100</span>
       </div>
       <h3>{level === "forte" ? "Forte" : level === "estavel" ? "Estavel" : "Prioridade"}</h3>
@@ -574,7 +574,7 @@ export function Dashboard({
         <section className="panel">
           <div className="section-head">
             <h3>Relatorios por habilidade</h3>
-            <span className="small-muted">Leitura separada de memoria, atencao, velocidade e raciocinio</span>
+            <span className="ability-section-subtitle">Leitura separada de memoria, atencao, velocidade e raciocinio</span>
           </div>
           <div className="insight-grid">
             {abilityInsights.map((insight) => (
