@@ -13,7 +13,7 @@ import { HelpScreen } from "@/components/HelpScreen";
 import { applyAppSettingsToDocument, registerOfflineSupport, useAppSettingsState } from "@/lib/app-settings";
 import { getOfflineSyncStatus, subscribeOfflineSyncStatus, type OfflineSyncStatus } from "@/lib/offline-store";
 import { LogicGame } from "@/components/LogicGame";
-import type { ClinicalObservation, HelpRequest } from "@/lib/types";
+import type { ClinicalObservation, HelpRequest, PrescriptionSession, ReminderSchedule } from "@/lib/types";
 import { MemoryGame } from "@/components/MemoryGame";
 import { ProfileScreen } from "@/components/ProfileScreen";
 import { SpatialGame } from "@/components/SpatialGame";
@@ -31,6 +31,8 @@ export default function Page() {
   const [history, setHistory] = useState<SessionRecord[]>([]);
   const [helpRequests, setHelpRequests] = useState<HelpRequest[]>([]);
   const [observations, setObservations] = useState<ClinicalObservation[]>([]);
+  const [reminders, setReminders] = useState<ReminderSchedule[]>([]);
+  const [prescriptions, setPrescriptions] = useState<PrescriptionSession[]>([]);
   const [adminHistories, setAdminHistories] = useState<Array<{ user: Usuario; history: SessionRecord[]; progress?: ProgressState }>>([]);
   const [adminConfirmed, setAdminConfirmed] = useState(false);
   const [adminAccessCode, setAdminAccessCode] = useState("");
@@ -77,6 +79,33 @@ export default function Page() {
           setObservations(await repository.loadClinicalObservations());
         } catch {
           setObservations([]);
+        }
+        try {
+          setReminders(await repository.loadReminderSchedules());
+        } catch {
+          setReminders([]);
+        }
+        try {
+          setPrescriptions(await repository.loadPrescriptionSessions());
+        } catch {
+          setPrescriptions([]);
+        }
+        if (activeUser.role !== "aluno") {
+          try {
+            const allHistories = await repository.loadAllHistories();
+            const users = await repository.listUsers();
+            const usersByEmail = new Map(users.map((item) => [item.email, item]));
+            const enriched = await Promise.all(
+              allHistories.map(async (entry) => ({
+                user: usersByEmail.get(entry.user.email) ?? entry.user,
+                history: entry.history,
+                progress: await repository.loadProgress(entry.user.email),
+              })),
+            );
+            setAdminHistories(enriched);
+          } catch {
+            setAdminHistories([]);
+          }
         }
         setTela("dashboard");
       }
@@ -158,6 +187,33 @@ export default function Page() {
     } catch {
       setObservations([]);
     }
+    try {
+      setReminders(await repository.loadReminderSchedules());
+    } catch {
+      setReminders([]);
+    }
+    try {
+      setPrescriptions(await repository.loadPrescriptionSessions());
+    } catch {
+      setPrescriptions([]);
+    }
+    if (activeUser.role !== "aluno") {
+      try {
+        const allHistories = await repository.loadAllHistories();
+        const users = await repository.listUsers();
+        const usersByEmail = new Map(users.map((item) => [item.email, item]));
+        const enriched = await Promise.all(
+          allHistories.map(async (entry) => ({
+            user: usersByEmail.get(entry.user.email) ?? entry.user,
+            history: entry.history,
+            progress: await repository.loadProgress(entry.user.email),
+          })),
+        );
+        setAdminHistories(enriched);
+      } catch {
+        setAdminHistories([]);
+      }
+    }
     setTela("dashboard");
     return activeUser;
   }
@@ -184,6 +240,8 @@ export default function Page() {
     setHistory([]);
     setHelpRequests([]);
     setObservations([]);
+    setReminders([]);
+    setPrescriptions([]);
     setAdminHistories([]);
     setTela("login");
   }
@@ -199,6 +257,8 @@ export default function Page() {
     setAdminHistories(overview.histories);
     setHelpRequests(overview.helpRequests);
     setObservations(overview.observations);
+    setReminders(overview.reminders ?? []);
+    setPrescriptions(overview.prescriptions ?? []);
     setTela("admin");
   }
 
@@ -237,6 +297,33 @@ export default function Page() {
       setObservations(await repository.loadClinicalObservations());
     } catch {
       setObservations([]);
+    }
+    try {
+      setReminders(await repository.loadReminderSchedules());
+    } catch {
+      setReminders([]);
+    }
+    try {
+      setPrescriptions(await repository.loadPrescriptionSessions());
+    } catch {
+      setPrescriptions([]);
+    }
+    if (activeUser.role !== "aluno") {
+      try {
+        const allHistories = await repository.loadAllHistories();
+        const users = await repository.listUsers();
+        const usersByEmail = new Map(users.map((item) => [item.email, item]));
+        const enriched = await Promise.all(
+          allHistories.map(async (entry) => ({
+            user: usersByEmail.get(entry.user.email) ?? entry.user,
+            history: entry.history,
+            progress: await repository.loadProgress(entry.user.email),
+          })),
+        );
+        setAdminHistories(enriched);
+      } catch {
+        setAdminHistories([]);
+      }
     }
   }
 
@@ -290,6 +377,25 @@ export default function Page() {
       authorName: usuario.nome,
     });
     setObservations(next);
+  }
+
+  async function handleSaveReminder(
+    input: Omit<ReminderSchedule, "id" | "createdAt" | "updatedAt"> & { id?: string },
+  ) {
+    const next = await repository.saveReminderSchedule(input);
+    setReminders(next);
+  }
+
+  async function handleSavePrescription(
+    input: Omit<PrescriptionSession, "id" | "createdAt" | "status">,
+  ) {
+    const next = await repository.savePrescriptionSession(input);
+    setPrescriptions(next);
+  }
+
+  async function handleUpdatePrescriptionStatus(id: string, status: PrescriptionSession["status"]) {
+    const next = await repository.updatePrescriptionStatus(id, status);
+    setPrescriptions(next);
   }
 
   function persistResult(
@@ -644,6 +750,8 @@ export default function Page() {
         histories={adminHistories}
         helpRequests={helpRequests}
         observations={observations}
+        reminders={reminders}
+        prescriptions={prescriptions}
         onBack={() => setTela("dashboard")}
         onUpdateHelpStatus={handleUpdateHelpStatus}
         onUpdateUserStatus={handleUpdateUserStatus}
@@ -668,10 +776,17 @@ export default function Page() {
       usuario={usuario}
       progresso={progresso}
       history={history}
+      managedHistories={adminHistories}
+      observations={observations}
+      reminders={reminders}
+      prescriptions={prescriptions}
       settings={settings}
       isOffline={isOffline}
       offlineSyncStatus={offlineSyncStatus}
       onUpdateSettings={updateSettings}
+      onSaveReminder={handleSaveReminder}
+      onSavePrescription={handleSavePrescription}
+      onUpdatePrescriptionStatus={handleUpdatePrescriptionStatus}
       onOpenMemory={() => setTela("memoria")}
       onOpenVisual={() => setTela("visual")}
       onOpenAttention={() => setTela("atencao")}

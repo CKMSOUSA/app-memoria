@@ -1646,6 +1646,37 @@ h2 {
   margin-bottom: 0;
 }
 
+.planner-grid,
+.ranking-list,
+.prescription-list,
+.observation-timeline {
+  display: grid;
+  gap: 12px;
+}
+
+.ranking-item {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 6px 12px;
+  padding: 12px 14px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.82);
+  border: 1px solid rgba(229, 216, 197, 0.9);
+}
+
+.ranking-item p {
+  grid-column: 1 / -1;
+  margin-bottom: 0;
+}
+
+.planner-card {
+  align-content: start;
+}
+
+.ranking-card {
+  align-content: start;
+}
+
 .engagement-tag {
   margin: 0;
   color: #8a553f;
@@ -1691,6 +1722,33 @@ h2 {
 .cooperative-card {
   background: linear-gradient(135deg, rgba(255, 244, 232, 0.96) 0%, rgba(255, 251, 244, 0.96) 100%);
   border-color: rgba(207, 95, 60, 0.2);
+}
+
+.app-formal-evaluation .guide-card,
+.app-formal-evaluation .quick-card,
+.app-formal-evaluation .track-card,
+.app-formal-evaluation .engagement-card {
+  box-shadow: none;
+  background: rgba(255, 255, 255, 0.98);
+}
+
+.app-formal-evaluation .eyebrow,
+.app-formal-evaluation .engagement-tag {
+  letter-spacing: 0.12em;
+}
+
+.app-visible-focus button:focus-visible,
+.app-visible-focus input:focus-visible,
+.app-visible-focus textarea:focus-visible,
+.app-visible-focus select:focus-visible {
+  outline: 3px solid #1d4ed8;
+  outline-offset: 3px;
+}
+
+.app-keyboard-navigation .btn,
+.app-keyboard-navigation .trail-tab,
+.app-keyboard-navigation .setting-toggle-card {
+  min-height: 48px;
 }
 
 .insight-card-top,

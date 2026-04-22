@@ -21,6 +21,13 @@ import {
   getSmartRecommendation,
 } from "@/lib/training-insights";
 import {
+  getComparativeReportInsights,
+  getFormalEvaluationProtocol,
+  getInterventionLibrary,
+  getPrivateClassRanking,
+  getRolePanelInsight,
+} from "@/lib/product-management";
+import {
   advancedAttentionChallenges,
   advancedComparisonChallenges,
   advancedLogicChallenges,
@@ -218,6 +225,126 @@ test("insights expose abilities, trends, recommendation and guided plans", () =>
   assert.equal(recommendation.mode, "atencao");
   assert.equal(diagnostic.starters.length, 5);
   assert.equal(plans.length, 3);
+});
+
+test("product management insights expose rankings, comparative report and role view", () => {
+  const progress = createDefaultProgress();
+  progress.atencao[1].attempts = 2;
+  progress.atencao[1].completed = true;
+  progress.memoria[1].attempts = 3;
+  const now = Date.now();
+  const daysAgo = (days: number) => new Date(now - days * 24 * 60 * 60 * 1000).toISOString();
+
+  const history = [
+    {
+      id: "1",
+      email: "aluno@example.com",
+      mode: "atencao" as const,
+      challengeId: 1,
+      score: 20,
+      timeSeconds: 12,
+      completed: true,
+      playedAt: daysAgo(2),
+    },
+    {
+      id: "2",
+      email: "aluno@example.com",
+      mode: "memoria" as const,
+      challengeId: 1,
+      score: 14,
+      timeSeconds: 16,
+      completed: false,
+      playedAt: daysAgo(10),
+    },
+    {
+      id: "3",
+      email: "aluno@example.com",
+      mode: "logica" as const,
+      challengeId: 1,
+      score: 25,
+      timeSeconds: 11,
+      completed: true,
+      playedAt: daysAgo(35),
+    },
+  ];
+
+  const comparative = getComparativeReportInsights(history);
+  const interventions = getInterventionLibrary(history, progress);
+  const protocol = getFormalEvaluationProtocol(
+    {
+      nome: "Aluno",
+      email: "aluno@example.com",
+      avatar: "🧠",
+      premium: false,
+      pontos: 12,
+      criadoEm: daysAgo(90),
+      idade: 12,
+      role: "aluno",
+      status: "ativo",
+      turma: "Turma A",
+    },
+    history,
+  );
+  const rolePanel = getRolePanelInsight(
+    {
+      nome: "Profa",
+      email: "prof@example.com",
+      avatar: "🧠",
+      premium: false,
+      pontos: 0,
+      criadoEm: daysAgo(90),
+      idade: 33,
+      role: "professor",
+      status: "ativo",
+      turma: "Turma A",
+    },
+    [
+      {
+        user: {
+          nome: "Aluno",
+          email: "aluno@example.com",
+          avatar: "🧠",
+          premium: false,
+          pontos: 12,
+          criadoEm: daysAgo(90),
+          idade: 12,
+          role: "aluno",
+          status: "ativo",
+          turma: "Turma A",
+        },
+        history,
+        progress,
+      },
+    ],
+  );
+  const ranking = getPrivateClassRanking(
+    [
+      {
+        user: {
+          nome: "Aluno",
+          email: "aluno@example.com",
+          avatar: "🧠",
+          premium: false,
+          pontos: 12,
+          criadoEm: daysAgo(90),
+          idade: 12,
+          role: "aluno",
+          status: "ativo",
+          turma: "Turma A",
+        },
+        history,
+        progress,
+      },
+    ],
+    "Turma A",
+    "score",
+  );
+
+  assert.equal(comparative.length, 4);
+  assert.ok(interventions.length >= 1);
+  assert.equal(protocol.rules.length, 4);
+  assert.equal(rolePanel?.cards.length, 4);
+  assert.equal(ranking.length, 1);
 });
 
 test("admin alerts prioritize abandonment and decline", () => {

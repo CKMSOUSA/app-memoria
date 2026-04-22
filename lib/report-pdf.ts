@@ -191,3 +191,35 @@ export function exportAdminReportPdf(input: {
   printWindow.focus();
   printWindow.print();
 }
+
+export function exportComparativeReportPdf(input: {
+  usuario: Usuario;
+  generatedAt: string;
+  items: Array<{ label: string; currentValue: number; previousValue: number; delta: number; summary: string }>;
+}) {
+  const printWindow = createPrintWindow(`Comparativo-${input.usuario.nome}`);
+  if (!printWindow) return;
+
+  writeSection(
+    printWindow,
+    `<h1>Comparativo por periodo</h1>
+     <p class="meta">${input.usuario.nome} • ${input.usuario.email} • Gerado em ${input.generatedAt}</p>`,
+  );
+
+  writeSection(
+    printWindow,
+    `<h2>Indicadores comparativos</h2>
+     ${input.items
+       .map(
+         (item) => `<div class="card">
+           <strong>${item.label}</strong>
+           <p class="line"><span class="pill">Atual ${item.currentValue}</span><span class="pill">Anterior ${item.previousValue}</span><span class="pill">Delta ${item.delta >= 0 ? "+" : ""}${item.delta}</span></p>
+           <p>${item.summary}</p>
+         </div>`,
+       )
+       .join("")}`,
+  );
+
+  printWindow.focus();
+  printWindow.print();
+}

@@ -21,6 +21,11 @@ import {
   saveSessionHistory,
   loginUser,
   registerUser as registerStoredUser,
+  loadReminderSchedules,
+  upsertReminderSchedule,
+  loadPrescriptionSessions,
+  appendPrescriptionSession,
+  updatePrescriptionStatus,
   saveProgress,
   simulateRecovery,
   upsertClinicalObservation,
@@ -61,7 +66,17 @@ import {
   type OfflineSyncStatus,
 } from "@/lib/offline-store";
 import { loadSupabaseProgress, saveSupabaseProgress } from "@/lib/supabase-progress";
-import type { AdminOverview, ClinicalObservation, DataMode, HelpRequest, ProgressState, SessionRecord, Usuario } from "@/lib/types";
+import type {
+  AdminOverview,
+  ClinicalObservation,
+  DataMode,
+  HelpRequest,
+  PrescriptionSession,
+  ProgressState,
+  ReminderSchedule,
+  SessionRecord,
+  Usuario,
+} from "@/lib/types";
 
 type RegisterResult = {
   error: string | null;
@@ -105,6 +120,15 @@ type AppRepository = {
     note: string;
     authorName: string;
   }) => Promise<ClinicalObservation[]>;
+  loadReminderSchedules: () => Promise<ReminderSchedule[]>;
+  saveReminderSchedule: (
+    input: Omit<ReminderSchedule, "id" | "createdAt" | "updatedAt"> & { id?: string },
+  ) => Promise<ReminderSchedule[]>;
+  loadPrescriptionSessions: () => Promise<PrescriptionSession[]>;
+  savePrescriptionSession: (
+    input: Omit<PrescriptionSession, "id" | "createdAt" | "status">,
+  ) => Promise<PrescriptionSession[]>;
+  updatePrescriptionStatus: (id: string, status: PrescriptionSession["status"]) => Promise<PrescriptionSession[]>;
   loadAdminOverview: (adminCode?: string) => Promise<AdminOverview>;
   updateManagedUserStatus: (email: string, status: Usuario["status"], adminCode?: string) => Promise<void>;
   updateHelpRequestStatus: (
@@ -790,6 +814,11 @@ const localRepository: AppRepository = {
   },
   loadClinicalObservations: async () => loadClinicalObservations(),
   saveClinicalObservation: async (input) => upsertClinicalObservation(input),
+  loadReminderSchedules: async () => loadReminderSchedules(),
+  saveReminderSchedule: async (input) => upsertReminderSchedule(input),
+  loadPrescriptionSessions: async () => loadPrescriptionSessions(),
+  savePrescriptionSession: async (input) => appendPrescriptionSession(input),
+  updatePrescriptionStatus: async (id, status) => updatePrescriptionStatus(id, status),
   loadAdminOverview: async (adminCode) => {
     const remoteOverview = await loadAdminOverviewFromApi(adminCode);
     if (remoteOverview) return mergeLocalOverviewFields(remoteOverview);
@@ -808,6 +837,8 @@ const localRepository: AppRepository = {
       histories: localHistories,
       helpRequests: loadHelpRequests(),
       observations: loadClinicalObservations(),
+      reminders: loadReminderSchedules(),
+      prescriptions: loadPrescriptionSessions(),
       source: "local",
     };
   },
@@ -977,6 +1008,11 @@ const remoteRepository: AppRepository = {
   },
   loadClinicalObservations: async () => loadClinicalObservations(),
   saveClinicalObservation: async (input) => upsertClinicalObservation(input),
+  loadReminderSchedules: async () => loadReminderSchedules(),
+  saveReminderSchedule: async (input) => upsertReminderSchedule(input),
+  loadPrescriptionSessions: async () => loadPrescriptionSessions(),
+  savePrescriptionSession: async (input) => appendPrescriptionSession(input),
+  updatePrescriptionStatus: async (id, status) => updatePrescriptionStatus(id, status),
   loadAdminOverview: async (adminCode) => {
     const overview = await loadAdminOverviewFromApi(adminCode);
     if (!overview) {

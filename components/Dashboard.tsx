@@ -7,7 +7,17 @@ import { InternalAssistant } from "@/components/InternalAssistant";
 import { getRemoteBackendStatus } from "@/lib/app-repository";
 import type { AppSettings } from "@/lib/app-settings";
 import type { OfflineSyncStatus } from "@/lib/offline-store";
-import { exportUserReportPdf } from "@/lib/report-pdf";
+import {
+  getComparativeReportInsights,
+  getFormalEvaluationProtocol,
+  getInterventionLibrary,
+  getPrivateClassRanking,
+  getRelevantObservations,
+  getRelevantPrescriptions,
+  getRolePanelInsight,
+  getUpcomingReminders,
+} from "@/lib/product-management";
+import { exportComparativeReportPdf, exportUserReportPdf } from "@/lib/report-pdf";
 import {
   attentionChallenges,
   comparisonChallenges,
@@ -40,7 +50,14 @@ import {
   getThemedTracks,
   getAchievementInsights,
 } from "@/lib/training-insights";
-import type { ProgressState, SessionRecord, Usuario } from "@/lib/types";
+import type {
+  ClinicalObservation,
+  PrescriptionSession,
+  ProgressState,
+  ReminderSchedule,
+  SessionRecord,
+  Usuario,
+} from "@/lib/types";
 
 type TrailMode = "memoria" | "visual" | "atencao" | "comparacao" | "espacial" | "logica";
 
@@ -60,10 +77,21 @@ type DashboardProps = {
   onOpenAdmin: () => void;
   onLogout: () => void;
   history: SessionRecord[];
+  managedHistories: Array<{ user: Usuario; history: SessionRecord[]; progress?: ProgressState }>;
+  observations: ClinicalObservation[];
+  reminders: ReminderSchedule[];
+  prescriptions: PrescriptionSession[];
   settings: AppSettings;
   isOffline: boolean;
   offlineSyncStatus: OfflineSyncStatus;
   onUpdateSettings: (partial: Partial<AppSettings>) => void;
+  onSaveReminder: (
+    input: Omit<ReminderSchedule, "id" | "createdAt" | "updatedAt"> & { id?: string },
+  ) => void | Promise<void>;
+  onSavePrescription: (
+    input: Omit<PrescriptionSession, "id" | "createdAt" | "status">,
+  ) => void | Promise<void>;
+  onUpdatePrescriptionStatus: (id: string, status: PrescriptionSession["status"]) => void | Promise<void>;
 };
 
 function ProgressList({
@@ -370,6 +398,318 @@ function CooperativeCard({
   );
 }
 
+function RolePanelCard({
+  title,
+  summary,
+  cards,
+}: {
+  title: string;
+  summary: string;
+  cards: Array<{ label: string; value: string; caption: string }>;
+}) {
+  return (
+    <section className="panel">
+      <div className="section-head">
+        <h3>{title}</h3>
+        <span className="small-muted">Painel dedicado por perfil</span>
+      </div>
+      <p className="muted">{summary}</p>
+      <div className="stats-grid">
+        {cards.map((card) => (
+          <StatCard key={card.label} label={card.label} value={card.value} caption={card.caption} />
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function RankingCard({
+  title,
+  entries,
+}: {
+  title: string;
+  entries: Array<{ email: string; name: string; score: number; subtitle: string }>;
+}) {
+  return (
+    <article className="engagement-card ranking-card">
+      <div className="section-head">
+        <h3>{title}</h3>
+        <span className="pill">{entries.length} posicao(oes)</span>
+      </div>
+      {entries.length > 0 ? (
+        <div className="ranking-list">
+          {entries.map((entry, index) => (
+            <div key={entry.email} className="ranking-item">
+              <strong>{`${index + 1}. ${entry.name}`}</strong>
+              <span>{entry.score}</span>
+              <p className="small-muted">{entry.subtitle}</p>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <p className="small-muted">Ainda nao ha dados suficientes para formar o ranking privado.</p>
+      )}
+    </article>
+  );
+}
+
+function ReminderPlanner({
+  turma,
+  reminders,
+  onSave,
+}: {
+  turma: string | null;
+  reminders: ReminderSchedule[];
+  onSave: (input: Omit<ReminderSchedule, "id" | "createdAt" | "updatedAt">) => void | Promise<void>;
+}) {
+  const [title, setTitle] = useState("");
+  const [objective, setObjective] = useState("");
+  const [days, setDays] = useState("Seg, Qua, Sex");
+  const [duration, setDuration] = useState("10");
+
+  return (
+    <article className="engagement-card planner-card">
+      <div className="section-head">
+        <h3>Agenda de treino e lembretes</h3>
+        <span className="small-muted">{reminders.length} rotina(s) ativa(s)</span>
+      </div>
+      <div className="planner-grid">
+        <label className="field field-compact">
+          <span>Titulo</span>
+          <input value={title} onChange={(event) => setTitle(event.target.value)} placeholder="Ex.: Treino de foco da semana" />
+        </label>
+        <label className="field field-compact">
+          <span>Objetivo</span>
+          <input value={objective} onChange={(event) => setObjective(event.target.value)} placeholder="Ex.: Atencao e ritmo de resposta" />
+        </label>
+        <label className="field field-compact">
+          <span>Dias</span>
+          <input value={days} onChange={(event) => setDays(event.target.value)} placeholder="Seg, Qua, Sex" />
+        </label>
+        <label className="field field-compact">
+          <span>Duracao em minutos</span>
+          <input value={duration} onChange={(event) => setDuration(event.target.value)} />
+        </label>
+      </div>
+      <button
+        className="btn btn-secondary"
+        onClick={() => {
+          if (!title.trim() || !objective.trim()) return;
+          void onSave({
+            ownerEmail: "",
+            turma,
+            title: title.trim(),
+            objective: objective.trim(),
+            daysOfWeek: days.split(",").map((item) => item.trim()).filter(Boolean),
+            durationMinutes: Math.max(5, Number(duration) || 10),
+            active: true,
+          });
+          setTitle("");
+          setObjective("");
+        }}
+      >
+        Salvar rotina
+      </button>
+      <div className="clean-list">
+        {reminders.map((item) => (
+          <p key={item.id} className="small-muted">{`${item.title} · ${item.daysOfWeek.join(", ")} · ${item.durationMinutes} min`}</p>
+        ))}
+      </div>
+    </article>
+  );
+}
+
+function PrescriptionPanel({
+  usuario,
+  prescriptions,
+  onSave,
+  onUpdateStatus,
+}: {
+  usuario: Usuario;
+  prescriptions: PrescriptionSession[];
+  onSave: (input: Omit<PrescriptionSession, "id" | "createdAt" | "status">) => void | Promise<void>;
+  onUpdateStatus: (id: string, status: PrescriptionSession["status"]) => void | Promise<void>;
+}) {
+  const [title, setTitle] = useState("");
+  const [objective, setObjective] = useState("");
+  const [targetEmail, setTargetEmail] = useState("");
+  const [mode, setMode] = useState<"memoria" | "atencao" | "comparacao" | "espacial" | "logica" | "visual" | "especial">("atencao");
+  const [challengeId, setChallengeId] = useState("1");
+  const [notes, setNotes] = useState("");
+
+  return (
+    <article className="engagement-card planner-card">
+      <div className="section-head">
+        <h3>Sessoes prescritas</h3>
+        <span className="small-muted">{prescriptions.length} item(ns) no ciclo</span>
+      </div>
+      {usuario.role === "professor" || usuario.role === "responsavel" ? (
+        <>
+          <div className="planner-grid">
+            <label className="field field-compact">
+              <span>Titulo</span>
+              <input value={title} onChange={(event) => setTitle(event.target.value)} placeholder="Ex.: Bloco de atencao da turma" />
+            </label>
+            <label className="field field-compact">
+              <span>Email do aluno</span>
+              <input value={targetEmail} onChange={(event) => setTargetEmail(event.target.value)} placeholder="aluno@email.com" />
+            </label>
+            <label className="field field-compact">
+              <span>Trilha</span>
+              <select className="text-input" value={mode} onChange={(event) => setMode(event.target.value as typeof mode)}>
+                <option value="memoria">Memoria</option>
+                <option value="visual">Memoria visual</option>
+                <option value="atencao">Atencao</option>
+                <option value="comparacao">Comparacao</option>
+                <option value="espacial">Orientacao espacial</option>
+                <option value="logica">Logica</option>
+                <option value="especial">Trilha exclusiva</option>
+              </select>
+            </label>
+            <label className="field field-compact">
+              <span>Fase</span>
+              <input value={challengeId} onChange={(event) => setChallengeId(event.target.value)} />
+            </label>
+          </div>
+          <label className="field field-compact">
+            <span>Objetivo</span>
+            <input value={objective} onChange={(event) => setObjective(event.target.value)} placeholder="Ex.: Reduzir erro por impulso" />
+          </label>
+          <label className="field field-compact">
+            <span>Observacoes da sessao</span>
+            <textarea className="text-input admin-reply-input" rows={3} value={notes} onChange={(event) => setNotes(event.target.value)} />
+          </label>
+          <button
+            className="btn btn-secondary"
+            onClick={() => {
+              if (!title.trim() || !targetEmail.trim()) return;
+              void onSave({
+                assignedToEmail: targetEmail.trim().toLowerCase(),
+                assignedByEmail: usuario.email,
+                assignedByName: usuario.nome,
+                turma: usuario.turma ?? null,
+                title: title.trim(),
+                objective: objective.trim() || "Sessao prescrita com objetivo orientado.",
+                mode,
+                challengeId: Math.max(1, Number(challengeId) || 1),
+                challengeName: `${getSessionModeLabel(mode)} - Fase ${Math.max(1, Number(challengeId) || 1)}`,
+                notes: notes.trim(),
+                durationMinutes: 10,
+              });
+              setTitle("");
+              setObjective("");
+              setTargetEmail("");
+              setNotes("");
+            }}
+          >
+            Prescrever sessao
+          </button>
+        </>
+      ) : null}
+      <div className="prescription-list">
+        {prescriptions.map((item) => (
+          <div key={item.id} className="ranking-item">
+            <strong>{item.title}</strong>
+            <span>{item.status === "concluida" ? "Feita" : "Pendente"}</span>
+            <p className="small-muted">{`${item.challengeName} · ${item.objective}`}</p>
+            {usuario.role === "aluno" && item.status === "pendente" ? (
+              <button className="btn btn-secondary" onClick={() => void onUpdateStatus(item.id, "concluida")}>
+                Marcar como concluida
+              </button>
+            ) : null}
+          </div>
+        ))}
+      </div>
+    </article>
+  );
+}
+
+function ComparativeCard({
+  items,
+  onExport,
+}: {
+  items: Array<{ label: string; currentValue: number; previousValue: number; delta: number; summary: string }>;
+  onExport: () => void;
+}) {
+  return (
+    <section className="panel">
+      <div className="section-head">
+        <h3>Comparativo por periodo</h3>
+        <button className="btn btn-secondary btn-export-report" onClick={onExport}>
+          Exportar comparativo
+        </button>
+      </div>
+      <div className="engagement-grid">
+        {items.map((item) => (
+          <article key={item.label} className="engagement-card">
+            <h3>{item.label}</h3>
+            <p className="engagement-highlight">{`${item.currentValue} agora · ${item.previousValue} antes · ${item.delta >= 0 ? "+" : ""}${item.delta}`}</p>
+            <p className="muted">{item.summary}</p>
+          </article>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function InterventionCard({
+  title,
+  summary,
+  actions,
+}: {
+  title: string;
+  summary: string;
+  actions: string[];
+}) {
+  return (
+    <article className="engagement-card">
+      <h3>{title}</h3>
+      <p className="muted">{summary}</p>
+      <ul className="clean-list">
+        {actions.map((action) => (
+          <li key={action}>{action}</li>
+        ))}
+      </ul>
+    </article>
+  );
+}
+
+function ObservationTimeline({
+  observations,
+}: {
+  observations: ClinicalObservation[];
+}) {
+  return (
+    <section className="panel">
+      <div className="section-head">
+        <h3>Observacoes com historico</h3>
+        <span className="small-muted">{observations.length} registro(s) do perfil</span>
+      </div>
+      <div className="observation-timeline">
+        {observations.length > 0 ? (
+          observations.map((item) => (
+            <article key={item.id} className="engagement-card">
+              <p className="engagement-tag">{item.category === "clinica" ? "Clinica" : "Pedagogica"}</p>
+              <h3>{new Date(item.updatedAt).toLocaleDateString("pt-BR")}</h3>
+              <p className="muted">{item.note}</p>
+              <p className="small-muted">{`Autor atual: ${item.authorName}`}</p>
+              {item.history && item.history.length > 0 ? (
+                <div className="small-muted">
+                  {item.history.slice(-3).map((revision) => (
+                    <p key={`${revision.updatedAt}-${revision.authorName}`}>{`${new Date(revision.updatedAt).toLocaleDateString("pt-BR")} · ${revision.authorName}: ${revision.note}`}</p>
+                  ))}
+                </div>
+              ) : null}
+            </article>
+          ))
+        ) : (
+          <p className="small-muted">Ainda nao ha observacoes clinicas ou pedagogicas para este perfil.</p>
+        )}
+      </div>
+    </section>
+  );
+}
+
 function TrackCard({
   title,
   audience,
@@ -407,10 +747,17 @@ export function Dashboard({
   onOpenAdmin,
   onLogout,
   history,
+  managedHistories,
+  observations,
+  reminders,
+  prescriptions,
   settings,
   isOffline,
   offlineSyncStatus,
   onUpdateSettings,
+  onSaveReminder,
+  onSavePrescription,
+  onUpdatePrescriptionStatus,
 }: DashboardProps) {
   const backendStatus = getRemoteBackendStatus();
   const memoriaRate = getCompletionRate(progresso.memoria);
@@ -452,6 +799,15 @@ export function Dashboard({
   const achievementInsights = getAchievementInsights(history, progresso);
   const themedTracks = getThemedTracks(usuario.idade, history, progresso);
   const cooperativeCycle = getCooperativeCycle(usuario, history, progresso);
+  const comparativeInsights = getComparativeReportInsights(history);
+  const interventionLibrary = getInterventionLibrary(history, progresso);
+  const formalEvaluationProtocol = getFormalEvaluationProtocol(usuario, history);
+  const rolePanel = getRolePanelInsight(usuario, managedHistories);
+  const privateRanking = getPrivateClassRanking(managedHistories, usuario.turma ?? null, "score");
+  const evolutionRanking = getPrivateClassRanking(managedHistories, usuario.turma ?? null, "evolucao");
+  const relevantObservations = getRelevantObservations(observations, usuario.email);
+  const upcomingReminders = getUpcomingReminders(reminders, usuario.email, usuario.turma ?? null);
+  const relevantPrescriptions = getRelevantPrescriptions(prescriptions, usuario);
   function handleExportPdf() {
     exportUserReportPdf({
       usuario,
@@ -493,6 +849,14 @@ export function Dashboard({
         durationLabel: item.durationLabel,
         summary: `${item.objective}. Ritmo sugerido: ${item.cadence}.`,
       })),
+    });
+  }
+
+  function handleExportComparativePdf() {
+    exportComparativeReportPdf({
+      usuario,
+      generatedAt: new Date().toLocaleString("pt-BR"),
+      items: comparativeInsights,
     });
   }
   const [activeTrailTab, setActiveTrailTab] = useState<TrailMode>("memoria");
@@ -711,6 +1075,8 @@ export function Dashboard({
           onUpdateSettings={onUpdateSettings}
         />
 
+        {rolePanel ? <RolePanelCard title={rolePanel.title} summary={rolePanel.summary} cards={rolePanel.cards} /> : null}
+
         <InternalAssistant
           usuario={usuario}
           progresso={progresso}
@@ -722,6 +1088,73 @@ export function Dashboard({
           onOpenLogic={onOpenLogic}
           onOpenSpecial={onOpenSpecial}
         />
+
+        {(usuario.role === "professor" || usuario.role === "responsavel") && usuario.turma ? (
+          <section className="panel">
+            <div className="section-head">
+              <h3>Ranking privado da turma</h3>
+              <span className="small-muted">Leitura interna por grupo, sem exposicao publica</span>
+            </div>
+            <div className="engagement-grid">
+              <RankingCard title="Ranking por desempenho" entries={privateRanking} />
+              <RankingCard title="Ranking por evolucao" entries={evolutionRanking} />
+            </div>
+          </section>
+        ) : null}
+
+        {(usuario.role === "professor" || usuario.role === "responsavel") ? (
+          <section className="panel">
+            <div className="section-head">
+              <h3>Rotina orientada do grupo</h3>
+              <span className="small-muted">Agenda, lembretes e sessoes prescritas para o ciclo atual</span>
+            </div>
+            <div className="engagement-grid">
+              <ReminderPlanner
+                turma={usuario.turma ?? null}
+                reminders={upcomingReminders}
+                onSave={(input) =>
+                  onSaveReminder({
+                    ...input,
+                    ownerEmail: usuario.email,
+                  })
+                }
+              />
+              <PrescriptionPanel
+                usuario={usuario}
+                prescriptions={relevantPrescriptions}
+                onSave={onSavePrescription}
+                onUpdateStatus={onUpdatePrescriptionStatus}
+              />
+            </div>
+          </section>
+        ) : null}
+
+        {usuario.role === "aluno" ? (
+          <section className="panel">
+            <div className="section-head">
+              <h3>Minha agenda guiada</h3>
+              <span className="small-muted">Lembretes e sessoes que chegaram para este perfil</span>
+            </div>
+            <div className="engagement-grid">
+              <article className="engagement-card planner-card">
+                <h3>Lembretes ativos</h3>
+                {upcomingReminders.length > 0 ? (
+                  upcomingReminders.map((item) => (
+                    <p key={item.id} className="small-muted">{`${item.title} · ${item.daysOfWeek.join(", ")} · ${item.durationMinutes} min`}</p>
+                  ))
+                ) : (
+                  <p className="small-muted">Nenhum lembrete ativo para este perfil ainda.</p>
+                )}
+              </article>
+              <PrescriptionPanel
+                usuario={usuario}
+                prescriptions={relevantPrescriptions}
+                onSave={onSavePrescription}
+                onUpdateStatus={onUpdatePrescriptionStatus}
+              />
+            </div>
+          </section>
+        ) : null}
 
         <section className="panel">
           <div className="section-head">
@@ -760,6 +1193,8 @@ export function Dashboard({
             <StatCard label="Modo forte" value={getSessionModeLabel(resumo.strongestMode)} caption="Trilha com melhor desempenho acumulado" />
           </div>
         </section>
+
+        <ComparativeCard items={comparativeInsights} onExport={handleExportComparativePdf} />
 
         <section className="panel diagnostic-panel">
           <div className="section-head">
@@ -833,6 +1268,8 @@ export function Dashboard({
             ))}
           </div>
         </section>
+
+        <ObservationTimeline observations={relevantObservations} />
 
         {usuario.role === "admin" ? (
           <section className="panel backend-panel">
@@ -988,6 +1425,18 @@ export function Dashboard({
 
         <section className="panel">
           <div className="section-head">
+            <h3>Biblioteca de intervencoes</h3>
+            <span className="small-muted">Acoes praticas sugeridas conforme habilidade, idade e desempenho</span>
+          </div>
+          <div className="engagement-grid">
+            {interventionLibrary.map((item) => (
+              <InterventionCard key={item.title} title={item.title} summary={item.summary} actions={item.actions} />
+            ))}
+          </div>
+        </section>
+
+        <section className="panel">
+          <div className="section-head">
             <h3>Trilhas tematicas</h3>
             <span className="small-muted">Atalhos prontos para foco escolar, agilidade mental, reabilitacao e desafio elite</span>
           </div>
@@ -1020,6 +1469,35 @@ export function Dashboard({
             actions={cooperativeCycle.actions}
             onOpen={() => openMode(cooperativeCycle.primaryMode)}
           />
+        </section>
+
+        <section className="panel">
+          <div className="section-head">
+            <h3>Checklist de acessibilidade avancada</h3>
+            <span className="small-muted">Contraste, foco, voz, teclado e ambiente formal controlado</span>
+          </div>
+          <div className="engagement-grid">
+            <article className="engagement-card">
+              <h3>{formalEvaluationProtocol.title}</h3>
+              <p className="muted">{formalEvaluationProtocol.summary}</p>
+              <ul className="clean-list">
+                {formalEvaluationProtocol.rules.map((rule) => (
+                  <li key={rule}>{rule}</li>
+                ))}
+              </ul>
+            </article>
+            <article className="engagement-card">
+              <h3>Checklist de leitura e acesso</h3>
+              <ul className="clean-list">
+                <li>{`Contraste forte: ${settings.highContrast ? "ativo" : "inativo"}`}</li>
+                <li>{`Fonte ampliada: ${settings.largeText ? "ativa" : "inativa"}`}</li>
+                <li>{`Narracao: ${settings.narrationEnabled ? "ativa" : "inativa"}`}</li>
+                <li>{`Foco visivel: ${settings.visibleFocus ? "ativo" : "inativo"}`}</li>
+                <li>{`Teclado: ${settings.keyboardNavigation ? "ativo" : "inativo"}`}</li>
+                <li>{`Modo formal: ${settings.formalEvaluationMode ? "ativo" : "inativo"}`}</li>
+              </ul>
+            </article>
+          </div>
         </section>
 
         <section className="panel trails-panel">

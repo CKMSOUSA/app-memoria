@@ -2,10 +2,19 @@
 
 import { useMemo, useState } from "react";
 
+import { getPrivateClassRanking } from "@/lib/product-management";
 import { exportAdminReportPdf } from "@/lib/report-pdf";
 import { getCompletionRate, getReportSummary, getSessionModeLabel } from "@/lib/scoring";
 import { getAdminAlerts } from "@/lib/training-insights";
-import type { ClinicalObservation, HelpRequest, ProgressState, SessionRecord, Usuario } from "@/lib/types";
+import type {
+  ClinicalObservation,
+  HelpRequest,
+  PrescriptionSession,
+  ProgressState,
+  ReminderSchedule,
+  SessionRecord,
+  Usuario,
+} from "@/lib/types";
 
 type AdminScreenProps = {
   usuario: Usuario;
@@ -13,6 +22,8 @@ type AdminScreenProps = {
   histories: Array<{ user: Usuario; history: SessionRecord[]; progress?: ProgressState }>;
   helpRequests: HelpRequest[];
   observations: ClinicalObservation[];
+  reminders: ReminderSchedule[];
+  prescriptions: PrescriptionSession[];
   onBack: () => void;
   onUpdateHelpStatus: (
     requestId: string,
@@ -46,6 +57,8 @@ export function AdminScreen({
   histories,
   helpRequests,
   observations,
+  reminders,
+  prescriptions,
   onBack,
   onUpdateHelpStatus,
   onUpdateUserStatus,
@@ -73,6 +86,8 @@ export function AdminScreen({
     [normalizedHistories],
   );
   const adminAlerts = useMemo(() => getAdminAlerts(normalizedHistories), [normalizedHistories]);
+  const scoreRanking = useMemo(() => getPrivateClassRanking(normalizedHistories, null, "score"), [normalizedHistories]);
+  const evolutionRanking = useMemo(() => getPrivateClassRanking(normalizedHistories, null, "evolucao"), [normalizedHistories]);
 
   const filteredHistories = useMemo(() => {
     const query = search.trim().toLowerCase();
@@ -240,6 +255,16 @@ export function AdminScreen({
             <h3>{helpRequests.length}</h3>
             <p className="muted">Duvidas registradas pelos usuarios dentro do app.</p>
           </article>
+          <article className="stat-card">
+            <p className="small-muted">Rotinas agendadas</p>
+            <h3>{reminders.length}</h3>
+            <p className="muted">Lembretes e agendas de treino ativos no produto.</p>
+          </article>
+          <article className="stat-card">
+            <p className="small-muted">Sessoes prescritas</p>
+            <h3>{prescriptions.length}</h3>
+            <p className="muted">Blocos orientados por professor ou responsavel.</p>
+          </article>
         </section>
 
         <section className="panel admin-status-panel">
@@ -287,6 +312,39 @@ export function AdminScreen({
           ) : (
             <p className="small-muted">Nenhum alerta critico agora. O grupo esta sem sinais fortes de abandono ou queda.</p>
           )}
+        </section>
+
+        <section className="panel">
+          <div className="section-head">
+            <h3>Rankings privados do produto</h3>
+            <span className="small-muted">Leitura consolidada por desempenho e evolucao</span>
+          </div>
+          <div className="admin-alert-grid">
+            <article className="admin-class-card">
+              <h3>Desempenho consolidado</h3>
+              <div className="ranking-list">
+                {scoreRanking.map((entry, index) => (
+                  <div key={entry.email} className="ranking-item">
+                    <strong>{`${index + 1}. ${entry.name}`}</strong>
+                    <span>{entry.score}</span>
+                    <p className="small-muted">{entry.subtitle}</p>
+                  </div>
+                ))}
+              </div>
+            </article>
+            <article className="admin-class-card">
+              <h3>Evolucao recente</h3>
+              <div className="ranking-list">
+                {evolutionRanking.map((entry, index) => (
+                  <div key={entry.email} className="ranking-item">
+                    <strong>{`${index + 1}. ${entry.name}`}</strong>
+                    <span>{entry.score >= 0 ? `+${entry.score}` : entry.score}</span>
+                    <p className="small-muted">{entry.subtitle}</p>
+                  </div>
+                ))}
+              </div>
+            </article>
+          </div>
         </section>
 
         <section className="panel admin-toolbar">
@@ -533,6 +591,15 @@ export function AdminScreen({
                               {`Atualizada em ${new Date(savedObservation.updatedAt).toLocaleDateString("pt-BR")} por ${savedObservation.authorName}.`}
                             </p>
                           ) : null}
+                          {savedObservation?.history && savedObservation.history.length > 0 ? (
+                            <div className="small-muted">
+                              {savedObservation.history.slice(-3).map((entry) => (
+                                <p key={`${entry.updatedAt}-${entry.authorName}`}>
+                                  {`${new Date(entry.updatedAt).toLocaleDateString("pt-BR")} · ${entry.authorName}: ${entry.note}`}
+                                </p>
+                              ))}
+                            </div>
+                          ) : null}
                           <button
                             type="button"
                             className="btn btn-secondary"
@@ -622,6 +689,35 @@ export function AdminScreen({
             ) : (
               <p className="small-muted">Nenhuma duvida corresponde aos filtros atuais.</p>
             )}
+          </div>
+        </section>
+
+        <section className="panel">
+          <div className="section-head">
+            <h3>Agenda e prescricoes do produto</h3>
+            <span className="small-muted">{`${reminders.length} rotina(s) e ${prescriptions.length} sessao(oes) prescrita(s)`}</span>
+          </div>
+          <div className="admin-alert-grid">
+            <article className="admin-class-card">
+              <h3>Rotinas agendadas</h3>
+              {reminders.length > 0 ? (
+                reminders.slice(0, 8).map((item) => (
+                  <p key={item.id} className="small-muted">{`${item.title} · ${item.daysOfWeek.join(", ")} · ${item.durationMinutes} min · ${item.turma ?? item.ownerEmail}`}</p>
+                ))
+              ) : (
+                <p className="small-muted">Ainda sem rotinas salvas.</p>
+              )}
+            </article>
+            <article className="admin-class-card">
+              <h3>Sessoes prescritas</h3>
+              {prescriptions.length > 0 ? (
+                prescriptions.slice(0, 8).map((item) => (
+                  <p key={item.id} className="small-muted">{`${item.title} · ${item.challengeName} · ${item.status} · ${item.assignedByName}`}</p>
+                ))
+              ) : (
+                <p className="small-muted">Ainda sem sessoes prescritas.</p>
+              )}
+            </article>
           </div>
         </section>
       </section>

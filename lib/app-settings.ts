@@ -11,6 +11,9 @@ export type AppSettings = {
   therapeuticMode: boolean;
   reducedStimuli: boolean;
   screenReaderHints: boolean;
+  formalEvaluationMode: boolean;
+  visibleFocus: boolean;
+  keyboardNavigation: boolean;
 };
 
 export const APP_SETTINGS_KEY = "app_memoria_settings_v1";
@@ -24,6 +27,9 @@ export const DEFAULT_APP_SETTINGS: AppSettings = {
   therapeuticMode: false,
   reducedStimuli: false,
   screenReaderHints: true,
+  formalEvaluationMode: false,
+  visibleFocus: true,
+  keyboardNavigation: true,
 };
 
 export function loadAppSettings(): AppSettings {
@@ -75,6 +81,9 @@ export function applyAppSettingsToDocument(settings: AppSettings) {
   body.classList.toggle("app-reduced-stimuli", settings.reducedStimuli || settings.therapeuticMode);
   body.classList.toggle("app-screen-reader-hints", settings.screenReaderHints);
   body.classList.toggle("app-therapeutic-mode", settings.therapeuticMode);
+  body.classList.toggle("app-formal-evaluation", settings.formalEvaluationMode);
+  body.classList.toggle("app-visible-focus", settings.visibleFocus);
+  body.classList.toggle("app-keyboard-navigation", settings.keyboardNavigation);
 }
 
 export function useAppSettingsState() {

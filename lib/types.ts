@@ -87,6 +87,12 @@ export type HelpRequest = {
   adminReply?: string | null;
 };
 
+export type ClinicalObservationRevision = {
+  note: string;
+  authorName: string;
+  updatedAt: string;
+};
+
 export type ClinicalObservation = {
   id: string;
   email: string;
@@ -95,6 +101,37 @@ export type ClinicalObservation = {
   authorName: string;
   createdAt: string;
   updatedAt: string;
+  history?: ClinicalObservationRevision[];
+};
+
+export type ReminderSchedule = {
+  id: string;
+  ownerEmail: string;
+  turma: string | null;
+  title: string;
+  objective: string;
+  daysOfWeek: string[];
+  durationMinutes: number;
+  createdAt: string;
+  updatedAt: string;
+  active: boolean;
+};
+
+export type PrescriptionSession = {
+  id: string;
+  assignedToEmail: string;
+  assignedByEmail: string;
+  assignedByName: string;
+  turma: string | null;
+  title: string;
+  objective: string;
+  mode: SessionMode;
+  challengeId: number;
+  challengeName: string;
+  notes: string;
+  durationMinutes: number;
+  createdAt: string;
+  status: "pendente" | "concluida";
 };
 
 export type AdminOverview = {
@@ -102,6 +139,8 @@ export type AdminOverview = {
   histories: Array<{ user: Usuario; history: SessionRecord[]; progress?: ProgressState }>;
   helpRequests: HelpRequest[];
   observations: ClinicalObservation[];
+  reminders?: ReminderSchedule[];
+  prescriptions?: PrescriptionSession[];
   source: "local" | "supabase";
 };
 

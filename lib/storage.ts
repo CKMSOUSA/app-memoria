@@ -1,7 +1,17 @@
 "use client";
 
 import { createDefaultProgress, mergeProgress } from "@/lib/scoring";
-import type { ClinicalObservation, HelpRequest, ProgressState, SessionRecord, Usuario, UsuarioPersistido, UserStatus } from "@/lib/types";
+import type {
+  ClinicalObservation,
+  HelpRequest,
+  PrescriptionSession,
+  ProgressState,
+  ReminderSchedule,
+  SessionRecord,
+  Usuario,
+  UsuarioPersistido,
+  UserStatus,
+} from "@/lib/types";
 
 export const USERS_KEY = "app_memoria_usuarios_v2";
 export const SESSION_KEY = "app_memoria_usuario_ativo_v2";
@@ -9,6 +19,8 @@ export const PROGRESS_PREFIX = "app_memoria_progresso_v2";
 export const HISTORY_PREFIX = "app_memoria_historico_v1";
 export const HELP_REQUESTS_KEY = "app_memoria_ajuda_v1";
 export const OBSERVATIONS_KEY = "app_memoria_observacoes_v1";
+export const REMINDERS_KEY = "app_memoria_agenda_v1";
+export const PRESCRIPTIONS_KEY = "app_memoria_prescricoes_v1";
 export const AVATAR_OPTIONS = ["🧠", "🚀", "🦊", "🐼", "🦁", "🧩"];
 
 type RegisterResult = {
@@ -467,6 +479,14 @@ export function upsertClinicalObservation(input: {
                 note: normalizedNote,
                 authorName: input.authorName,
                 updatedAt: now,
+                history: [
+                  ...(item.history ?? []),
+                  {
+                    note: item.note,
+                    authorName: item.authorName,
+                    updatedAt: item.updatedAt,
+                  },
+                ].slice(-12),
               }
             : item,
         )
@@ -479,11 +499,99 @@ export function upsertClinicalObservation(input: {
             authorName: input.authorName,
             createdAt: now,
             updatedAt: now,
+            history: [],
           },
           ...current,
         ];
 
   saveClinicalObservations(next);
+  return next;
+}
+
+export function loadReminderSchedules() {
+  if (!canUseStorage()) return [] as ReminderSchedule[];
+  const raw = localStorage.getItem(REMINDERS_KEY);
+  if (!raw) return [] as ReminderSchedule[];
+
+  try {
+    return JSON.parse(raw) as ReminderSchedule[];
+  } catch {
+    return [] as ReminderSchedule[];
+  }
+}
+
+export function saveReminderSchedules(reminders: ReminderSchedule[]) {
+  if (!canUseStorage()) return;
+  localStorage.setItem(REMINDERS_KEY, JSON.stringify(reminders.slice(0, 240)));
+}
+
+export function upsertReminderSchedule(
+  input: Omit<ReminderSchedule, "id" | "createdAt" | "updatedAt"> & { id?: string },
+) {
+  const current = loadReminderSchedules();
+  const now = new Date().toISOString();
+
+  const next = input.id
+    ? current.map((item) =>
+        item.id === input.id
+          ? {
+              ...item,
+              ...input,
+              updatedAt: now,
+            }
+          : item,
+      )
+    : [
+        {
+          ...input,
+          id: `${Date.now()}-${Math.random().toString(16).slice(2, 8)}`,
+          createdAt: now,
+          updatedAt: now,
+        },
+        ...current,
+      ];
+
+  saveReminderSchedules(next);
+  return next;
+}
+
+export function loadPrescriptionSessions() {
+  if (!canUseStorage()) return [] as PrescriptionSession[];
+  const raw = localStorage.getItem(PRESCRIPTIONS_KEY);
+  if (!raw) return [] as PrescriptionSession[];
+
+  try {
+    return JSON.parse(raw) as PrescriptionSession[];
+  } catch {
+    return [] as PrescriptionSession[];
+  }
+}
+
+export function savePrescriptionSessions(prescriptions: PrescriptionSession[]) {
+  if (!canUseStorage()) return;
+  localStorage.setItem(PRESCRIPTIONS_KEY, JSON.stringify(prescriptions.slice(0, 320)));
+}
+
+export function appendPrescriptionSession(input: Omit<PrescriptionSession, "id" | "createdAt" | "status">) {
+  const current = loadPrescriptionSessions();
+  const next: PrescriptionSession[] = [
+    {
+      ...input,
+      id: `${Date.now()}-${Math.random().toString(16).slice(2, 8)}`,
+      createdAt: new Date().toISOString(),
+      status: "pendente",
+    },
+    ...current,
+  ];
+
+  savePrescriptionSessions(next);
+  return next;
+}
+
+export function updatePrescriptionStatus(id: string, status: PrescriptionSession["status"]) {
+  const current = loadPrescriptionSessions();
+  const next = current.map((item) => (item.id === id ? { ...item, status } : item));
+  savePrescriptionSessions(next);
   return next;
 }
 

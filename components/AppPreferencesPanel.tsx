@@ -100,6 +100,24 @@ export function AppPreferencesPanel({ settings, isOffline, offlineSyncStatus, on
           checked={settings.reducedStimuli}
           onChange={() => onUpdateSettings({ reducedStimuli: !settings.reducedStimuli })}
         />
+        <SettingToggle
+          label="Avaliacao formal"
+          description="Ativa um ambiente mais padronizado, com menos distração e leitura mais tecnica."
+          checked={settings.formalEvaluationMode}
+          onChange={() => onUpdateSettings({ formalEvaluationMode: !settings.formalEvaluationMode })}
+        />
+        <SettingToggle
+          label="Foco visivel"
+          description="Reforca bordas e destaque de foco para uso com teclado e leitura assistida."
+          checked={settings.visibleFocus}
+          onChange={() => onUpdateSettings({ visibleFocus: !settings.visibleFocus })}
+        />
+        <SettingToggle
+          label="Navegacao por teclado"
+          description="Mantem a interface preparada para setas, tabulacao e leitura de tela."
+          checked={settings.keyboardNavigation}
+          onChange={() => onUpdateSettings({ keyboardNavigation: !settings.keyboardNavigation })}
+        />
       </div>
     </section>
   );
