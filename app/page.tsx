@@ -379,6 +379,16 @@ export default function Page() {
     setObservations(next);
   }
 
+  async function handleResetAllTrainingData() {
+    await repository.resetAllTrainingData(adminAccessCode);
+    const overview = await repository.loadAdminOverview(adminAccessCode);
+    setAdminHistories(overview.histories);
+    setHelpRequests(overview.helpRequests);
+    setObservations(overview.observations);
+    setReminders(overview.reminders ?? []);
+    setPrescriptions(overview.prescriptions ?? []);
+  }
+
   async function handleSaveReminder(
     input: Omit<ReminderSchedule, "id" | "createdAt" | "updatedAt"> & { id?: string },
   ) {
@@ -755,6 +765,7 @@ export default function Page() {
         onBack={() => setTela("dashboard")}
         onUpdateHelpStatus={handleUpdateHelpStatus}
         onUpdateUserStatus={handleUpdateUserStatus}
+        onResetAllTrainingData={handleResetAllTrainingData}
         onSaveObservation={handleSaveObservation}
       />
     );

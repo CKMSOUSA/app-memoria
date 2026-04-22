@@ -290,6 +290,28 @@ export function excludeUser(email: string) {
   return updatedUser;
 }
 
+export function resetTrainingDataForAllUsers() {
+  const users = readUsers();
+  const nextUsers = users.map((user) =>
+    user.role === "admin"
+      ? user
+      : {
+          ...user,
+          pontos: 0,
+        },
+  );
+
+  writeUsers(nextUsers);
+
+  for (const user of nextUsers) {
+    if (user.role === "admin") continue;
+    localStorage.setItem(`${PROGRESS_PREFIX}:${user.email}`, JSON.stringify(createDefaultProgress()));
+    localStorage.setItem(`${HISTORY_PREFIX}:${user.email}`, JSON.stringify([]));
+  }
+
+  localStorage.setItem(PRESCRIPTIONS_KEY, JSON.stringify([]));
+}
+
 export function syncAuthUserProfile(profile: {
   email: string;
   nome?: string;

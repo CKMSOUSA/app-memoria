@@ -31,6 +31,7 @@ type AdminScreenProps = {
     adminReply?: string,
   ) => Promise<void>;
   onUpdateUserStatus: (email: string, status: Usuario["status"]) => Promise<void>;
+  onResetAllTrainingData: () => Promise<void>;
   onSaveObservation: (
     email: string,
     category: ClinicalObservation["category"],
@@ -62,6 +63,7 @@ export function AdminScreen({
   onBack,
   onUpdateHelpStatus,
   onUpdateUserStatus,
+  onResetAllTrainingData,
   onSaveObservation,
 }: AdminScreenProps) {
   const normalizedHistories = useMemo(
@@ -75,6 +77,7 @@ export function AdminScreen({
   const [updatingHelpId, setUpdatingHelpId] = useState<string | null>(null);
   const [updatingUserEmail, setUpdatingUserEmail] = useState<string | null>(null);
   const [savingObservationKey, setSavingObservationKey] = useState<string | null>(null);
+  const [resettingAllData, setResettingAllData] = useState(false);
   const [replyDrafts, setReplyDrafts] = useState<Record<string, string>>({});
   const [observationDrafts, setObservationDrafts] = useState<Record<string, string>>({});
   const userStatusSummary = useMemo(
@@ -227,6 +230,30 @@ export function AdminScreen({
           <div className="button-row">
             <button className="btn btn-secondary btn-export-report" onClick={handleExportAdminPdf}>
               Exportar PDF
+            </button>
+            <button
+              className="btn btn-secondary"
+              disabled={resettingAllData}
+              onClick={async () => {
+                const confirmed = window.confirm(
+                  "Zerar o treinamento de todos os usuarios? Isso vai reiniciar pontos, progresso, historico e sessoes prescritas, sem apagar as contas.",
+                );
+                if (!confirmed) return;
+
+                const finalConfirmed = window.confirm(
+                  "Confirmacao final: todos os usuarios nao administradores vao recomecar do zero. Deseja continuar?",
+                );
+                if (!finalConfirmed) return;
+
+                setResettingAllData(true);
+                try {
+                  await onResetAllTrainingData();
+                } finally {
+                  setResettingAllData(false);
+                }
+              }}
+            >
+              {resettingAllData ? "Zerando usuarios..." : "Zerar treinamento de todos"}
             </button>
             <button className="btn btn-admin-back" onClick={onBack}>
               Voltar ao painel

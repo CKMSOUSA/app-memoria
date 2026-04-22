@@ -26,6 +26,7 @@ import {
   loadPrescriptionSessions,
   appendPrescriptionSession,
   updatePrescriptionStatus,
+  resetTrainingDataForAllUsers,
   saveProgress,
   simulateRecovery,
   upsertClinicalObservation,
@@ -131,6 +132,7 @@ type AppRepository = {
   updatePrescriptionStatus: (id: string, status: PrescriptionSession["status"]) => Promise<PrescriptionSession[]>;
   loadAdminOverview: (adminCode?: string) => Promise<AdminOverview>;
   updateManagedUserStatus: (email: string, status: Usuario["status"], adminCode?: string) => Promise<void>;
+  resetAllTrainingData: (adminCode?: string) => Promise<void>;
   updateHelpRequestStatus: (
     requestId: string,
     status: HelpRequest["status"],
@@ -866,6 +868,14 @@ const localRepository: AppRepository = {
     updateUserStatus(email, status);
     await persistUsersToOfflineStore();
   },
+  resetAllTrainingData: async (adminCode) => {
+    if (!isLocalAdminCodeValid(adminCode)) {
+      throw new Error("Acesso administrativo nao autorizado.");
+    }
+
+    resetTrainingDataForAllUsers();
+    await persistUsersToOfflineStore();
+  },
   updateHelpRequestStatus: async (requestId, status, adminReply, adminCode) => {
     const remoteResult = await updateAdminHelpRequestStatus(requestId, status, adminReply, adminCode);
     if (remoteResult?.helpRequests) {
@@ -1025,6 +1035,10 @@ const remoteRepository: AppRepository = {
     if (!result?.ok) {
       throw new Error("Nao foi possivel atualizar o usuario no backend administrativo.");
     }
+  },
+  resetAllTrainingData: async () => {
+    resetTrainingDataForAllUsers();
+    await persistUsersToOfflineStore();
   },
   updateHelpRequestStatus: async (requestId, status, adminReply, adminCode) => {
     const result = await updateAdminHelpRequestStatus(requestId, status, adminReply, adminCode);
