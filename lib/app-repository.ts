@@ -1,11 +1,13 @@
 "use client";
 
 import {
+  appendAdminAuditEntry,
   appendSessionHistory,
   appendHelpRequest,
   bootstrapStorage,
   clearActiveSession,
   excludeUser,
+  exportBackupData,
   setActiveSession,
   syncAuthUserProfile,
   ensureAdminUser,
@@ -24,12 +26,16 @@ import {
   loadReminderSchedules,
   upsertReminderSchedule,
   loadPrescriptionSessions,
+  loadUserLinks,
+  loadAdminAuditLog,
   appendPrescriptionSession,
+  restoreBackupData,
   updatePrescriptionStatus,
   resetTrainingDataForAllUsers,
   saveProgress,
   simulateRecovery,
   upsertClinicalObservation,
+  upsertUserLink,
   updateUserStatus,
   updateUserProfile as updateStoredUserProfile,
   updateUserPoints as updateStoredUserPoints,
@@ -69,6 +75,8 @@ import {
 import { loadSupabaseProgress, saveSupabaseProgress } from "@/lib/supabase-progress";
 import type {
   AdminOverview,
+  AdminAuditEntry,
+  BackupData,
   ClinicalObservation,
   DataMode,
   HelpRequest,
@@ -76,6 +84,7 @@ import type {
   ProgressState,
   ReminderSchedule,
   SessionRecord,
+  UserLink,
   Usuario,
 } from "@/lib/types";
 
@@ -130,6 +139,12 @@ type AppRepository = {
     input: Omit<PrescriptionSession, "id" | "createdAt" | "status">,
   ) => Promise<PrescriptionSession[]>;
   updatePrescriptionStatus: (id: string, status: PrescriptionSession["status"]) => Promise<PrescriptionSession[]>;
+  loadUserLinks: () => Promise<UserLink[]>;
+  saveUserLink: (input: Omit<UserLink, "id" | "createdAt">) => Promise<UserLink[]>;
+  loadAdminAuditLog: () => Promise<AdminAuditEntry[]>;
+  appendAdminAuditEntry: (input: Omit<AdminAuditEntry, "id" | "createdAt">) => Promise<AdminAuditEntry[]>;
+  exportBackupData: () => Promise<BackupData>;
+  restoreBackupData: (backup: BackupData) => Promise<void>;
   loadAdminOverview: (adminCode?: string) => Promise<AdminOverview>;
   updateManagedUserStatus: (email: string, status: Usuario["status"], adminCode?: string) => Promise<void>;
   resetAllTrainingData: (adminCode?: string) => Promise<void>;
@@ -417,6 +432,8 @@ function mergeLocalOverviewFields(overview: AdminOverview): AdminOverview {
       return localUser ? { ...entry, user: { ...entry.user, turma: localUser.turma ?? entry.user.turma ?? null } } : entry;
     }),
     observations: loadClinicalObservations(),
+    userLinks: loadUserLinks(),
+    auditLog: loadAdminAuditLog(),
   };
 }
 
@@ -821,6 +838,15 @@ const localRepository: AppRepository = {
   loadPrescriptionSessions: async () => loadPrescriptionSessions(),
   savePrescriptionSession: async (input) => appendPrescriptionSession(input),
   updatePrescriptionStatus: async (id, status) => updatePrescriptionStatus(id, status),
+  loadUserLinks: async () => loadUserLinks(),
+  saveUserLink: async (input) => upsertUserLink(input),
+  loadAdminAuditLog: async () => loadAdminAuditLog(),
+  appendAdminAuditEntry: async (input) => appendAdminAuditEntry(input),
+  exportBackupData: async () => exportBackupData(),
+  restoreBackupData: async (backup) => {
+    restoreBackupData(backup);
+    await persistUsersToOfflineStore();
+  },
   loadAdminOverview: async (adminCode) => {
     const remoteOverview = await loadAdminOverviewFromApi(adminCode);
     if (remoteOverview) return mergeLocalOverviewFields(remoteOverview);
@@ -841,6 +867,8 @@ const localRepository: AppRepository = {
       observations: loadClinicalObservations(),
       reminders: loadReminderSchedules(),
       prescriptions: loadPrescriptionSessions(),
+      userLinks: loadUserLinks(),
+      auditLog: loadAdminAuditLog(),
       source: "local",
     };
   },
@@ -1023,6 +1051,15 @@ const remoteRepository: AppRepository = {
   loadPrescriptionSessions: async () => loadPrescriptionSessions(),
   savePrescriptionSession: async (input) => appendPrescriptionSession(input),
   updatePrescriptionStatus: async (id, status) => updatePrescriptionStatus(id, status),
+  loadUserLinks: async () => loadUserLinks(),
+  saveUserLink: async (input) => upsertUserLink(input),
+  loadAdminAuditLog: async () => loadAdminAuditLog(),
+  appendAdminAuditEntry: async (input) => appendAdminAuditEntry(input),
+  exportBackupData: async () => exportBackupData(),
+  restoreBackupData: async (backup) => {
+    restoreBackupData(backup);
+    await persistUsersToOfflineStore();
+  },
   loadAdminOverview: async (adminCode) => {
     const overview = await loadAdminOverviewFromApi(adminCode);
     if (!overview) {

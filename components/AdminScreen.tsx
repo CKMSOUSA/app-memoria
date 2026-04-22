@@ -1,18 +1,21 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 
-import { getPrivateClassRanking } from "@/lib/product-management";
+import { getAdherencePanel, getFilteredManagedHistories, getPrivateClassRanking, summarizeAuditLog } from "@/lib/product-management";
 import { exportAdminReportPdf } from "@/lib/report-pdf";
 import { getCompletionRate, getReportSummary, getSessionModeLabel } from "@/lib/scoring";
 import { getAdminAlerts } from "@/lib/training-insights";
 import type {
+  AdminAuditEntry,
+  BackupData,
   ClinicalObservation,
   HelpRequest,
   PrescriptionSession,
   ProgressState,
   ReminderSchedule,
   SessionRecord,
+  UserLink,
   Usuario,
 } from "@/lib/types";
 
@@ -24,6 +27,8 @@ type AdminScreenProps = {
   observations: ClinicalObservation[];
   reminders: ReminderSchedule[];
   prescriptions: PrescriptionSession[];
+  userLinks: UserLink[];
+  auditLog: AdminAuditEntry[];
   onBack: () => void;
   onUpdateHelpStatus: (
     requestId: string,
@@ -37,6 +42,9 @@ type AdminScreenProps = {
     category: ClinicalObservation["category"],
     note: string,
   ) => Promise<void>;
+  onSaveUserLink: (input: Omit<UserLink, "id" | "createdAt">) => Promise<void>;
+  onExportBackup: () => Promise<BackupData>;
+  onRestoreBackup: (backup: BackupData) => Promise<void>;
 };
 
 const userStatusLabels: Record<Usuario["status"], string> = {
@@ -60,11 +68,16 @@ export function AdminScreen({
   observations,
   reminders,
   prescriptions,
+  userLinks,
+  auditLog,
   onBack,
   onUpdateHelpStatus,
   onUpdateUserStatus,
   onResetAllTrainingData,
   onSaveObservation,
+  onSaveUserLink,
+  onExportBackup,
+  onRestoreBackup,
 }: AdminScreenProps) {
   const normalizedHistories = useMemo(
     () => (histories.length > 0 ? histories : [{ user: usuario, history: [], progress: progressoAtual }]),
@@ -78,6 +91,15 @@ export function AdminScreen({
   const [updatingUserEmail, setUpdatingUserEmail] = useState<string | null>(null);
   const [savingObservationKey, setSavingObservationKey] = useState<string | null>(null);
   const [resettingAllData, setResettingAllData] = useState(false);
+  const [ageFilter, setAgeFilter] = useState<"todas" | "6-12" | "13-17" | "18+">("todas");
+  const [levelFilter, setLevelFilter] = useState<"todos" | "iniciante" | "intermediario" | "avancado">("todos");
+  const [trendFilter, setTrendFilter] = useState<"todas" | "subindo" | "estavel" | "caindo">("todas");
+  const [prescriptionFilter, setPrescriptionFilter] = useState<"todas" | "pendente" | "concluida">("todas");
+  const [linkOwnerEmail, setLinkOwnerEmail] = useState("");
+  const [linkStudentEmail, setLinkStudentEmail] = useState("");
+  const [linkRelationship, setLinkRelationship] = useState<"professor" | "responsavel">("professor");
+  const [restoringBackup, setRestoringBackup] = useState(false);
+  const backupInputRef = useRef<HTMLInputElement | null>(null);
   const [replyDrafts, setReplyDrafts] = useState<Record<string, string>>({});
   const [observationDrafts, setObservationDrafts] = useState<Record<string, string>>({});
   const userStatusSummary = useMemo(
@@ -89,13 +111,23 @@ export function AdminScreen({
     [normalizedHistories],
   );
   const adminAlerts = useMemo(() => getAdminAlerts(normalizedHistories), [normalizedHistories]);
+  const adherencePanel = useMemo(() => getAdherencePanel(normalizedHistories), [normalizedHistories]);
   const scoreRanking = useMemo(() => getPrivateClassRanking(normalizedHistories, null, "score"), [normalizedHistories]);
   const evolutionRanking = useMemo(() => getPrivateClassRanking(normalizedHistories, null, "evolucao"), [normalizedHistories]);
 
   const filteredHistories = useMemo(() => {
     const query = search.trim().toLowerCase();
-
-    return normalizedHistories.filter(({ user, history }) => {
+    const advancedFiltered = getFilteredManagedHistories(
+      normalizedHistories,
+      {
+        ageBand: ageFilter,
+        level: levelFilter,
+        trend: trendFilter,
+        prescriptionStatus: prescriptionFilter,
+      },
+      prescriptions,
+    );
+    return advancedFiltered.filter(({ user, history }) => {
       if (userStatusFilter !== "todos" && user.status !== userStatusFilter) {
         return false;
       }
@@ -120,7 +152,7 @@ export function AdminScreen({
 
       return matchesUser || matchesHistory;
     });
-  }, [normalizedHistories, search, userRoleFilter, userStatusFilter]);
+  }, [normalizedHistories, search, userRoleFilter, userStatusFilter, ageFilter, levelFilter, trendFilter, prescriptionFilter, prescriptions]);
 
   const turmaSummaries = useMemo(() => {
     const grouped = new Map<
@@ -233,6 +265,24 @@ export function AdminScreen({
             </button>
             <button
               className="btn btn-secondary"
+              onClick={async () => {
+                const backup = await onExportBackup();
+                const blob = new Blob([JSON.stringify(backup, null, 2)], { type: "application/json" });
+                const url = URL.createObjectURL(blob);
+                const anchor = document.createElement("a");
+                anchor.href = url;
+                anchor.download = `backup-app-memoria-${new Date().toISOString().slice(0, 10)}.json`;
+                anchor.click();
+                URL.revokeObjectURL(url);
+              }}
+            >
+              Exportar backup
+            </button>
+            <button className="btn btn-secondary" onClick={() => backupInputRef.current?.click()}>
+              Restaurar backup
+            </button>
+            <button
+              className="btn btn-secondary"
               disabled={resettingAllData}
               onClick={async () => {
                 const confirmed = window.confirm(
@@ -259,6 +309,24 @@ export function AdminScreen({
               Voltar ao painel
             </button>
           </div>
+          <input
+            ref={backupInputRef}
+            type="file"
+            accept="application/json"
+            hidden
+            onChange={async (event) => {
+              const file = event.target.files?.[0];
+              if (!file) return;
+              setRestoringBackup(true);
+              try {
+                const text = await file.text();
+                await onRestoreBackup(JSON.parse(text) as BackupData);
+              } finally {
+                setRestoringBackup(false);
+                event.target.value = "";
+              }
+            }}
+          />
         </header>
 
         <section className="stats-grid">
@@ -431,6 +499,134 @@ export function AdminScreen({
                 <option value="respondida">Respondidas</option>
               </select>
             </label>
+
+            <label className="field">
+              <span>Faixa etaria</span>
+              <select className="text-input" value={ageFilter} onChange={(event) => setAgeFilter(event.target.value as typeof ageFilter)}>
+                <option value="todas">Todas</option>
+                <option value="6-12">6 a 12</option>
+                <option value="13-17">13 a 17</option>
+                <option value="18+">18+</option>
+              </select>
+            </label>
+
+            <label className="field">
+              <span>Nivel medio</span>
+              <select className="text-input" value={levelFilter} onChange={(event) => setLevelFilter(event.target.value as typeof levelFilter)}>
+                <option value="todos">Todos</option>
+                <option value="iniciante">Iniciante</option>
+                <option value="intermediario">Intermediario</option>
+                <option value="avancado">Avancado</option>
+              </select>
+            </label>
+
+            <label className="field">
+              <span>Tendencia</span>
+              <select className="text-input" value={trendFilter} onChange={(event) => setTrendFilter(event.target.value as typeof trendFilter)}>
+                <option value="todas">Todas</option>
+                <option value="subindo">Subindo</option>
+                <option value="estavel">Estavel</option>
+                <option value="caindo">Caindo</option>
+              </select>
+            </label>
+
+            <label className="field">
+              <span>Status da prescricao</span>
+              <select
+                className="text-input"
+                value={prescriptionFilter}
+                onChange={(event) => setPrescriptionFilter(event.target.value as typeof prescriptionFilter)}
+              >
+                <option value="todas">Todas</option>
+                <option value="pendente">Pendentes</option>
+                <option value="concluida">Concluidas</option>
+              </select>
+            </label>
+          </div>
+        </section>
+
+        <section className="panel">
+          <div className="section-head">
+            <h3>Painel de adesao</h3>
+            <span className="small-muted">Leitura de frequencia, risco e abandono</span>
+          </div>
+          <div className="admin-status-grid">
+            <div className="admin-status-card admin-status-card-active">
+              <strong>{adherencePanel.regular}</strong>
+              <span>Rotina ativa</span>
+            </div>
+            <div className="admin-status-card admin-status-card-blocked">
+              <strong>{adherencePanel.attention}</strong>
+              <span>Precisam atencao</span>
+            </div>
+            <div className="admin-status-card admin-status-card-deleted">
+              <strong>{adherencePanel.inactive}</strong>
+              <span>Inativos</span>
+            </div>
+          </div>
+          <div className="admin-alert-grid">
+            {adherencePanel.entries.slice(0, 8).map((entry) => (
+              <article key={entry.email} className={`admin-alert-card admin-alert-${entry.label === "regular" ? "baixa" : entry.label === "attention" ? "media" : "alta"}`}>
+                <h3>{entry.name}</h3>
+                <p className="small-muted">{entry.email}</p>
+                <p className="muted">{entry.summary}</p>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        <section className="panel">
+          <div className="section-head">
+            <h3>Vinculos explicitos</h3>
+            <span className="small-muted">Conecte professor ou responsavel a alunos especificos</span>
+          </div>
+          <div className="admin-toolbar-grid">
+            <label className="field">
+              <span>Email do professor ou responsavel</span>
+              <input value={linkOwnerEmail} onChange={(event) => setLinkOwnerEmail(event.target.value)} placeholder="adulto@email.com" />
+            </label>
+            <label className="field">
+              <span>Email do aluno</span>
+              <input value={linkStudentEmail} onChange={(event) => setLinkStudentEmail(event.target.value)} placeholder="aluno@email.com" />
+            </label>
+            <label className="field">
+              <span>Tipo de vinculo</span>
+              <select className="text-input" value={linkRelationship} onChange={(event) => setLinkRelationship(event.target.value as typeof linkRelationship)}>
+                <option value="professor">Professor</option>
+                <option value="responsavel">Responsavel</option>
+              </select>
+            </label>
+            <div className="field">
+              <span>&nbsp;</span>
+              <button
+                className="btn btn-secondary"
+                onClick={async () => {
+                  if (!linkOwnerEmail.trim() || !linkStudentEmail.trim()) return;
+                  await onSaveUserLink({
+                    ownerEmail: linkOwnerEmail.trim().toLowerCase(),
+                    studentEmail: linkStudentEmail.trim().toLowerCase(),
+                    relationship: linkRelationship,
+                  });
+                  setLinkOwnerEmail("");
+                  setLinkStudentEmail("");
+                }}
+              >
+                Salvar vinculo
+              </button>
+            </div>
+          </div>
+          <div className="admin-alert-grid">
+            {userLinks.length > 0 ? (
+              userLinks.slice(0, 10).map((item) => (
+                <article key={item.id} className="admin-class-card">
+                  <h3>{item.relationship === "professor" ? "Professor" : "Responsavel"}</h3>
+                  <p className="small-muted">{item.ownerEmail}</p>
+                  <p className="muted">{`Aluno vinculado: ${item.studentEmail}`}</p>
+                </article>
+              ))
+            ) : (
+              <p className="small-muted">Ainda nao ha vinculos explicitos registrados.</p>
+            )}
           </div>
         </section>
 
@@ -745,6 +941,30 @@ export function AdminScreen({
                 <p className="small-muted">Ainda sem sessoes prescritas.</p>
               )}
             </article>
+          </div>
+        </section>
+
+        <section className="panel">
+          <div className="section-head">
+            <h3>Log de acoes administrativas</h3>
+            <span className="small-muted">{auditLog.length} registro(s) recentes</span>
+          </div>
+          <div className="faq-list">
+            {summarizeAuditLog(auditLog).length > 0 ? (
+              summarizeAuditLog(auditLog).map((entry) => (
+                <article key={entry.id} className="faq-card">
+                  <div className="section-head">
+                    <strong>{entry.actorName}</strong>
+                    <span className="small-muted">{new Date(entry.createdAt).toLocaleString("pt-BR")}</span>
+                  </div>
+                  <p className="small-muted">{entry.action}</p>
+                  <p className="muted">{entry.description}</p>
+                  {entry.targetEmail ? <p className="small-muted">{entry.targetEmail}</p> : null}
+                </article>
+              ))
+            ) : (
+              <p className="small-muted">{restoringBackup ? "Restaurando backup..." : "Ainda nao ha acoes auditadas."}</p>
+            )}
           </div>
         </section>
       </section>

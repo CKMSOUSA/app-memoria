@@ -2,12 +2,15 @@
 
 import { createDefaultProgress, mergeProgress } from "@/lib/scoring";
 import type {
+  AdminAuditEntry,
+  BackupData,
   ClinicalObservation,
   HelpRequest,
   PrescriptionSession,
   ProgressState,
   ReminderSchedule,
   SessionRecord,
+  UserLink,
   Usuario,
   UsuarioPersistido,
   UserStatus,
@@ -21,6 +24,8 @@ export const HELP_REQUESTS_KEY = "app_memoria_ajuda_v1";
 export const OBSERVATIONS_KEY = "app_memoria_observacoes_v1";
 export const REMINDERS_KEY = "app_memoria_agenda_v1";
 export const PRESCRIPTIONS_KEY = "app_memoria_prescricoes_v1";
+export const USER_LINKS_KEY = "app_memoria_vinculos_v1";
+export const AUDIT_LOG_KEY = "app_memoria_auditoria_v1";
 export const AVATAR_OPTIONS = ["🧠", "🚀", "🦊", "🐼", "🦁", "🧩"];
 
 type RegisterResult = {
@@ -615,6 +620,111 @@ export function updatePrescriptionStatus(id: string, status: PrescriptionSession
   const next = current.map((item) => (item.id === id ? { ...item, status } : item));
   savePrescriptionSessions(next);
   return next;
+}
+
+export function loadUserLinks() {
+  if (!canUseStorage()) return [] as UserLink[];
+  const raw = localStorage.getItem(USER_LINKS_KEY);
+  if (!raw) return [] as UserLink[];
+
+  try {
+    return JSON.parse(raw) as UserLink[];
+  } catch {
+    return [] as UserLink[];
+  }
+}
+
+export function saveUserLinks(links: UserLink[]) {
+  if (!canUseStorage()) return;
+  localStorage.setItem(USER_LINKS_KEY, JSON.stringify(links.slice(0, 500)));
+}
+
+export function upsertUserLink(input: Omit<UserLink, "id" | "createdAt">) {
+  const current = loadUserLinks();
+  const existing = current.find(
+    (item) =>
+      item.ownerEmail === input.ownerEmail &&
+      item.studentEmail === input.studentEmail &&
+      item.relationship === input.relationship,
+  );
+
+  if (existing) return current;
+
+  const next = [
+    {
+      ...input,
+      id: `${Date.now()}-${Math.random().toString(16).slice(2, 8)}`,
+      createdAt: new Date().toISOString(),
+    },
+    ...current,
+  ];
+  saveUserLinks(next);
+  return next;
+}
+
+export function loadAdminAuditLog() {
+  if (!canUseStorage()) return [] as AdminAuditEntry[];
+  const raw = localStorage.getItem(AUDIT_LOG_KEY);
+  if (!raw) return [] as AdminAuditEntry[];
+
+  try {
+    return JSON.parse(raw) as AdminAuditEntry[];
+  } catch {
+    return [] as AdminAuditEntry[];
+  }
+}
+
+export function saveAdminAuditLog(entries: AdminAuditEntry[]) {
+  if (!canUseStorage()) return;
+  localStorage.setItem(AUDIT_LOG_KEY, JSON.stringify(entries.slice(0, 600)));
+}
+
+export function appendAdminAuditEntry(input: Omit<AdminAuditEntry, "id" | "createdAt">) {
+  const current = loadAdminAuditLog();
+  const next = [
+    {
+      ...input,
+      id: `${Date.now()}-${Math.random().toString(16).slice(2, 8)}`,
+      createdAt: new Date().toISOString(),
+    },
+    ...current,
+  ];
+  saveAdminAuditLog(next);
+  return next;
+}
+
+export function exportBackupData(): BackupData {
+  const users = readUsers();
+  const progressByEmail = Object.fromEntries(users.map((user) => [user.email, loadProgress(user.email)]));
+  const historyByEmail = Object.fromEntries(users.map((user) => [user.email, loadSessionHistory(user.email)]));
+
+  return {
+    exportedAt: new Date().toISOString(),
+    users,
+    helpRequests: loadHelpRequests(),
+    observations: loadClinicalObservations(),
+    reminders: loadReminderSchedules(),
+    prescriptions: loadPrescriptionSessions(),
+    userLinks: loadUserLinks(),
+    auditLog: loadAdminAuditLog(),
+    progressByEmail,
+    historyByEmail,
+  };
+}
+
+export function restoreBackupData(backup: BackupData) {
+  writeUsers((backup.users ?? []).map(normalizeUser));
+  saveHelpRequests(backup.helpRequests ?? []);
+  saveClinicalObservations(backup.observations ?? []);
+  saveReminderSchedules(backup.reminders ?? []);
+  savePrescriptionSessions(backup.prescriptions ?? []);
+  saveUserLinks(backup.userLinks ?? []);
+  saveAdminAuditLog(backup.auditLog ?? []);
+
+  for (const user of backup.users ?? []) {
+    saveProgress(user.email, mergeProgress(backup.progressByEmail?.[user.email]));
+    saveSessionHistory(user.email, backup.historyByEmail?.[user.email] ?? []);
+  }
 }
 
 export function simulateRecovery(email: string) {

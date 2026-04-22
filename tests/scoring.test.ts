@@ -21,8 +21,11 @@ import {
   getSmartRecommendation,
 } from "@/lib/training-insights";
 import {
+  getAdherencePanel,
+  getAutomaticGoals,
   getComparativeReportInsights,
   getFormalEvaluationProtocol,
+  getManagedStudentHistories,
   getInterventionLibrary,
   getPrivateClassRanking,
   getRolePanelInsight,
@@ -345,6 +348,79 @@ test("product management insights expose rankings, comparative report and role v
   assert.equal(protocol.rules.length, 4);
   assert.equal(rolePanel?.cards.length, 4);
   assert.equal(ranking.length, 1);
+});
+
+test("links, automatic goals and adherence panel reflect managed students", () => {
+  const progress = createDefaultProgress();
+  const now = Date.now();
+  const daysAgo = (days: number) => new Date(now - days * 24 * 60 * 60 * 1000).toISOString();
+  const aluno = {
+    nome: "Aluno",
+    email: "aluno@example.com",
+    avatar: "🧠",
+    premium: false,
+    pontos: 12,
+    criadoEm: daysAgo(120),
+    idade: 11,
+    role: "aluno" as const,
+    status: "ativo" as const,
+    turma: "Turma A",
+  };
+  const professor = {
+    nome: "Prof",
+    email: "prof@example.com",
+    avatar: "🧠",
+    premium: false,
+    pontos: 0,
+    criadoEm: daysAgo(120),
+    idade: 33,
+    role: "professor" as const,
+    status: "ativo" as const,
+    turma: "Outra Turma",
+  };
+  const history = [
+    {
+      id: "1",
+      email: aluno.email,
+      mode: "memoria" as const,
+      challengeId: 1,
+      score: 18,
+      timeSeconds: 14,
+      completed: true,
+      playedAt: daysAgo(2),
+    },
+    {
+      id: "2",
+      email: aluno.email,
+      mode: "atencao" as const,
+      challengeId: 1,
+      score: 10,
+      timeSeconds: 20,
+      completed: false,
+      playedAt: daysAgo(25),
+    },
+  ];
+
+  const managed = getManagedStudentHistories(
+    professor,
+    [{ user: aluno, history, progress }],
+    [
+      {
+        id: "l1",
+        ownerEmail: professor.email,
+        studentEmail: aluno.email,
+        relationship: "professor",
+        createdAt: daysAgo(4),
+      },
+    ],
+  );
+  const goals = getAutomaticGoals(history, progress);
+  const adherence = getAdherencePanel([{ user: aluno, history, progress }]);
+
+  assert.equal(managed.length, 1);
+  assert.equal(goals.length, 3);
+  assert.equal(adherence.regular, 0);
+  assert.equal(adherence.attention, 1);
 });
 
 test("admin alerts prioritize abandonment and decline", () => {

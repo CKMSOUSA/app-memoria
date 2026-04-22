@@ -1,12 +1,14 @@
 import { getSessionModeLabel } from "@/lib/scoring";
 import { getAbilityInsights, getPerformanceTrends, getSmartRecommendation } from "@/lib/training-insights";
 import type {
+  AdminAuditEntry,
   ClinicalObservation,
   PrescriptionSession,
   ProgressState,
   ReminderSchedule,
   SessionMode,
   SessionRecord,
+  UserLink,
   Usuario,
 } from "@/lib/types";
 
@@ -46,6 +48,19 @@ export type EvaluationProtocol = {
   title: string;
   summary: string;
   rules: string[];
+};
+
+export type AutomaticGoal = {
+  title: string;
+  progressLabel: string;
+  summary: string;
+};
+
+export type AdherenceInsight = {
+  regular: number;
+  attention: number;
+  inactive: number;
+  entries: Array<{ email: string; name: string; label: "regular" | "attention" | "inactive"; summary: string }>;
 };
 
 function average(values: number[]) {
@@ -255,4 +270,129 @@ export function getRelevantPrescriptions(
   }
 
   return prescriptions.filter((item) => item.assignedByEmail === usuario.email || (usuario.turma && item.turma === usuario.turma));
+}
+
+export function getManagedStudentHistories(
+  usuario: Usuario,
+  histories: ManagedHistory[],
+  userLinks: UserLink[],
+) {
+  if (usuario.role === "admin") return histories.filter((entry) => entry.user.role === "aluno");
+  if (usuario.role === "aluno") return histories.filter((entry) => entry.user.email === usuario.email);
+
+  const linkedEmails = new Set(
+    userLinks
+      .filter((item) => item.ownerEmail === usuario.email && item.relationship === usuario.role)
+      .map((item) => item.studentEmail),
+  );
+
+  const linked = histories.filter((entry) => entry.user.role === "aluno" && linkedEmails.has(entry.user.email));
+  if (linked.length > 0) return linked;
+
+  return histories.filter((entry) => entry.user.role === "aluno" && entry.user.turma === usuario.turma);
+}
+
+export function getAutomaticGoals(history: SessionRecord[], progresso: ProgressState): AutomaticGoal[] {
+  const recommendation = getSmartRecommendation(history, progresso);
+  const recentWeek = getPeriodStats(history, 7, 0);
+  const completedModes = new Set(history.filter((entry) => entry.completed).map((entry) => entry.mode));
+
+  return [
+    {
+      title: "Meta de frequencia da semana",
+      progressLabel: `${Math.min(recentWeek.sessions, 3)}/3 sessoes registradas`,
+      summary: "Manter tres blocos curtos na semana para consolidar rotina.",
+    },
+    {
+      title: "Meta de consolidacao principal",
+      progressLabel: `${getSessionModeLabel(recommendation.mode)} · fase ${recommendation.challengeId}`,
+      summary: `Priorizar ${recommendation.challengeName} ate estabilizar conclusao e reduzir erro recorrente.`,
+    },
+    {
+      title: "Meta de variedade cognitiva",
+      progressLabel: `${Math.min(completedModes.size, 3)}/3 trilhas concluidas`,
+      summary: "Alternar trilhas ajuda a distribuir carga entre memoria, atencao e raciocinio.",
+    },
+  ];
+}
+
+export function getAdherencePanel(histories: ManagedHistory[]): AdherenceInsight {
+  const entries = histories
+    .filter((entry) => entry.user.role === "aluno")
+    .map((entry) => {
+      const recentWeek = getPeriodStats(entry.history, 7, 0);
+      const recentMonth = getPeriodStats(entry.history, 30, 0);
+      const label: "regular" | "attention" | "inactive" =
+        recentWeek.sessions >= 2
+          ? "regular"
+          : recentMonth.sessions >= 1
+            ? "attention"
+            : "inactive";
+
+      return {
+        email: entry.user.email,
+        name: entry.user.nome,
+        label,
+        summary:
+          label === "regular"
+            ? `${recentWeek.sessions} sessoes na semana com rotina ativa.`
+            : label === "attention"
+              ? "Treino recente baixo; vale retomar com meta curta."
+              : "Sem registros recentes; risco de abandono mais alto.",
+      };
+    });
+
+  return {
+    regular: entries.filter((item) => item.label === "regular").length,
+    attention: entries.filter((item) => item.label === "attention").length,
+    inactive: entries.filter((item) => item.label === "inactive").length,
+    entries: entries.sort((left, right) => left.name.localeCompare(right.name)),
+  };
+}
+
+export function getFilteredManagedHistories(
+  histories: ManagedHistory[],
+  filters: {
+    ageBand?: "todas" | "6-12" | "13-17" | "18+";
+    level?: "todos" | "iniciante" | "intermediario" | "avancado";
+    trend?: "todas" | "subindo" | "estavel" | "caindo";
+    prescriptionStatus?: "todas" | "pendente" | "concluida";
+  },
+  prescriptions: PrescriptionSession[],
+) {
+  return histories.filter((entry) => {
+    const ageMatch =
+      filters.ageBand === undefined || filters.ageBand === "todas"
+        ? true
+        : filters.ageBand === "6-12"
+          ? entry.user.idade <= 12
+          : filters.ageBand === "13-17"
+            ? entry.user.idade >= 13 && entry.user.idade <= 17
+            : entry.user.idade >= 18;
+
+    const averageScore = Math.round(average(entry.history.map((item) => item.score)));
+    const levelMatch =
+      filters.level === undefined || filters.level === "todos"
+        ? true
+        : filters.level === "iniciante"
+          ? averageScore < 15
+          : filters.level === "intermediario"
+            ? averageScore >= 15 && averageScore < 24
+            : averageScore >= 24;
+
+    const trendDirection = getPerformanceTrends(entry.history)[0]?.direction ?? "estavel";
+    const trendMatch = filters.trend === undefined || filters.trend === "todas" ? true : trendDirection === filters.trend;
+
+    const userPrescriptions = prescriptions.filter((item) => item.assignedToEmail === entry.user.email);
+    const prescriptionMatch =
+      filters.prescriptionStatus === undefined || filters.prescriptionStatus === "todas"
+        ? true
+        : userPrescriptions.some((item) => item.status === filters.prescriptionStatus);
+
+    return ageMatch && levelMatch && trendMatch && prescriptionMatch;
+  });
+}
+
+export function summarizeAuditLog(entries: AdminAuditEntry[]) {
+  return entries.slice(0, 12);
 }

@@ -13,7 +13,15 @@ import { HelpScreen } from "@/components/HelpScreen";
 import { applyAppSettingsToDocument, registerOfflineSupport, useAppSettingsState } from "@/lib/app-settings";
 import { getOfflineSyncStatus, subscribeOfflineSyncStatus, type OfflineSyncStatus } from "@/lib/offline-store";
 import { LogicGame } from "@/components/LogicGame";
-import type { ClinicalObservation, HelpRequest, PrescriptionSession, ReminderSchedule } from "@/lib/types";
+import type {
+  AdminAuditEntry,
+  BackupData,
+  ClinicalObservation,
+  HelpRequest,
+  PrescriptionSession,
+  ReminderSchedule,
+  UserLink,
+} from "@/lib/types";
 import { MemoryGame } from "@/components/MemoryGame";
 import { ProfileScreen } from "@/components/ProfileScreen";
 import { SpatialGame } from "@/components/SpatialGame";
@@ -33,6 +41,8 @@ export default function Page() {
   const [observations, setObservations] = useState<ClinicalObservation[]>([]);
   const [reminders, setReminders] = useState<ReminderSchedule[]>([]);
   const [prescriptions, setPrescriptions] = useState<PrescriptionSession[]>([]);
+  const [userLinks, setUserLinks] = useState<UserLink[]>([]);
+  const [auditLog, setAuditLog] = useState<AdminAuditEntry[]>([]);
   const [adminHistories, setAdminHistories] = useState<Array<{ user: Usuario; history: SessionRecord[]; progress?: ProgressState }>>([]);
   const [adminConfirmed, setAdminConfirmed] = useState(false);
   const [adminAccessCode, setAdminAccessCode] = useState("");
@@ -89,6 +99,16 @@ export default function Page() {
           setPrescriptions(await repository.loadPrescriptionSessions());
         } catch {
           setPrescriptions([]);
+        }
+        try {
+          setUserLinks(await repository.loadUserLinks());
+        } catch {
+          setUserLinks([]);
+        }
+        try {
+          setAuditLog(await repository.loadAdminAuditLog());
+        } catch {
+          setAuditLog([]);
         }
         if (activeUser.role !== "aluno") {
           try {
@@ -197,6 +217,16 @@ export default function Page() {
     } catch {
       setPrescriptions([]);
     }
+    try {
+      setUserLinks(await repository.loadUserLinks());
+    } catch {
+      setUserLinks([]);
+    }
+    try {
+      setAuditLog(await repository.loadAdminAuditLog());
+    } catch {
+      setAuditLog([]);
+    }
     if (activeUser.role !== "aluno") {
       try {
         const allHistories = await repository.loadAllHistories();
@@ -242,6 +272,8 @@ export default function Page() {
     setObservations([]);
     setReminders([]);
     setPrescriptions([]);
+    setUserLinks([]);
+    setAuditLog([]);
     setAdminHistories([]);
     setTela("login");
   }
@@ -259,6 +291,8 @@ export default function Page() {
     setObservations(overview.observations);
     setReminders(overview.reminders ?? []);
     setPrescriptions(overview.prescriptions ?? []);
+    setUserLinks(overview.userLinks ?? []);
+    setAuditLog(overview.auditLog ?? []);
     setTela("admin");
   }
 
@@ -354,14 +388,40 @@ export default function Page() {
   async function handleUpdateHelpStatus(requestId: string, status: HelpRequest["status"], adminReply?: string) {
     const nextRequests = await repository.updateHelpRequestStatus(requestId, status, adminReply, adminAccessCode);
     setHelpRequests(nextRequests);
+    if (usuario) {
+      setAuditLog(
+        await repository.appendAdminAuditEntry({
+          actorEmail: usuario.email,
+          actorName: usuario.nome,
+          action: "help_replied",
+          targetEmail: nextRequests.find((item) => item.id === requestId)?.email ?? null,
+          description: `Pedido de ajuda ${requestId} atualizado para ${status}.`,
+        }),
+      );
+    }
   }
 
   async function handleUpdateUserStatus(email: string, status: Usuario["status"]) {
     await repository.updateManagedUserStatus(email, status, adminAccessCode);
+    if (usuario) {
+      setAuditLog(
+        await repository.appendAdminAuditEntry({
+          actorEmail: usuario.email,
+          actorName: usuario.nome,
+          action: "user_status_updated",
+          targetEmail: email,
+          description: `Status do usuario ${email} alterado para ${status}.`,
+        }),
+      );
+    }
     const overview = await repository.loadAdminOverview(adminAccessCode);
     setAdminHistories(overview.histories);
     setHelpRequests(overview.helpRequests);
     setObservations(overview.observations);
+    setReminders(overview.reminders ?? []);
+    setPrescriptions(overview.prescriptions ?? []);
+    setUserLinks(overview.userLinks ?? []);
+    setAuditLog(overview.auditLog ?? []);
   }
 
   async function handleSaveObservation(
@@ -377,16 +437,38 @@ export default function Page() {
       authorName: usuario.nome,
     });
     setObservations(next);
+    setAuditLog(
+      await repository.appendAdminAuditEntry({
+        actorEmail: usuario.email,
+        actorName: usuario.nome,
+        action: "observation_saved",
+        targetEmail: email,
+        description: `Observacao ${category} atualizada para ${email}.`,
+      }),
+    );
   }
 
   async function handleResetAllTrainingData() {
     await repository.resetAllTrainingData(adminAccessCode);
+    if (usuario) {
+      setAuditLog(
+        await repository.appendAdminAuditEntry({
+          actorEmail: usuario.email,
+          actorName: usuario.nome,
+          action: "reset_all_training",
+          targetEmail: null,
+          description: "Treinamento de todos os usuarios nao administradores foi zerado.",
+        }),
+      );
+    }
     const overview = await repository.loadAdminOverview(adminAccessCode);
     setAdminHistories(overview.histories);
     setHelpRequests(overview.helpRequests);
     setObservations(overview.observations);
     setReminders(overview.reminders ?? []);
     setPrescriptions(overview.prescriptions ?? []);
+    setUserLinks(overview.userLinks ?? []);
+    setAuditLog(overview.auditLog ?? []);
   }
 
   async function handleSaveReminder(
@@ -394,6 +476,17 @@ export default function Page() {
   ) {
     const next = await repository.saveReminderSchedule(input);
     setReminders(next);
+    if (usuario) {
+      setAuditLog(
+        await repository.appendAdminAuditEntry({
+          actorEmail: usuario.email,
+          actorName: usuario.nome,
+          action: "reminder_saved",
+          targetEmail: input.ownerEmail || null,
+          description: `Rotina ${input.title} salva${input.turma ? ` para ${input.turma}` : ""}.`,
+        }),
+      );
+    }
   }
 
   async function handleSavePrescription(
@@ -401,11 +494,69 @@ export default function Page() {
   ) {
     const next = await repository.savePrescriptionSession(input);
     setPrescriptions(next);
+    if (usuario) {
+      setAuditLog(
+        await repository.appendAdminAuditEntry({
+          actorEmail: usuario.email,
+          actorName: usuario.nome,
+          action: "prescription_saved",
+          targetEmail: input.assignedToEmail,
+          description: `Sessao prescrita ${input.title} para ${input.assignedToEmail}.`,
+        }),
+      );
+    }
   }
 
   async function handleUpdatePrescriptionStatus(id: string, status: PrescriptionSession["status"]) {
     const next = await repository.updatePrescriptionStatus(id, status);
     setPrescriptions(next);
+    if (usuario) {
+      const prescription = next.find((item) => item.id === id);
+      setAuditLog(
+        await repository.appendAdminAuditEntry({
+          actorEmail: usuario.email,
+          actorName: usuario.nome,
+          action: "prescription_completed",
+          targetEmail: prescription?.assignedToEmail ?? null,
+          description: `Sessao ${prescription?.title ?? id} marcada como ${status}.`,
+        }),
+      );
+    }
+  }
+
+  async function handleSaveUserLink(input: Omit<UserLink, "id" | "createdAt">) {
+    const next = await repository.saveUserLink(input);
+    setUserLinks(next);
+    if (usuario) {
+      setAuditLog(
+        await repository.appendAdminAuditEntry({
+          actorEmail: usuario.email,
+          actorName: usuario.nome,
+          action: "user_link_saved",
+          targetEmail: input.studentEmail,
+          description: `Vinculo ${input.relationship} criado entre ${input.ownerEmail} e ${input.studentEmail}.`,
+        }),
+      );
+    }
+  }
+
+  async function handleRestoreBackup(backup: BackupData) {
+    await repository.restoreBackupData(backup);
+    if (usuario) {
+      setAuditLog(
+        await repository.appendAdminAuditEntry({
+          actorEmail: usuario.email,
+          actorName: usuario.nome,
+          action: "backup_restored",
+          targetEmail: null,
+          description: "Backup restaurado no aplicativo.",
+        }),
+      );
+    }
+    await hydrateUserSession(usuario ?? repository.getActiveSession()!);
+    if (adminAccessCode) {
+      await openAdminArea(adminAccessCode);
+    }
   }
 
   function persistResult(
@@ -762,11 +913,16 @@ export default function Page() {
         observations={observations}
         reminders={reminders}
         prescriptions={prescriptions}
+        userLinks={userLinks}
+        auditLog={auditLog}
         onBack={() => setTela("dashboard")}
         onUpdateHelpStatus={handleUpdateHelpStatus}
         onUpdateUserStatus={handleUpdateUserStatus}
         onResetAllTrainingData={handleResetAllTrainingData}
         onSaveObservation={handleSaveObservation}
+        onSaveUserLink={handleSaveUserLink}
+        onExportBackup={() => repository.exportBackupData()}
+        onRestoreBackup={handleRestoreBackup}
       />
     );
   }
@@ -791,6 +947,7 @@ export default function Page() {
       observations={observations}
       reminders={reminders}
       prescriptions={prescriptions}
+      userLinks={userLinks}
       settings={settings}
       isOffline={isOffline}
       offlineSyncStatus={offlineSyncStatus}

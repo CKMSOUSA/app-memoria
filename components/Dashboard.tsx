@@ -8,9 +8,11 @@ import { getRemoteBackendStatus } from "@/lib/app-repository";
 import type { AppSettings } from "@/lib/app-settings";
 import type { OfflineSyncStatus } from "@/lib/offline-store";
 import {
+  getAutomaticGoals,
   getComparativeReportInsights,
   getFormalEvaluationProtocol,
   getInterventionLibrary,
+  getManagedStudentHistories,
   getPrivateClassRanking,
   getRelevantObservations,
   getRelevantPrescriptions,
@@ -56,6 +58,7 @@ import type {
   ProgressState,
   ReminderSchedule,
   SessionRecord,
+  UserLink,
   Usuario,
 } from "@/lib/types";
 
@@ -81,6 +84,7 @@ type DashboardProps = {
   observations: ClinicalObservation[];
   reminders: ReminderSchedule[];
   prescriptions: PrescriptionSession[];
+  userLinks: UserLink[];
   settings: AppSettings;
   isOffline: boolean;
   offlineSyncStatus: OfflineSyncStatus;
@@ -751,6 +755,7 @@ export function Dashboard({
   observations,
   reminders,
   prescriptions,
+  userLinks,
   settings,
   isOffline,
   offlineSyncStatus,
@@ -802,9 +807,11 @@ export function Dashboard({
   const comparativeInsights = getComparativeReportInsights(history);
   const interventionLibrary = getInterventionLibrary(history, progresso);
   const formalEvaluationProtocol = getFormalEvaluationProtocol(usuario, history);
-  const rolePanel = getRolePanelInsight(usuario, managedHistories);
-  const privateRanking = getPrivateClassRanking(managedHistories, usuario.turma ?? null, "score");
-  const evolutionRanking = getPrivateClassRanking(managedHistories, usuario.turma ?? null, "evolucao");
+  const automaticGoals = getAutomaticGoals(history, progresso);
+  const managedStudentHistories = getManagedStudentHistories(usuario, managedHistories, userLinks);
+  const rolePanel = getRolePanelInsight(usuario, managedStudentHistories);
+  const privateRanking = getPrivateClassRanking(managedStudentHistories, null, "score");
+  const evolutionRanking = getPrivateClassRanking(managedStudentHistories, null, "evolucao");
   const relevantObservations = getRelevantObservations(observations, usuario.email);
   const upcomingReminders = getUpcomingReminders(reminders, usuario.email, usuario.turma ?? null);
   const relevantPrescriptions = getRelevantPrescriptions(prescriptions, usuario);
@@ -1172,6 +1179,22 @@ export function Dashboard({
                 completed={mission.completed}
                 onOpen={() => openMode(mission.primaryMode)}
               />
+            ))}
+          </div>
+        </section>
+
+        <section className="panel">
+          <div className="section-head">
+            <h3>Metas automaticas por aluno</h3>
+            <span className="small-muted">Geradas com base em historico, erro recorrente e ritmo recente</span>
+          </div>
+          <div className="engagement-grid">
+            {automaticGoals.map((goal) => (
+              <article key={goal.title} className="engagement-card">
+                <h3>{goal.title}</h3>
+                <p className="engagement-highlight">{goal.progressLabel}</p>
+                <p className="muted">{goal.summary}</p>
+              </article>
             ))}
           </div>
         </section>

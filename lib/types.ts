@@ -93,6 +93,33 @@ export type ClinicalObservationRevision = {
   updatedAt: string;
 };
 
+export type UserLink = {
+  id: string;
+  ownerEmail: string;
+  studentEmail: string;
+  relationship: "professor" | "responsavel";
+  createdAt: string;
+};
+
+export type AdminAuditEntry = {
+  id: string;
+  actorEmail: string;
+  actorName: string;
+  action:
+    | "user_status_updated"
+    | "observation_saved"
+    | "help_replied"
+    | "reset_all_training"
+    | "reminder_saved"
+    | "prescription_saved"
+    | "prescription_completed"
+    | "user_link_saved"
+    | "backup_restored";
+  targetEmail?: string | null;
+  description: string;
+  createdAt: string;
+};
+
 export type ClinicalObservation = {
   id: string;
   email: string;
@@ -141,7 +168,22 @@ export type AdminOverview = {
   observations: ClinicalObservation[];
   reminders?: ReminderSchedule[];
   prescriptions?: PrescriptionSession[];
+  userLinks?: UserLink[];
+  auditLog?: AdminAuditEntry[];
   source: "local" | "supabase";
+};
+
+export type BackupData = {
+  exportedAt: string;
+  users: UsuarioPersistido[];
+  helpRequests: HelpRequest[];
+  observations: ClinicalObservation[];
+  reminders: ReminderSchedule[];
+  prescriptions: PrescriptionSession[];
+  userLinks: UserLink[];
+  auditLog: AdminAuditEntry[];
+  progressByEmail: Record<string, ProgressState>;
+  historyByEmail: Record<string, SessionRecord[]>;
 };
 
 export type MemoryChallenge = {
