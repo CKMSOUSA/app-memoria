@@ -175,6 +175,18 @@ async function deleteFromStore(storeName: string, key: string) {
   });
 }
 
+async function clearStore(storeName: string) {
+  const database = await openDatabase();
+  if (!database) return;
+
+  await new Promise<void>((resolve, reject) => {
+    const transaction = database.transaction(storeName, "readwrite");
+    transaction.objectStore(storeName).clear();
+    transaction.oncomplete = () => resolve();
+    transaction.onerror = () => reject(transaction.error ?? new Error("Falha ao limpar dados offline."));
+  });
+}
+
 async function getAllFromStore<T>(storeName: string): Promise<T[]> {
   const database = await openDatabase();
   if (!database) return [];
@@ -402,4 +414,16 @@ export async function removePendingSyncOperation(id: string) {
   await deleteFromStore(QUEUE_STORE, id);
   const pending = await listPendingSyncOperations();
   await updateOfflineSyncStatus({ pendingCount: pending.length });
+}
+
+export async function resetOfflineStore() {
+  if (!canUseIndexedDb()) {
+    return { ...DEFAULT_SYNC_STATUS, isSupported: false };
+  }
+
+  await openDatabase();
+  await clearStore(SNAPSHOT_STORE);
+  await clearStore(QUEUE_STORE);
+  await updateOfflineSyncStatus({ ...DEFAULT_SYNC_STATUS, isSupported: true, pendingCount: 0 });
+  return initializeOfflineStore();
 }

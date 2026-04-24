@@ -68,6 +68,7 @@ import {
   persistSessionHistorySnapshot,
   persistSessionSnapshot,
   persistUsersSnapshot,
+  resetOfflineStore,
   removePendingSyncOperation,
   updateOfflineSyncStatus,
   type OfflineSyncStatus,
@@ -392,6 +393,26 @@ async function updateManagedUserStatusFromApi(
     method: "PATCH",
     headers,
     body: JSON.stringify({ email, status }),
+  });
+
+  return parseJson<{ ok: boolean }>(response);
+}
+
+async function resetAdminDataFromApi(adminCode?: string) {
+  const session = getStoredSupabaseSession();
+  const headers = new Headers();
+
+  if (adminCode?.trim()) {
+    headers.set("x-admin-code", adminCode.trim());
+  }
+
+  if (session?.access_token) {
+    headers.set("Authorization", `Bearer ${session.access_token}`);
+  }
+
+  const response = await fetch("/api/admin/reset", {
+    method: "POST",
+    headers,
   });
 
   return parseJson<{ ok: boolean }>(response);
@@ -897,12 +918,20 @@ const localRepository: AppRepository = {
     await persistUsersToOfflineStore();
   },
   resetAllTrainingData: async (adminCode) => {
-    if (!isLocalAdminCodeValid(adminCode)) {
+    const remoteResult = await resetAdminDataFromApi(adminCode);
+    const canResetLocally = isLocalAdminCodeValid(adminCode);
+    if (!remoteResult?.ok && !canResetLocally) {
       throw new Error("Acesso administrativo nao autorizado.");
     }
 
     resetTrainingDataForAllUsers();
+    const sessionEmail = getStoredSupabaseSession()?.user?.email?.trim().toLowerCase() || "";
+    if (sessionEmail && !listUsers().some((user) => user.role === "admin" && user.email === sessionEmail)) {
+      clearStoredSupabaseSession();
+    }
     await persistUsersToOfflineStore();
+    await persistHelpRequestsSnapshot(loadHelpRequests());
+    await resetOfflineStore();
   },
   updateHelpRequestStatus: async (requestId, status, adminReply, adminCode) => {
     const remoteResult = await updateAdminHelpRequestStatus(requestId, status, adminReply, adminCode);

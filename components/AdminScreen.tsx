@@ -286,12 +286,12 @@ export function AdminScreen({
               disabled={resettingAllData}
               onClick={async () => {
                 const confirmed = window.confirm(
-                  "Zerar o treinamento de todos os usuarios? Isso vai reiniciar pontos, progresso, historico e sessoes prescritas, sem apagar as contas.",
+                  "Remover todos os usuarios nao administradores? Isso vai apagar contas, progresso, historico, pedidos, vinculos e demais dados associados, preservando apenas o administrativo.",
                 );
                 if (!confirmed) return;
 
                 const finalConfirmed = window.confirm(
-                  "Confirmacao final: todos os usuarios nao administradores vao recomecar do zero. Deseja continuar?",
+                  "Confirmacao final: apenas as contas administrativas serao mantidas. Deseja continuar?",
                 );
                 if (!finalConfirmed) return;
 
@@ -303,7 +303,7 @@ export function AdminScreen({
                 }
               }}
             >
-              {resettingAllData ? "Zerando usuarios..." : "Zerar treinamento de todos"}
+              {resettingAllData ? "Limpando usuarios..." : "Limpar usuarios nao admin"}
             </button>
             <button className="btn btn-admin-back" onClick={onBack}>
               Voltar ao painel

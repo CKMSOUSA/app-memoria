@@ -296,25 +296,41 @@ export function excludeUser(email: string) {
 }
 
 export function resetTrainingDataForAllUsers() {
+  if (!canUseStorage()) return;
+
   const users = readUsers();
-  const nextUsers = users.map((user) =>
-    user.role === "admin"
-      ? user
-      : {
-          ...user,
-          pontos: 0,
-        },
-  );
+  const adminUsers = users.filter((user) => user.role === "admin");
+  const adminEmails = new Set(adminUsers.map((user) => user.email));
 
-  writeUsers(nextUsers);
+  writeUsers(adminUsers);
 
-  for (const user of nextUsers) {
-    if (user.role === "admin") continue;
-    localStorage.setItem(`${PROGRESS_PREFIX}:${user.email}`, JSON.stringify(createDefaultProgress()));
-    localStorage.setItem(`${HISTORY_PREFIX}:${user.email}`, JSON.stringify([]));
+  for (const user of users) {
+    if (adminEmails.has(user.email)) continue;
+    localStorage.removeItem(`${PROGRESS_PREFIX}:${user.email}`);
+    localStorage.removeItem(`${HISTORY_PREFIX}:${user.email}`);
   }
 
-  localStorage.setItem(PRESCRIPTIONS_KEY, JSON.stringify([]));
+  const activeSessionEmail = localStorage.getItem(SESSION_KEY);
+  if (!activeSessionEmail || !adminEmails.has(activeSessionEmail)) {
+    clearActiveSession();
+  }
+
+  saveHelpRequests(loadHelpRequests().filter((item) => adminEmails.has(item.email)));
+  saveClinicalObservations(loadClinicalObservations().filter((item) => adminEmails.has(item.email)));
+  saveReminderSchedules(loadReminderSchedules().filter((item) => adminEmails.has(item.ownerEmail)));
+  savePrescriptionSessions(
+    loadPrescriptionSessions().filter(
+      (item) => adminEmails.has(item.assignedByEmail) && adminEmails.has(item.assignedToEmail),
+    ),
+  );
+  saveUserLinks(
+    loadUserLinks().filter((item) => adminEmails.has(item.ownerEmail) && adminEmails.has(item.studentEmail)),
+  );
+  saveAdminAuditLog(
+    loadAdminAuditLog().filter(
+      (item) => adminEmails.has(item.actorEmail) && (!item.targetEmail || adminEmails.has(item.targetEmail)),
+    ),
+  );
 }
 
 export function syncAuthUserProfile(profile: {

@@ -457,7 +457,7 @@ export default function Page() {
           actorName: usuario.nome,
           action: "reset_all_training",
           targetEmail: null,
-          description: "Treinamento de todos os usuarios nao administradores foi zerado.",
+          description: "Todos os usuarios nao administradores e seus dados foram removidos, preservando apenas as contas admin.",
         }),
       );
     }
