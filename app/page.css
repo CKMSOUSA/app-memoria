@@ -2028,6 +2028,50 @@ h2 {
   gap: 16px;
 }
 
+.admin-options-panel {
+  display: grid;
+  gap: 16px;
+}
+
+.admin-options-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+.admin-option-card {
+  display: grid;
+  gap: 6px;
+  padding: 16px;
+  border-radius: 20px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.78);
+  text-align: left;
+  color: var(--ink-strong);
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+}
+
+.admin-option-card:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 14px 24px rgba(34, 45, 48, 0.08);
+}
+
+.admin-option-card strong {
+  font-size: 15px;
+}
+
+.admin-option-card span {
+  color: var(--ink-soft);
+  line-height: 1.4;
+  font-size: 13px;
+}
+
+.admin-option-card-active {
+  border-color: rgba(207, 95, 60, 0.28);
+  background: linear-gradient(135deg, rgba(255, 240, 226, 0.98) 0%, rgba(255, 251, 244, 0.98) 100%);
+  box-shadow: 0 14px 26px rgba(207, 95, 60, 0.12);
+}
+
 .admin-priority-panel {
   border: 1px solid rgba(184, 75, 75, 0.14);
   background: linear-gradient(135deg, rgba(255, 243, 240, 0.92) 0%, rgba(255, 251, 244, 0.98) 100%);

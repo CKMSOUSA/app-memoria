@@ -956,6 +956,7 @@ export default function Page() {
         userLinks={userLinks}
         auditLog={auditLog}
         onBack={() => setTela("perfil")}
+        onLogout={handleLogout}
         onUpdateHelpStatus={handleUpdateHelpStatus}
         onUpdateUserStatus={handleUpdateUserStatus}
         onResetAllTrainingData={handleResetAllTrainingData}

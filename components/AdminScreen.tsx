@@ -30,6 +30,7 @@ type AdminScreenProps = {
   userLinks: UserLink[];
   auditLog: AdminAuditEntry[];
   onBack: () => void;
+  onLogout: () => void;
   onUpdateHelpStatus: (
     requestId: string,
     status: HelpRequest["status"],
@@ -46,6 +47,8 @@ type AdminScreenProps = {
   onExportBackup: () => Promise<BackupData>;
   onRestoreBackup: (backup: BackupData) => Promise<void>;
 };
+
+type AdminPanelOption = "visao-geral" | "usuarios" | "ajuda" | "rotinas" | "auditoria";
 
 const userStatusLabels: Record<Usuario["status"], string> = {
   ativo: "Ativo",
@@ -71,6 +74,7 @@ export function AdminScreen({
   userLinks,
   auditLog,
   onBack,
+  onLogout,
   onUpdateHelpStatus,
   onUpdateUserStatus,
   onResetAllTrainingData,
@@ -105,6 +109,7 @@ export function AdminScreen({
   const backupInputRef = useRef<HTMLInputElement | null>(null);
   const [replyDrafts, setReplyDrafts] = useState<Record<string, string>>({});
   const [observationDrafts, setObservationDrafts] = useState<Record<string, string>>({});
+  const [activePanel, setActivePanel] = useState<AdminPanelOption>("visao-geral");
   const userStatusSummary = useMemo(
     () => ({
       ativo: normalizedHistories.filter(({ user }) => user.status === "ativo").length,
@@ -250,6 +255,13 @@ export function AdminScreen({
     target?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
+  function openPanel(panel: AdminPanelOption, target?: HTMLElement | null) {
+    setActivePanel(panel);
+    if (target) {
+      window.setTimeout(() => scrollToSection(target), 80);
+    }
+  }
+
   function getObservation(email: string, category: ClinicalObservation["category"]) {
     return observations.find((item) => item.email === email && item.category === category) ?? null;
   }
@@ -267,6 +279,14 @@ export function AdminScreen({
       observations,
     });
   }
+
+  const panelOptions: Array<{ id: AdminPanelOption; label: string; caption: string }> = [
+    { id: "visao-geral", label: "Visao geral", caption: "Riscos, indicadores e rankings" },
+    { id: "usuarios", label: "Usuarios", caption: "Busca, bloqueio e acompanhamento" },
+    { id: "ajuda", label: "Ajuda", caption: "Mensagens e respostas" },
+    { id: "rotinas", label: "Rotinas", caption: "Turmas, vinculos e prescricoes" },
+    { id: "auditoria", label: "Auditoria", caption: "Reset, historico e rastreio" },
+  ];
 
   return (
     <main className="shell shell-center">
@@ -327,6 +347,9 @@ export function AdminScreen({
             </button>
             <button className="btn btn-admin-back" onClick={onBack}>
               Abrir meu perfil
+            </button>
+            <button className="btn btn-secondary" onClick={onLogout}>
+              Sair
             </button>
           </div>
           <input
@@ -392,7 +415,7 @@ export function AdminScreen({
                 setSearch("");
                 setUserRoleFilter("aluno");
                 setUserStatusFilter("ativo");
-                scrollToSection(usersSectionRef.current);
+                openPanel("usuarios", usersSectionRef.current);
               }}
             >
               <strong>Bloquear usuario</strong>
@@ -404,7 +427,7 @@ export function AdminScreen({
               onClick={() => {
                 setSearch("");
                 setHelpStatusFilter("aberta");
-                scrollToSection(helpSectionRef.current);
+                openPanel("ajuda", helpSectionRef.current);
               }}
             >
               <strong>Responder ajuda</strong>
@@ -431,7 +454,7 @@ export function AdminScreen({
                 setResettingAllData(true);
                 try {
                   await onResetAllTrainingData();
-                  scrollToSection(auditSectionRef.current);
+                  openPanel("auditoria", auditSectionRef.current);
                 } finally {
                   setResettingAllData(false);
                 }
@@ -443,6 +466,29 @@ export function AdminScreen({
           </div>
         </section>
 
+        <section className="panel admin-options-panel">
+          <div className="section-head">
+            <h3>Painel de opcoes</h3>
+            <span className="small-muted">Abra somente o grupo de informacoes que voce quer administrar agora</span>
+          </div>
+          <div className="admin-options-grid" role="tablist" aria-label="Opcoes do painel administrativo">
+            {panelOptions.map((option) => (
+              <button
+                key={option.id}
+                type="button"
+                role="tab"
+                aria-selected={activePanel === option.id}
+                className={`admin-option-card ${activePanel === option.id ? "admin-option-card-active" : ""}`}
+                onClick={() => setActivePanel(option.id)}
+              >
+                <strong>{option.label}</strong>
+                <span>{option.caption}</span>
+              </button>
+            ))}
+          </div>
+        </section>
+
+        {activePanel === "visao-geral" ? (
         <section className="stats-grid">
           <article className="stat-card">
             <p className="small-muted">Usuarios monitorados</p>
@@ -475,7 +521,9 @@ export function AdminScreen({
             <p className="muted">Blocos orientados por professor ou responsavel.</p>
           </article>
         </section>
+        ) : null}
 
+        {activePanel === "visao-geral" ? (
         <section className="panel admin-status-panel">
           <div className="section-head">
             <h3>Status dos usuarios</h3>
@@ -496,7 +544,9 @@ export function AdminScreen({
             </div>
           </div>
         </section>
+        ) : null}
 
+        {activePanel === "visao-geral" ? (
         <section className="panel admin-alerts-panel">
           <div className="section-head">
             <h3>Alertas inteligentes</h3>
@@ -522,7 +572,9 @@ export function AdminScreen({
             <p className="small-muted">Nenhum alerta critico agora. O grupo esta sem sinais fortes de abandono ou queda.</p>
           )}
         </section>
+        ) : null}
 
+        {activePanel === "visao-geral" ? (
         <section className="panel">
           <div className="section-head">
             <h3>Rankings privados do produto</h3>
@@ -555,7 +607,9 @@ export function AdminScreen({
             </article>
           </div>
         </section>
+        ) : null}
 
+        {activePanel === "usuarios" ? (
         <section className="panel admin-toolbar">
           <div className="section-head">
             <h3>Busca e filtros</h3>
@@ -658,7 +712,9 @@ export function AdminScreen({
             </label>
           </div>
         </section>
+        ) : null}
 
+        {activePanel === "visao-geral" ? (
         <section className="panel">
           <div className="section-head">
             <h3>Painel de adesao</h3>
@@ -688,7 +744,9 @@ export function AdminScreen({
             ))}
           </div>
         </section>
+        ) : null}
 
+        {activePanel === "rotinas" ? (
         <section className="panel">
           <div className="section-head">
             <h3>Vinculos explicitos</h3>
@@ -743,7 +801,9 @@ export function AdminScreen({
             )}
           </div>
         </section>
+        ) : null}
 
+        {activePanel === "rotinas" ? (
         <section className="panel admin-class-panel">
           <div className="section-head">
             <h3>Visao por turma</h3>
@@ -779,7 +839,9 @@ export function AdminScreen({
             <p className="small-muted">Nenhuma turma corresponde aos filtros atuais.</p>
           )}
         </section>
+        ) : null}
 
+        {activePanel === "usuarios" ? (
         <section ref={usersSectionRef} className="panel">
           <div className="section-head">
             <h3>Resumo por aluno</h3>
@@ -962,7 +1024,9 @@ export function AdminScreen({
           </div>
           {filteredHistories.length === 0 ? <p className="small-muted">Nenhum aluno corresponde aos filtros atuais.</p> : null}
         </section>
+        ) : null}
 
+        {activePanel === "ajuda" ? (
         <section ref={helpSectionRef} className="panel">
           <div className="section-head">
             <h3>Duvidas enviadas</h3>
@@ -1028,7 +1092,9 @@ export function AdminScreen({
             )}
           </div>
         </section>
+        ) : null}
 
+        {activePanel === "rotinas" ? (
         <section className="panel">
           <div className="section-head">
             <h3>Agenda e prescricoes do produto</h3>
@@ -1057,7 +1123,9 @@ export function AdminScreen({
             </article>
           </div>
         </section>
+        ) : null}
 
+        {activePanel === "auditoria" ? (
         <section ref={auditSectionRef} className="panel">
           <div className="section-head">
             <h3>Log de acoes administrativas</h3>
@@ -1081,6 +1149,7 @@ export function AdminScreen({
             )}
           </div>
         </section>
+        ) : null}
       </section>
     </main>
   );
