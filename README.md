@@ -10,6 +10,12 @@ Aplicativo de treino cognitivo com trilhas de:
 - Orientacao espacial
 - Trilha exclusiva por publico
 
+## Roadmap Tecnico
+
+O plano tecnico das proximas evolucoes do produto esta em:
+
+- `docs/ROADMAP-TECNICO.md`
+
 ## O que foi reforcado nesta versao
 
 - textos e instrucoes mais guiados dentro dos jogos

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { type ReactNode, useState } from "react";
 
 import { AppPreferencesPanel } from "@/components/AppPreferencesPanel";
 import { InternalAssistant } from "@/components/InternalAssistant";
@@ -57,12 +57,14 @@ import type {
   PrescriptionSession,
   ProgressState,
   ReminderSchedule,
+  SessionMode,
   SessionRecord,
   UserLink,
   Usuario,
 } from "@/lib/types";
 
 type TrailMode = "memoria" | "visual" | "atencao" | "comparacao" | "espacial" | "logica";
+type DashboardTab = "hoje" | "progresso" | "rotina" | "insights";
 
 type DashboardProps = {
   usuario: Usuario;
@@ -179,6 +181,154 @@ function CompactMetricCard({ label, value, caption }: { label: string; value: st
         <strong className="metric-chip-value">{value}</strong>
       </div>
       <p className="metric-chip-caption">{caption}</p>
+    </article>
+  );
+}
+
+function SidebarMenuGroup({
+  title,
+  children,
+  defaultOpen = false,
+}: {
+  title: string;
+  children: ReactNode;
+  defaultOpen?: boolean;
+}) {
+  return (
+    <details className="sidebar-group" open={defaultOpen}>
+      <summary>{title}</summary>
+      <div className="sidebar-group-body">{children}</div>
+    </details>
+  );
+}
+
+function DisclosureSection({
+  title,
+  caption,
+  children,
+  defaultOpen = false,
+}: {
+  title: string;
+  caption: string;
+  children: ReactNode;
+  defaultOpen?: boolean;
+}) {
+  return (
+    <details className="dashboard-disclosure panel" open={defaultOpen}>
+      <summary className="dashboard-disclosure-summary">
+        <div>
+          <h3>{title}</h3>
+          <span className="small-muted">{caption}</span>
+        </div>
+      </summary>
+      <div className="dashboard-disclosure-body">{children}</div>
+    </details>
+  );
+}
+
+function formatSyncTimestamp(value: string | null) {
+  if (!value) return "Ainda nao houve sincronizacao confirmada.";
+  return `Ultima sincronizacao em ${new Date(value).toLocaleString("pt-BR")}.`;
+}
+
+function getGoalLabel(goal: Usuario["goal"]) {
+  switch (goal) {
+    case "memoria":
+      return "Fortalecer memoria";
+    case "atencao":
+      return "Melhorar atencao";
+    case "pedagogico":
+      return "Reforco pedagogico";
+    case "rotina":
+      return "Criar rotina";
+    default:
+      return "Definir foco";
+  }
+}
+
+function getLevelLabel(level: Usuario["selfReportedLevel"]) {
+  switch (level) {
+    case "iniciante":
+      return "Iniciante";
+    case "intermediario":
+      return "Intermediario";
+    case "avancado":
+      return "Avancado";
+    default:
+      return "Nao definido";
+  }
+}
+
+function ContinueTrainingCard({
+  title,
+  summary,
+  highlight,
+  onOpen,
+}: {
+  title: string;
+  summary: string;
+  highlight: string;
+  onOpen: () => void;
+}) {
+  return (
+    <article className="continue-card">
+      <p className="engagement-tag">Continuar treino</p>
+      <h3>{title}</h3>
+      <p className="muted">{summary}</p>
+      <p className="engagement-highlight">{highlight}</p>
+      <button className="btn btn-primary" onClick={onOpen}>
+        Retomar agora
+      </button>
+    </article>
+  );
+}
+
+function SyncStatusCard({
+  isOffline,
+  offlineSyncStatus,
+}: {
+  isOffline: boolean;
+  offlineSyncStatus: OfflineSyncStatus;
+}) {
+  const hasError = Boolean(offlineSyncStatus.lastError);
+  const pendingCount = offlineSyncStatus.pendingCount;
+  const statusLabel = isOffline
+    ? "Offline"
+    : offlineSyncStatus.isSyncing
+      ? "Sincronizando"
+      : hasError
+        ? "Erro de sincronizacao"
+        : pendingCount > 0
+          ? "Sincronizacao pendente"
+          : "Sincronizado";
+  const summary = isOffline
+    ? "O app continua funcionando e vai reenviar seus dados quando a conexao voltar."
+    : hasError
+      ? offlineSyncStatus.lastError ?? "Falha ao sincronizar os dados recentes."
+      : pendingCount > 0
+        ? `${pendingCount} alteracao(oes) aguardando envio para o modo online.`
+        : formatSyncTimestamp(offlineSyncStatus.lastSyncedAt);
+
+  return (
+    <article className={`sync-status-card ${isOffline ? "sync-status-card-offline" : hasError ? "sync-status-card-error" : "sync-status-card-ok"}`}>
+      <div className="section-head">
+        <div>
+          <p className="engagement-tag">Status dos dados</p>
+          <h3>{statusLabel}</h3>
+        </div>
+        <span className="pill">{pendingCount} pendencia(s)</span>
+      </div>
+      <p className="muted">{summary}</p>
+      <div className="sync-status-grid">
+        <div className="profile-chip">
+          <strong>Fila offline</strong>
+          <span>{pendingCount > 0 ? `${pendingCount} item(ns)` : "Vazia"}</span>
+        </div>
+        <div className="profile-chip">
+          <strong>Modo atual</strong>
+          <span>{isOffline ? "Salvando offline" : "Online com fallback"}</span>
+        </div>
+      </div>
     </article>
   );
 }
@@ -815,6 +965,27 @@ export function Dashboard({
   const relevantObservations = getRelevantObservations(observations, usuario.email);
   const upcomingReminders = getUpcomingReminders(reminders, usuario.email, usuario.turma ?? null);
   const relevantPrescriptions = getRelevantPrescriptions(prescriptions, usuario);
+  const latestSession = history[0] ?? null;
+  const continueTraining = latestSession
+    ? {
+        mode: latestSession.mode,
+        title: latestSession.completed
+          ? `Proxima etapa em ${getSessionModeLabel(smartRecommendation.mode)}`
+          : `Retomar ${getSessionModeLabel(latestSession.mode)}`,
+        summary: latestSession.completed
+          ? `${smartRecommendation.reason} Seu foco atual esta alinhado com ${getGoalLabel(usuario.goal)}.`
+          : `Sua ultima sessao ficou em ${getSessionModeLabel(latestSession.mode)} na fase ${latestSession.challengeId}. Retome enquanto o contexto ainda esta fresco.`,
+        highlight: latestSession.completed
+          ? `${smartRecommendation.challengeName} · ${getGoalLabel(usuario.goal)} · ${usuario.weeklyAvailability ?? 3} dia(s)/semana`
+          : `Fase ${latestSession.challengeId} · score ${latestSession.score} · ${latestSession.completed ? "concluida" : "em aberto"}`,
+      }
+    : {
+        mode: smartRecommendation.mode,
+        title: `Comecar por ${getSessionModeLabel(smartRecommendation.mode)}`,
+        summary: `${smartRecommendation.reason} Vamos iniciar pelo foco ${getGoalLabel(usuario.goal)} com nivel ${getLevelLabel(usuario.selfReportedLevel)}.`,
+        highlight: `${smartRecommendation.challengeName} · ${usuario.weeklyAvailability ?? 3} dia(s)/semana`,
+      };
+
   function handleExportPdf() {
     exportUserReportPdf({
       usuario,
@@ -867,6 +1038,7 @@ export function Dashboard({
     });
   }
   const [activeTrailTab, setActiveTrailTab] = useState<TrailMode>("memoria");
+  const [activeDashboardTab, setActiveDashboardTab] = useState<DashboardTab>("hoje");
   const trailTabs: Array<{
     id: TrailMode;
     label: string;
@@ -908,6 +1080,20 @@ export function Dashboard({
     if (mode === "espacial") return onOpenSpatial();
     return onOpenLogic();
   };
+  const openSessionMode = (mode: SessionMode) => {
+    if (mode === "especial") return onOpenSpecial();
+    return openMode(mode);
+  };
+  const dashboardTabs: Array<{ id: DashboardTab; label: string; caption: string }> = [
+    { id: "hoje", label: "Hoje", caption: "Proximo passo e rotina imediata" },
+    { id: "progresso", label: "Progresso", caption: "Evolucao e trilhas" },
+    { id: "rotina", label: "Rotina", caption: "Planos, sugestoes e agenda" },
+    {
+      id: "insights",
+      label: "Insights",
+      caption: usuario.role === "admin" ? "Analises e operacao" : "Ajustes e leitura",
+    },
+  ];
 
   return (
     <main className="shell shell-dashboard">
@@ -921,30 +1107,34 @@ export function Dashboard({
         </div>
         <p className="sidebar-label">Treino diario</p>
         <button className="btn btn-side btn-side-active">Dashboard</button>
-        <button className="btn btn-side" onClick={onOpenMemory}>
-          Jogo de memoria
-        </button>
-        <button className="btn btn-side" onClick={onOpenVisual}>
-          Memoria visual
-        </button>
-        <button className="btn btn-side" onClick={onOpenAttention}>
-          Jogo de atencao
-        </button>
-        <button className="btn btn-side" onClick={onOpenComparison}>
-          Jogo de comparacao
-        </button>
-        <button className="btn btn-side" onClick={onOpenSpatial}>
-          Orientacao espacial
-        </button>
-        <button className="btn btn-side" onClick={onOpenLogic}>
-          Jogo de logica
-        </button>
-        <button className="btn btn-side" onClick={onOpenSpecial}>
-          Trilha exclusiva
-        </button>
-        <button className="btn btn-side" onClick={onOpenAdvanced}>
-          Testes Avancados
-        </button>
+        <SidebarMenuGroup title="Treinos base" defaultOpen>
+          <button className="btn btn-side" onClick={onOpenMemory}>
+            Jogo de memoria
+          </button>
+          <button className="btn btn-side" onClick={onOpenAttention}>
+            Jogo de atencao
+          </button>
+          <button className="btn btn-side" onClick={onOpenComparison}>
+            Jogo de comparacao
+          </button>
+        </SidebarMenuGroup>
+        <SidebarMenuGroup title="Explorar mais">
+          <button className="btn btn-side" onClick={onOpenVisual}>
+            Memoria visual
+          </button>
+          <button className="btn btn-side" onClick={onOpenSpatial}>
+            Orientacao espacial
+          </button>
+          <button className="btn btn-side" onClick={onOpenLogic}>
+            Jogo de logica
+          </button>
+          <button className="btn btn-side" onClick={onOpenSpecial}>
+            Trilha exclusiva
+          </button>
+          <button className="btn btn-side" onClick={onOpenAdvanced}>
+            Testes Avancados
+          </button>
+        </SidebarMenuGroup>
         <button className="btn btn-side" onClick={onOpenProfile}>
           Perfil
         </button>
@@ -977,23 +1167,14 @@ export function Dashboard({
               cada fase.
             </p>
             <div className="topbar-actions">
-              <button className="btn btn-primary" onClick={onOpenMemory}>
-                Memoria
+              <button className="btn btn-primary" onClick={() => openSessionMode(continueTraining.mode)}>
+                Continuar treino
               </button>
-              <button className="btn btn-secondary" onClick={onOpenAttention}>
-                Atencao
+              <button className="btn btn-secondary" onClick={() => setActiveDashboardTab("progresso")}>
+                Ver progresso
               </button>
-              <button className="btn btn-secondary" onClick={onOpenComparison}>
-                Comparacao
-              </button>
-              <button className="btn btn-secondary" onClick={onOpenSpatial}>
-                Orientacao espacial
-              </button>
-              <button className="btn btn-secondary" onClick={onOpenLogic}>
-                Logica
-              </button>
-              <button className="btn btn-secondary" onClick={onOpenAdvanced}>
-                Testes Avancados
+              <button className="btn btn-secondary" onClick={() => setActiveDashboardTab("rotina")}>
+                Abrir rotina
               </button>
             </div>
           </div>
@@ -1030,7 +1211,30 @@ export function Dashboard({
           </div>
         </header>
 
-        <section className="panel metrics-panel">
+        <section className="panel dashboard-tabs-panel">
+          <div className="section-head">
+            <h3>Navegacao rapida</h3>
+            <span className="small-muted">Abra so o grupo de informacoes que voce quer ver agora</span>
+          </div>
+          <div className="dashboard-tabs" role="tablist" aria-label="Abas do dashboard">
+            {dashboardTabs.map((tab) => (
+              <button
+                key={tab.id}
+                type="button"
+                role="tab"
+                aria-selected={activeDashboardTab === tab.id}
+                className={`dashboard-tab ${activeDashboardTab === tab.id ? "dashboard-tab-active" : ""}`}
+                onClick={() => setActiveDashboardTab(tab.id)}
+              >
+                <span className="trail-tab-label">{tab.label}</span>
+                <span className="trail-tab-rate">{tab.caption}</span>
+              </button>
+            ))}
+          </div>
+        </section>
+
+        {activeDashboardTab === "progresso" ? (
+          <section className="panel metrics-panel">
           <div className="section-head">
             <h3>{`Resumo do treino: Status ${usuario.premium ? "Premium" : "Basico"}`}</h3>
             <span className="small-muted">Indicadores principais do desempenho atual</span>
@@ -1040,6 +1244,21 @@ export function Dashboard({
               label="Pontos"
               value={String(usuario.pontos)}
               caption="Pontuacao acumulada por melhora real"
+            />
+            <CompactMetricCard
+              label="Objetivo"
+              value={getGoalLabel(usuario.goal)}
+              caption="Foco principal definido no onboarding"
+            />
+            <CompactMetricCard
+              label="Nivel inicial"
+              value={getLevelLabel(usuario.selfReportedLevel)}
+              caption="Percepcao de entrada usada para guiar o ritmo"
+            />
+            <CompactMetricCard
+              label="Rotina"
+              value={`${usuario.weeklyAvailability ?? 3} dia(s)`}
+              caption="Disponibilidade semanal informada no perfil"
             />
             <CompactMetricCard label="Nivel" value={getNivel(usuario.pontos)} caption="Escala progressiva do aplicativo" />
             <CompactMetricCard
@@ -1073,42 +1292,51 @@ export function Dashboard({
               caption="Progresso no minijogo do seu publico"
             />
           </div>
+          </section>
+        ) : null}
+
+        {activeDashboardTab === "hoje" ? (
+          <>
+        <section className="continue-sync-grid">
+          <ContinueTrainingCard
+            title={continueTraining.title}
+            summary={continueTraining.summary}
+            highlight={continueTraining.highlight}
+            onOpen={() => openSessionMode(continueTraining.mode)}
+          />
+          <SyncStatusCard isOffline={isOffline} offlineSyncStatus={offlineSyncStatus} />
         </section>
 
+          </>
+        ) : null}
+
+        {activeDashboardTab === "insights" ? (
         <AppPreferencesPanel
           settings={settings}
           isOffline={isOffline}
           offlineSyncStatus={offlineSyncStatus}
           onUpdateSettings={onUpdateSettings}
         />
-
-        {rolePanel ? <RolePanelCard title={rolePanel.title} summary={rolePanel.summary} cards={rolePanel.cards} /> : null}
-
-        <InternalAssistant
-          usuario={usuario}
-          progresso={progresso}
-          history={history}
-          onOpenMemory={onOpenMemory}
-          onOpenAttention={onOpenAttention}
-          onOpenComparison={onOpenComparison}
-          onOpenSpatial={onOpenSpatial}
-          onOpenLogic={onOpenLogic}
-          onOpenSpecial={onOpenSpecial}
-        />
-
-        {(usuario.role === "professor" || usuario.role === "responsavel") && usuario.turma ? (
-          <section className="panel">
-            <div className="section-head">
-              <h3>Ranking privado da turma</h3>
-              <span className="small-muted">Leitura interna por grupo, sem exposicao publica</span>
-            </div>
-            <div className="engagement-grid">
-              <RankingCard title="Ranking por desempenho" entries={privateRanking} />
-              <RankingCard title="Ranking por evolucao" entries={evolutionRanking} />
-            </div>
-          </section>
         ) : null}
 
+        {activeDashboardTab === "insights" ? (
+          usuario.role === "admin" ? (
+          <InternalAssistant
+            usuario={usuario}
+            progresso={progresso}
+            history={history}
+            onOpenMemory={onOpenMemory}
+            onOpenAttention={onOpenAttention}
+            onOpenComparison={onOpenComparison}
+            onOpenSpatial={onOpenSpatial}
+            onOpenLogic={onOpenLogic}
+            onOpenSpecial={onOpenSpecial}
+          />
+          ) : null
+        ) : null}
+
+        {activeDashboardTab === "hoje" ? (
+          <>
         {(usuario.role === "professor" || usuario.role === "responsavel") ? (
           <section className="panel">
             <div className="section-head">
@@ -1182,42 +1410,69 @@ export function Dashboard({
             ))}
           </div>
         </section>
+          </>
+        ) : null}
 
-        <section className="panel">
-          <div className="section-head">
-            <h3>Metas automaticas por aluno</h3>
-            <span className="small-muted">Geradas com base em historico, erro recorrente e ritmo recente</span>
-          </div>
-          <div className="engagement-grid">
-            {automaticGoals.map((goal) => (
-              <article key={goal.title} className="engagement-card">
-                <h3>{goal.title}</h3>
-                <p className="engagement-highlight">{goal.progressLabel}</p>
-                <p className="muted">{goal.summary}</p>
-              </article>
-            ))}
-          </div>
-        </section>
+        {activeDashboardTab === "insights" ? (
+          <>
+            {rolePanel ? <RolePanelCard title={rolePanel.title} summary={rolePanel.summary} cards={rolePanel.cards} /> : null}
 
-        <section className="panel report-panel">
-          <div className="section-head">
-            <h3>Relatorio de desempenho</h3>
-            <div className="section-head-actions">
-              <span className="small-muted">Resumo automatico das suas sessoes</span>
-              <button className="btn btn-secondary btn-export-report" onClick={handleExportPdf}>
-                Exportar PDF
-              </button>
-            </div>
-          </div>
-          <div className="stats-grid">
-            <StatCard label="Sessoes" value={String(resumo.totalSessions)} caption="Rodadas registradas no historico" />
-            <StatCard label="Concluidas" value={String(resumo.completedSessions)} caption="Sessoes com meta atingida" />
-            <StatCard label="Media" value={String(resumo.averageScore)} caption="Pontuacao media por sessao" />
-            <StatCard label="Modo forte" value={getSessionModeLabel(resumo.strongestMode)} caption="Trilha com melhor desempenho acumulado" />
-          </div>
-        </section>
+            {(usuario.role === "professor" || usuario.role === "responsavel") && usuario.turma ? (
+              <section className="panel">
+                <div className="section-head">
+                  <h3>Ranking privado da turma</h3>
+                  <span className="small-muted">Leitura interna por grupo, sem exposicao publica</span>
+                </div>
+                <div className="engagement-grid">
+                  <RankingCard title="Ranking por desempenho" entries={privateRanking} />
+                  <RankingCard title="Ranking por evolucao" entries={evolutionRanking} />
+                </div>
+              </section>
+            ) : null}
+          </>
+        ) : null}
 
-        <ComparativeCard items={comparativeInsights} onExport={handleExportComparativePdf} />
+        {activeDashboardTab === "progresso" ? (
+          <>
+        {usuario.role === "admin" ? (
+          <>
+            <section className="panel">
+              <div className="section-head">
+                <h3>Metas automaticas por aluno</h3>
+                <span className="small-muted">Geradas com base em historico, erro recorrente e ritmo recente</span>
+              </div>
+              <div className="engagement-grid">
+                {automaticGoals.map((goal) => (
+                  <article key={goal.title} className="engagement-card">
+                    <h3>{goal.title}</h3>
+                    <p className="engagement-highlight">{goal.progressLabel}</p>
+                    <p className="muted">{goal.summary}</p>
+                  </article>
+                ))}
+              </div>
+            </section>
+
+            <section className="panel report-panel">
+              <div className="section-head">
+                <h3>Relatorio de desempenho</h3>
+                <div className="section-head-actions">
+                  <span className="small-muted">Resumo automatico das suas sessoes</span>
+                  <button className="btn btn-secondary btn-export-report" onClick={handleExportPdf}>
+                    Exportar PDF
+                  </button>
+                </div>
+              </div>
+              <div className="stats-grid">
+                <StatCard label="Sessoes" value={String(resumo.totalSessions)} caption="Rodadas registradas no historico" />
+                <StatCard label="Concluidas" value={String(resumo.completedSessions)} caption="Sessoes com meta atingida" />
+                <StatCard label="Media" value={String(resumo.averageScore)} caption="Pontuacao media por sessao" />
+                <StatCard label="Modo forte" value={getSessionModeLabel(resumo.strongestMode)} caption="Trilha com melhor desempenho acumulado" />
+              </div>
+            </section>
+
+            <ComparativeCard items={comparativeInsights} onExport={handleExportComparativePdf} />
+          </>
+        ) : null}
 
         <section className="panel diagnostic-panel">
           <div className="section-head">
@@ -1254,24 +1509,26 @@ export function Dashboard({
           </div>
         </section>
 
-        <section className="panel">
-          <div className="section-head">
-            <h3>Historico semanal e mensal</h3>
-            <span className="small-muted">Tendencia de melhora ou queda no ritmo recente</span>
-          </div>
-          <div className="trend-grid">
-            {performanceTrends.map((trend) => (
-              <TrendCard
-                key={trend.label}
-                label={trend.label}
-                direction={trend.direction}
-                scoreDelta={trend.scoreDelta}
-                completionDelta={trend.completionDelta}
-                summary={trend.summary}
-              />
-            ))}
-          </div>
-        </section>
+        {usuario.role === "admin" ? (
+          <section className="panel">
+            <div className="section-head">
+              <h3>Historico semanal e mensal</h3>
+              <span className="small-muted">Tendencia de melhora ou queda no ritmo recente</span>
+            </div>
+            <div className="trend-grid">
+              {performanceTrends.map((trend) => (
+                <TrendCard
+                  key={trend.label}
+                  label={trend.label}
+                  direction={trend.direction}
+                  scoreDelta={trend.scoreDelta}
+                  completionDelta={trend.completionDelta}
+                  summary={trend.summary}
+                />
+              ))}
+            </div>
+          </section>
+        ) : null}
 
         <section className="panel">
           <div className="section-head">
@@ -1291,10 +1548,12 @@ export function Dashboard({
             ))}
           </div>
         </section>
+          </>
+        ) : null}
 
-        <ObservationTimeline observations={relevantObservations} />
+        {activeDashboardTab === "insights" ? <ObservationTimeline observations={relevantObservations} /> : null}
 
-        {usuario.role === "admin" ? (
+        {activeDashboardTab === "insights" && usuario.role === "admin" ? (
           <section className="panel backend-panel">
             <div className="section-head">
               <h3>Contas e Progresso Online</h3>
@@ -1318,11 +1577,11 @@ export function Dashboard({
           </section>
         ) : null}
 
-        <section className="panel">
-          <div className="section-head">
-            <h3>Trilhas por publico</h3>
-            <span className="small-muted">O app ajusta conteudo e dificuldade automaticamente pela idade</span>
-          </div>
+        {activeDashboardTab === "insights" ? (
+        <DisclosureSection
+          title="Trilhas por publico"
+          caption="O app ajusta conteudo e dificuldade automaticamente pela idade"
+        >
           <div className="track-grid">
             <TrackCard
               title="Trilha Infantil"
@@ -1343,8 +1602,11 @@ export function Dashboard({
               description="Mais densidade de informacao, menos tempo e metas mais exigentes por fase."
             />
           </div>
-        </section>
+        </DisclosureSection>
+        ) : null}
 
+        {activeDashboardTab === "rotina" ? (
+          <>
         <section className="panel quick-grid">
           <article className="quick-card quick-card-highlight">
             <p className="small-muted">Recomendacao inteligente</p>
@@ -1446,23 +1708,21 @@ export function Dashboard({
           </div>
         </section>
 
-        <section className="panel">
-          <div className="section-head">
-            <h3>Biblioteca de intervencoes</h3>
-            <span className="small-muted">Acoes praticas sugeridas conforme habilidade, idade e desempenho</span>
-          </div>
+        <DisclosureSection
+          title="Biblioteca de intervencoes"
+          caption="Acoes praticas sugeridas conforme habilidade, idade e desempenho"
+        >
           <div className="engagement-grid">
             {interventionLibrary.map((item) => (
               <InterventionCard key={item.title} title={item.title} summary={item.summary} actions={item.actions} />
             ))}
           </div>
-        </section>
+        </DisclosureSection>
 
-        <section className="panel">
-          <div className="section-head">
-            <h3>Trilhas tematicas</h3>
-            <span className="small-muted">Atalhos prontos para foco escolar, agilidade mental, reabilitacao e desafio elite</span>
-          </div>
+        <DisclosureSection
+          title="Trilhas tematicas"
+          caption="Atalhos prontos para foco escolar, agilidade mental, reabilitacao e desafio elite"
+        >
           <div className="engagement-grid">
             {themedTracks.map((track) => (
               <ThemedTrackCard
@@ -1476,13 +1736,12 @@ export function Dashboard({
               />
             ))}
           </div>
-        </section>
+        </DisclosureSection>
 
-        <section className="panel">
-          <div className="section-head">
-            <h3>Modo duelo ou cooperativo</h3>
-            <span className="small-muted">Mesmo ciclo para aluno e professor ou responsavel acompanharem juntos</span>
-          </div>
+        <DisclosureSection
+          title="Modo duelo ou cooperativo"
+          caption="Mesmo ciclo para aluno e professor ou responsavel acompanharem juntos"
+        >
           <CooperativeCard
             title={cooperativeCycle.title}
             summary={cooperativeCycle.summary}
@@ -1492,13 +1751,15 @@ export function Dashboard({
             actions={cooperativeCycle.actions}
             onOpen={() => openMode(cooperativeCycle.primaryMode)}
           />
-        </section>
+        </DisclosureSection>
+          </>
+        ) : null}
 
-        <section className="panel">
-          <div className="section-head">
-            <h3>Checklist de acessibilidade avancada</h3>
-            <span className="small-muted">Contraste, foco, voz, teclado e ambiente formal controlado</span>
-          </div>
+        {activeDashboardTab === "insights" ? (
+        <DisclosureSection
+          title="Checklist de acessibilidade avancada"
+          caption="Contraste, foco, voz, teclado e ambiente formal controlado"
+        >
           <div className="engagement-grid">
             <article className="engagement-card">
               <h3>{formalEvaluationProtocol.title}</h3>
@@ -1521,8 +1782,10 @@ export function Dashboard({
               </ul>
             </article>
           </div>
-        </section>
+        </DisclosureSection>
+        ) : null}
 
+        {activeDashboardTab === "progresso" ? (
         <section className="panel trails-panel">
           <div className="section-head">
             <h3>Trilhas do aluno</h3>
@@ -1549,6 +1812,7 @@ export function Dashboard({
             <ProgressList title={activeTrail.title} mode={activeTrail.id} progressMap={activeTrail.progressMap} />
           </div>
         </section>
+        ) : null}
       </section>
     </main>
   );

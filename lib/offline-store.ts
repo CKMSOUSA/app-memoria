@@ -48,7 +48,8 @@ export type PendingSyncOperation =
       id: string;
       type: "updateUserProfile";
       email: string;
-      profile: Pick<Usuario, "idade" | "nome" | "avatar"> & Partial<Pick<Usuario, "role" | "turma">>;
+      profile: Pick<Usuario, "idade" | "nome" | "avatar"> &
+        Partial<Pick<Usuario, "role" | "turma" | "goal" | "selfReportedLevel" | "weeklyAvailability" | "onboardingCompletedAt">>;
       createdAt: string;
     };
 
@@ -70,7 +71,8 @@ export type PendingSyncOperationInput =
   | {
       type: "updateUserProfile";
       email: string;
-      profile: Pick<Usuario, "idade" | "nome" | "avatar"> & Partial<Pick<Usuario, "role" | "turma">>;
+      profile: Pick<Usuario, "idade" | "nome" | "avatar"> &
+        Partial<Pick<Usuario, "role" | "turma" | "goal" | "selfReportedLevel" | "weeklyAvailability" | "onboardingCompletedAt">>;
     };
 
 export type OfflineSyncStatus = {

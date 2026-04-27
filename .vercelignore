@@ -1,0 +1,12 @@
+node_modules
+.next
+.vercel
+coverage
+out
+.env
+.env.local
+*.log
+GitKrakenSetup.exe
+.next-dev.log
+.next-dev.err.log
+.next-dev.combined.log

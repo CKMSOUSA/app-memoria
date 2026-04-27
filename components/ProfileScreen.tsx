@@ -5,10 +5,26 @@ import { AVATAR_OPTIONS } from "@/lib/storage";
 import { getAgeBand, getAgeLabel, getAudienceLabel, getAudienceFromAge } from "@/lib/scoring";
 import type { Usuario } from "@/lib/types";
 
+const goalLabels: Record<NonNullable<Usuario["goal"]>, string> = {
+  memoria: "Fortalecer memoria",
+  atencao: "Melhorar atencao",
+  rotina: "Criar rotina de treino",
+  pedagogico: "Reforco pedagogico",
+};
+
+const levelLabels: Record<NonNullable<Usuario["selfReportedLevel"]>, string> = {
+  iniciante: "Iniciante",
+  intermediario: "Intermediario",
+  avancado: "Avancado",
+};
+
 type ProfileScreenProps = {
   usuario: Usuario;
   onBack: () => void;
-  onSaveProfile: (profile: Pick<Usuario, "idade" | "nome" | "avatar"> & Partial<Pick<Usuario, "role" | "turma">>) => void | Promise<void>;
+  onSaveProfile: (
+    profile: Pick<Usuario, "idade" | "nome" | "avatar"> &
+      Partial<Pick<Usuario, "role" | "turma" | "goal" | "selfReportedLevel" | "weeklyAvailability" | "onboardingCompletedAt">>,
+  ) => void | Promise<void>;
 };
 
 const roleLabels: Record<Usuario["role"], string> = {
@@ -24,6 +40,11 @@ export function ProfileScreen({ usuario, onBack, onSaveProfile }: ProfileScreenP
   const [avatar, setAvatar] = useState(usuario.avatar);
   const [role, setRole] = useState<Usuario["role"]>(usuario.role);
   const [turma, setTurma] = useState(usuario.turma ?? "");
+  const [goal, setGoal] = useState<NonNullable<Usuario["goal"]>>(usuario.goal ?? "rotina");
+  const [selfReportedLevel, setSelfReportedLevel] = useState<NonNullable<Usuario["selfReportedLevel"]>>(
+    usuario.selfReportedLevel ?? "iniciante",
+  );
+  const [weeklyAvailability, setWeeklyAvailability] = useState(String(usuario.weeklyAvailability ?? 3));
   const [mensagem, setMensagem] = useState("");
 
   async function handleSave() {
@@ -38,12 +59,22 @@ export function ProfileScreen({ usuario, onBack, onSaveProfile }: ProfileScreenP
       return;
     }
 
+    const weeklyAvailabilityNumber = Number(weeklyAvailability);
+    if (!Number.isInteger(weeklyAvailabilityNumber) || weeklyAvailabilityNumber < 1 || weeklyAvailabilityNumber > 7) {
+      setMensagem("Informe quantos dias por semana voce consegue treinar, entre 1 e 7.");
+      return;
+    }
+
     await onSaveProfile({
       idade: idadeNumero,
       nome: nome.trim(),
       avatar,
       role,
       turma: turma.trim() || null,
+      goal,
+      selfReportedLevel,
+      weeklyAvailability: weeklyAvailabilityNumber,
+      onboardingCompletedAt: usuario.onboardingCompletedAt ?? new Date().toISOString(),
     });
     setMensagem("Perfil atualizado com sucesso.");
   }
@@ -129,6 +160,58 @@ export function ProfileScreen({ usuario, onBack, onSaveProfile }: ProfileScreenP
           </label>
         </div>
 
+        <div className="form-grid">
+          <label className="field">
+            <span>Objetivo principal</span>
+            <select
+              className="text-input"
+              value={goal}
+              onChange={(event) => {
+                setMensagem("");
+                setGoal(event.target.value as NonNullable<Usuario["goal"]>);
+              }}
+            >
+              {Object.entries(goalLabels).map(([value, label]) => (
+                <option key={value} value={value}>
+                  {label}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <label className="field">
+            <span>Nivel percebido</span>
+            <select
+              className="text-input"
+              value={selfReportedLevel}
+              onChange={(event) => {
+                setMensagem("");
+                setSelfReportedLevel(event.target.value as NonNullable<Usuario["selfReportedLevel"]>);
+              }}
+            >
+              {Object.entries(levelLabels).map(([value, label]) => (
+                <option key={value} value={value}>
+                  {label}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
+
+        <label className="field">
+          <span>Dias por semana disponiveis</span>
+          <input
+            type="number"
+            min={1}
+            max={7}
+            value={weeklyAvailability}
+            onChange={(event) => {
+              setMensagem("");
+              setWeeklyAvailability(event.target.value);
+            }}
+          />
+        </label>
+
         <div className="avatar-picker avatar-picker-profile">
           {AVATAR_OPTIONS.map((option) => (
             <button
@@ -165,6 +248,18 @@ export function ProfileScreen({ usuario, onBack, onSaveProfile }: ProfileScreenP
           <div className="profile-chip">
             <strong>Perfil</strong>
             <span>{roleLabels[role]}</span>
+          </div>
+          <div className="profile-chip">
+            <strong>Objetivo</strong>
+            <span>{goalLabels[goal]}</span>
+          </div>
+          <div className="profile-chip">
+            <strong>Nivel</strong>
+            <span>{levelLabels[selfReportedLevel]}</span>
+          </div>
+          <div className="profile-chip">
+            <strong>Rotina</strong>
+            <span>{`${weeklyAvailability || "3"} dia(s) por semana`}</span>
           </div>
           <div className="profile-chip">
             <strong>Turma</strong>

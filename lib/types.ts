@@ -3,6 +3,7 @@ export type Tela =
   | "cadastro"
   | "recuperar"
   | "adminAcesso"
+  | "onboarding"
   | "dashboard"
   | "testesAvancados"
   | "memoria"
@@ -25,6 +26,8 @@ export type Tela =
 export type DataMode = "local" | "remote";
 export type UserRole = "aluno" | "responsavel" | "professor" | "admin";
 export type UserStatus = "ativo" | "bloqueado" | "excluido";
+export type TrainingGoal = "memoria" | "atencao" | "rotina" | "pedagogico";
+export type UserSelfReportedLevel = "iniciante" | "intermediario" | "avancado";
 
 export type Usuario = {
   nome: string;
@@ -37,6 +40,10 @@ export type Usuario = {
   role: UserRole;
   status: UserStatus;
   turma?: string | null;
+  goal?: TrainingGoal | null;
+  selfReportedLevel?: UserSelfReportedLevel | null;
+  weeklyAvailability?: number | null;
+  onboardingCompletedAt?: string | null;
 };
 
 export type UsuarioPersistido = Usuario & {

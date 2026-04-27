@@ -62,6 +62,10 @@ function normalizeUser(user: UsuarioPersistido): UsuarioPersistido {
     role: user.role ?? "aluno",
     status: user.status ?? "ativo",
     turma: typeof (user as UsuarioPersistido & { turma?: string | null }).turma === "string" ? (user as UsuarioPersistido & { turma?: string | null }).turma : null,
+    goal: user.goal ?? null,
+    selfReportedLevel: user.selfReportedLevel ?? null,
+    weeklyAvailability: typeof user.weeklyAvailability === "number" ? user.weeklyAvailability : null,
+    onboardingCompletedAt: user.onboardingCompletedAt ?? null,
   };
 }
 
@@ -247,7 +251,8 @@ export function updateUserAge(email: string, idade: number) {
 
 export function updateUserProfile(
   email: string,
-  profile: Pick<Usuario, "idade" | "nome" | "avatar"> & Partial<Pick<Usuario, "role" | "turma">>,
+  profile: Pick<Usuario, "idade" | "nome" | "avatar"> &
+    Partial<Pick<Usuario, "role" | "turma" | "goal" | "selfReportedLevel" | "weeklyAvailability" | "onboardingCompletedAt">>,
 ) {
   const users = readUsers();
   let updatedUser: Usuario | null = null;
@@ -344,6 +349,10 @@ export function syncAuthUserProfile(profile: {
   status?: Usuario["status"];
   criadoEm?: string;
   turma?: string | null;
+  goal?: Usuario["goal"];
+  selfReportedLevel?: Usuario["selfReportedLevel"];
+  weeklyAvailability?: Usuario["weeklyAvailability"];
+  onboardingCompletedAt?: Usuario["onboardingCompletedAt"];
 }) {
   const users = readUsers();
   const existing = users.find((user) => user.email === profile.email);
@@ -363,6 +372,11 @@ export function syncAuthUserProfile(profile: {
             status: profile.status ?? user.status,
             criadoEm: profile.criadoEm ?? user.criadoEm,
             turma: profile.turma ?? user.turma ?? null,
+            goal: profile.goal ?? user.goal ?? null,
+            selfReportedLevel: profile.selfReportedLevel ?? user.selfReportedLevel ?? null,
+            weeklyAvailability:
+              typeof profile.weeklyAvailability === "number" ? profile.weeklyAvailability : user.weeklyAvailability ?? null,
+            onboardingCompletedAt: profile.onboardingCompletedAt ?? user.onboardingCompletedAt ?? null,
           },
     );
     writeUsers(nextUsers);
@@ -381,6 +395,10 @@ export function syncAuthUserProfile(profile: {
     role: profile.role ?? "aluno",
     status: profile.status ?? "ativo",
     turma: profile.turma ?? null,
+    goal: profile.goal ?? null,
+    selfReportedLevel: profile.selfReportedLevel ?? null,
+    weeklyAvailability: profile.weeklyAvailability ?? null,
+    onboardingCompletedAt: profile.onboardingCompletedAt ?? null,
   };
 
   writeUsers([...users, created]);

@@ -23,6 +23,7 @@ import type {
   UserLink,
 } from "@/lib/types";
 import { MemoryGame } from "@/components/MemoryGame";
+import { OnboardingScreen } from "@/components/OnboardingScreen";
 import { ProfileScreen } from "@/components/ProfileScreen";
 import { SpatialGame } from "@/components/SpatialGame";
 import { VisualMemoryGame } from "@/components/VisualMemoryGame";
@@ -31,6 +32,10 @@ import { mergeProgress } from "@/lib/scoring";
 import type { DataMode, ProgressState, SessionRecord, SessionMode, Tela, Usuario } from "@/lib/types";
 
 const repository = getAppRepository();
+
+function shouldShowOnboarding(user: Usuario | null) {
+  return Boolean(user && user.role !== "admin" && !user.onboardingCompletedAt);
+}
 
 export default function Page() {
   const [tela, setTela] = useState<Tela>("login");
@@ -127,7 +132,7 @@ export default function Page() {
             setAdminHistories([]);
           }
         }
-        setTela("dashboard");
+        setTela(shouldShowOnboarding(activeUser) ? "onboarding" : "dashboard");
       }
 
       setDataMode(repository.mode);
@@ -244,7 +249,7 @@ export default function Page() {
         setAdminHistories([]);
       }
     }
-    setTela("dashboard");
+    setTela(shouldShowOnboarding(activeUser) ? "onboarding" : "dashboard");
     return activeUser;
   }
 
@@ -278,10 +283,25 @@ export default function Page() {
     setTela("login");
   }
 
-  async function handleSaveProfile(profile: Pick<Usuario, "idade" | "nome" | "avatar"> & Partial<Pick<Usuario, "role" | "turma">>) {
+  async function handleSaveProfile(
+    profile: Pick<Usuario, "idade" | "nome" | "avatar"> &
+      Partial<Pick<Usuario, "role" | "turma" | "goal" | "selfReportedLevel" | "weeklyAvailability" | "onboardingCompletedAt">>,
+  ) {
     if (!usuario) return;
     const updatedUser = await repository.updateUserProfile(usuario.email, profile);
     if (updatedUser) setUsuario(updatedUser);
+  }
+
+  async function handleCompleteOnboarding(
+    profile: Pick<Usuario, "idade" | "nome" | "avatar"> &
+      Partial<Pick<Usuario, "goal" | "selfReportedLevel" | "weeklyAvailability" | "onboardingCompletedAt">>,
+  ) {
+    if (!usuario) return;
+    const updatedUser = await repository.updateUserProfile(usuario.email, profile);
+    if (updatedUser) {
+      setUsuario(updatedUser);
+      setTela("dashboard");
+    }
   }
 
   async function openAdminArea(accessCode = adminAccessCode) {
@@ -673,6 +693,7 @@ export default function Page() {
           tela === "perfil" ||
           tela === "especial" ||
           tela === "ajuda" ||
+          tela === "onboarding" ||
           tela === "admin"
             ? "login"
             : tela
@@ -874,6 +895,10 @@ export default function Page() {
         }
       />
     );
+  }
+
+  if (tela === "onboarding") {
+    return <OnboardingScreen usuario={usuario} onSave={handleCompleteOnboarding} />;
   }
 
   if (tela === "perfil") {

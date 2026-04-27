@@ -94,6 +94,9 @@ type RegisterResult = {
   user: Usuario | null;
 };
 
+type EditableUserProfile = Pick<Usuario, "idade" | "nome" | "avatar"> &
+  Partial<Pick<Usuario, "role" | "turma" | "goal" | "selfReportedLevel" | "weeklyAvailability" | "onboardingCompletedAt">>;
+
 type AppRepository = {
   mode: DataMode;
   bootstrap: () => Promise<void>;
@@ -113,7 +116,7 @@ type AppRepository = {
   ) => Promise<RegisterResult>;
   updateUserProfile: (
     email: string,
-    profile: Pick<Usuario, "idade" | "nome" | "avatar"> & Partial<Pick<Usuario, "role" | "turma">>,
+    profile: EditableUserProfile,
   ) => Promise<Usuario | null>;
   updateUserPoints: (email: string, delta: number) => Promise<Usuario | null>;
   loadProgress: (email: string) => Promise<ProgressState>;
