@@ -291,86 +291,124 @@ export function AdminScreen({
   return (
     <main className="shell shell-center">
       <section className="game-card">
-        <header className="game-header">
-          <div>
-            <p className="eyebrow admin-area-title">Home administrativa</p>
-            <h1 className="admin-home-heading">Operacao central do aplicativo</h1>
-            <p className="muted">
-              Entrada dedicada para operacao, alertas criticos e acoes rapidas sem depender do dashboard do aluno.
-            </p>
-          </div>
-          <div className="button-row">
-            <button className="btn btn-secondary btn-export-report" onClick={handleExportAdminPdf}>
-              Exportar PDF
-            </button>
-            <button
-              className="btn btn-secondary"
-              onClick={async () => {
-                const backup = await onExportBackup();
-                const blob = new Blob([JSON.stringify(backup, null, 2)], { type: "application/json" });
-                const url = URL.createObjectURL(blob);
-                const anchor = document.createElement("a");
-                anchor.href = url;
-                anchor.download = `backup-app-memoria-${new Date().toISOString().slice(0, 10)}.json`;
-                anchor.click();
-                URL.revokeObjectURL(url);
-              }}
-            >
-              Exportar backup
-            </button>
-            <button className="btn btn-secondary" onClick={() => backupInputRef.current?.click()}>
-              Restaurar backup
-            </button>
-            <button
-              className="btn btn-secondary"
-              disabled={resettingAllData}
-              onClick={async () => {
-                const confirmed = window.confirm(
-                  "Remover todos os usuarios nao administradores? Isso vai apagar contas, progresso, historico, pedidos, vinculos e demais dados associados, preservando apenas o administrativo.",
-                );
-                if (!confirmed) return;
+        <div className="admin-shell">
+          <aside className="admin-sidebar">
+            <div className="admin-sidebar-profile">
+              <div className="sidebar-avatar">{usuario.avatar}</div>
+              <div>
+                <h2>{usuario.nome}</h2>
+                <p className="sidebar-email">{usuario.email}</p>
+              </div>
+            </div>
+            <p className="sidebar-label">Administracao</p>
+            <div className="admin-sidebar-nav">
+              {panelOptions
+                .filter((option) => option.id !== "ajuda")
+                .map((option) => (
+                  <button
+                    key={option.id}
+                    type="button"
+                    className={`admin-nav-button ${activePanel === option.id ? "admin-nav-button-active" : ""}`}
+                    onClick={() => setActivePanel(option.id)}
+                  >
+                    <strong>{option.label}</strong>
+                    <span>{option.caption}</span>
+                  </button>
+                ))}
+              <button type="button" className="admin-nav-button" onClick={onBack}>
+                <strong>Meu perfil</strong>
+                <span>Editar dados do administrador</span>
+              </button>
+              <button
+                type="button"
+                className={`admin-nav-button ${activePanel === "ajuda" ? "admin-nav-button-active" : ""}`}
+                onClick={() => setActivePanel("ajuda")}
+              >
+                <strong>Ajuda</strong>
+                <span>Pedidos, mensagens e respostas</span>
+              </button>
+              <button type="button" className="admin-nav-button admin-nav-button-danger" onClick={onLogout}>
+                <strong>Sair</strong>
+                <span>Encerrar sessao administrativa</span>
+              </button>
+            </div>
+          </aside>
 
-                const finalConfirmed = window.confirm(
-                  "Confirmacao final: apenas as contas administrativas serao mantidas. Deseja continuar?",
-                );
-                if (!finalConfirmed) return;
+          <div className="admin-content">
+            <header className="game-header">
+              <div>
+                <p className="eyebrow admin-area-title">Home administrativa</p>
+                <h1 className="admin-home-heading">Operacao central do aplicativo</h1>
+                <p className="muted">
+                  Entrada dedicada para operacao, alertas criticos e acoes rapidas sem depender do dashboard do aluno.
+                </p>
+              </div>
+              <div className="button-row">
+                <button className="btn btn-secondary btn-export-report" onClick={handleExportAdminPdf}>
+                  Exportar PDF
+                </button>
+                <button
+                  className="btn btn-secondary"
+                  onClick={async () => {
+                    const backup = await onExportBackup();
+                    const blob = new Blob([JSON.stringify(backup, null, 2)], { type: "application/json" });
+                    const url = URL.createObjectURL(blob);
+                    const anchor = document.createElement("a");
+                    anchor.href = url;
+                    anchor.download = `backup-app-memoria-${new Date().toISOString().slice(0, 10)}.json`;
+                    anchor.click();
+                    URL.revokeObjectURL(url);
+                  }}
+                >
+                  Exportar backup
+                </button>
+                <button className="btn btn-secondary" onClick={() => backupInputRef.current?.click()}>
+                  Restaurar backup
+                </button>
+                <button
+                  className="btn btn-secondary"
+                  disabled={resettingAllData}
+                  onClick={async () => {
+                    const confirmed = window.confirm(
+                      "Remover todos os usuarios nao administradores? Isso vai apagar contas, progresso, historico, pedidos, vinculos e demais dados associados, preservando apenas o administrativo.",
+                    );
+                    if (!confirmed) return;
 
-                setResettingAllData(true);
-                try {
-                  await onResetAllTrainingData();
-                } finally {
-                  setResettingAllData(false);
-                }
-              }}
-            >
-              {resettingAllData ? "Limpando usuarios..." : "Limpar usuarios nao admin"}
-            </button>
-            <button className="btn btn-admin-back" onClick={onBack}>
-              Abrir meu perfil
-            </button>
-            <button className="btn btn-secondary" onClick={onLogout}>
-              Sair
-            </button>
-          </div>
-          <input
-            ref={backupInputRef}
-            type="file"
-            accept="application/json"
-            hidden
-            onChange={async (event) => {
-              const file = event.target.files?.[0];
-              if (!file) return;
-              setRestoringBackup(true);
-              try {
-                const text = await file.text();
-                await onRestoreBackup(JSON.parse(text) as BackupData);
-              } finally {
-                setRestoringBackup(false);
-                event.target.value = "";
-              }
-            }}
-          />
-        </header>
+                    const finalConfirmed = window.confirm(
+                      "Confirmacao final: apenas as contas administrativas serao mantidas. Deseja continuar?",
+                    );
+                    if (!finalConfirmed) return;
+
+                    setResettingAllData(true);
+                    try {
+                      await onResetAllTrainingData();
+                    } finally {
+                      setResettingAllData(false);
+                    }
+                  }}
+                >
+                  {resettingAllData ? "Limpando usuarios..." : "Limpar usuarios nao admin"}
+                </button>
+              </div>
+              <input
+                ref={backupInputRef}
+                type="file"
+                accept="application/json"
+                hidden
+                onChange={async (event) => {
+                  const file = event.target.files?.[0];
+                  if (!file) return;
+                  setRestoringBackup(true);
+                  try {
+                    const text = await file.text();
+                    await onRestoreBackup(JSON.parse(text) as BackupData);
+                  } finally {
+                    setRestoringBackup(false);
+                    event.target.value = "";
+                  }
+                }}
+              />
+            </header>
 
         <section className="panel admin-priority-panel">
           <div className="section-head">
@@ -463,28 +501,6 @@ export function AdminScreen({
               <strong>{resettingAllData ? "Resetando dados..." : "Resetar dados"}</strong>
               <span>Limpar usuarios nao admin e registrar a acao na auditoria</span>
             </button>
-          </div>
-        </section>
-
-        <section className="panel admin-options-panel">
-          <div className="section-head">
-            <h3>Painel de opcoes</h3>
-            <span className="small-muted">Abra somente o grupo de informacoes que voce quer administrar agora</span>
-          </div>
-          <div className="admin-options-grid" role="tablist" aria-label="Opcoes do painel administrativo">
-            {panelOptions.map((option) => (
-              <button
-                key={option.id}
-                type="button"
-                role="tab"
-                aria-selected={activePanel === option.id}
-                className={`admin-option-card ${activePanel === option.id ? "admin-option-card-active" : ""}`}
-                onClick={() => setActivePanel(option.id)}
-              >
-                <strong>{option.label}</strong>
-                <span>{option.caption}</span>
-              </button>
-            ))}
           </div>
         </section>
 
@@ -1150,6 +1166,8 @@ export function AdminScreen({
           </div>
         </section>
         ) : null}
+          </div>
+        </div>
       </section>
     </main>
   );
