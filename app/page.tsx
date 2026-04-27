@@ -37,6 +37,15 @@ function shouldShowOnboarding(user: Usuario | null) {
   return Boolean(user && user.role !== "admin" && !user.onboardingCompletedAt);
 }
 
+function getHomeScreenForUser(user: Usuario | null, adminConfirmed = false): Tela {
+  if (!user) return "login";
+  if (shouldShowOnboarding(user)) return "onboarding";
+  if (user.role === "admin") {
+    return adminConfirmed ? "admin" : "adminConfirm";
+  }
+  return "dashboard";
+}
+
 export default function Page() {
   const [tela, setTela] = useState<Tela>("login");
   const [usuario, setUsuario] = useState<Usuario | null>(null);
@@ -132,7 +141,7 @@ export default function Page() {
             setAdminHistories([]);
           }
         }
-        setTela(shouldShowOnboarding(activeUser) ? "onboarding" : "dashboard");
+        setTela(getHomeScreenForUser(activeUser, false));
       }
 
       setDataMode(repository.mode);
@@ -175,15 +184,15 @@ export default function Page() {
 
   useEffect(() => {
     if (usuario && usuario.role !== "admin" && tela === "admin") {
-      setTela("dashboard");
+      setTela(getHomeScreenForUser(usuario, adminConfirmed));
     }
-  }, [tela, usuario]);
+  }, [adminConfirmed, tela, usuario]);
 
   useEffect(() => {
     if (usuario && usuario.role !== "admin" && tela === "adminConfirm") {
-      setTela("dashboard");
+      setTela(getHomeScreenForUser(usuario, adminConfirmed));
     }
-  }, [tela, usuario]);
+  }, [adminConfirmed, tela, usuario]);
 
   async function handleLogin(email: string, password: string) {
     const activeUser = await repository.loginUser(email, password);
@@ -249,7 +258,7 @@ export default function Page() {
         setAdminHistories([]);
       }
     }
-    setTela(shouldShowOnboarding(activeUser) ? "onboarding" : "dashboard");
+    setTela(getHomeScreenForUser(activeUser, false));
     return activeUser;
   }
 
@@ -300,7 +309,7 @@ export default function Page() {
     const updatedUser = await repository.updateUserProfile(usuario.email, profile);
     if (updatedUser) {
       setUsuario(updatedUser);
-      setTela("dashboard");
+      setTela(getHomeScreenForUser(updatedUser, adminConfirmed));
     }
   }
 
@@ -318,7 +327,7 @@ export default function Page() {
 
   async function handleOpenAdmin() {
     if (!usuario || usuario.role !== "admin") {
-      setTela("dashboard");
+      setTela(getHomeScreenForUser(usuario, adminConfirmed));
       return;
     }
 
@@ -902,13 +911,19 @@ export default function Page() {
   }
 
   if (tela === "perfil") {
-    return <ProfileScreen usuario={usuario} onBack={() => setTela("dashboard")} onSaveProfile={handleSaveProfile} />;
+    return (
+      <ProfileScreen
+        usuario={usuario}
+        onBack={() => setTela(getHomeScreenForUser(usuario, adminConfirmed))}
+        onSaveProfile={handleSaveProfile}
+      />
+    );
   }
 
   if (tela === "testesAvancados") {
     return (
       <AdvancedTestsPanel
-        onBack={() => setTela("dashboard")}
+        onBack={() => setTela(getHomeScreenForUser(usuario, adminConfirmed))}
         onOpenMemory={() => setTela("memoriaAvancada")}
         onOpenAttention={() => setTela("atencaoAvancada")}
         onOpenComparison={() => setTela("comparacaoAvancada")}
@@ -922,7 +937,7 @@ export default function Page() {
     return (
       <AdminConfirmScreen
         usuario={usuario}
-        onBack={() => setTela("dashboard")}
+        onBack={() => setTela(getHomeScreenForUser(usuario, adminConfirmed))}
         onConfirm={handleAdminCodeConfirm}
       />
     );
@@ -940,7 +955,7 @@ export default function Page() {
         prescriptions={prescriptions}
         userLinks={userLinks}
         auditLog={auditLog}
-        onBack={() => setTela("dashboard")}
+        onBack={() => setTela("perfil")}
         onUpdateHelpStatus={handleUpdateHelpStatus}
         onUpdateUserStatus={handleUpdateUserStatus}
         onResetAllTrainingData={handleResetAllTrainingData}
@@ -957,7 +972,7 @@ export default function Page() {
       <HelpScreen
         usuario={usuario}
         requests={helpRequests.filter((item) => item.email === usuario.email)}
-        onBack={() => setTela("dashboard")}
+        onBack={() => setTela(getHomeScreenForUser(usuario, adminConfirmed))}
         onSubmit={handleSubmitHelpRequest}
       />
     );

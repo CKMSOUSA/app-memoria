@@ -79,6 +79,9 @@ export function AdminScreen({
   onExportBackup,
   onRestoreBackup,
 }: AdminScreenProps) {
+  const usersSectionRef = useRef<HTMLElement | null>(null);
+  const helpSectionRef = useRef<HTMLElement | null>(null);
+  const auditSectionRef = useRef<HTMLElement | null>(null);
   const normalizedHistories = useMemo(
     () => (histories.length > 0 ? histories : [{ user: usuario, history: [], progress: progressoAtual }]),
     [histories, progressoAtual, usuario],
@@ -111,6 +114,7 @@ export function AdminScreen({
     [normalizedHistories],
   );
   const adminAlerts = useMemo(() => getAdminAlerts(normalizedHistories), [normalizedHistories]);
+  const criticalAlerts = useMemo(() => adminAlerts.filter((alert) => alert.severity === "alta"), [adminAlerts]);
   const adherencePanel = useMemo(() => getAdherencePanel(normalizedHistories), [normalizedHistories]);
   const scoreRanking = useMemo(() => getPrivateClassRanking(normalizedHistories, null, "score"), [normalizedHistories]);
   const evolutionRanking = useMemo(() => getPrivateClassRanking(normalizedHistories, null, "evolucao"), [normalizedHistories]);
@@ -230,6 +234,21 @@ export function AdminScreen({
       );
     });
   }, [helpRequests, helpStatusFilter, search]);
+  const openHelpRequestsCount = useMemo(
+    () => helpRequests.filter((request) => request.status === "aberta").length,
+    [helpRequests],
+  );
+  const manageableActiveUsersCount = useMemo(
+    () =>
+      normalizedHistories.filter(
+        ({ user }) => user.role !== "admin" && user.status !== "bloqueado" && user.status !== "excluido",
+      ).length,
+    [normalizedHistories],
+  );
+
+  function scrollToSection(target: HTMLElement | null) {
+    target?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
 
   function getObservation(email: string, category: ClinicalObservation["category"]) {
     return observations.find((item) => item.email === email && item.category === category) ?? null;
@@ -254,9 +273,10 @@ export function AdminScreen({
       <section className="game-card">
         <header className="game-header">
           <div>
-            <p className="eyebrow admin-area-title">Area administrativa</p>
+            <p className="eyebrow admin-area-title">Home administrativa</p>
+            <h1 className="admin-home-heading">Operacao central do aplicativo</h1>
             <p className="muted">
-              Painel de acompanhamento com resumo por aluno, ultima atividade, modo de treino mais forte e central de ajuda.
+              Entrada dedicada para operacao, alertas criticos e acoes rapidas sem depender do dashboard do aluno.
             </p>
           </div>
           <div className="button-row">
@@ -306,7 +326,7 @@ export function AdminScreen({
               {resettingAllData ? "Limpando usuarios..." : "Limpar usuarios nao admin"}
             </button>
             <button className="btn btn-admin-back" onClick={onBack}>
-              Voltar ao painel
+              Abrir meu perfil
             </button>
           </div>
           <input
@@ -328,6 +348,100 @@ export function AdminScreen({
             }}
           />
         </header>
+
+        <section className="panel admin-priority-panel">
+          <div className="section-head">
+            <div>
+              <h3>Alertas criticos no topo</h3>
+              <span className="small-muted">Itens que pedem acao primeiro</span>
+            </div>
+            <span className="pill">{criticalAlerts.length} prioridade alta</span>
+          </div>
+          {criticalAlerts.length > 0 ? (
+            <div className="admin-critical-list">
+              {criticalAlerts.slice(0, 4).map((alert, index) => (
+                <article key={`${alert.email}-${alert.category}-${alert.title}`} className="admin-critical-card">
+                  <div className="section-head">
+                    <div>
+                      <p className="small-muted">{`Prioridade ${index + 1}`}</p>
+                      <h3>{alert.title}</h3>
+                    </div>
+                    <span className="pill">Alta</span>
+                  </div>
+                  <p className="small-muted">{alert.name}</p>
+                  <p className="muted">{alert.summary}</p>
+                  <p className="small-muted">{alert.recommendation}</p>
+                </article>
+              ))}
+            </div>
+          ) : (
+            <p className="small-muted">Nenhum alerta de prioridade alta no momento.</p>
+          )}
+        </section>
+
+        <section className="panel admin-quick-actions-panel">
+          <div className="section-head">
+            <h3>Atalhos de acao rapida</h3>
+            <span className="small-muted">Fluxos operacionais mais usados em um clique</span>
+          </div>
+          <div className="admin-quick-actions-grid">
+            <button
+              className="admin-quick-action admin-quick-action-warning"
+              type="button"
+              onClick={() => {
+                setSearch("");
+                setUserRoleFilter("aluno");
+                setUserStatusFilter("ativo");
+                scrollToSection(usersSectionRef.current);
+              }}
+            >
+              <strong>Bloquear usuario</strong>
+              <span>{`${manageableActiveUsersCount} perfil(is) elegivel(is) para revisao`}</span>
+            </button>
+            <button
+              className="admin-quick-action admin-quick-action-info"
+              type="button"
+              onClick={() => {
+                setSearch("");
+                setHelpStatusFilter("aberta");
+                scrollToSection(helpSectionRef.current);
+              }}
+            >
+              <strong>Responder ajuda</strong>
+              <span>{`${openHelpRequestsCount} pedido(s) em aberto`}</span>
+            </button>
+            <button className="admin-quick-action admin-quick-action-neutral" type="button" onClick={handleExportAdminPdf}>
+              <strong>Exportar relatorio</strong>
+              <span>Gerar PDF consolidado com usuarios, ajuda e observacoes</span>
+            </button>
+            <button
+              className="admin-quick-action admin-quick-action-danger"
+              type="button"
+              onClick={async () => {
+                const confirmed = window.confirm(
+                  "Remover todos os usuarios nao administradores? Isso vai apagar contas, progresso, historico, pedidos, vinculos e demais dados associados, preservando apenas o administrativo.",
+                );
+                if (!confirmed) return;
+
+                const finalConfirmed = window.confirm(
+                  "Confirmacao final: apenas as contas administrativas serao mantidas. Deseja continuar?",
+                );
+                if (!finalConfirmed) return;
+
+                setResettingAllData(true);
+                try {
+                  await onResetAllTrainingData();
+                  scrollToSection(auditSectionRef.current);
+                } finally {
+                  setResettingAllData(false);
+                }
+              }}
+            >
+              <strong>{resettingAllData ? "Resetando dados..." : "Resetar dados"}</strong>
+              <span>Limpar usuarios nao admin e registrar a acao na auditoria</span>
+            </button>
+          </div>
+        </section>
 
         <section className="stats-grid">
           <article className="stat-card">
@@ -666,7 +780,7 @@ export function AdminScreen({
           )}
         </section>
 
-        <section className="panel">
+        <section ref={usersSectionRef} className="panel">
           <div className="section-head">
             <h3>Resumo por aluno</h3>
             <span className="small-muted">{filteredHistories.length} perfil(is) encontrado(s)</span>
@@ -849,7 +963,7 @@ export function AdminScreen({
           {filteredHistories.length === 0 ? <p className="small-muted">Nenhum aluno corresponde aos filtros atuais.</p> : null}
         </section>
 
-        <section className="panel">
+        <section ref={helpSectionRef} className="panel">
           <div className="section-head">
             <h3>Duvidas enviadas</h3>
             <span className="small-muted">{filteredHelpRequests.length} item(ns) encontrado(s)</span>
@@ -944,7 +1058,7 @@ export function AdminScreen({
           </div>
         </section>
 
-        <section className="panel">
+        <section ref={auditSectionRef} className="panel">
           <div className="section-head">
             <h3>Log de acoes administrativas</h3>
             <span className="small-muted">{auditLog.length} registro(s) recentes</span>
