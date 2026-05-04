@@ -66,6 +66,8 @@ import type {
 type TrailMode = "memoria" | "visual" | "atencao" | "comparacao" | "espacial" | "logica";
 type DashboardTab = "hoje" | "progresso" | "rotina" | "insights";
 
+const REFLECTION_SECONDS = 40;
+
 const processReflectionPrompts = [
   "O que esta ocupando sua mente neste momento?",
   "Que sensacao aparece quando voce fica alguns segundos sem pressa?",
@@ -1051,7 +1053,7 @@ export function Dashboard({
   const [activeTrailTab, setActiveTrailTab] = useState<TrailMode>("memoria");
   const [activeDashboardTab, setActiveDashboardTab] = useState<DashboardTab>("hoje");
   const [reflectionPromptIndex, setReflectionPromptIndex] = useState(0);
-  const [reflectionSecondsLeft, setReflectionSecondsLeft] = useState(20);
+  const [reflectionSecondsLeft, setReflectionSecondsLeft] = useState(REFLECTION_SECONDS);
   const [reflectionOpen, setReflectionOpen] = useState(false);
   const trailTabs: Array<{
     id: TrailMode;
@@ -1123,7 +1125,7 @@ export function Dashboard({
 
   function startProcessReflection() {
     setReflectionPromptIndex((current) => (current + 1) % processReflectionPrompts.length);
-    setReflectionSecondsLeft(20);
+    setReflectionSecondsLeft(REFLECTION_SECONDS);
     setReflectionOpen(true);
   }
 
@@ -1269,12 +1271,12 @@ export function Dashboard({
           {reflectionOpen ? (
             <article className="process-reflection-card" aria-live="polite">
               <div>
-                <p className="small-muted">Pausa de reflexao</p>
+                <p className="small-muted process-reflection-label">Pausa de reflexao</p>
                 <h3>{reflectionComplete ? "Pausa concluida" : `${reflectionSecondsLeft}s para pensar`}</h3>
-                <p className="muted">{reflectionPrompt}</p>
+                <p className="muted process-reflection-question">{reflectionPrompt}</p>
               </div>
               <div className="process-reflection-meter" aria-label={`${reflectionSecondsLeft} segundos restantes`}>
-                <span style={{ width: `${((20 - reflectionSecondsLeft) / 20) * 100}%` }} />
+                <span style={{ width: `${((REFLECTION_SECONDS - reflectionSecondsLeft) / REFLECTION_SECONDS) * 100}%` }} />
               </div>
               {reflectionComplete ? (
                 <p className="process-reflection-done">Guarde a percepcao que apareceu e siga com calma.</p>

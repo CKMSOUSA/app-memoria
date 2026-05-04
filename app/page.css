@@ -667,7 +667,16 @@ h2 {
 .process-reflection-card h3 {
   margin-bottom: 8px;
   color: #7f2d2d;
-  font-size: 24px;
+  font-size: 30px;
+}
+
+.process-reflection-label {
+  font-size: 17px;
+}
+
+.process-reflection-question {
+  font-size: 22px;
+  line-height: 1.45;
 }
 
 .process-reflection-meter {
