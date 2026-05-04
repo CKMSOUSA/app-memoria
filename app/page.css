@@ -671,7 +671,10 @@ h2 {
 }
 
 .process-reflection-label {
-  font-size: 17px;
+  color: #7f2d2d;
+  font-size: 20px;
+  font-weight: 900;
+  letter-spacing: 0.04em;
 }
 
 .process-reflection-question {
