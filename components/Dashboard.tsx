@@ -67,11 +67,14 @@ type TrailMode = "memoria" | "visual" | "atencao" | "comparacao" | "espacial" | 
 type DashboardTab = "hoje" | "progresso" | "rotina" | "insights";
 
 const processReflectionPrompts = [
-  "Antes de responder, perceba: o que esta acontecendo primeiro, o que vem depois, e onde voce costuma se apressar?",
-  "Qual parte desta tarefa pede cuidado, mesmo parecendo simples?",
-  "Que pista voce pode observar antes de escolher uma resposta?",
-  "Se voce errar, que informacao o erro pode te dar sobre o proximo passo?",
-  "O que muda quando voce espera alguns segundos antes de agir?",
+  "O que esta ocupando sua mente neste momento?",
+  "Que sensacao aparece quando voce fica alguns segundos sem pressa?",
+  "O que voce quer cuidar melhor hoje?",
+  "Qual pensamento merece ser observado sem virar uma acao imediata?",
+  "O que este pequeno intervalo muda no seu jeito de perceber o tempo?",
+  "Que significado voce quer colocar no que vai fazer agora?",
+  "O que voce nota no seu corpo quando para por alguns segundos?",
+  "Que escolha simples pode deixar este momento mais consciente?",
 ];
 
 type DashboardProps = {
@@ -1266,15 +1269,15 @@ export function Dashboard({
           {reflectionOpen ? (
             <article className="process-reflection-card" aria-live="polite">
               <div>
-                <p className="small-muted">Mentalidade de processo</p>
-                <h3>{reflectionComplete ? "Agora escolha com calma" : `${reflectionSecondsLeft}s para observar`}</h3>
+                <p className="small-muted">Pausa de reflexao</p>
+                <h3>{reflectionComplete ? "Pausa concluida" : `${reflectionSecondsLeft}s para pensar`}</h3>
                 <p className="muted">{reflectionPrompt}</p>
               </div>
               <div className="process-reflection-meter" aria-label={`${reflectionSecondsLeft} segundos restantes`}>
                 <span style={{ width: `${((20 - reflectionSecondsLeft) / 20) * 100}%` }} />
               </div>
               {reflectionComplete ? (
-                <p className="process-reflection-done">Quando a resposta nascer, siga pelo proximo passo com atencao.</p>
+                <p className="process-reflection-done">Guarde a percepcao que apareceu e siga com calma.</p>
               ) : null}
             </article>
           ) : null}
