@@ -92,21 +92,21 @@ export function getComparativeReportInsights(history: SessionRecord[]): Comparat
 
   return [
     {
-      label: "Score medio semanal",
+      label: "Score médio semanal",
       currentValue: weeklyCurrent.averageScore,
       previousValue: weeklyPrevious.averageScore,
       delta: weeklyCurrent.averageScore - weeklyPrevious.averageScore,
-      summary: "Compara a media da semana atual com a semana imediatamente anterior.",
+      summary: "Compara a média da semana atual com a semana imediatamente anterior.",
     },
     {
-      label: "Conclusao semanal",
+      label: "Conclusão semanal",
       currentValue: weeklyCurrent.completionRate,
       previousValue: weeklyPrevious.completionRate,
       delta: weeklyCurrent.completionRate - weeklyPrevious.completionRate,
-      summary: "Mostra se a semana atual esta mais consistente na entrega de sessoes completas.",
+      summary: "Mostra se a semana atual está mais consistente na entrega de sessões completas.",
     },
     {
-      label: "Score medio mensal",
+      label: "Score médio mensal",
       currentValue: monthlyCurrent.averageScore,
       previousValue: monthlyPrevious.averageScore,
       delta: monthlyCurrent.averageScore - monthlyPrevious.averageScore,
@@ -117,7 +117,7 @@ export function getComparativeReportInsights(history: SessionRecord[]): Comparat
       currentValue: monthlyCurrent.sessions,
       previousValue: monthlyPrevious.sessions,
       delta: monthlyCurrent.sessions - monthlyPrevious.sessions,
-      summary: "Ajuda a ler aderencia, retorno ao treino e estabilidade da rotina ao longo do mes.",
+      summary: "Ajuda a ler aderência, retorno ao treino e estabilidade da rotina ao longo do mes.",
     },
   ];
 }
@@ -138,7 +138,7 @@ export function getPrivateClassRanking(histories: ManagedHistory[], turma: strin
         subtitle:
           mode === "score"
             ? `${currentMonth.sessions} sessao(oes) no periodo`
-            : `${evolution >= 0 ? "+" : ""}${evolution} ponto(s) no ultimo ciclo`,
+            : `${evolution >= 0 ? "+" : ""}${evolution} ponto(s) no último ciclo`,
       };
     })
     .sort((left, right) => right.score - left.score || left.name.localeCompare(right.name))
@@ -158,16 +158,16 @@ export function getRolePanelInsight(usuario: Usuario, histories: ManagedHistory[
   const recommendationMode = managed[0]?.progress ? getSmartRecommendation(managed[0].history, managed[0].progress).mode : "memoria";
 
   return {
-    title: usuario.role === "professor" ? "Painel do professor" : "Painel do responsavel",
+    title: usuario.role === "professor" ? "Painel do professor" : "Painel do responsável",
     summary:
       usuario.role === "professor"
-        ? "Visao agrupada da turma com foco em aderencia, progresso e proximo bloco prescrito."
-        : "Visao de acompanhamento do grupo ou rotina compartilhada, com foco em constancia e apoio no treino.",
+        ? "Visao agrupada da turma com foco em aderência, progresso e próximo bloco prescrito."
+        : "Visao de acompanhamento do grupo ou rotina compartilhada, com foco em constância e apoio no treino.",
     cards: [
       { label: "Alunos acompanhados", value: String(managed.length), caption: "Perfis de aluno vinculados pela mesma turma ou grupo." },
-      { label: "Media consolidada", value: String(averageScore || 0), caption: "Leitura agregada do desempenho recente do grupo." },
-      { label: "Conclusao", value: `${completionRate}%`, caption: "Percentual de sessoes completas nas rodadas registradas." },
-      { label: "Foco recomendado", value: getSessionModeLabel(recommendationMode), caption: "Trilha com mais valor para o proximo ciclo monitorado." },
+      { label: "Média consolidada", value: String(averageScore || 0), caption: "Leitura agregada do desempenho recente do grupo." },
+      { label: "Conclusão", value: `${completionRate}%`, caption: "Percentual de sessões completas nas rodadas registradas." },
+      { label: "Foco recomendado", value: getSessionModeLabel(recommendationMode), caption: "Trilha com mais valor para o próximo ciclo monitorado." },
     ],
   };
 }
@@ -183,12 +183,12 @@ export function getInterventionLibrary(history: SessionRecord[], progresso: Prog
     .map((item) => {
       if (item.key === "memoriaTrabalho") {
         return {
-          title: "Intervencao para memoria de trabalho",
+          title: "Intervenção para memória de trabalho",
           category: "memoria" as const,
-          summary: "Use evocacao curta, repeticao guiada e revisao imediata das respostas que faltaram.",
+          summary: "Use evocação curta, repetição guiada e revisão imediata das respostas que faltaram.",
           actions: [
-            "Comecar por fases curtas antes de aumentar quantidade de itens.",
-            "Pedir repeticao em voz alta antes de responder, quando isso fizer sentido.",
+            "Começar por fases curtas antes de aumentar quantidade de itens.",
+            "Pedir repetição em voz alta antes de responder, quando isso fizer sentido.",
             "Revisar erros e faltas logo depois da rodada, sem trocar de trilha cedo demais.",
           ],
           mode: "memoria" as const,
@@ -196,12 +196,12 @@ export function getInterventionLibrary(history: SessionRecord[], progresso: Prog
       }
       if (item.key === "atencaoSustentada") {
         return {
-          title: "Intervencao para atencao sustentada",
+          title: "Intervenção para atenção sustentada",
           category: "atencao" as const,
-          summary: "Reduza impulsividade com blocos breves, alvo unico e revisao de cliques fora do foco.",
+          summary: "Reduza impulsividade com blocos breves, alvo único e revisão de cliques fora do foco.",
           actions: [
-            "Usar sessoes de 5 a 10 minutos para preservar foco.",
-            "Pausar entre rodadas quando houver aumento rapido de erro.",
+            "Usar sessões de 5 a 10 minutos para preservar foco.",
+            "Pausar entre rodadas quando houver aumento rápido de erro.",
             "Retomar a fase imediatamente anterior se os cliques errados subirem.",
           ],
           mode: "atencao" as const,
@@ -209,24 +209,24 @@ export function getInterventionLibrary(history: SessionRecord[], progresso: Prog
       }
       if (item.key === "velocidadeResposta") {
         return {
-          title: "Intervencao para velocidade de resposta",
+          title: "Intervenção para velocidade de resposta",
           category: "velocidade" as const,
-          summary: "Acelere com criterio: primeiro estabilize acerto, depois reduza tempo de decisao.",
+          summary: "Acelere com critério: primeiro estabilize acerto, depois reduza tempo de decisão.",
           actions: [
-            "Iniciar com metas de precisao antes de pressionar velocidade.",
-            "Alternar comparacao e atencao para variar ritmo sem perder regra.",
-            falling ? "Evitar subir dificuldade na mesma semana em que a tendencia estiver caindo." : "Subir uma fase apenas quando houver duas rodadas estaveis.",
+            "Iniciar com metas de precisão antes de pressionar velocidade.",
+            "Alternar comparação e atenção para variar ritmo sem perder regra.",
+            falling ? "Evitar subir dificuldade na mesma semana em que a tendência estiver caindo." : "Subir uma fase apenas quando houver duas rodadas estaveis.",
           ],
           mode: recommendation.mode,
         };
       }
       return {
-        title: "Intervencao para raciocinio",
+        title: "Intervenção para raciocínio",
         category: "raciocinio" as const,
-        summary: "Reforce leitura de padrao e criterio com tempo suficiente para verbalizar a regra.",
+        summary: "Reforce leitura de padrão e critério com tempo suficiente para verbalizar a regra.",
         actions: [
           "Pedir que a pessoa explique a regra antes de marcar a resposta.",
-          "Alternar logica e comparacao para consolidar criterio.",
+          "Alternar lógica e comparação para consolidar critério.",
           "Manter a mesma fase por mais de uma rodada quando ainda houver troca de regra.",
         ],
         mode: "logica" as const,
@@ -240,10 +240,10 @@ export function getFormalEvaluationProtocol(usuario: Usuario, history: SessionRe
     title: "Modo avaliacao formal",
     summary: `Versao mais padronizada para ${usuario.nome}, com menos interferencia visual e leitura mais tecnica do desempenho.`,
     rules: [
-      "Ativar contraste controlado, foco visivel e reducao de estimulos.",
-      "Aplicar sequencia curta: memoria, atencao, comparacao e logica.",
-      `Registrar comparativos principais: ${comparative[0]?.label.toLowerCase() ?? "score medio"} e ${comparative[1]?.label.toLowerCase() ?? "conclusao semanal"}.`,
-      "Evitar interrupcoes durante a sessao e revisar apenas ao final de cada bloco.",
+      "Ativar contraste controlado, foco visível e redução de estimulos.",
+      "Aplicar sequência curta: memória, atenção, comparação e lógica.",
+      `Registrar comparativos principais: ${comparative[0]?.label.toLowerCase() ?? "score médio"} e ${comparative[1]?.label.toLowerCase() ?? "conclusão semanal"}.`,
+      "Evitar interrupções durante a sessão e revisar apenas ao final de cada bloco.",
     ],
   };
 }
@@ -299,19 +299,19 @@ export function getAutomaticGoals(history: SessionRecord[], progresso: ProgressS
 
   return [
     {
-      title: "Meta de frequencia da semana",
+      title: "Meta de frequência da semana",
       progressLabel: `${Math.min(recentWeek.sessions, 3)}/3 sessoes registradas`,
       summary: "Manter tres blocos curtos na semana para consolidar rotina.",
     },
     {
-      title: "Meta de consolidacao principal",
+      title: "Meta de consolidação principal",
       progressLabel: `${getSessionModeLabel(recommendation.mode)} · fase ${recommendation.challengeId}`,
       summary: `Priorizar ${recommendation.challengeName} ate estabilizar conclusao e reduzir erro recorrente.`,
     },
     {
       title: "Meta de variedade cognitiva",
-      progressLabel: `${Math.min(completedModes.size, 3)}/3 trilhas concluidas`,
-      summary: "Alternar trilhas ajuda a distribuir carga entre memoria, atencao e raciocinio.",
+      progressLabel: `${Math.min(completedModes.size, 3)}/3 trilhas concluídas`,
+      summary: "Alternar trilhas ajuda a distribuir carga entre memória, atenção e raciocínio.",
     },
   ];
 }

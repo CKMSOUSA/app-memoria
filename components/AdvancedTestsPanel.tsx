@@ -11,24 +11,24 @@ type AdvancedTestsPanelProps = {
 
 const advancedTracks = [
   {
-    title: "Memoria",
-    description: "Listas longas, interferencia semantica e codigos muito parecidos.",
+    title: "Memória",
+    description: "Listas longas, interferencia semântica e códigos muito parecidos.",
   },
   {
-    title: "Atencao",
-    description: "Grades densas com distratores quase identicos e margem minima de erro.",
+    title: "Atenção",
+    description: "Grades densas com distratores quase idênticos e margem mínima de erro.",
   },
   {
-    title: "Comparacao",
-    description: "Regras compostas, calculo mental e criterios abstratos na mesma rodada.",
+    title: "Comparação",
+    description: "Regras compostas, cálculo mental e critérios abstratos na mesma rodada.",
   },
   {
-    title: "Orientacao espacial",
+    title: "Orientação espacial",
     description: "Rotas extensas com retorno, cruzamento de eixo e pouca janela de memorizacao.",
   },
   {
-    title: "Logica",
-    description: "Series compostas por duas ou tres regras simultaneas, em nivel extremo.",
+    title: "Lógica",
+    description: "Series compostas por duas ou tres regras simultaneas, em nível extremo.",
   },
 ];
 
@@ -50,7 +50,7 @@ export function AdvancedTestsPanel({
             <p className="eyebrow">Testes Avancados</p>
             <h1>Painel de alta complexidade cognitiva</h1>
             <p className="muted">
-              Esta area ignora adaptacao por idade e apresenta somente desafios em grau muito dificil, extremamente dificil e elite cognitiva.
+              Esta área ignora adaptação por idade e apresenta somente desafios em grau muito difícil, extremamente difícil e elite cognitiva.
             </p>
           </div>
           <button className="btn btn-secondary" onClick={onBack}>
@@ -61,7 +61,7 @@ export function AdvancedTestsPanel({
         <section className="panel">
           <div className="section-head">
             <h3>Escolha a trilha extrema</h3>
-            <span className="small-muted">Cinco blocos independentes para treino avancado</span>
+            <span className="small-muted">Cinco blocos independentes para treino avançado</span>
           </div>
 
           <div className="admin-grid">

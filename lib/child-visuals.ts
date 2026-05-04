@@ -143,7 +143,7 @@ export function getChildVisual(token: string) {
   if (token.includes("estrela")) return "⭐";
   if (token.includes("cubos")) return "🧱";
   if (token.includes("nuvens")) return "☁️";
-  if (token.includes("lapis")) return "✏️";
+  if (token.includes("lápis")) return "✏️";
   if (token.includes("minuto") || token.includes("hora") || token.includes("segundo")) return "⏱️";
 
   return "✨";

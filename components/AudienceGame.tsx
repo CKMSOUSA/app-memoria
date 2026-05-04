@@ -154,8 +154,8 @@ export function AudienceGame({ usuario, progresso, onBack, onRememberVariation, 
     setPhase("result");
     setFeedback(
       result.completed
-        ? `Voce reconstruiu ${result.hits.length} item(ns) na ordem certa e concluiu a fase.`
-        : `Voce acertou ${result.hits.length} item(ns). Precisa de ${activeMinimum} para concluir esta fase.`,
+        ? `Você reconstruiu ${result.hits.length} item(ns) na ordem certa e concluiu a fase.`
+        : `Você acertou ${result.hits.length} item(ns). Precisa de ${activeMinimum} para concluir esta fase.`,
     );
     setReview({
       hits: result.hits,
@@ -221,7 +221,7 @@ export function AudienceGame({ usuario, progresso, onBack, onRememberVariation, 
           <section className="review-card review-card-full">
             <div className="section-head">
               <div>
-                <h3>Correcao da rodada</h3>
+                <h3>Correção da rodada</h3>
                 <p className="muted">{feedback}</p>
               </div>
               <span className="pill">Score {review.score}</span>
@@ -232,7 +232,7 @@ export function AudienceGame({ usuario, progresso, onBack, onRememberVariation, 
                 { label: "Erros", value: String(review.wrongItems.length) },
                 { label: "Faltaram", value: String(review.missedItems.length) },
               ]}
-              note="Aqui a ordem importa. Mesmo acertando o item, ele precisa aparecer na posicao certa para contar."
+              note="Aqui a ordem importa. Mesmo acertando o item, ele precisa aparecer na posição certa para contar."
             />
             {review.wrongItems.length > 0 || review.missedItems.length > 0 ? (
               <p className="review-note">
@@ -281,7 +281,7 @@ export function AudienceGame({ usuario, progresso, onBack, onRememberVariation, 
                       </span>
                     ))
                   ) : (
-                    <span className="small-muted">Voce completou toda a sequencia.</span>
+                    <span className="small-muted">Você completou toda a sequência.</span>
                   )}
                 </div>
               </div>
@@ -318,12 +318,12 @@ export function AudienceGame({ usuario, progresso, onBack, onRememberVariation, 
                   <span>{`${activeMinimum} itens certos`}</span>
                 </div>
                 <div className="phase-chip">
-                  <strong>Sequencia</strong>
+                  <strong>Sequência</strong>
                   <span>{`${activeSequence.length} itens`}</span>
                 </div>
                 <div className="phase-chip">
                   <strong>Modo</strong>
-                  <span>{settings.therapeuticMode ? "Terapeutico" : "Padrao"}</span>
+                  <span>{settings.therapeuticMode ? "Terapêutico" : "Padrão"}</span>
                 </div>
               </div>
 
@@ -331,9 +331,9 @@ export function AudienceGame({ usuario, progresso, onBack, onRememberVariation, 
                 <strong>Etapa da rodada</strong>
                 <span>
                   {phase === "showing"
-                    ? "Memorizando a sequencia"
+                    ? "Memorizando a sequência"
                     : phase === "answering"
-                      ? "Respondendo a sequencia"
+                      ? "Respondendo a sequência"
                       : "Pronto para iniciar"}
                 </span>
               </div>
@@ -350,16 +350,16 @@ export function AudienceGame({ usuario, progresso, onBack, onRememberVariation, 
                 )
               ) : (
                 <div className="word-box word-box-hidden exclusive-word-box">
-                  A sequencia aparece apenas durante a exibicao inicial.
+                  A sequência aparece apenas durante a exibição inicial.
                 </div>
               )}
             </section>
 
             <section className="panel exclusive-panel">
               <div className="section-head">
-                <h3>Monte a sequencia</h3>
+                <h3>Monte a sequência</h3>
                 <span className="small-muted">
-                  {phase === "answering" ? "Digite a sequencia na ordem correta" : "Aguardando rodada"}
+                  {phase === "answering" ? "Digite a sequência na ordem correta" : "Aguardando rodada"}
                 </span>
               </div>
 
@@ -388,7 +388,7 @@ export function AudienceGame({ usuario, progresso, onBack, onRememberVariation, 
                 disabled={phase !== "answering"}
                 onChange={(event) => setResponse(event.target.value)}
                 rows={7}
-                aria-label="Resposta da sequencia exclusiva"
+                aria-label="Resposta da sequência exclusiva"
               />
 
               <div className="button-row">
@@ -402,17 +402,17 @@ export function AudienceGame({ usuario, progresso, onBack, onRememberVariation, 
           <section className="panel exclusive-guide-panel">
             <GameGuide
               title="Como jogar"
-              objective="Veja a sequencia uma vez, esconda e depois reescreva os itens na mesma ordem."
+              objective="Veja a sequência uma vez, esconda e depois reescreva os itens na mesma ordem."
               steps={[
-                "Clique em Iniciar rodada para mostrar a sequencia.",
+                "Clique em Iniciar rodada para mostrar a sequência.",
                 "Leia os itens com calma e memorize a ordem em que aparecem.",
                 "Clique em Ocultar e responder para entrar no modo de resposta.",
                 "Digite os itens na mesma ordem e corrija a rodada.",
               ]}
               tip={
                 settings.therapeuticMode
-                  ? "No modo terapeutico, a sequencia fica mais curta e a carga visual fica mais controlada."
-                  : "A fase so conta como concluida quando voce atinge a meta de itens certos em ordem."
+                  ? "No modo terapêutico, a sequência fica mais curta e a carga visual fica mais controlada."
+                  : "A fase só conta como concluida quando você atinge a meta de itens certos em ordem."
               }
               isChild={usuario.idade <= 10}
             />

@@ -59,7 +59,7 @@ export function AppPreferencesPanel({ settings, isOffline, offlineSyncStatus, on
           {offlineSyncStatus.pendingCount > 0 ? `${offlineSyncStatus.pendingCount} pendente(s)` : "Fila vazia"}
         </span>
         <span className={`pill ${offlineSyncStatus.lastError ? "pill-locked" : "pill-success"}`}>
-          {offlineSyncStatus.lastError ? "Sincronizacao com atencao" : "Sincronizacao estavel"}
+          {offlineSyncStatus.lastError ? "Sincronizacao com atenção" : "Sincronizacao estável"}
         </span>
       </div>
       {offlineSyncStatus.lastError ? <p className="small-muted">{offlineSyncStatus.lastError}</p> : null}
@@ -78,7 +78,7 @@ export function AppPreferencesPanel({ settings, isOffline, offlineSyncStatus, on
         />
         <SettingToggle
           label="Narracao"
-          description="Ativa leitura por voz das instrucoes principais dos jogos."
+          description="Ativa leitura por voz das instruções principais dos jogos."
           checked={settings.narrationEnabled}
           onChange={() => onUpdateSettings({ narrationEnabled: !settings.narrationEnabled })}
         />
@@ -89,8 +89,8 @@ export function AppPreferencesPanel({ settings, isOffline, offlineSyncStatus, on
           onChange={() => onUpdateSettings({ simplifiedCommands: !settings.simplifiedCommands })}
         />
         <SettingToggle
-          label="Modo terapeutico"
-          description="Encurta sessoes, reduz carga visual e suaviza a exigencia inicial."
+          label="Modo terapêutico"
+          description="Encurta sessões, reduz carga visual e suaviza a exigencia inicial."
           checked={settings.therapeuticMode}
           onChange={() => onUpdateSettings({ therapeuticMode: !settings.therapeuticMode })}
         />
@@ -102,19 +102,19 @@ export function AppPreferencesPanel({ settings, isOffline, offlineSyncStatus, on
         />
         <SettingToggle
           label="Avaliacao formal"
-          description="Ativa um ambiente mais padronizado, com menos distração e leitura mais tecnica."
+          description="Ativa um ambiente mais padronizado, com menos distração e leitura mais técnica."
           checked={settings.formalEvaluationMode}
           onChange={() => onUpdateSettings({ formalEvaluationMode: !settings.formalEvaluationMode })}
         />
         <SettingToggle
-          label="Foco visivel"
+          label="Foco visível"
           description="Reforca bordas e destaque de foco para uso com teclado e leitura assistida."
           checked={settings.visibleFocus}
           onChange={() => onUpdateSettings({ visibleFocus: !settings.visibleFocus })}
         />
         <SettingToggle
           label="Navegacao por teclado"
-          description="Mantem a interface preparada para setas, tabulacao e leitura de tela."
+          description="Mantem a interface preparada para setas, tabulação e leitura de tela."
           checked={settings.keyboardNavigation}
           onChange={() => onUpdateSettings({ keyboardNavigation: !settings.keyboardNavigation })}
         />

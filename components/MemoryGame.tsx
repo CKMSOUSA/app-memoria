@@ -296,8 +296,8 @@ export function MemoryGame({
     setPhase("result");
     setFeedback(
       result.completed
-        ? `Voce acertou ${result.hits.length} figura(s) e concluiu o desafio. Score da rodada: ${result.score}.`
-        : `Voce acertou ${result.hits.length} figura(s). Precisa de ${sessionDifficulty.minimoParaConcluir} para concluir este desafio.`,
+        ? `Você acertou ${result.hits.length} figura(s) e concluiu o desafio. Score da rodada: ${result.score}.`
+        : `Você acertou ${result.hits.length} figura(s). Precisa de ${sessionDifficulty.minimoParaConcluir} para concluir este desafio.`,
     );
     setReview(result);
     playResultSound(
@@ -312,12 +312,12 @@ export function MemoryGame({
       <section className="game-card">
         <header className="game-header">
           <div>
-            <p className="eyebrow">{isAdvancedMode ? "Testes Avancados" : "Trilha de memoria"}</p>
-            <h1>{isAdvancedMode ? "Memoria de altissima carga" : "Memorize, oculte e recupere"}</h1>
+            <p className="eyebrow">{isAdvancedMode ? "Testes Avançados" : "Trilha de memória"}</p>
+            <h1>{isAdvancedMode ? "Memória de altíssima carga" : "Memorize, oculte e recupere"}</h1>
             <p className="muted">
               {isAdvancedMode
-                ? "Estas fases usam listas maiores, codigos parecidos e nenhuma reducao por idade."
-                : "Cada rodada tem uma unica correcao. Pontos extras so entram quando voce melhora seu recorde anterior."}
+                ? "Estas fases usam listas maiores, códigos parecidos e nenhuma redução por idade."
+                : "Cada rodada tem uma única correção. Pontos extras só entram quando você melhora seu recorde anterior."}
             </p>
           </div>
           <div className="button-row">
@@ -331,7 +331,7 @@ export function MemoryGame({
         <section className="panel">
           <div className="section-head">
             <h3>Escolha o desafio</h3>
-            <span className="small-muted">Nivel atual: {getNivel(usuario.pontos)}</span>
+            <span className="small-muted">Nível atual: {getNivel(usuario.pontos)}</span>
           </div>
           <div className="tabs-grid">
             {challengeList.map((item, index) => {
@@ -361,7 +361,7 @@ export function MemoryGame({
           <section className="review-card review-card-full">
               <div className="section-head">
                 <div>
-                  <h3>Correcao da rodada</h3>
+                  <h3>Correção da rodada</h3>
                   <p className="muted">{feedback}</p>
                 </div>
                 <span className="pill">Score {review.score}</span>
@@ -374,7 +374,7 @@ export function MemoryGame({
                 ]}
                 note={
                   review.completed
-                    ? "Excelente. Agora tente repetir mantendo a mesma precisao."
+                    ? "Excelente. Agora tente repetir mantendo a mesma precisão."
                     : review.missedWords.length > 0
                       ? `Onde errou: faltou lembrar ${review.missedWords.length} figura(s). Observe a coluna "Faltaram" antes de tentar de novo.`
                       : "Onde errou: havia selecao extra. Compare os erros marcados com as figuras corretas."
@@ -416,7 +416,7 @@ export function MemoryGame({
                       <MemoryFigureCard key={item} token={item} />
                     ))
                   ) : (
-                    <span className="small-muted">Voce lembrou de todas.</span>
+                    <span className="small-muted">Você lembrou de todas.</span>
                   )}
                 </div>
               </div>
@@ -444,17 +444,17 @@ export function MemoryGame({
 
               <GameGuide
                 title="Como jogar"
-                objective="Observe as figuras, espere o tempo terminar e depois selecione apenas as que voce lembrar."
+                objective="Observe as figuras, espere o tempo terminar e depois selecione apenas as que você lembrar."
                 steps={[
                   "Clique em Iniciar rodada para mostrar as figuras.",
                   "Memorize cada figura enquanto o contador estiver ativo.",
-                  "Quando as figuras sumirem, selecione no painel ao lado o que voce lembrar.",
+                  "Quando as figuras sumirem, selecione no painel ao lado o que você lembrar.",
                   "Use Corrigir rodada para ver acertos, erros e figuras faltantes.",
                 ]}
                 tip={
                   isAdvancedMode
-                    ? "No modo avancado, a diferenca entre itens e minima. Vale conferir com calma antes de responder."
-                    : "Cada rodada vale uma correcao. Para subir pontos, voce precisa superar o seu melhor score nesta fase."
+                    ? "No modo avançado, a diferença entre itens é mínima. Vale conferir com calma antes de responder."
+                    : "Cada rodada vale uma correção. Para subir pontos, você precisa superar o seu melhor score nesta fase."
                 }
                 isChild={!isAdvancedMode && usuario.idade <= 10}
               />
@@ -473,7 +473,7 @@ export function MemoryGame({
                   <span>{`${palavrasVisiveis.length} itens`}</span>
                 </div>
                 <div className="phase-chip">
-                  <strong>Adaptacao</strong>
+                  <strong>Adaptação</strong>
                   <span>{`${sessionDifficulty.tempoMemorizacao}s de memorizacao`}</span>
                 </div>
               </div>

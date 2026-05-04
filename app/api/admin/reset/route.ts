@@ -138,24 +138,24 @@ async function deleteUserData(email: string) {
 export async function POST(request: NextRequest) {
   const serviceKey = getServiceRoleKey();
   if (!getSupabaseUrl() || !getSupabaseAnonKey() || !serviceKey) {
-    return NextResponse.json({ ok: false, error: "Configuracao administrativa incompleta." }, { status: 503 });
+    return NextResponse.json({ ok: false, error: "Configuração administrativa incompleta." }, { status: 503 });
   }
 
   const authorized = await authorizeAdmin(request);
   if (!authorized) {
-    return NextResponse.json({ ok: false, error: "Acesso administrativo nao autorizado." }, { status: 403 });
+    return NextResponse.json({ ok: false, error: "Acesso administrativo não autorizado." }, { status: 403 });
   }
 
   const profiles = await loadProfiles();
   if (!profiles) {
-    return NextResponse.json({ ok: false, error: "Nao foi possivel listar os usuarios." }, { status: 500 });
+    return NextResponse.json({ ok: false, error: "Não foi possível listar os usuários." }, { status: 500 });
   }
 
   const nonAdminEmails = profiles.filter((profile) => profile.role !== "admin").map((profile) => profile.email);
   const results = await Promise.all(nonAdminEmails.map((email) => deleteUserData(email)));
 
   if (results.some((result) => !result)) {
-    return NextResponse.json({ ok: false, error: "Nao foi possivel zerar todos os usuarios." }, { status: 500 });
+    return NextResponse.json({ ok: false, error: "Não foi possível zerar todos os usuários." }, { status: 500 });
   }
 
   return NextResponse.json({ ok: true });

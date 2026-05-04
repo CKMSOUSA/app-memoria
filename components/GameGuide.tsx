@@ -23,7 +23,7 @@ export function GameGuide({ title, objective, steps, tip, isChild = false }: Gam
         <div className="button-row guide-actions">
           <span className="guide-badge">{simplifiedCommands ? "Comandos simples" : "Leia antes de jogar"}</span>
           <button type="button" className="btn btn-secondary btn-guide-narrate" onClick={narrateNow}>
-            {narrationEnabled ? "Repetir voz" : "Ouvir instrucoes"}
+            {narrationEnabled ? "Repetir voz" : "Ouvir instruções"}
           </button>
         </div>
       </div>

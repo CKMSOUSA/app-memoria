@@ -478,7 +478,7 @@ export default function Page() {
           actorName: usuario.nome,
           action: "reset_all_training",
           targetEmail: null,
-          description: "Todos os usuarios nao administradores e seus dados foram removidos, preservando apenas as contas admin.",
+          description: "Todos os usuários não administradores e seus dados foram removidos, preservando apenas as contas admin.",
         }),
       );
     }
@@ -664,7 +664,7 @@ export default function Page() {
         <section className="auth-card">
           <p className="eyebrow">Carregando</p>
           <h1>Preparando sua rotina de treino</h1>
-          <p className="muted">Estamos restaurando sua sessao e seu progresso salvo.</p>
+          <p className="muted">Estamos restaurando sua sessão e seu progresso salvo.</p>
         </section>
       </main>
     );

@@ -129,8 +129,8 @@ export function VisualMemoryGame({
     setReview(result);
     setFeedback(
       result.completed
-        ? `Voce encontrou ${result.pairsFound} pares e concluiu a fase visual.`
-        : `Voce encontrou ${result.pairsFound} pares. Precisa de ${challenge.minimoParaConcluir} para concluir.`,
+        ? `Você encontrou ${result.pairsFound} pares e concluiu a fase visual.`
+        : `Você encontrou ${result.pairsFound} pares. Precisa de ${challenge.minimoParaConcluir} para concluir.`,
     );
     playResultSound(
       result.completed,
@@ -245,7 +245,7 @@ export function VisualMemoryGame({
       <section className="game-card">
         <header className="game-header">
           <div>
-            <p className="eyebrow">Trilha de memoria visual</p>
+            <p className="eyebrow">Trilha de memória visual</p>
             <h1>Encontre os pares de figuras</h1>
             <p className="muted">Treino visual com cartas de animais, flores, objetos e outras imagens ilustradas.</p>
           </div>
@@ -260,7 +260,7 @@ export function VisualMemoryGame({
         <section className="panel">
           <div className="section-head">
             <h3>Escolha o desafio</h3>
-            <span className="small-muted">Nivel atual: {getNivel(usuario.pontos)}</span>
+            <span className="small-muted">Nível atual: {getNivel(usuario.pontos)}</span>
           </div>
           <div className="tabs-grid">
             {visualChallenges.map((item) => {
@@ -287,7 +287,7 @@ export function VisualMemoryGame({
           <section className="review-card review-card-full">
             <div className="section-head">
               <div>
-                <h3>Correcao da rodada</h3>
+                <h3>Correção da rodada</h3>
                 <p className="muted">{feedback}</p>
               </div>
               <span className="pill">Score {review.score}</span>
@@ -298,7 +298,7 @@ export function VisualMemoryGame({
                 { label: "Erros", value: String(review.wrongMatches) },
                 { label: "Meta", value: `${challenge.minimoParaConcluir} pares` },
               ]}
-              note="Na memoria visual, o ideal e observar posicao e categoria da figura antes das cartas virarem."
+              note="Na memória visual, o ideal é observar posição e categoria da figura antes das cartas virarem."
             />
             {!review.completed ? (
               <p className="review-note">
@@ -350,11 +350,11 @@ export function VisualMemoryGame({
                 objective="Veja as cartas abertas por alguns segundos e depois encontre os pares iguais."
                 steps={[
                   "Clique em Iniciar rodada para revelar todas as figuras.",
-                  "Memorize onde estao animais, flores e outros simbolos.",
+                  "Memorize onde estão animais, flores e outros símbolos.",
                   "Quando as cartas virarem, clique em duas por vez para formar pares.",
                   "No fim da rodada, confira quantos pares encontrou e quantos erros cometeu.",
                 ]}
-                tip="Para criancas pequenas, as figuras funcionam como apoio visual mais concreto do que palavras."
+                tip="Para crianças pequenas, as figuras funcionam como apoio visual mais concreto do que palavras."
                 isChild={usuario.idade <= 10}
               />
 
@@ -419,7 +419,7 @@ export function VisualMemoryGame({
 
               <div className="response-timer-row response-timer-row-near-board">
                 <TimerDisplay
-                  label={phase === "showing" ? "Observacao" : "Tempo"}
+                  label={phase === "showing" ? "Observação" : "Tempo"}
                   value={phase === "showing" || phase === "playing" ? `${timeLeft}s` : "--"}
                   tone={phase === "playing" && timeLeft <= 10 ? "warning" : phase === "showing" || phase === "playing" ? "active" : "neutral"}
                 />

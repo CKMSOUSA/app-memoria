@@ -11,7 +11,7 @@ export const memoryChallenges: MemoryChallenge[] = [
   {
     id: 2,
     nome: "Natureza e estudo",
-    palavras: ["gato", "arvore", "rio", "porta", "lapis"],
+    palavras: ["gato", "arvore", "rio", "porta", "lápis"],
     tempoMemorizacao: 7,
     minimoParaConcluir: 3,
   },
@@ -59,8 +59,8 @@ export const attentionChallenges: AttentionChallenge[] = [
   },
   {
     id: 3,
-    nome: "Atencao seletiva",
-    instrucao: "Selecione apenas os numeros 7 e ignore os demais.",
+    nome: "Atenção seletiva",
+    instrucao: "Selecione apenas os números 7 e ignore os demais.",
     alvo: "7",
     grade: ["7", "1", "4", "7", "9", "2", "7", "3", "7", "6", "8", "7"],
     tempoLimite: 14,

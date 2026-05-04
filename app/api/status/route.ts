@@ -16,9 +16,9 @@ export function GET() {
 
   return NextResponse.json({
     ok: true,
-    message: "API pronta para integrar autenticacao, perfil e progresso online.",
+    message: "API pronta para integrar autenticação, perfil e progresso online.",
     storageMode: mode,
-    provider: hasSupabase ? "supabase" : "nao configurado",
+    provider: hasSupabase ? "supabase" : "não configurado",
     remoteReady: hasSupabase,
     adminOnlineReady: hasSupabase && hasAdminServer,
     timestamp: new Date().toISOString(),

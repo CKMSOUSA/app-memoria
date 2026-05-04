@@ -121,7 +121,7 @@ export function exportAdminReportPdf(input: {
   helpRequests: HelpRequest[];
   observations: ClinicalObservation[];
 }) {
-  const printWindow = createPrintWindow("Relatorio-Administrativo");
+  const printWindow = createPrintWindow("Relatório-Administrativo");
   if (!printWindow) return;
 
   writeSection(
@@ -164,13 +164,13 @@ export function exportAdminReportPdf(input: {
          ? input.observations
              .map(
                (item) => `<div class="card">
-                 <strong>${item.category === "clinica" ? "Clinica" : "Pedagogica"} • ${item.email}</strong>
+                 <strong>${item.category === "clinica" ? "Clínica" : "Pedagógica"} • ${item.email}</strong>
                  <p class="muted">Atualizada em ${new Date(item.updatedAt).toLocaleDateString("pt-BR")} por ${item.authorName}</p>
                  <p>${item.note}</p>
                </div>`,
              )
              .join("")
-         : `<p class="muted">Nenhuma observacao registrada.</p>`
+         : `<p class="muted">Nenhuma observação registrada.</p>`
      }`,
   );
 

@@ -6,16 +6,16 @@ import { getAgeBand, getAgeLabel, getAudienceLabel, getAudienceFromAge } from "@
 import type { Usuario } from "@/lib/types";
 
 const goalLabels: Record<NonNullable<Usuario["goal"]>, string> = {
-  memoria: "Fortalecer memoria",
-  atencao: "Melhorar atencao",
+  memoria: "Fortalecer memória",
+  atencao: "Melhorar atenção",
   rotina: "Criar rotina de treino",
-  pedagogico: "Reforco pedagogico",
+  pedagogico: "Reforco pedagógico",
 };
 
 const levelLabels: Record<NonNullable<Usuario["selfReportedLevel"]>, string> = {
   iniciante: "Iniciante",
   intermediario: "Intermediario",
-  avancado: "Avancado",
+  avancado: "Avançado",
 };
 
 type ProfileScreenProps = {
@@ -29,7 +29,7 @@ type ProfileScreenProps = {
 
 const roleLabels: Record<Usuario["role"], string> = {
   aluno: "Aluno",
-  responsavel: "Responsavel",
+  responsavel: "Responsável",
   professor: "Professor",
   admin: "Administrador",
 };
@@ -50,7 +50,7 @@ export function ProfileScreen({ usuario, onBack, onSaveProfile }: ProfileScreenP
   async function handleSave() {
     const idadeNumero = Number(idade);
     if (!Number.isInteger(idadeNumero) || idadeNumero < 6 || idadeNumero > 99) {
-      setMensagem("Informe uma idade valida entre 6 e 99 anos.");
+      setMensagem("Informe uma idade válida entre 6 e 99 anos.");
       return;
     }
 
@@ -61,7 +61,7 @@ export function ProfileScreen({ usuario, onBack, onSaveProfile }: ProfileScreenP
 
     const weeklyAvailabilityNumber = Number(weeklyAvailability);
     if (!Number.isInteger(weeklyAvailabilityNumber) || weeklyAvailabilityNumber < 1 || weeklyAvailabilityNumber > 7) {
-      setMensagem("Informe quantos dias por semana voce consegue treinar, entre 1 e 7.");
+      setMensagem("Informe quantos dias por semana você consegue treinar, entre 1 e 7.");
       return;
     }
 
@@ -90,7 +90,7 @@ export function ProfileScreen({ usuario, onBack, onSaveProfile }: ProfileScreenP
             <p className="eyebrow">Perfil</p>
             <h1>Preferencias do Jogador</h1>
             <p className="muted">
-              Ajuste sua idade para o app recalibrar a trilha, a linguagem, a complexidade e a progressao das fases.
+              Ajuste sua idade para o app recalibrar a trilha, a linguagem, a complexidade e a progressão das fases.
             </p>
           </div>
           <div className="hero-badge">Perfil editavel</div>
@@ -180,7 +180,7 @@ export function ProfileScreen({ usuario, onBack, onSaveProfile }: ProfileScreenP
           </label>
 
           <label className="field">
-            <span>Nivel percebido</span>
+            <span>Nível percebido</span>
             <select
               className="text-input"
               value={selfReportedLevel}
@@ -254,7 +254,7 @@ export function ProfileScreen({ usuario, onBack, onSaveProfile }: ProfileScreenP
             <span>{goalLabels[goal]}</span>
           </div>
           <div className="profile-chip">
-            <strong>Nivel</strong>
+            <strong>Nível</strong>
             <span>{levelLabels[selfReportedLevel]}</span>
           </div>
           <div className="profile-chip">

@@ -235,7 +235,7 @@ function describeAbilitySummary(title: string, score: number, strongestModeLabel
     return `${title} esta forte agora, com base consistente em ${strongestModeLabel.toLowerCase()}.`;
   }
   if (score >= 48) {
-    return `${title} esta estavel, mas ainda pode ganhar consistencia quando voce alterna com ${weakestModeLabel.toLowerCase()}.`;
+    return `${title} está estável, mas ainda pode ganhar consistencia quando você alterna com ${weakestModeLabel.toLowerCase()}.`;
   }
   return `${title} pede reforco imediato. O padrao recente indica revisar ${weakestModeLabel.toLowerCase()} com mais frequencia.`;
 }
@@ -271,28 +271,28 @@ export function getAbilityInsights(history: SessionRecord[], progresso: Progress
   const strongestReasoningMode =
     getModeCompositeScore(history, progresso.comparacao, "comparacao") >=
     getModeCompositeScore(history, progresso.logica, "logica")
-      ? "Comparacao"
-      : "Logica";
+      ? "Comparação"
+      : "Lógica";
   const weakestReasoningMode =
     getModeCompositeScore(history, progresso.comparacao, "comparacao") <
     getModeCompositeScore(history, progresso.logica, "logica")
-      ? "Comparacao"
-      : "Logica";
+      ? "Comparação"
+      : "Lógica";
 
   return [
     {
       key: "memoriaTrabalho",
-      title: "Memoria de trabalho",
+      title: "Memória de trabalho",
       score: memoryWork,
       level: describeAbilityLevel(memoryWork),
-      summary: describeAbilitySummary("A memoria de trabalho", memoryWork, "memoria", "memoria visual"),
+      summary: describeAbilitySummary("A memória de trabalho", memoryWork, "memoria", "memória visual"),
     },
     {
       key: "atencaoSustentada",
-      title: "Atencao sustentada",
+      title: "Atenção sustentada",
       score: sustainedAttention,
       level: describeAbilityLevel(sustainedAttention),
-      summary: describeAbilitySummary("A atencao sustentada", sustainedAttention, "atencao", "orientacao espacial"),
+      summary: describeAbilitySummary("A atenção sustentada", sustainedAttention, "atencao", "orientação espacial"),
     },
     {
       key: "velocidadeResposta",
@@ -301,17 +301,17 @@ export function getAbilityInsights(history: SessionRecord[], progresso: Progress
       level: describeAbilityLevel(responseSpeed),
       summary:
         responseSpeed >= 70
-          ? "Seu ritmo de resposta esta competitivo, sem perder muita precisao nas rodadas."
+          ? "Seu ritmo de resposta está competitivo, sem perder muita precisão nas rodadas."
           : responseSpeed >= 48
-            ? "Sua velocidade esta funcional, mas ainda oscila quando o desafio exige mais trocas ou sequencias."
-            : "Seu tempo de resposta caiu nas ultimas sessoes. Vale priorizar blocos curtos e objetivos.",
+            ? "Sua velocidade está funcional, mas ainda oscila quando o desafio exige mais trocas ou sequencias."
+            : "Seu tempo de resposta caiu nas últimas sessões. Vale priorizar blocos curtos e objetivos.",
     },
     {
       key: "raciocinio",
-      title: "Raciocinio",
+      title: "Raciocínio",
       score: reasoning,
       level: describeAbilityLevel(reasoning),
-      summary: describeAbilitySummary("O raciocinio", reasoning, strongestReasoningMode, weakestReasoningMode),
+      summary: describeAbilitySummary("O raciocínio", reasoning, strongestReasoningMode, weakestReasoningMode),
     },
   ];
 }
@@ -349,10 +349,10 @@ function buildTrend(
     current.count === 0
       ? `${label} sem dados suficientes ainda.`
       : direction === "subindo"
-        ? `${label} em alta, com melhora de score e maior constancia nas metas.`
+        ? `${label} em alta, com melhora de score e maior constância nas metas.`
         : direction === "caindo"
-          ? `${label} em queda, com mais sessoes incompletas ou score menor que no periodo anterior.`
-          : `${label} estavel, mantendo faixa parecida de pontuacao e conclusao.`;
+          ? `${label} em queda, com mais sessões incompletas ou score menor que no período anterior.`
+          : `${label} estavel, mantendo faixa parecida de pontuação e conclusão.`;
 
   return { label, direction, scoreDelta, completionDelta, summary };
 }
@@ -416,24 +416,24 @@ export function getAutomaticDiagnostic(idade: number, history: SessionRecord[], 
       ? audience === "infantil"
         ? "Entrada guiada"
         : audience === "adolescente"
-          ? "Entrada intermediaria"
+          ? "Entrada intermediária"
           : "Entrada objetiva"
       : completionRate >= 70 && avgScore >= 24
-        ? "Pronto para avancar"
+        ? "Pronto para avançar"
         : completionRate >= 45
-          ? "Base em consolidacao"
+          ? "Base em consolidação"
           : "Precisa de base controlada";
 
   const focusLabel =
     history.length < 4
-      ? "Primeiro mapeamento automatico para evitar comecar forte ou facil demais."
+      ? "Primeiro mapeamento automático para evitar começar forte ou fácil demais."
       : avgScore >= 26
-        ? "Perfil atual indica tolerancia maior a carga cognitiva e transicao mais rapida."
-        : "Perfil atual pede mais repeticao de base antes de acelerar tempo e complexidade.";
+        ? "Perfil atual indica tolerância maior a carga cognitiva e transição mais rápida."
+        : "Perfil atual pede mais repetição de base antes de acelerar tempo e complexidade.";
 
   return {
-    title: history.length < 4 ? "Diagnostico inicial automatico" : "Reposicionamento automatico",
-    summary: `O app sugere um ponto de partida ideal por trilha usando idade, historico recente e desafios ja concluidos.`,
+    title: history.length < 4 ? "Diagnóstico inicial automático" : "Reposicionamento automático",
+    summary: `O app sugere um ponto de partida ideal por trilha usando idade, histórico recente e desafios já concluídos.`,
     readinessLabel,
     focusLabel,
     starters,
@@ -465,21 +465,21 @@ export function getSmartRecommendation(history: SessionRecord[], progresso: Prog
   const challengeName = getChallengeName(weakestMode, challengeId);
 
   const reasonByMode: Record<CoreMode, string> = {
-    memoria: "O historico mostra evocacao irregular e queda quando a quantidade de itens aumenta.",
-    visual: "Os pareamentos recentes indicam dificuldade em sustentar memoria visual e localizacao de pares.",
+    memoria: "O histórico mostra evocação irregular e queda quando a quantidade de itens aumenta.",
+    visual: "Os pareamentos recentes indicam dificuldade em sustentar memória visual e localização de pares.",
     atencao: "Os erros recorrentes aparecem em foco seletivo e controle de impulsos durante a busca do alvo.",
-    comparacao: "O padrao recente sugere oscilacao ao decidir criterio, ordem ou quantidade sob tempo.",
-    espacial: "As rotas recentes mostram perda de sequencia e troca de direcao em movimentos sucessivos.",
-    logica: "As ultimas rodadas indicam dificuldade em sustentar regras, padroes e previsao do proximo termo.",
+    comparacao: "O padrão recente sugere oscilação ao decidir critério, ordem ou quantidade sob tempo.",
+    espacial: "As rotas recentes mostram perda de sequência e troca de direção em movimentos sucessivos.",
+    logica: "As últimas rodadas indicam dificuldade em sustentar regras, padrões e previsão do próximo termo.",
   };
 
   const objectiveByMode: Record<CoreMode, string> = {
-    memoria: "Reforcar memoria de trabalho com evocacao curta e mais precisa.",
-    visual: "Reforcar memoria visual e localizacao com menos dispersao.",
-    atencao: "Reduzir erro recorrente de selecao e melhorar constancia de foco.",
-    comparacao: "Estabilizar criterio de decisao antes de subir a velocidade.",
+    memoria: "Reforçar memória de trabalho com evocação curta e mais precisa.",
+    visual: "Reforçar memória visual e localização com menos dispersao.",
+    atencao: "Reduzir erro recorrente de selecao e melhorar constância de foco.",
+    comparacao: "Estabilizar critério de decisão antes de subir a velocidade.",
     espacial: "Reconstruir sequencias espaciais com mais seguranca.",
-    logica: "Recuperar leitura de regra e previsao de padrao com menos impulsividade.",
+    logica: "Recuperar leitura de regra e previsão de padrão com menos impulsividade.",
   };
 
   return {
@@ -505,45 +505,45 @@ export function getGuidedSessions(
   return [
     {
       id: "focus-10",
-      title: "Treino de 10 minutos para atencao",
+      title: "Treino de 10 minutos para atenção",
       durationLabel: "10 minutos",
-      objective: "Reforcar foco seletivo, reduzir erros de impulso e dar uma sessao curta de alta utilidade.",
+      objective: "Reforçar foco seletivo, reduzir erros de impulso e dar uma sessão curta de alta utilidade.",
       cadence: "Ideal para abrir o dia ou aquecer antes de outra trilha.",
       primaryMode: "atencao",
       challengeId: attentionStarter.challengeId,
       steps: [
         `Comece em ${attentionStarter.challengeName}.`,
         "Faca duas rodadas seguidas tentando reduzir cliques errados.",
-        "Se a segunda rodada sair melhor, feche com uma rodada curta de comparacao.",
+        "Se a segunda rodada sair melhor, feche com uma rodada curta de comparação.",
       ],
     },
     {
       id: "memory-4w",
-      title: "Plano de 4 semanas para memoria",
+      title: "Plano de 4 semanas para memória",
       durationLabel: "4 semanas",
-      objective: "Construir constancia em memoria de trabalho com progressao gradual de carga.",
-      cadence: "Tres encontros por semana, alternando evocacao verbal e memoria visual.",
+      objective: "Construir constância em memória de trabalho com progressão gradual de carga.",
+      cadence: "Três encontros por semana, alternando evocação verbal e memória visual.",
       primaryMode: "memoria",
       challengeId: memoryStarter.challengeId,
       steps: [
-        `Semana 1: estabilize ${memoryStarter.challengeName} e uma rodada de memoria visual.`,
+        `Semana 1: estabilize ${memoryStarter.challengeName} e uma rodada de memória visual.`,
         "Semana 2: aumente para duas rodadas consecutivas com pausa curta.",
-        "Semana 3: inclua orientacao espacial para reforcar sequencia e manutencao.",
-        "Semana 4: compare os scores e tente subir uma fase mantendo precisao.",
+        "Semana 3: inclua orientação espacial para reforcar sequência e manutenção.",
+        "Semana 4: compare os scores e tente subir uma fase mantendo precisão.",
       ],
     },
     {
       id: "reasoning-precision",
-      title: "Bloco guiado de raciocinio e precisao",
+      title: "Bloco guiado de raciocínio e precisão",
       durationLabel: "15 minutos",
-      objective: "Equilibrar velocidade com criterio em padroes, comparacao e tomada de decisao.",
-      cadence: "Use quando quiser uma sessao mais densa, mas ainda objetiva.",
+      objective: "Equilibrar velocidade com critério em padrões, comparação e tomada de decisão.",
+      cadence: "Use quando quiser uma sessão mais densa, mas ainda objetiva.",
       primaryMode: recommendation.mode === "comparacao" || recommendation.mode === "logica" ? recommendation.mode : "logica",
       challengeId: recommendation.mode === "comparacao" || recommendation.mode === "logica" ? recommendation.challengeId : logicStarter.challengeId,
       steps: [
         `Abra ${recommendation.mode === "comparacao" || recommendation.mode === "logica" ? recommendation.challengeName : logicStarter.challengeName}.`,
         "Complete uma rodada focando em acertar antes de acelerar.",
-        "Feche com uma rodada de comparacao para consolidar criterio e resposta.",
+        "Feche com uma rodada de comparação para consolidar critério e resposta.",
       ],
     },
   ];
@@ -567,7 +567,7 @@ export function getEngagementMissions(history: SessionRecord[], progresso: Progr
       id: "daily-start",
       cadence: "diaria",
       title: "Missao diaria de arranque",
-      summary: "Concluir uma sessao curta no dia para manter frequencia e reduzir abandono.",
+      summary: "Concluir uma sessão curta no dia para manter frequência e reduzir abandono.",
       progressLabel: `${Math.min(todayCompleted, 1)}/1 sessao concluida hoje`,
       completed: todayCompleted >= 1,
       primaryMode: recommendation.mode,
@@ -585,7 +585,7 @@ export function getEngagementMissions(history: SessionRecord[], progresso: Progr
       id: "weekly-variety",
       cadence: "semanal",
       title: "Missao semanal de variedade",
-      summary: "Alternar trilhas para treinar foco, evocacao e raciocinio dentro da mesma semana.",
+      summary: "Alternar trilhas para treinar foco, evocação e raciocínio dentro da mesma semana.",
       progressLabel: `${Math.min(weeklyModes.size, 3)}/3 trilhas diferentes na semana`,
       completed: weeklyModes.size >= 3,
       primaryMode: "comparacao",
@@ -594,8 +594,8 @@ export function getEngagementMissions(history: SessionRecord[], progresso: Progr
       id: "weekly-consistency",
       cadence: "semanal",
       title: "Missao semanal de consistencia",
-      summary: "Completar pelo menos tres sessoes na semana e manter score medio em crescimento.",
-      progressLabel: `${Math.min(weeklyCompleted, 3)}/3 sessoes concluidas · media ${weeklyAverage}`,
+      summary: "Completar pelo menos tres sessões na semana e manter score médio em crescimento.",
+      progressLabel: `${Math.min(weeklyCompleted, 3)}/3 sessões concluídas · média ${weeklyAverage}`,
       completed: weeklyCompleted >= 3,
       primaryMode: "memoria",
     },
@@ -627,24 +627,24 @@ export function getAchievementInsights(history: SessionRecord[], progresso: Prog
       title: "Ritmo consistente",
       category: "consistencia",
       unlocked: streak >= 3 || getDistinctDayCount(recentWeek) >= 3,
-      summary: "Reconhece frequencia real de treino, mesmo com sessoes curtas.",
+      summary: "Reconhece frequência real de treino, mesmo com sessões curtas.",
       highlight: streak >= 3 ? `${streak} dias seguidos de treino` : `${getDistinctDayCount(recentWeek)} dias ativos na semana`,
     },
     {
       id: "precision",
-      title: "Precisao em crescimento",
+      title: "Precisão em crescimento",
       category: "precisao",
       unlocked: precisionRate >= 60,
-      summary: "Valoriza acerto e controle de erro, nao so pontuacao bruta.",
-      highlight: `${precisionRate}% das sessoes recentes com boa precisao`,
+      summary: "Valoriza acerto e controle de erro, não só pontuação bruta.",
+      highlight: `${precisionRate}% das sessões recentes com boa precisão`,
     },
     {
       id: "evolution",
-      title: "Evolucao cognitiva",
+      title: "Evolução cognitiva",
       category: "evolucao",
       unlocked: evolutionDelta >= 4 || completedModes >= 4,
-      summary: "Marca ampliacao de repertorio ou melhora consistente nas ultimas semanas.",
-      highlight: evolutionDelta >= 4 ? `Melhora de ${evolutionDelta} pontos no ultimo ciclo` : `${completedModes} trilhas ja tiveram conclusoes`,
+      summary: "Marca ampliacao de repertorio ou melhora consistente nas últimas semanas.",
+      highlight: evolutionDelta >= 4 ? `Melhora de ${evolutionDelta} pontos no último ciclo` : `${completedModes} trilhas já tiveram conclusões`,
     },
   ];
 }
@@ -661,8 +661,8 @@ export function getThemedTracks(idade: number, history: SessionRecord[], progres
       id: "foco-escolar",
       title: "Foco escolar",
       label: "Trilha tematica",
-      summary: "Combina atencao, comparacao e curta memoria de trabalho para melhorar permanencia na tarefa.",
-      audienceHint: audience === "infantil" ? "Boa para rotina escolar curta e guiada." : "Boa para estudo, revisao e organizacao mental.",
+      summary: "Combina atenção, comparação e curta memória de trabalho para melhorar permanência na tarefa.",
+      audienceHint: audience === "infantil" ? "Boa para rotina escolar curta e guiada." : "Boa para estudo, revisão e organização mental.",
       primaryMode: "atencao",
       challengeId: attentionStarter.challengeId,
       challengeName: attentionStarter.challengeName,
@@ -671,8 +671,8 @@ export function getThemedTracks(idade: number, history: SessionRecord[], progres
       id: "agilidade-mental",
       title: "Agilidade mental",
       label: "Trilha tematica",
-      summary: "Prioriza velocidade de resposta com criterio antes de subir a carga mais densa.",
-      audienceHint: "Indicada quando o objetivo e responder com mais rapidez sem perder precisao.",
+      summary: "Prioriza velocidade de resposta com critério antes de subir a carga mais densa.",
+      audienceHint: "Indicada quando o objetivo é responder com mais rapidez sem perder precisão.",
       primaryMode: recommendation.mode,
       challengeId: recommendation.challengeId,
       challengeName: recommendation.challengeName,
@@ -681,8 +681,8 @@ export function getThemedTracks(idade: number, history: SessionRecord[], progres
       id: "reabilitacao",
       title: "Reabilitacao",
       label: "Trilha tematica",
-      summary: "Usa sessoes controladas, memoria e orientacao espacial com menor carga e repeticao guiada.",
-      audienceHint: "Funciona bem em rotina terapeutica, retorno gradual ou dias de menor energia.",
+      summary: "Usa sessões controladas, memória e orientação espacial com menor carga e repetição guiada.",
+      audienceHint: "Funciona bem em rotina terapêutica, retorno gradual ou dias de menor energia.",
       primaryMode: "memoria",
       challengeId: memoryStarter.challengeId,
       challengeName: memoryStarter.challengeName,
@@ -691,8 +691,8 @@ export function getThemedTracks(idade: number, history: SessionRecord[], progres
       id: "desafio-elite",
       title: "Desafio elite",
       label: "Trilha tematica",
-      summary: "Direciona para desafios de maior densidade e prepara a transicao para os testes avancados.",
-      audienceHint: "Pensada para quem ja sustenta boa constancia e quer acelerar complexidade.",
+      summary: "Direciona para desafios de maior densidade e prepara a transição para os testes avancados.",
+      audienceHint: "Pensada para quem já sustenta boa constância e quer acelerar complexidade.",
       primaryMode: "espacial",
       challengeId: spatialStarter.challengeId,
       challengeName: spatialStarter.challengeName,
@@ -712,15 +712,15 @@ export function getCooperativeCycle(
       ? "Aluno"
       : usuario.role === "responsavel"
         ? "Filho ou aluno"
-        : "Professor ou responsavel";
+        : "Professor ou responsável";
   const cadence =
     weeklyTrend?.direction === "caindo"
-      ? "Acompanhar duas vezes nesta semana, com revisao curta apos cada sessao."
+      ? "Acompanhar duas vezes nesta semana, com revisão curta apos cada sessão."
       : "Acompanhar uma vez por semana e revisar o bloco concluido no mesmo dia.";
 
   return {
     title: "Modo cooperativo guiado",
-    summary: "Organiza um mesmo ciclo entre aluno e adulto de referencia, sem precisar montar a rotina manualmente.",
+    summary: "Organiza um mesmo ciclo entre aluno e adulto de referência, sem precisar montar a rotina manualmente.",
     partnerLabel,
     cadence,
     primaryMode: recommendation.mode,
@@ -730,13 +730,13 @@ export function getCooperativeCycle(
       usuario.role === "aluno"
         ? [
             `Fazer a atividade sugerida: ${recommendation.challengeName}.`,
-            "Registrar como se sentiu no final da rodada: facil, media ou pesada.",
-            "Mostrar o resultado para o professor ou responsavel no mesmo ciclo.",
+            "Registrar como se sentiu no final da rodada: fácil, média ou pesada.",
+            "Mostrar o resultado para o professor ou responsável no mesmo ciclo.",
           ]
         : [
             `Acompanhar ${getSessionModeLabel(recommendation.mode)} em ${recommendation.challengeName}.`,
-            "Observar se o erro foi de impulso, memoria ou perda de regra antes de trocar a trilha.",
-            "Validar se a proxima sessao deve repetir a fase ou subir a complexidade.",
+            "Observar se o erro foi de impulso, memória ou perda de regra antes de trocar a trilha.",
+            "Validar se a próxima sessão deve repetir a fase ou subir a complexidade.",
           ],
   };
 }
@@ -772,8 +772,8 @@ export function getAdminAlerts(
         severity: "alta",
         category: "abandono",
         title: "Risco de abandono",
-        summary: `${entry.user.nome} esta sem treinar ha ${daysSinceLastSession} dias, apesar de ja ter historico no app.`,
-        recommendation: "Retomar com uma sessao curta guiada e contato ativo para recuperar a rotina.",
+        summary: `${entry.user.nome} está sem treinar há ${daysSinceLastSession} dias, apesar de já ter histórico no app.`,
+        recommendation: "Retomar com uma sessão curta guiada e contato ativo para recuperar a rotina.",
       });
     }
 
@@ -784,7 +784,7 @@ export function getAdminAlerts(
         severity: weeklyTrend.scoreDelta <= -10 ? "alta" : "media",
         category: "queda",
         title: "Queda recente de desempenho",
-        summary: `${entry.user.nome} entrou em tendencia de queda na semana, com ${weeklyTrend.scoreDelta} pontos no score e ${weeklyTrend.completionDelta}% em conclusao.`,
+        summary: `${entry.user.nome} entrou em tendencia de queda na semana, com ${weeklyTrend.scoreDelta} pontos no score e ${weeklyTrend.completionDelta}% em conclusão.`,
         recommendation: `Priorizar ${getSessionModeLabel(recommendation.mode)} em ${recommendation.challengeName} para estabilizar o desempenho.`,
       });
     }
@@ -795,8 +795,8 @@ export function getAdminAlerts(
         name: entry.user.nome,
         severity: completionRate <= 25 ? "alta" : "media",
         category: "baixa_conclusao",
-        title: "Baixa taxa de conclusao",
-        summary: `${entry.user.nome} concluiu apenas ${completionRate}% das sessoes registradas.`,
+        title: "Baixa taxa de conclusão",
+        summary: `${entry.user.nome} concluiu apenas ${completionRate}% das sessões registradas.`,
         recommendation: "Rebaixar a carga da rotina e focar em blocos curtos com meta clara de acerto.",
       });
     }
@@ -807,8 +807,8 @@ export function getAdminAlerts(
         name: entry.user.nome,
         severity: "baixa",
         category: "intervencao",
-        title: "Intervencao sugerida",
-        summary: `${entry.user.nome} esta acumulando erros de foco seletivo e pode se beneficiar de um bloco dirigido de atencao.`,
+        title: "Intervenção sugerida",
+        summary: `${entry.user.nome} está acumulando erros de foco seletivo e pode se beneficiar de um bloco dirigido de atenção.`,
         recommendation: `Abrir ${recommendation.challengeName} e acompanhar se os erros diminuem em duas rodadas seguidas.`,
       });
     }

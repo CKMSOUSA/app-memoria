@@ -164,8 +164,8 @@ export function AttentionGame({
       });
       setFeedback(
         result.completed
-          ? `Voce encontrou ${result.foundCount} alvo(s) e concluiu o desafio. Score da rodada: ${result.score}.`
-          : `Voce encontrou ${result.foundCount} de ${result.totalTargets} alvo(s). Precisa de ${sessionDifficulty.minimoParaConcluir} para concluir.`,
+          ? `Você encontrou ${result.foundCount} alvo(s) e concluiu o desafio. Score da rodada: ${result.score}.`
+          : `Você encontrou ${result.foundCount} de ${result.totalTargets} alvo(s). Precisa de ${sessionDifficulty.minimoParaConcluir} para concluir.`,
       );
       if (!isAdvancedMode) {
         setAdaptiveTuning((current) => {
@@ -232,8 +232,8 @@ export function AttentionGame({
       });
       setFeedback(
         result.completed
-          ? `Voce encontrou ${result.foundCount} alvo(s) e concluiu o desafio. Score da rodada: ${result.score}.`
-          : `Voce encontrou ${result.foundCount} de ${result.totalTargets} alvo(s). Precisa de ${sessionDifficulty.minimoParaConcluir} para concluir.`,
+          ? `Você encontrou ${result.foundCount} alvo(s) e concluiu o desafio. Score da rodada: ${result.score}.`
+          : `Você encontrou ${result.foundCount} de ${result.totalTargets} alvo(s). Precisa de ${sessionDifficulty.minimoParaConcluir} para concluir.`,
       );
       if (!isAdvancedMode) {
         setAdaptiveTuning((current) => {
@@ -329,11 +329,11 @@ export function AttentionGame({
       <section className="game-card">
         <header className="game-header">
           <div>
-            <p className="eyebrow">{isAdvancedMode ? "Testes Avancados" : "Trilha de atencao"}</p>
-            <h1>{isAdvancedMode ? "Atencao seletiva extrema" : "Encontre apenas o estimulo correto"}</h1>
+            <p className="eyebrow">{isAdvancedMode ? "Testes Avançados" : "Trilha de atenção"}</p>
+            <h1>{isAdvancedMode ? "Atenção seletiva extrema" : "Encontre apenas o estímulo correto"}</h1>
             <p className="muted">
               {isAdvancedMode
-                ? "A grade usa distratores muito parecidos e nao reduz carga visual por idade."
+                ? "A grade usa distratores muito parecidos e não reduz carga visual por idade."
                 : "Velocidade ajuda, mas cliques errados reduzem seu score. A ideia aqui e treinar foco seletivo."}
             </p>
           </div>
@@ -348,7 +348,7 @@ export function AttentionGame({
         <section className="panel">
           <div className="section-head">
             <h3>Escolha o desafio</h3>
-            <span className="small-muted">Nivel atual: {getNivel(usuario.pontos)}</span>
+            <span className="small-muted">Nível atual: {getNivel(usuario.pontos)}</span>
           </div>
           <div className="tabs-grid">
             {challengeList.map((item, index) => {
@@ -376,7 +376,7 @@ export function AttentionGame({
           <section className="review-card review-card-full">
               <div className="section-head">
                 <div>
-                  <h3>Correcao da rodada</h3>
+                  <h3>Correção da rodada</h3>
                   <p className="muted">{feedback}</p>
                 </div>
                 <span className="pill">Score {review.score}</span>
@@ -387,7 +387,7 @@ export function AttentionGame({
                   { label: "Erros", value: String(review.wrongClicks) },
                   { label: "Tempo", value: `${review.elapsedSeconds}s` },
                 ]}
-              note="Observe se voce perdeu por pressa ou por clicar no simbolo errado. O foco seletivo melhora quando erro e velocidade entram em equilibrio."
+              note="Observe se você perdeu por pressa ou por clicar no símbolo errado. O foco seletivo melhora quando erro e velocidade entram em equilibrio."
             />
             {!review.completed ? (
               <p className="review-note">
@@ -462,17 +462,17 @@ export function AttentionGame({
 
               <GameGuide
                 title="Como jogar"
-                objective="Clique somente nos simbolos alvo. Tudo o que nao for alvo conta como erro."
+                objective="Clique somente nos símbolos alvo. Tudo o que não for alvo conta como erro."
                 steps={[
-                  "Confira o simbolo alvo antes de iniciar a rodada.",
+                  "Confira o símbolo alvo antes de iniciar a rodada.",
                   "Clique em Iniciar rodada para liberar a grade.",
                   "Toque apenas nas celulas com o alvo correto antes do tempo acabar.",
                   "No final, veja quantos alvos encontrou e quantos erros cometeu.",
                 ]}
                 tip={
                   isAdvancedMode
-                    ? "No modo avancado, a maior parte da dificuldade esta nos quase-acertos. Olhe duas vezes antes de clicar."
-                    : "Quanto menos erros e quanto mais rapido voce encontrar os alvos, melhor sera o score da fase."
+                    ? "No modo avançado, a maior parte da dificuldade está nos quase-acertos. Olhe duas vezes antes de clicar."
+                    : "Quanto menos erros e quanto mais rápido você encontrar os alvos, melhor será o score da fase."
                 }
                 isChild={!isAdvancedMode && usuario.idade <= 10}
               />
@@ -491,7 +491,7 @@ export function AttentionGame({
                   <span>{`${gradeVisivel.length} celulas`}</span>
                 </div>
                 <div className="phase-chip">
-                  <strong>Adaptacao</strong>
+                  <strong>Adaptação</strong>
                   <span>{`${sessionDifficulty.tempoLimite}s de foco`}</span>
                 </div>
               </div>
@@ -506,7 +506,7 @@ export function AttentionGame({
               <div className="status-row">
                 <div className="meter-box">
                   <strong>Tempo restante</strong>
-                  <span>{phase === "playing" ? `${timeLeft}s` : "Aguardando inicio"}</span>
+                  <span>{phase === "playing" ? `${timeLeft}s` : "Aguardando início"}</span>
                 </div>
                 <div className="meter-box">
                   <strong>Erros</strong>

@@ -102,7 +102,7 @@ function writeUsers(users: UsuarioPersistido[]) {
 
 async function createSeedAdminUser() {
   const seeded: UsuarioPersistido = {
-    nome: "Usuario teste",
+    nome: "Usuário teste",
     email: "user@email.com",
     avatar: AVATAR_OPTIONS[0],
     passwordHash: await hashPassword("123456"),
@@ -172,7 +172,7 @@ export async function registerUser(
   const users = readUsers();
 
   if (users.some((user) => user.email.toLowerCase() === normalizedEmail)) {
-    return { error: "Este email ja esta cadastrado.", user: null };
+    return { error: "Este email já está cadastrado.", user: null };
   }
 
   const createdUser: UsuarioPersistido = {
@@ -764,8 +764,8 @@ export function restoreBackupData(backup: BackupData) {
 export function simulateRecovery(email: string) {
   const exists = readUsers().some((user) => user.email.toLowerCase() === email.trim().toLowerCase());
   if (exists) {
-    return "Se este email existir, um fluxo de recuperacao sera iniciado. Em producao, envie um link temporario em vez de exibir a senha.";
+    return "Se este email existir, um fluxo de recuperação será iniciado. Em produção, envie um link temporário em vez de exibir a senha.";
   }
 
-  return "Nao encontramos uma conta com este email.";
+  return "Não encontramos uma conta com este email.";
 }

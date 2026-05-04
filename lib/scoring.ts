@@ -104,7 +104,7 @@ export function mergeProgress(saved?: Partial<ProgressState> | null): ProgressSt
 export function getNivel(pontos: number) {
   if (pontos < 20) return "Iniciante";
   if (pontos < 45) return "Aprendiz";
-  if (pontos < 75) return "Avancado";
+  if (pontos < 75) return "Avançado";
   return "Alta performance";
 }
 
@@ -117,17 +117,17 @@ export function getCompletionRate(progressMap: Record<number, { completed: boole
 export function getSessionModeLabel(mode: SessionMode) {
   switch (mode) {
     case "memoria":
-      return "Memoria";
+      return "Memória";
     case "atencao":
-      return "Atencao";
+      return "Atenção";
     case "visual":
-      return "Memoria visual";
+      return "Memória visual";
     case "comparacao":
-      return "Comparacao";
+      return "Comparação";
     case "espacial":
-      return "Orientacao espacial";
+      return "Orientação espacial";
     case "logica":
-      return "Logica";
+      return "Lógica";
     default:
       return "Trilha exclusiva";
   }

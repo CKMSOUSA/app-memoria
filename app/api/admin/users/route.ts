@@ -134,26 +134,26 @@ async function loadTargetUser(email: string) {
 export async function PATCH(request: NextRequest) {
   const serviceKey = getServiceRoleKey();
   if (!getSupabaseUrl() || !getSupabaseAnonKey() || !serviceKey) {
-    return NextResponse.json({ ok: false, error: "Configuracao administrativa incompleta." }, { status: 503 });
+    return NextResponse.json({ ok: false, error: "Configuração administrativa incompleta." }, { status: 503 });
   }
 
   const authorized = await authorizeAdmin(request);
   if (!authorized) {
-    return NextResponse.json({ ok: false, error: "Acesso administrativo nao autorizado." }, { status: 403 });
+    return NextResponse.json({ ok: false, error: "Acesso administrativo não autorizado." }, { status: 403 });
   }
 
   const body = (await request.json()) as { email?: string; status?: UserStatus };
   if (!body.email || !body.status || !["ativo", "bloqueado", "excluido"].includes(body.status)) {
-    return NextResponse.json({ ok: false, error: "Dados invalidos para atualizar o usuario." }, { status: 400 });
+    return NextResponse.json({ ok: false, error: "Dados inválidos para atualizar o usuário." }, { status: 400 });
   }
 
   const target = await loadTargetUser(body.email);
   if (!target) {
-    return NextResponse.json({ ok: false, error: "Usuario nao encontrado." }, { status: 404 });
+    return NextResponse.json({ ok: false, error: "Usuário não encontrado." }, { status: 404 });
   }
 
   if (target.role === "admin" && body.status !== "ativo") {
-    return NextResponse.json({ ok: false, error: "Nao e permitido bloquear ou excluir uma conta admin." }, { status: 400 });
+    return NextResponse.json({ ok: false, error: "Não é permitido bloquear ou excluir uma conta admin." }, { status: 400 });
   }
 
   const profileUpdate = await serviceMutate(`/user_profiles?email=eq.${encodeURIComponent(body.email)}`, {
@@ -168,7 +168,7 @@ export async function PATCH(request: NextRequest) {
   });
 
   if (!profileUpdate?.ok) {
-    return NextResponse.json({ ok: false, error: "Nao foi possivel atualizar o usuario." }, { status: 500 });
+    return NextResponse.json({ ok: false, error: "Não foi possível atualizar o usuário." }, { status: 500 });
   }
 
   if (body.status === "excluido") {

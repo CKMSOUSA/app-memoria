@@ -127,7 +127,7 @@ function openDatabase(): Promise<IDBDatabase | null> {
     };
 
     request.onsuccess = () => resolve(request.result);
-    request.onerror = () => reject(request.error ?? new Error("Nao foi possivel abrir o IndexedDB."));
+    request.onerror = () => reject(request.error ?? new Error("Não foi possível abrir o IndexedDB."));
   });
 }
 

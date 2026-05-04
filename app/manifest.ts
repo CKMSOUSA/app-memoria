@@ -2,9 +2,9 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "NeuroApp Memoria",
+    name: "NeuroApp Memória",
     short_name: "NeuroApp",
-    description: "Treino cognitivo com memoria, atencao, comparacao, orientacao espacial e logica.",
+    description: "Treino cognitivo com memória, atenção, comparação, orientação espacial e lógica.",
     start_url: "/",
     display: "standalone",
     background_color: "#f4efe6",

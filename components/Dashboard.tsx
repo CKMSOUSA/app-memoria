@@ -69,109 +69,109 @@ type DashboardTab = "hoje" | "progresso" | "rotina" | "insights";
 const REFLECTION_SECONDS = 40;
 
 const processReflectionPrompts = [
-  "O que esta ocupando sua mente neste momento?",
-  "Que sensacao aparece quando voce fica alguns segundos sem pressa?",
-  "O que voce quer cuidar melhor hoje?",
-  "Qual pensamento merece ser observado sem virar uma acao imediata?",
+  "O que está ocupando sua mente neste momento?",
+  "Que sensacao aparece quando você fica alguns segundos sem pressa?",
+  "O que você quer cuidar melhor hoje?",
+  "Qual pensamento merece ser observado sem virar uma ação imediata?",
   "O que este pequeno intervalo muda no seu jeito de perceber o tempo?",
-  "Que significado voce quer colocar no que vai fazer agora?",
-  "O que voce nota no seu corpo quando para por alguns segundos?",
+  "Que significado você quer colocar no que vai fazer agora?",
+  "O que você nota no seu corpo quando para por alguns segundos?",
   "Que escolha simples pode deixar este momento mais consciente?",
   "Qual foi a melhor parte do seu dia ate agora?",
-  "O que voce gostaria de entender melhor sobre si mesmo?",
+  "O que você gostaria de entender melhor sobre si mesmo?",
   "Que coisa pequena merece sua gratidao neste momento?",
-  "O que voce pode fazer com mais calma hoje?",
-  "Qual sentimento esta mais presente agora?",
-  "Que pensamento voce pode deixar passar sem brigar com ele?",
-  "O que voce quer lembrar quando terminar esta pausa?",
-  "Qual atitude sua combina com a pessoa que voce quer ser?",
-  "O que voce pode observar sem tentar mudar imediatamente?",
+  "O que você pode fazer com mais calma hoje?",
+  "Qual sentimento está mais presente agora?",
+  "Que pensamento você pode deixar passar sem brigar com ele?",
+  "O que você quer lembrar quando terminar esta pausa?",
+  "Qual atitude sua combina com a pessoa que você quer ser?",
+  "O que você pode observar sem tentar mudar imediatamente?",
   "Qual parte do seu dia pediu mais paciencia?",
-  "O que voce aprendeu recentemente sobre esperar?",
-  "Que pequena decisao pode melhorar seu proximo momento?",
-  "O que voce esta sentindo que ainda nao colocou em palavras?",
-  "Qual barulho ou silencio voce percebe agora?",
+  "O que você aprendeu recentemente sobre esperar?",
+  "Que pequena decisão pode melhorar seu próximo momento?",
+  "O que você está sentindo que ainda não colocou em palavras?",
+  "Qual barulho ou silencio você percebe agora?",
   "O que seu corpo parece estar pedindo neste instante?",
-  "Que coisa voce pode fazer com mais presenca?",
-  "Qual pensamento esta tentando correr na sua frente?",
-  "O que fica mais claro quando voce respira devagar?",
-  "Que valor voce quer praticar nos proximos minutos?",
-  "O que voce pode aceitar por enquanto?",
-  "Qual cuidado simples voce pode ter consigo hoje?",
-  "O que voce quer soltar antes de continuar?",
-  "Que parte de voce precisa de gentileza agora?",
-  "O que mudou dentro de voce desde o comeco do dia?",
+  "Que coisa você pode fazer com mais presenca?",
+  "Qual pensamento está tentando correr na sua frente?",
+  "O que fica mais claro quando você respira devagar?",
+  "Que valor você quer praticar nos proximos minutos?",
+  "O que você pode aceitar por enquanto?",
+  "Qual cuidado simples você pode ter consigo hoje?",
+  "O que você quer soltar antes de continuar?",
+  "Que parte de você precisa de gentileza agora?",
+  "O que mudou dentro de você desde o comeco do dia?",
   "Qual lembranca boa pode te acompanhar por alguns segundos?",
-  "O que voce quer perceber melhor ao seu redor?",
-  "Que pequena coisa esta funcionando bem hoje?",
+  "O que você quer perceber melhor ao seu redor?",
+  "Que pequena coisa está funcionando bem hoje?",
   "Qual pensamento merece menos pressa?",
-  "O que voce pode fazer sem se cobrar tanto?",
-  "Que pergunta voce faria para si mesmo agora?",
-  "O que voce quer cultivar com repeticao e paciencia?",
-  "Qual detalhe do ambiente voce ainda nao tinha notado?",
-  "O que voce pode agradecer sem precisar explicar?",
-  "Que escolha ajudaria voce a ficar mais inteiro agora?",
+  "O que você pode fazer sem se cobrar tanto?",
+  "Que pergunta você faria para si mesmo agora?",
+  "O que você quer cultivar com repetição e paciencia?",
+  "Qual detalhe do ambiente você ainda não tinha notado?",
+  "O que você pode agradecer sem precisar explicar?",
+  "Que escolha ajudaria você a ficar mais inteiro agora?",
   "O que significa estar atento neste momento?",
-  "Qual parte do tempo voce costuma apressar?",
-  "O que voce pode fazer para respeitar seu ritmo?",
-  "Que sensacao aparece quando voce nao precisa responder logo?",
-  "O que voce gostaria de cuidar com mais carinho?",
+  "Qual parte do tempo você costuma apressar?",
+  "O que você pode fazer para respeitar seu ritmo?",
+  "Que sensacao aparece quando você não precisa responder logo?",
+  "O que você gostaria de cuidar com mais carinho?",
   "Qual pensamento pode esperar mais um pouco?",
-  "O que voce quer fazer com mais intencao?",
-  "Que qualidade voce quer trazer para este momento?",
-  "O que voce percebe quando escuta sua propria respiracao?",
-  "Qual parte do seu corpo esta mais relaxada agora?",
-  "Qual parte do seu corpo esta pedindo atencao?",
-  "O que voce pode notar sem julgar?",
+  "O que você quer fazer com mais intencao?",
+  "Que qualidade você quer trazer para este momento?",
+  "O que você percebe quando escuta sua propria respiracao?",
+  "Qual parte do seu corpo está mais relaxada agora?",
+  "Qual parte do seu corpo está pedindo atenção?",
+  "O que você pode notar sem julgar?",
   "Que coisa simples pode te ajudar a recomecar?",
-  "O que voce quer lembrar sobre o valor da pausa?",
+  "O que você quer lembrar sobre o valor da pausa?",
   "Qual emocao merece espaco sem pressa?",
-  "O que voce pode fazer hoje que tenha significado?",
-  "Que tipo de pessoa voce quer ser no proximo gesto?",
-  "O que voce esta tentando controlar demais?",
-  "O que voce pode deixar acontecer no seu tempo?",
+  "O que você pode fazer hoje que tenha significado?",
+  "Que tipo de pessoa você quer ser no próximo gesto?",
+  "O que você está tentando controlar demais?",
+  "O que você pode deixar acontecer no seu tempo?",
   "Que pensamento te aproxima de uma escolha melhor?",
-  "O que voce pode observar no intervalo entre uma ideia e outra?",
+  "O que você pode observar no intervalo entre uma ideia e outra?",
   "Qual foi uma pequena vitoria recente?",
-  "O que voce quer aprender com este momento de espera?",
-  "Que coisa importante nao precisa ser resolvida agora?",
-  "O que voce pode fazer com mais leveza?",
+  "O que você quer aprender com este momento de espera?",
+  "Que coisa importante não precisa ser resolvida agora?",
+  "O que você pode fazer com mais leveza?",
   "Qual palavra descreve seu estado agora?",
-  "Que palavra voce gostaria de levar para o resto do dia?",
-  "O que voce pode perceber sem transformar em tarefa?",
-  "Qual cuidado voce ofereceria a um amigo neste momento?",
-  "Voce pode oferecer esse mesmo cuidado a si mesmo?",
-  "O que voce quer fazer devagar para fazer melhor?",
-  "Qual habito voce quer fortalecer aos poucos?",
-  "O que voce pode escolher mesmo quando existe pressa?",
+  "Que palavra você gostaria de levar para o resto do dia?",
+  "O que você pode perceber sem transformar em tarefa?",
+  "Qual cuidado você ofereceria a um amigo neste momento?",
+  "Você pode oferecer esse mesmo cuidado a si mesmo?",
+  "O que você quer fazer devagar para fazer melhor?",
+  "Qual habito você quer fortalecer aos poucos?",
+  "O que você pode escolher mesmo quando existe pressa?",
   "Que coisa te ajuda a voltar para o presente?",
-  "O que voce nota no seu rosto quando para por alguns segundos?",
+  "O que você nota no seu rosto quando para por alguns segundos?",
   "Que pensamento te deixa mais calmo?",
-  "O que voce pode fazer para ouvir melhor a si mesmo?",
-  "Qual pequena verdade voce esta percebendo agora?",
-  "O que voce quer honrar no seu proprio tempo?",
-  "Que gesto simples pode demonstrar respeito por voce?",
-  "O que voce pode deixar mais simples hoje?",
-  "Qual expectativa voce pode afrouxar um pouco?",
-  "O que voce quer fazer com mais honestidade?",
-  "Que coisa voce pode reconhecer sem se comparar?",
-  "O que voce pode notar sobre sua energia agora?",
+  "O que você pode fazer para ouvir melhor a si mesmo?",
+  "Qual pequena verdade você está percebendo agora?",
+  "O que você quer honrar no seu próprio tempo?",
+  "Que gesto simples pode demonstrar respeito por você?",
+  "O que você pode deixar mais simples hoje?",
+  "Qual expectativa você pode afrouxar um pouco?",
+  "O que você quer fazer com mais honestidade?",
+  "Que coisa você pode reconhecer sem se comparar?",
+  "O que você pode notar sobre sua energia agora?",
   "Qual limite seu merece respeito hoje?",
-  "Que escolha pequena pode proteger sua atencao?",
-  "O que voce faria se pudesse agir com mais calma?",
+  "Que escolha pequena pode proteger sua atenção?",
+  "O que você faria se pudesse agir com mais calma?",
   "Qual parte deste momento parece suficiente?",
-  "O que voce quer lembrar quando sentir pressa?",
+  "O que você quer lembrar quando sentir pressa?",
   "Que pensamento pode virar curiosidade em vez de cobranca?",
-  "O que voce pode aprender com uma pausa curta?",
-  "Qual sentimento voce pode nomear sem tentar consertar?",
-  "O que voce quer preservar dentro de voce hoje?",
-  "Que coisa simples mostra que voce esta presente?",
-  "O que voce pode fazer com cuidado mesmo sendo pequeno?",
-  "Qual direcao voce quer dar para sua atencao?",
-  "O que voce percebe quando nao precisa provar nada?",
+  "O que você pode aprender com uma pausa curta?",
+  "Qual sentimento você pode nomear sem tentar consertar?",
+  "O que você quer preservar dentro de você hoje?",
+  "Que coisa simples mostra que você está presente?",
+  "O que você pode fazer com cuidado mesmo sendo pequeno?",
+  "Qual direção você quer dar para sua atenção?",
+  "O que você percebe quando não precisa provar nada?",
   "Que parte da sua rotina pode ganhar mais sentido?",
-  "O que voce quer fazer porque importa, nao porque e urgente?",
-  "O que voce pode respeitar no seu proprio ritmo?",
+  "O que você quer fazer porque importa, não porque e urgente?",
+  "O que você pode respeitar no seu próprio ritmo?",
 ];
 
 type DashboardProps = {
@@ -335,18 +335,18 @@ function DisclosureSection({
 }
 
 function formatSyncTimestamp(value: string | null) {
-  if (!value) return "Ainda nao houve sincronizacao confirmada.";
+  if (!value) return "Ainda não houve sincronizacao confirmada.";
   return `Ultima sincronizacao em ${new Date(value).toLocaleString("pt-BR")}.`;
 }
 
 function getGoalLabel(goal: Usuario["goal"]) {
   switch (goal) {
     case "memoria":
-      return "Fortalecer memoria";
+      return "Fortalecer memória";
     case "atencao":
-      return "Melhorar atencao";
+      return "Melhorar atenção";
     case "pedagogico":
-      return "Reforco pedagogico";
+      return "Reforco pedagógico";
     case "rotina":
       return "Criar rotina";
     default:
@@ -361,9 +361,9 @@ function getLevelLabel(level: Usuario["selfReportedLevel"]) {
     case "intermediario":
       return "Intermediario";
     case "avancado":
-      return "Avancado";
+      return "Avançado";
     default:
-      return "Nao definido";
+      return "Não definido";
   }
 }
 
@@ -458,7 +458,7 @@ function AbilityCard({
         <p className="ability-card-title">{title}</p>
         <span className="pill">{score}/100</span>
       </div>
-      <h3>{level === "forte" ? "Forte" : level === "estavel" ? "Estavel" : "Prioridade"}</h3>
+      <h3>{level === "forte" ? "Forte" : level === "estavel" ? "Estável" : "Prioridade"}</h3>
       <p className="muted">{summary}</p>
     </article>
   );
@@ -477,7 +477,7 @@ function TrendCard({
   completionDelta: number;
   summary: string;
 }) {
-  const signal = direction === "subindo" ? "Em melhora" : direction === "caindo" ? "Em queda" : "Estavel";
+  const signal = direction === "subindo" ? "Em melhora" : direction === "caindo" ? "Em queda" : "Estável";
   return (
     <article className={`trend-card trend-card-${direction}`}>
       <div className="section-head">
@@ -487,7 +487,7 @@ function TrendCard({
       <p className="muted">{summary}</p>
       <div className="trend-metrics">
         <span>{`${scoreDelta >= 0 ? "+" : ""}${scoreDelta} score`}</span>
-        <span>{`${completionDelta >= 0 ? "+" : ""}${completionDelta}% conclusao`}</span>
+        <span>{`${completionDelta >= 0 ? "+" : ""}${completionDelta}% conclusão`}</span>
       </div>
     </article>
   );
@@ -575,7 +575,7 @@ function AchievementCard({
   highlight: string;
 }) {
   const categoryLabel =
-    category === "consistencia" ? "Consistencia" : category === "precisao" ? "Precisao" : "Evolucao";
+    category === "consistencia" ? "Consistencia" : category === "precisao" ? "Precisão" : "Evolução";
 
   return (
     <article className={`engagement-card achievement-card ${unlocked ? "achievement-card-unlocked" : ""}`}>
@@ -696,7 +696,7 @@ function RankingCard({
     <article className="engagement-card ranking-card">
       <div className="section-head">
         <h3>{title}</h3>
-        <span className="pill">{entries.length} posicao(oes)</span>
+        <span className="pill">{entries.length} posição(oes)</span>
       </div>
       {entries.length > 0 ? (
         <div className="ranking-list">
@@ -709,7 +709,7 @@ function RankingCard({
           ))}
         </div>
       ) : (
-        <p className="small-muted">Ainda nao ha dados suficientes para formar o ranking privado.</p>
+        <p className="small-muted">Ainda não há dados suficientes para formar o ranking privado.</p>
       )}
     </article>
   );
@@ -742,7 +742,7 @@ function ReminderPlanner({
         </label>
         <label className="field field-compact">
           <span>Objetivo</span>
-          <input value={objective} onChange={(event) => setObjective(event.target.value)} placeholder="Ex.: Atencao e ritmo de resposta" />
+          <input value={objective} onChange={(event) => setObjective(event.target.value)} placeholder="Ex.: Atenção e ritmo de resposta" />
         </label>
         <label className="field field-compact">
           <span>Dias</span>
@@ -802,7 +802,7 @@ function PrescriptionPanel({
   return (
     <article className="engagement-card planner-card">
       <div className="section-head">
-        <h3>Sessoes prescritas</h3>
+        <h3>Sessões prescritas</h3>
         <span className="small-muted">{prescriptions.length} item(ns) no ciclo</span>
       </div>
       {usuario.role === "professor" || usuario.role === "responsavel" ? (
@@ -810,7 +810,7 @@ function PrescriptionPanel({
           <div className="planner-grid">
             <label className="field field-compact">
               <span>Titulo</span>
-              <input value={title} onChange={(event) => setTitle(event.target.value)} placeholder="Ex.: Bloco de atencao da turma" />
+              <input value={title} onChange={(event) => setTitle(event.target.value)} placeholder="Ex.: Bloco de atenção da turma" />
             </label>
             <label className="field field-compact">
               <span>Email do aluno</span>
@@ -819,12 +819,12 @@ function PrescriptionPanel({
             <label className="field field-compact">
               <span>Trilha</span>
               <select className="text-input" value={mode} onChange={(event) => setMode(event.target.value as typeof mode)}>
-                <option value="memoria">Memoria</option>
-                <option value="visual">Memoria visual</option>
-                <option value="atencao">Atencao</option>
-                <option value="comparacao">Comparacao</option>
-                <option value="espacial">Orientacao espacial</option>
-                <option value="logica">Logica</option>
+                <option value="memoria">Memória</option>
+                <option value="visual">Memória visual</option>
+                <option value="atencao">Atenção</option>
+                <option value="comparacao">Comparação</option>
+                <option value="espacial">Orientação espacial</option>
+                <option value="logica">Lógica</option>
                 <option value="especial">Trilha exclusiva</option>
               </select>
             </label>
@@ -838,7 +838,7 @@ function PrescriptionPanel({
             <input value={objective} onChange={(event) => setObjective(event.target.value)} placeholder="Ex.: Reduzir erro por impulso" />
           </label>
           <label className="field field-compact">
-            <span>Observacoes da sessao</span>
+            <span>Observações da sessão</span>
             <textarea className="text-input admin-reply-input" rows={3} value={notes} onChange={(event) => setNotes(event.target.value)} />
           </label>
           <button
@@ -851,7 +851,7 @@ function PrescriptionPanel({
                 assignedByName: usuario.nome,
                 turma: usuario.turma ?? null,
                 title: title.trim(),
-                objective: objective.trim() || "Sessao prescrita com objetivo orientado.",
+                objective: objective.trim() || "Sessão prescrita com objetivo orientado.",
                 mode,
                 challengeId: Math.max(1, Number(challengeId) || 1),
                 challengeName: `${getSessionModeLabel(mode)} - Fase ${Math.max(1, Number(challengeId) || 1)}`,
@@ -864,7 +864,7 @@ function PrescriptionPanel({
               setNotes("");
             }}
           >
-            Prescrever sessao
+            Prescrever sessão
           </button>
         </>
       ) : null}
@@ -944,14 +944,14 @@ function ObservationTimeline({
   return (
     <section className="panel">
       <div className="section-head">
-        <h3>Observacoes com historico</h3>
+        <h3>Observações com histórico</h3>
         <span className="small-muted">{observations.length} registro(s) do perfil</span>
       </div>
       <div className="observation-timeline">
         {observations.length > 0 ? (
           observations.map((item) => (
             <article key={item.id} className="engagement-card">
-              <p className="engagement-tag">{item.category === "clinica" ? "Clinica" : "Pedagogica"}</p>
+              <p className="engagement-tag">{item.category === "clinica" ? "Clínica" : "Pedagógica"}</p>
               <h3>{new Date(item.updatedAt).toLocaleDateString("pt-BR")}</h3>
               <p className="muted">{item.note}</p>
               <p className="small-muted">{`Autor atual: ${item.authorName}`}</p>
@@ -965,7 +965,7 @@ function ObservationTimeline({
             </article>
           ))
         ) : (
-          <p className="small-muted">Ainda nao ha observacoes clinicas ou pedagogicas para este perfil.</p>
+          <p className="small-muted">Ainda não há observações clinicas ou pedagogicas para este perfil.</p>
         )}
       </div>
     </section>
@@ -1099,9 +1099,9 @@ export function Dashboard({
       usuario,
       generatedAt: new Date().toLocaleString("pt-BR"),
       summary: [
-        { label: "Sessoes", value: String(resumo.totalSessions), caption: "Rodadas registradas no historico" },
-        { label: "Concluidas", value: String(resumo.completedSessions), caption: "Sessoes com meta atingida" },
-        { label: "Media", value: String(resumo.averageScore), caption: "Pontuacao media por sessao" },
+        { label: "Sessões", value: String(resumo.totalSessions), caption: "Rodadas registradas no histórico" },
+        { label: "Concluidas", value: String(resumo.completedSessions), caption: "Sessões com meta atingida" },
+        { label: "Média", value: String(resumo.averageScore), caption: "Pontuação média por sessão" },
         {
           label: "Modo forte",
           value: getSessionModeLabel(resumo.strongestMode),
@@ -1111,12 +1111,12 @@ export function Dashboard({
       abilities: abilityInsights.map((item) => ({
         title: item.title,
         score: item.score,
-        level: item.level === "forte" ? "Forte" : item.level === "estavel" ? "Estavel" : "Prioridade",
+        level: item.level === "forte" ? "Forte" : item.level === "estavel" ? "Estável" : "Prioridade",
         summary: item.summary,
       })),
       trends: performanceTrends.map((item) => ({
         label: item.label,
-        direction: item.direction === "subindo" ? "Em melhora" : item.direction === "caindo" ? "Em queda" : "Estavel",
+        direction: item.direction === "subindo" ? "Em melhora" : item.direction === "caindo" ? "Em queda" : "Estável",
         summary: item.summary,
       })),
       diagnostic: {
@@ -1163,24 +1163,24 @@ export function Dashboard({
       | ProgressState["espacial"]
       | ProgressState["logica"];
   }> = [
-    { id: "memoria", label: "Memoria", title: "Trilha de memoria", rate: memoriaRate, progressMap: progresso.memoria },
-    { id: "visual", label: "Memoria visual", title: "Trilha de memoria visual", rate: visualRate, progressMap: progresso.visual },
-    { id: "atencao", label: "Atencao", title: "Trilha de atencao", rate: atencaoRate, progressMap: progresso.atencao },
+    { id: "memoria", label: "Memória", title: "Trilha de memória", rate: memoriaRate, progressMap: progresso.memoria },
+    { id: "visual", label: "Memória visual", title: "Trilha de memória visual", rate: visualRate, progressMap: progresso.visual },
+    { id: "atencao", label: "Atenção", title: "Trilha de atenção", rate: atencaoRate, progressMap: progresso.atencao },
     {
       id: "comparacao",
-      label: "Comparacao",
-      title: "Trilha de comparacao",
+      label: "Comparação",
+      title: "Trilha de comparação",
       rate: comparacaoRate,
       progressMap: progresso.comparacao,
     },
     {
       id: "espacial",
-      label: "Orientacao espacial",
-      title: "Trilha de orientacao espacial",
+      label: "Orientação espacial",
+      title: "Trilha de orientação espacial",
       rate: espacialRate,
       progressMap: progresso.espacial,
     },
-    { id: "logica", label: "Logica", title: "Trilha de logica", rate: getCompletionRate(progresso.logica), progressMap: progresso.logica },
+    { id: "logica", label: "Lógica", title: "Trilha de lógica", rate: getCompletionRate(progresso.logica), progressMap: progresso.logica },
   ];
   const activeTrail = trailTabs.find((trail) => trail.id === activeTrailTab) ?? trailTabs[0];
   const openMode = (mode: TrailMode) => {
@@ -1196,13 +1196,13 @@ export function Dashboard({
     return openMode(mode);
   };
   const dashboardTabs: Array<{ id: DashboardTab; label: string; caption: string }> = [
-    { id: "hoje", label: "Hoje", caption: "Proximo passo e rotina imediata" },
-    { id: "progresso", label: "Progresso", caption: "Evolucao e trilhas" },
-    { id: "rotina", label: "Rotina", caption: "Planos, sugestoes e agenda" },
+    { id: "hoje", label: "Hoje", caption: "Próximo passo e rotina imediata" },
+    { id: "progresso", label: "Progresso", caption: "Evolução e trilhas" },
+    { id: "rotina", label: "Rotina", caption: "Planos, sugestões e agenda" },
     {
       id: "insights",
       label: "Insights",
-      caption: usuario.role === "admin" ? "Analises e operacao" : "Ajustes e leitura",
+      caption: usuario.role === "admin" ? "Análises e operação" : "Ajustes e leitura",
     },
   ];
   const reflectionPrompt = processReflectionPrompts[reflectionPromptIndex] ?? processReflectionPrompts[0];
@@ -1243,24 +1243,24 @@ export function Dashboard({
         <button className="btn btn-side btn-side-active">Dashboard</button>
         <SidebarMenuGroup title="Treinos base" defaultOpen>
           <button className="btn btn-side" onClick={onOpenMemory}>
-            Jogo de memoria
+            Jogo de memória
           </button>
           <button className="btn btn-side" onClick={onOpenAttention}>
-            Jogo de atencao
+            Jogo de atenção
           </button>
           <button className="btn btn-side" onClick={onOpenComparison}>
-            Jogo de comparacao
+            Jogo de comparação
           </button>
         </SidebarMenuGroup>
         <SidebarMenuGroup title="Explorar mais">
           <button className="btn btn-side" onClick={onOpenVisual}>
-            Memoria visual
+            Memória visual
           </button>
           <button className="btn btn-side" onClick={onOpenSpatial}>
-            Orientacao espacial
+            Orientação espacial
           </button>
           <button className="btn btn-side" onClick={onOpenLogic}>
-            Jogo de logica
+            Jogo de lógica
           </button>
           <button className="btn btn-side" onClick={onOpenSpecial}>
             Trilha exclusiva
@@ -1291,13 +1291,13 @@ export function Dashboard({
       <section className="content">
         <header className="topbar panel">
           <div className="topbar-main">
-            <p className="eyebrow">Painel do usuario</p>
+            <p className="eyebrow">Painel do usuário</p>
             <div className="dashboard-title-row">
               <h1 className="dashboard-title">{`Ola, ${usuario.nome}`}</h1>
               <span className="dashboard-age-chip">{getAgeLabel(usuario.idade)}</span>
             </div>
             <p className="muted">
-              Seu progresso fica salvo por desafio. Os pontos so aumentam quando voce supera seu melhor resultado em
+              Seu progresso fica salvo por desafio. Os pontos só aumentam quando você supera seu melhor resultado em
               cada fase.
             </p>
             <div className="topbar-actions">
@@ -1328,13 +1328,13 @@ export function Dashboard({
             </div>
             <section className={`topbar-personal panel audience-hero audience-${currentAudience}`}>
               <div>
-                <p className="eyebrow">Experiencia personalizada</p>
+                <p className="eyebrow">Experiência personalizada</p>
                 <h3>{getAudienceLabel(currentAudience)}</h3>
                 <p className="muted">
                   {currentAudience === "infantil"
-                    ? "Painel com linguagem mais ludica, jogos concretos e reforco positivo para criancas."
+                    ? "Painel com linguagem mais lúdica, jogos concretos e reforco positivo para crianças."
                     : currentAudience === "adolescente"
-                      ? "Painel com ritmo mais rapido, metas intermediarias e desafios de foco e codificacao."
+                      ? "Painel com ritmo mais rápido, metas intermediarias e desafios de foco e codificacao."
                       : "Painel com maior densidade, rotina objetiva e desafios com mais carga cognitiva."}
                 </p>
               </div>
@@ -1347,8 +1347,8 @@ export function Dashboard({
 
         <section className="panel dashboard-tabs-panel">
           <div className="section-head">
-            <h3>Navegacao rapida</h3>
-            <span className="small-muted">Abra so o grupo de informacoes que voce quer ver agora</span>
+            <h3>Navegacao rápida</h3>
+            <span className="small-muted">Abra só o grupo de informacoes que você quer ver agora</span>
           </div>
           <div className="dashboard-tabs" role="tablist" aria-label="Abas do dashboard">
             {dashboardTabs.map((tab) => (
@@ -1371,7 +1371,7 @@ export function Dashboard({
           {reflectionOpen ? (
             <article className="process-reflection-card" aria-live="polite">
               <div>
-                <p className="small-muted process-reflection-label">Pausa de reflexao</p>
+                <p className="small-muted process-reflection-label">Pausa de reflexão</p>
                 <h3>{reflectionComplete ? "Pausa concluida" : `${reflectionSecondsLeft}s para pensar`}</h3>
                 <p className="muted process-reflection-question">{reflectionPrompt}</p>
               </div>
@@ -1379,7 +1379,7 @@ export function Dashboard({
                 <span style={{ width: `${((REFLECTION_SECONDS - reflectionSecondsLeft) / REFLECTION_SECONDS) * 100}%` }} />
               </div>
               {reflectionComplete ? (
-                <p className="process-reflection-done">Guarde a percepcao que apareceu e siga com calma.</p>
+                <p className="process-reflection-done">Guarde a percepção que apareceu e siga com calma.</p>
               ) : null}
             </article>
           ) : null}
@@ -1395,7 +1395,7 @@ export function Dashboard({
             <CompactMetricCard
               label="Pontos"
               value={String(usuario.pontos)}
-              caption="Pontuacao acumulada por melhora real"
+              caption="Pontuação acumulada por melhora real"
             />
             <CompactMetricCard
               label="Objetivo"
@@ -1403,40 +1403,40 @@ export function Dashboard({
               caption="Foco principal definido no onboarding"
             />
             <CompactMetricCard
-              label="Nivel inicial"
+              label="Nível inicial"
               value={getLevelLabel(usuario.selfReportedLevel)}
-              caption="Percepcao de entrada usada para guiar o ritmo"
+              caption="Percepção de entrada usada para guiar o ritmo"
             />
             <CompactMetricCard
               label="Rotina"
               value={`${usuario.weeklyAvailability ?? 3} dia(s)`}
               caption="Disponibilidade semanal informada no perfil"
             />
-            <CompactMetricCard label="Nivel" value={getNivel(usuario.pontos)} caption="Escala progressiva do aplicativo" />
+            <CompactMetricCard label="Nível" value={getNivel(usuario.pontos)} caption="Escala progressiva do aplicativo" />
             <CompactMetricCard
-              label="Memoria / Visual"
+              label="Memória / Visual"
               value={`${memoriaRate}% / ${visualRate}%`}
               caption="Progresso nas trilhas verbal e visual"
             />
             <CompactMetricCard
-              label="Atencao"
+              label="Atenção"
               value={`${atencaoRate}%`}
               caption="Percentual de desafios concluidos em foco seletivo"
             />
             <CompactMetricCard
-              label="Comparacao"
+              label="Comparação"
               value={`${comparacaoRate}%`}
               caption="Comparacoes de quantidade, valor, ordem e tamanho"
             />
             <CompactMetricCard
-              label="Orientacao"
+              label="Orientação"
               value={`${espacialRate}%`}
-              caption="Progresso nos desafios de rota, direcao e referencia espacial"
+              caption="Progresso nos desafios de rota, direção e referência espacial"
             />
             <CompactMetricCard
-              label="Logica"
+              label="Lógica"
               value={`${getCompletionRate(progresso.logica)}%`}
-              caption="Sequencias, padroes e previsao do proximo termo"
+              caption="Sequencias, padrões e previsão do próximo termo"
             />
             <CompactMetricCard
               label="Trilha exclusiva"
@@ -1493,7 +1493,7 @@ export function Dashboard({
           <section className="panel">
             <div className="section-head">
               <h3>Rotina orientada do grupo</h3>
-              <span className="small-muted">Agenda, lembretes e sessoes prescritas para o ciclo atual</span>
+              <span className="small-muted">Agenda, lembretes e sessões prescritas para o ciclo atual</span>
             </div>
             <div className="engagement-grid">
               <ReminderPlanner
@@ -1520,7 +1520,7 @@ export function Dashboard({
           <section className="panel">
             <div className="section-head">
               <h3>Minha agenda guiada</h3>
-              <span className="small-muted">Lembretes e sessoes que chegaram para este perfil</span>
+              <span className="small-muted">Lembretes e sessões que chegaram para este perfil</span>
             </div>
             <div className="engagement-grid">
               <article className="engagement-card planner-card">
@@ -1546,7 +1546,7 @@ export function Dashboard({
         <section className="panel">
           <div className="section-head">
             <h3>Missoes diarias e semanais</h3>
-            <span className="small-muted">Metas curtas para manter frequencia e dar direcao ao proximo treino</span>
+            <span className="small-muted">Metas curtas para manter frequência e dar direção ao próximo treino</span>
           </div>
           <div className="engagement-grid">
             {engagementMissions.map((mission) => (
@@ -1577,7 +1577,7 @@ export function Dashboard({
                 </div>
                 <div className="engagement-grid">
                   <RankingCard title="Ranking por desempenho" entries={privateRanking} />
-                  <RankingCard title="Ranking por evolucao" entries={evolutionRanking} />
+                  <RankingCard title="Ranking por evolução" entries={evolutionRanking} />
                 </div>
               </section>
             ) : null}
@@ -1591,7 +1591,7 @@ export function Dashboard({
             <section className="panel">
               <div className="section-head">
                 <h3>Metas automaticas por aluno</h3>
-                <span className="small-muted">Geradas com base em historico, erro recorrente e ritmo recente</span>
+                <span className="small-muted">Geradas com base em histórico, erro recorrente e ritmo recente</span>
               </div>
               <div className="engagement-grid">
                 {automaticGoals.map((goal) => (
@@ -1606,18 +1606,18 @@ export function Dashboard({
 
             <section className="panel report-panel">
               <div className="section-head">
-                <h3>Relatorio de desempenho</h3>
+                <h3>Relatório de desempenho</h3>
                 <div className="section-head-actions">
-                  <span className="small-muted">Resumo automatico das suas sessoes</span>
+                  <span className="small-muted">Resumo automatico das suas sessões</span>
                   <button className="btn btn-secondary btn-export-report" onClick={handleExportPdf}>
                     Exportar PDF
                   </button>
                 </div>
               </div>
               <div className="stats-grid">
-                <StatCard label="Sessoes" value={String(resumo.totalSessions)} caption="Rodadas registradas no historico" />
-                <StatCard label="Concluidas" value={String(resumo.completedSessions)} caption="Sessoes com meta atingida" />
-                <StatCard label="Media" value={String(resumo.averageScore)} caption="Pontuacao media por sessao" />
+                <StatCard label="Sessões" value={String(resumo.totalSessions)} caption="Rodadas registradas no histórico" />
+                <StatCard label="Concluidas" value={String(resumo.completedSessions)} caption="Sessões com meta atingida" />
+                <StatCard label="Média" value={String(resumo.averageScore)} caption="Pontuação média por sessão" />
                 <StatCard label="Modo forte" value={getSessionModeLabel(resumo.strongestMode)} caption="Trilha com melhor desempenho acumulado" />
               </div>
             </section>
@@ -1646,7 +1646,7 @@ export function Dashboard({
         <section className="panel">
           <div className="section-head">
             <h3>Relatorios por habilidade</h3>
-            <span className="ability-section-subtitle">Leitura separada de memoria, atencao, velocidade e raciocinio</span>
+            <span className="ability-section-subtitle">Leitura separada de memória, atenção, velocidade e raciocínio</span>
           </div>
           <div className="insight-grid">
             {abilityInsights.map((insight) => (
@@ -1664,8 +1664,8 @@ export function Dashboard({
         {usuario.role === "admin" ? (
           <section className="panel">
             <div className="section-head">
-              <h3>Historico semanal e mensal</h3>
-              <span className="small-muted">Tendencia de melhora ou queda no ritmo recente</span>
+              <h3>Histórico semanal e mensal</h3>
+              <span className="small-muted">Tendência de melhora ou queda no ritmo recente</span>
             </div>
             <div className="trend-grid">
               {performanceTrends.map((trend) => (
@@ -1685,7 +1685,7 @@ export function Dashboard({
         <section className="panel">
           <div className="section-head">
             <h3>Conquistas visuais</h3>
-            <span className="small-muted">Reconhecimentos por consistencia, precisao e evolucao, nao so por pontuacao</span>
+            <span className="small-muted">Reconhecimentos por consistencia, precisão e evolução, não só por pontuação</span>
           </div>
           <div className="engagement-grid">
             {achievementInsights.map((achievement) => (
@@ -1732,20 +1732,20 @@ export function Dashboard({
         {activeDashboardTab === "insights" ? (
         <DisclosureSection
           title="Trilhas por publico"
-          caption="O app ajusta conteudo e dificuldade automaticamente pela idade"
+          caption="O app ajusta conteúdo e dificuldade automaticamente pela idade"
         >
           <div className="track-grid">
             <TrackCard
               title="Trilha Infantil"
               audience="infantil"
               currentAudience={currentAudience}
-              description="Vocabulos mais concretos, instrucoes mais ludicas e menor carga visual para criancas."
+              description="Vocábulos mais concretos, instruções mais lúdicas e menor carga visual para crianças."
             />
             <TrackCard
               title="Trilha Adolescente"
               audience="adolescente"
               currentAudience={currentAudience}
-              description="Mais velocidade, mais itens por rodada e desafios com exigencia intermediaria."
+              description="Mais velocidade, mais itens por rodada e desafios com exigencia intermediária."
             />
             <TrackCard
               title="Trilha Adulta"
@@ -1761,7 +1761,7 @@ export function Dashboard({
           <>
         <section className="panel quick-grid">
           <article className="quick-card quick-card-highlight">
-            <p className="small-muted">Recomendacao inteligente</p>
+            <p className="small-muted">Recomendação inteligente</p>
             <h3>{smartRecommendation.title}</h3>
             <p className="muted">{smartRecommendation.reason}</p>
             <p className="small-muted">{`${smartRecommendation.objective} Proxima fase: ${smartRecommendation.challengeName}.`}</p>
@@ -1770,43 +1770,43 @@ export function Dashboard({
             </button>
           </article>
           <article className="quick-card">
-            <p className="small-muted">Recomendacao de memoria</p>
+            <p className="small-muted">Recomendação de memória</p>
             <h3>{memoriaRecomendada?.nome ?? "Primeira fase"}</h3>
-            <p className="muted">Boa para trabalhar evocacao de palavras e consolidar rotina curta de treino.</p>
+            <p className="muted">Boa para trabalhar evocação de palavras e consolidar rotina curta de treino.</p>
             <button className="btn btn-secondary" onClick={onOpenMemory}>
-              Abrir memoria
+              Abrir memória
             </button>
           </article>
           <article className="quick-card">
-            <p className="small-muted">Recomendacao visual</p>
+            <p className="small-muted">Recomendação visual</p>
             <h3>{visualRecomendada?.nomeInfantil ?? visualRecomendada?.nome ?? "Primeira fase"}</h3>
-            <p className="muted">Boa para pareamento de figuras, memoria de posicao e treino com animais e flores.</p>
+            <p className="muted">Boa para pareamento de figuras, memória de posição e treino com animais e flores.</p>
             <button className="btn btn-secondary" onClick={onOpenVisual}>
-              Abrir memoria visual
+              Abrir memória visual
             </button>
           </article>
           <article className="quick-card">
-            <p className="small-muted">Recomendacao de atencao</p>
+            <p className="small-muted">Recomendação de atenção</p>
             <h3>{atencaoRecomendada?.nome ?? "Primeira fase"}</h3>
-            <p className="muted">Boa para foco seletivo, velocidade visual e reducao de erros por impulso.</p>
+            <p className="muted">Boa para foco seletivo, velocidade visual e redução de erros por impulso.</p>
             <button className="btn btn-secondary" onClick={onOpenAttention}>
-              Abrir atencao
+              Abrir atenção
             </button>
           </article>
           <article className="quick-card">
-            <p className="small-muted">Recomendacao de comparacao</p>
+            <p className="small-muted">Recomendação de comparação</p>
             <h3>{comparacaoRecomendada?.nome ?? "Primeira fase"}</h3>
-            <p className="muted">Boa para criterio, ordem, tamanho, quantidade e decisao rapida entre opcoes.</p>
+            <p className="muted">Boa para critério, ordem, tamanho, quantidade e decisão rápida entre opções.</p>
             <button className="btn btn-secondary" onClick={onOpenComparison}>
-              Abrir comparacao
+              Abrir comparação
             </button>
           </article>
           <article className="quick-card">
-            <p className="small-muted">Recomendacao de logica</p>
+            <p className="small-muted">Recomendação de lógica</p>
             <h3>{logicaRecomendada?.nome ?? "Primeira fase"}</h3>
-            <p className="muted">Boa para perceber padroes, completar sequencias e prever o proximo elemento.</p>
+            <p className="muted">Boa para perceber padrões, completar sequências e prever o próximo elemento.</p>
             <button className="btn btn-secondary" onClick={onOpenLogic}>
-              Abrir logica
+              Abrir lógica
             </button>
           </article>
         </section>
@@ -1814,14 +1814,14 @@ export function Dashboard({
         <section className="panel split-panel">
           <div>
             <div className="section-head">
-              <h3>Evolucao geral</h3>
+              <h3>Evolução geral</h3>
               <span className="small-muted">Meta sugerida: 75 pontos</span>
             </div>
             <div className="progress-rail">
               <div className="progress-fill" style={{ width: `${Math.min((usuario.pontos / 75) * 100, 100)}%` }} />
             </div>
             <p className="muted">
-              Continue tentando melhorar seus melhores resultados. Assim a progressao fica mais justa, mais clara e
+              Continue tentando melhorar seus melhores resultados. Assim a progressão fica mais justa, mais clara e
               menos repetitiva.
             </p>
           </div>
@@ -1835,14 +1835,14 @@ export function Dashboard({
               <li>{`Memoria: priorize "${memoriaRecomendada?.nome ?? "primeiro desafio"}" na proxima sessao`}</li>
               <li>{`Atencao: priorize "${atencaoRecomendada?.nome ?? "primeiro desafio"}" para variar o treino`}</li>
               <li>{`Comparacao: priorize "${comparacaoRecomendada?.nome ?? "primeiro desafio"}" para ampliar o raciocinio comparativo`}</li>
-              <li>As fases liberam em ordem, entao concluir bem a atual ajuda a manter a trilha pedagogica</li>
+              <li>As fases liberam em ordem, entao concluir bem a atual ajuda a manter a trilha pedagógica</li>
             </ul>
           </div>
         </section>
 
         <section className="panel">
           <div className="section-head">
-            <h3>Sessoes guiadas por objetivo</h3>
+            <h3>Sessões guiadas por objetivo</h3>
             <span className="small-muted">Planos curtos e progressivos para usar sem montar a rotina manualmente</span>
           </div>
           <div className="guided-plan-grid">
@@ -1862,7 +1862,7 @@ export function Dashboard({
 
         <DisclosureSection
           title="Biblioteca de intervencoes"
-          caption="Acoes praticas sugeridas conforme habilidade, idade e desempenho"
+          caption="Ações práticas sugeridas conforme habilidade, idade e desempenho"
         >
           <div className="engagement-grid">
             {interventionLibrary.map((item) => (
@@ -1892,7 +1892,7 @@ export function Dashboard({
 
         <DisclosureSection
           title="Modo duelo ou cooperativo"
-          caption="Mesmo ciclo para aluno e professor ou responsavel acompanharem juntos"
+          caption="Mesmo ciclo para aluno e professor ou responsável acompanharem juntos"
         >
           <CooperativeCard
             title={cooperativeCycle.title}
@@ -1909,7 +1909,7 @@ export function Dashboard({
 
         {activeDashboardTab === "insights" ? (
         <DisclosureSection
-          title="Checklist de acessibilidade avancada"
+          title="Checklist de acessibilidade avançada"
           caption="Contraste, foco, voz, teclado e ambiente formal controlado"
         >
           <div className="engagement-grid">

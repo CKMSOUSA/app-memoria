@@ -193,8 +193,8 @@ export function ComparisonGame({
     setPhase("result");
     setFeedback(
       result.completed
-        ? `Voce acertou ${result.hits.length} comparacao(oes) e concluiu a fase.`
-        : `Voce acertou ${result.hits.length} comparacao(oes). Precisa de ${sessionDifficulty.minimoParaConcluir} para concluir.`,
+        ? `Você acertou ${result.hits.length} comparação(ões) e concluiu a fase.`
+        : `Você acertou ${result.hits.length} comparação(ões). Precisa de ${sessionDifficulty.minimoParaConcluir} para concluir.`,
     );
     setReview(result);
     playResultSound(result.completed, result.completed ? "precision" : result.mistakes.length > 0 ? "logic" : "default");
@@ -242,12 +242,12 @@ export function ComparisonGame({
       <section className="game-card">
         <header className="game-header">
           <div>
-            <p className="eyebrow">{isAdvancedMode ? "Testes Avancados" : "Trilha de comparacao"}</p>
-            <h1>{isAdvancedMode ? "Comparacao de criterio composto" : "Compare e escolha a opcao correta"}</h1>
+            <p className="eyebrow">{isAdvancedMode ? "Testes Avancados" : "Trilha de comparação"}</p>
+            <h1>{isAdvancedMode ? "Comparação de critério composto" : "Compare e escolha a opção correta"}</h1>
             <p className="muted">
               {isAdvancedMode
-                ? "As fases avancadas misturam calculo mental, regra secundaria e comparacao abstrata."
-                : "Esta trilha treina comparacao de tamanho, quantidade, ordem e valor com fases progressivas."}
+                ? "As fases avançadas misturam cálculo mental, regra secundária e comparação abstrata."
+                : "Esta trilha treina comparação de tamanho, quantidade, ordem e valor com fases progressivas."}
             </p>
           </div>
           <div className="button-row">
@@ -261,7 +261,7 @@ export function ComparisonGame({
         <section className="panel">
           <div className="section-head">
             <h3>Escolha o desafio</h3>
-            <span className="small-muted">Nivel atual: {getNivel(usuario.pontos)}</span>
+            <span className="small-muted">Nível atual: {getNivel(usuario.pontos)}</span>
           </div>
           <div className="tabs-grid">
             {challengeList.map((item, index) => {
@@ -289,7 +289,7 @@ export function ComparisonGame({
           <section className="review-card review-card-full">
             <div className="section-head">
               <div>
-                <h3>Correcao da rodada</h3>
+                <h3>Correção da rodada</h3>
                 <p className="muted">{feedback}</p>
               </div>
               <span className="pill">Score {review.score}</span>
@@ -300,11 +300,11 @@ export function ComparisonGame({
                 { label: "Erros", value: String(review.mistakes.length) },
                 { label: "Rodadas", value: String(rounds.length) },
               ]}
-              note="Leia sempre o criterio da fase antes de responder. Em comparacao, o erro mais comum e escolher rapido sem conferir a regra."
+              note="Leia sempre o critério da fase antes de responder. Em comparação, o erro mais comum e escolher rápido sem conferir a regra."
             />
             {!review.completed && review.mistakes.length > 0 ? (
               <p className="review-note">
-                {`Onde errou: revise a(s) comparacao(oes) ${review.mistakes.map((item) => item + 1).join(", ")}. Elas mostram sua resposta, a correta e o motivo.`}
+                {`Onde errou: revise a(s) comparação(ões) ${review.mistakes.map((item) => item + 1).join(", ")}. Elas mostram sua resposta, a correta e o motivo.`}
               </p>
             ) : null}
 
@@ -355,17 +355,17 @@ export function ComparisonGame({
 
               <GameGuide
                 title="Como jogar"
-                objective="Leia o criterio da fase e escolha, em cada comparacao, qual lado atende melhor a esse criterio."
+                objective="Leia o critério da fase e escolha, em cada comparação, qual lado atende melhor a esse critério."
                 steps={[
-                  "Clique em Iniciar rodada para abrir a sequencia de comparacoes.",
-                  "Leia o criterio da fase antes de responder.",
-                  "Escolha entre a opcao esquerda e a direita em cada rodada.",
-                  "No fim, compare suas respostas com a correcao explicada.",
+                  "Clique em Iniciar rodada para abrir a sequência de comparacoes.",
+                  "Leia o critério da fase antes de responder.",
+                  "Escolha entre a opção esquerda e a direita em cada rodada.",
+                  "No fim, compare suas respostas com a correção explicada.",
                 ]}
                 tip={
                   isAdvancedMode
-                    ? "No modo avancado, leia a regra duas vezes. Algumas rodadas usam criterio principal e criterio de desempate."
-                    : "Algumas fases pedem o maior valor, outras o menor, a palavra mais longa ou o que vem antes. O criterio da fase e o mais importante."
+                    ? "No modo avançado, leia a regra duas vezes. Algumas rodadas usam critério principal e critério de desempate."
+                    : "Algumas fases pedem o maior valor, outras o menor, a palavra mais longa ou o que vem antes. O critério da fase é o mais importante."
                 }
                 isChild={!isAdvancedMode && usuario.idade <= 10}
               />
@@ -384,7 +384,7 @@ export function ComparisonGame({
                   <span>{rounds.length}</span>
                 </div>
                 <div className="phase-chip">
-                  <strong>Adaptacao</strong>
+                  <strong>Adaptação</strong>
                   <span>{`${sessionDifficulty.tempoLimite}s totais`}</span>
                 </div>
               </div>
@@ -392,7 +392,7 @@ export function ComparisonGame({
               <div className="status-row">
                 <div className="meter-box">
                   <strong>Tempo restante</strong>
-                  <span>{phase === "playing" ? `${timeLeft}s` : "Aguardando inicio"}</span>
+                  <span>{phase === "playing" ? `${timeLeft}s` : "Aguardando início"}</span>
                 </div>
                 <div className="meter-box">
                   <strong>Meta da fase</strong>
@@ -453,17 +453,17 @@ export function ComparisonGame({
 
               <div className="comparison-board">
                 <button className="comparison-card" onClick={() => handleAnswer("left")} disabled={phase !== "playing"}>
-                  <span className="small-muted">Opcao esquerda</span>
+                  <span className="small-muted">Opção esquerda</span>
                   <strong>{showChildVisuals ? <ChildVisualBadge token={currentRound.left} /> : currentRound.left}</strong>
                 </button>
                 <button className="comparison-card" onClick={() => handleAnswer("right")} disabled={phase !== "playing"}>
-                  <span className="small-muted">Opcao direita</span>
+                  <span className="small-muted">Opção direita</span>
                   <strong>{showChildVisuals ? <ChildVisualBadge token={currentRound.right} /> : currentRound.right}</strong>
                 </button>
               </div>
 
               <p className="muted comparison-helper">
-                Clique na opcao correta para passar para a proxima comparacao.
+                Clique na opção correta para passar para a proxima comparação.
               </p>
             </section>
           </div>

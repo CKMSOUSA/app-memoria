@@ -13,19 +13,19 @@ type HelpScreenProps = {
 const FAQ_ITEMS = [
   {
     question: "Como comeco uma rodada?",
-    answer: "Entre no jogo desejado, leia a caixa de instrucoes e clique em 'Iniciar rodada'. A fase passa a valer quando a rodada começa.",
+    answer: "Entre no jogo desejado, leia a caixa de instruções e clique em 'Iniciar rodada'. A fase passa a valer quando a rodada começa.",
   },
   {
     question: "Como ganho pontos?",
-    answer: "Os pontos aumentam quando voce melhora o seu melhor resultado naquela fase. Repetir a mesma pontuacao nao adiciona pontos extras.",
+    answer: "Os pontos aumentam quando você melhora o seu melhor resultado naquela fase. Repetir a mesma pontuação não adiciona pontos extras.",
   },
   {
     question: "Meu progresso fica salvo?",
-    answer: "Sim. Nesta versao, o progresso fica salvo no navegador do proprio dispositivo. A base ja esta pronta para backend online no futuro.",
+    answer: "Sim. Nesta versão, o progresso fica salvo no navegador do próprio dispositivo. A base já está pronta para backend online no futuro.",
   },
   {
-    question: "O que fazer se eu nao entender um exercicio?",
-    answer: "Leia a caixa 'Como funciona' dentro do jogo. Se ainda houver duvida, use o formulario abaixo para registrar sua pergunta.",
+    question: "O que fazer se eu não entender um exercicio?",
+    answer: "Leia a caixa 'Como funciona' dentro do jogo. Se ainda houver dúvida, use o formulario abaixo para registrar sua pergunta.",
   },
 ];
 
@@ -37,7 +37,7 @@ export function HelpScreen({ usuario, requests, onBack, onSubmit }: HelpScreenPr
 
   async function handleSubmit() {
     if (!subject.trim() || !message.trim()) {
-      setNotice("Preencha o assunto e a mensagem para enviar sua duvida.");
+      setNotice("Preencha o assunto e a mensagem para enviar sua dúvida.");
       return;
     }
 
@@ -50,7 +50,7 @@ export function HelpScreen({ usuario, requests, onBack, onSubmit }: HelpScreenPr
     });
     setSubject("");
     setMessage("");
-    setNotice("Sua duvida foi registrada com sucesso. Ela tambem aparece na area administrativa.");
+    setNotice("Sua dúvida foi registrada com sucesso. Ela tambem aparece na área administrativa.");
     setIsSending(false);
   }
 
@@ -60,8 +60,8 @@ export function HelpScreen({ usuario, requests, onBack, onSubmit }: HelpScreenPr
         <header className="game-header">
           <div>
             <p className="eyebrow">Ajuda</p>
-            <h1>Central de apoio ao usuario</h1>
-            <p className="muted">Consulte respostas rapidas e registre uma pergunta se precisar de orientacao.</p>
+            <h1>Central de apoio ao usuário</h1>
+            <p className="muted">Consulte respostas rápidas e registre uma pergunta se precisar de orientação.</p>
           </div>
           <button className="btn btn-secondary" onClick={onBack}>
             Voltar ao painel
@@ -87,13 +87,13 @@ export function HelpScreen({ usuario, requests, onBack, onSubmit }: HelpScreenPr
 
           <section className="panel">
             <div className="section-head">
-              <h3>Enviar duvida</h3>
+              <h3>Enviar dúvida</h3>
               <span className="small-muted">{requests.length} registro(s) enviado(s)</span>
             </div>
 
             <label className="field">
               <span>Assunto</span>
-              <input value={subject} onChange={(event) => setSubject(event.target.value)} placeholder="Ex.: Nao entendi o jogo de orientacao espacial" />
+              <input value={subject} onChange={(event) => setSubject(event.target.value)} placeholder="Ex.: Não entendi o jogo de orientação espacial" />
             </label>
 
             <label className="field">
@@ -103,7 +103,7 @@ export function HelpScreen({ usuario, requests, onBack, onSubmit }: HelpScreenPr
                 rows={6}
                 value={message}
                 onChange={(event) => setMessage(event.target.value)}
-                placeholder="Descreva o que aconteceu ou em qual tela voce precisa de ajuda."
+                placeholder="Descreva o que aconteceu ou em qual tela você precisa de ajuda."
               />
             </label>
 
@@ -111,12 +111,12 @@ export function HelpScreen({ usuario, requests, onBack, onSubmit }: HelpScreenPr
 
             <div className="button-row">
               <button className="btn btn-primary" onClick={handleSubmit} disabled={isSending}>
-                {isSending ? "Enviando..." : "Enviar duvida"}
+                {isSending ? "Enviando..." : "Enviar dúvida"}
               </button>
             </div>
 
             <div className="help-history">
-              <strong>Suas ultimas duvidas</strong>
+              <strong>Suas últimas dúvidas</strong>
               {requests.length > 0 ? (
                 requests.slice(0, 4).map((request) => (
                   <article key={request.id} className="faq-card">
@@ -134,7 +134,7 @@ export function HelpScreen({ usuario, requests, onBack, onSubmit }: HelpScreenPr
                   </article>
                 ))
               ) : (
-                <p className="small-muted">Nenhuma duvida enviada ainda.</p>
+                <p className="small-muted">Nenhuma dúvida enviada ainda.</p>
               )}
             </div>
           </section>

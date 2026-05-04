@@ -158,8 +158,8 @@ export function LogicGame({
       setPhase("result");
       setFeedback(
         result.completed
-          ? `Voce acertou ${result.hits.length} sequencia(s) e concluiu a fase.`
-          : `Voce acertou ${result.hits.length} sequencia(s). Precisa de ${sessionDifficulty.minimoParaConcluir} para concluir.`,
+          ? `Você acertou ${result.hits.length} sequência(s) e concluiu a fase.`
+          : `Você acertou ${result.hits.length} sequência(s). Precisa de ${sessionDifficulty.minimoParaConcluir} para concluir.`,
       );
       setReview(result);
       playResultSound(result.completed, result.completed ? "precision" : result.mistakes.length > 0 ? "logic" : "default");
@@ -228,12 +228,12 @@ export function LogicGame({
       <section className="game-card">
         <header className="game-header">
           <div>
-            <p className="eyebrow">{isAdvancedMode ? "Testes Avancados" : "Trilha de logica"}</p>
-            <h1>{isAdvancedMode ? "Logica em nivel extremo" : "Descubra a regra e escolha o proximo termo"}</h1>
+            <p className="eyebrow">{isAdvancedMode ? "Testes Avancados" : "Trilha de lógica"}</p>
+            <h1>{isAdvancedMode ? "Lógica em nível extremo" : "Descubra a regra e escolha o próximo termo"}</h1>
             <p className="muted">
               {isAdvancedMode
-                ? "As fases avancadas combinam duas ou tres regras ao mesmo tempo e reduzem a margem para resposta por impulso."
-                : "Essa trilha trabalha raciocinio sequencial, padroes e previsao de proximo passo."}
+                ? "As fases avançadas combinam duas ou tres regras ao mesmo tempo e reduzem a margem para resposta por impulso."
+                : "Essa trilha trabalha raciocínio sequencial, padrões e previsão de próximo passo."}
             </p>
           </div>
           <div className="button-row">
@@ -247,7 +247,7 @@ export function LogicGame({
         <section className="panel">
           <div className="section-head">
             <h3>Escolha o desafio</h3>
-            <span className="small-muted">Nivel atual: {getNivel(usuario.pontos)}</span>
+            <span className="small-muted">Nível atual: {getNivel(usuario.pontos)}</span>
           </div>
           <div className="tabs-grid">
             {challengeList.map((item, index) => {
@@ -275,7 +275,7 @@ export function LogicGame({
           <section className="review-card review-card-full">
             <div className="section-head">
               <div>
-                <h3>Correcao da rodada</h3>
+                <h3>Correção da rodada</h3>
                 <p className="muted">{feedback}</p>
               </div>
               <span className="pill">Score {review.score}</span>
@@ -286,11 +286,11 @@ export function LogicGame({
                 { label: "Erros", value: String(review.mistakes.length) },
                 { label: "Sequencias", value: String(activeRounds.length) },
               ]}
-              note="Leia a explicacao correta depois de cada rodada. Isso ajuda a reconhecer o padrao com mais rapidez na proxima tentativa."
+              note="Leia a explicacao correta depois de cada rodada. Isso ajuda a reconhecer o padrão com mais rapidez na proxima tentativa."
             />
             {!review.completed && review.mistakes.length > 0 ? (
               <p className="review-note">
-                {`Onde errou: a(s) sequencia(s) ${review.mistakes.map((item) => item + 1).join(", ")} precisam de revisao. Veja a regra explicada em cada card.`}
+                {`Onde errou: a(s) sequência(s) ${review.mistakes.map((item) => item + 1).join(", ")} precisam de revisao. Veja a regra explicada em cada card.`}
               </p>
             ) : null}
 
@@ -332,17 +332,17 @@ export function LogicGame({
 
               <GameGuide
                 title="Como jogar"
-                objective="Observe a regra da sequencia e escolha qual opcao vem depois."
+                objective="Observe a regra da sequência e escolha qual opção vem depois."
                 steps={[
-                  "Clique em Iniciar rodada para abrir a serie de sequencias.",
-                  "Leia a sequencia com calma e procure a regra de repeticao, crescimento ou alternancia.",
-                  "Escolha a melhor opcao para completar a sequencia.",
+                  "Clique em Iniciar rodada para abrir a serie de sequências.",
+                  "Leia a sequência com calma e procure a regra de repetição, crescimento ou alternancia.",
+                  "Escolha a melhor opção para completar a sequência.",
                   "Ao final, compare sua resposta com a explicacao correta.",
                 ]}
                 tip={
                   isAdvancedMode
-                    ? "Nos testes avancados, procure mais de uma regra. Se uma explicacao parecer simples demais, provavelmente ha outra camada."
-                    : "Nem toda sequencia cresce de 1 em 1. Algumas alternam, dobram ou pulam letras."
+                    ? "Nos testes avancados, procure mais de uma regra. Se uma explicacao parecer simples demais, provavelmente há outra camada."
+                    : "Nem toda sequência cresce de 1 em 1. Algumas alternam, dobram ou pulam letras."
                 }
                 isChild={!isAdvancedMode && usuario.idade <= 10}
               />
@@ -361,7 +361,7 @@ export function LogicGame({
                   <span>{activeRounds.length}</span>
                 </div>
                 <div className="phase-chip">
-                  <strong>Adaptacao</strong>
+                  <strong>Adaptação</strong>
                   <span>{`${sessionDifficulty.tempoLimite}s totais`}</span>
                 </div>
               </div>
@@ -369,7 +369,7 @@ export function LogicGame({
               <div className="status-row">
                 <div className="meter-box">
                   <strong>Tempo restante</strong>
-                  <span>{phase === "playing" ? `${timeLeft}s` : "Aguardando inicio"}</span>
+                  <span>{phase === "playing" ? `${timeLeft}s` : "Aguardando início"}</span>
                 </div>
                 <div className="meter-box">
                   <strong>Meta da fase</strong>
@@ -380,7 +380,7 @@ export function LogicGame({
 
             <section className="panel">
               <div className="section-head">
-                <h3>Sequencia atual</h3>
+                <h3>Sequência atual</h3>
                 <span className="small-muted">
                   {phase === "playing" ? `${currentRoundIndex + 1}/${activeRounds.length}` : "Aguardando rodada"}
                 </span>
@@ -430,7 +430,7 @@ export function LogicGame({
               <div className="comparison-board">
                 {currentRound.options.map((option) => (
                   <button key={option} className="comparison-card logic-card" onClick={() => handleAnswer(option)} disabled={phase !== "playing"}>
-                    <span className="small-muted">Opcao</span>
+                    <span className="small-muted">Opção</span>
                     <strong>{showChildVisuals ? <ChildVisualBadge token={option} /> : option}</strong>
                   </button>
                 ))}

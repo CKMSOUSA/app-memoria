@@ -248,7 +248,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(
       {
         ok: false,
-        error: "Acesso administrativo nao autorizado.",
+        error: "Acesso administrativo não autorizado.",
       },
       { status: 403 },
     );
@@ -265,7 +265,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(
       {
         ok: false,
-        error: "Nao foi possivel carregar a visao administrativa online.",
+        error: "Não foi possível carregar a visão administrativa online.",
       },
       { status: 500 },
     );
@@ -324,7 +324,7 @@ export async function PATCH(request: NextRequest) {
     return NextResponse.json(
       {
         ok: false,
-        error: "Acesso administrativo nao autorizado.",
+        error: "Acesso administrativo não autorizado.",
       },
       { status: 403 },
     );
@@ -339,7 +339,7 @@ export async function PATCH(request: NextRequest) {
     return NextResponse.json(
       {
         ok: false,
-        error: "Dados invalidos para atualizar o pedido de ajuda.",
+        error: "Dados inválidos para atualizar o pedido de ajuda.",
       },
       { status: 400 },
     );
@@ -360,7 +360,7 @@ export async function PATCH(request: NextRequest) {
     return NextResponse.json(
       {
         ok: false,
-        error: "Nao foi possivel atualizar o status da duvida.",
+        error: "Não foi possível atualizar o status da dúvida.",
       },
       { status: 500 },
     );
@@ -371,7 +371,7 @@ export async function PATCH(request: NextRequest) {
     return NextResponse.json(
       {
         ok: false,
-        error: "A duvida foi atualizada, mas nao foi possivel recarregar a lista.",
+        error: "A dúvida foi atualizada, mas não foi possível recarregar a lista.",
       },
       { status: 500 },
     );

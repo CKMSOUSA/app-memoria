@@ -15,13 +15,13 @@ export function AdminConfirmScreen({ usuario, onBack, onConfirm }: AdminConfirmS
 
   async function handleConfirm() {
     if (!code.trim()) {
-      setNotice("Digite o codigo de confirmacao para continuar.");
+      setNotice("Digite o código de confirmação para continuar.");
       return;
     }
 
     const ok = await onConfirm(code.trim());
     if (!ok) {
-      setNotice("Codigo de confirmacao invalido.");
+      setNotice("Código de confirmação invalido.");
     }
   }
 
@@ -35,17 +35,17 @@ export function AdminConfirmScreen({ usuario, onBack, onConfirm }: AdminConfirmS
             <p className="muted">
               {usuario
                 ? `${usuario.nome}, sua conta ja tem perfil administrativo. Agora confirme o codigo extra para abrir a area administrativa.`
-                : "Digite o codigo exclusivo para abrir a area administrativa a partir da tela inicial do app."}
+                : "Digite o código exclusivo para abrir a área administrativa a partir da tela inicial do app."}
             </p>
           </div>
           <div className="hero-badge">Etapa extra de seguranca</div>
         </div>
 
         <label className="field">
-          <span>Codigo de confirmacao</span>
+          <span>Código de confirmação</span>
           <input
             type="password"
-            placeholder="Digite o codigo de liberacao"
+            placeholder="Digite o código de liberação"
             value={code}
             onChange={(event) => {
               setNotice("");
@@ -55,7 +55,7 @@ export function AdminConfirmScreen({ usuario, onBack, onConfirm }: AdminConfirmS
         </label>
 
         <div className="notice notice-ok">
-          Esta etapa protege a area administrativa mesmo quando a conta de admin ja fez login com email e senha.
+          Esta etapa protege a área administrativa mesmo quando a conta de admin já fez login com email e senha.
         </div>
 
         {notice ? <p className="notice">{notice}</p> : null}

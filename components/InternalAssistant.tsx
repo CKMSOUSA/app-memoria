@@ -44,32 +44,32 @@ export function InternalAssistant({
   const assistantResponse = useMemo(() => {
     if (objective === "foco") {
       return {
-        title: "Sugestao para foco e atencao",
-        summary: "A melhor entrada agora e um bloco curto de atencao seletiva, seguido por comparacao leve para sustentar criterio.",
+        title: "Sugestão para foco e atenção",
+        summary: "A melhor entrada agora é um bloco curto de atenção seletiva, seguido por comparação leve para sustentar critério.",
         actionMode: "atencao" as const,
-        actionLabel: "Abrir atencao",
+        actionLabel: "Abrir atenção",
       };
     }
     if (objective === "memoria") {
       return {
-        title: "Sugestao para memoria",
-        summary: `O diagnostico atual indica comecar em ${diagnostic.starters.find((item) => item.mode === "memoria")?.challengeName ?? "memoria"} e combinar com memoria visual quando possivel.`,
+        title: "Sugestão para memória",
+        summary: `O diagnostico atual indica comecar em ${diagnostic.starters.find((item) => item.mode === "memoria")?.challengeName ?? "memoria"} e combinar com memória visual quando possivel.`,
         actionMode: "memoria" as const,
-        actionLabel: "Abrir memoria",
+        actionLabel: "Abrir memória",
       };
     }
     if (objective === "raciocinio") {
       return {
-        title: "Sugestao para raciocinio",
-        summary: "Comparacao e logica devem abrir a sessao, porque elas organizam criterio, padrao e tomada de decisao sob tempo.",
+        title: "Sugestão para raciocínio",
+        summary: "Comparação e lógica devem abrir a sessão, porque elas organizam critério, padrão e tomada de decisão sob tempo.",
         actionMode: recommendation.mode === "comparacao" || recommendation.mode === "logica" ? recommendation.mode : "logica",
         actionLabel:
-          recommendation.mode === "comparacao" || recommendation.mode === "logica" ? `Abrir ${getSessionModeLabel(recommendation.mode)}` : "Abrir logica",
+          recommendation.mode === "comparacao" || recommendation.mode === "logica" ? `Abrir ${getSessionModeLabel(recommendation.mode)}` : "Abrir lógica",
       };
     }
     if (objective === "terapeutico") {
       return {
-        title: "Sugestao para uso terapeutico",
+        title: "Sugestão para uso terapêutico",
         summary: `${guidedPlans[0]?.title ?? "Treino curto"} funciona bem com baixa carga inicial, pausas curtas e foco em concluir sem pressa.`,
         actionMode: "especial" as const,
         actionLabel: "Abrir trilha exclusiva",
@@ -100,11 +100,11 @@ export function InternalAssistant({
       </div>
       <div className="trail-tabs" role="tablist" aria-label="Objetivos do assistente">
         {[
-          ["diagnostico", "Diagnostico"],
+          ["diagnostico", "Diagnóstico"],
           ["foco", "Foco"],
-          ["memoria", "Memoria"],
-          ["raciocinio", "Raciocinio"],
-          ["terapeutico", "Terapeutico"],
+          ["memoria", "Memória"],
+          ["raciocinio", "Raciocínio"],
+          ["terapeutico", "Terapêutico"],
         ].map(([id, label]) => (
           <button
             key={id}

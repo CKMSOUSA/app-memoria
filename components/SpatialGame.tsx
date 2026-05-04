@@ -273,8 +273,8 @@ export function SpatialGame({
       setReview(result);
       setFeedback(
         result.completed
-          ? `Voce reconstruiu ${result.hits.length} direcao(oes) corretamente e concluiu a rota.`
-          : `Voce acertou ${result.hits.length} movimento(s). Precisa de ${sessionDifficulty.minimoParaConcluir} para concluir.`,
+          ? `Você reconstruiu ${result.hits.length} direção(ões) corretamente e concluiu a rota.`
+          : `Você acertou ${result.hits.length} movimento(s). Precisa de ${sessionDifficulty.minimoParaConcluir} para concluir.`,
       );
       playResultSound(
         result.completed,
@@ -289,12 +289,12 @@ export function SpatialGame({
       <section className="game-card">
         <header className="game-header">
           <div>
-            <p className="eyebrow">{isAdvancedMode ? "Testes Avancados" : "Trilha de orientacao espacial"}</p>
-            <h1>{isAdvancedMode ? "Orientacao espacial extrema" : "Observe a rota e monte o caminho"}</h1>
+            <p className="eyebrow">{isAdvancedMode ? "Testes Avançados" : "Trilha de orientação espacial"}</p>
+            <h1>{isAdvancedMode ? "Orientação espacial extrema" : "Observe a rota e monte o caminho"}</h1>
             <p className="muted">
               {isAdvancedMode
-                ? "As rotas avancadas sao mais longas, com retorno parcial e menos tempo de observacao."
-                : "Este treino trabalha referencia espacial, esquerda e direita, e memoria de deslocamento em sequencia."}
+                ? "As rotas avançadas são mais longas, com retorno parcial e menos tempo de observação."
+                : "Este treino trabalha referência espacial, esquerda e direita, e memória de deslocamento em sequência."}
             </p>
           </div>
           <div className="button-row">
@@ -308,7 +308,7 @@ export function SpatialGame({
         <section className="panel">
           <div className="section-head">
             <h3>Escolha o desafio</h3>
-            <span className="small-muted">Nivel atual: {getNivel(usuario.pontos)}</span>
+            <span className="small-muted">Nível atual: {getNivel(usuario.pontos)}</span>
           </div>
           <div className="tabs-grid">
             {challengeList.map((item, index) => {
@@ -336,7 +336,7 @@ export function SpatialGame({
           <section className="review-card review-card-full">
             <div className="section-head">
               <div>
-                <h3>Correcao da rota</h3>
+                <h3>Correção da rota</h3>
                 <p className="muted">{feedback}</p>
               </div>
               <span className="pill">Score {review.score}</span>
@@ -347,7 +347,7 @@ export function SpatialGame({
                 { label: "Erros", value: String(review.wrongMoves.length) },
                 { label: "Passos", value: String(activeSequence.length) },
               ]}
-              note="Compare a rota correta com a sua rota. Isso ajuda a perceber onde a referencia espacial se perdeu."
+              note="Compare a rota correta com a sua rota. Isso ajuda a perceber onde a referência espacial se perdeu."
             />
             {!review.completed && review.wrongMoves.length > 0 ? (
               <p className="review-note">
@@ -431,21 +431,21 @@ export function SpatialGame({
 
               {isAdvancedMode ? (
                 <div className="round-task-card compact-task-card">
-                  <strong className="round-task-title">Observacao da rota</strong>
+                  <strong className="round-task-title">Observação da rota</strong>
                   <span className="round-task-meta">{`Fase ${challengeNumber} - ${challenge.difficultyLabel}`}</span>
                   <p className="round-task-description advanced-task-description">{currentVariation.prompt}</p>
                 </div>
               ) : (
                 <GameGuide
                   title="Como jogar"
-                  objective="Observe o caminho no tabuleiro e depois repita os movimentos na mesma ordem usando somente os botoes de direcao."
+                  objective="Observe o caminho no tabuleiro e depois repita os movimentos na mesma ordem usando somente os botões de direção."
                   steps={[
                     "Clique em Iniciar rodada para mostrar a rota.",
-                    "Use os numeros do tabuleiro como guia: 0 e o inicio, 1 e o primeiro passo, 2 e o segundo, e assim por diante.",
+                    "Use os números do tabuleiro como guia: 0 é o início, 1 é o primeiro passo, 2 é o segundo, e assim por diante.",
                     "Quando a rota sumir, responda clicando em Cima, Baixo, Esquerda e Direita.",
-                    "Na correcao final, compare a rota certa com a rota que voce montou.",
+                    "Na correção final, compare a rota certa com a rota que você montou.",
                   ]}
-                  tip="Voce nao precisa clicar no tabuleiro. O tabuleiro serve apenas para mostrar o caminho visualmente."
+                  tip="Você não precisa clicar no tabuleiro. O tabuleiro serve apenas para mostrar o caminho visualmente."
                   isChild={!isAdvancedMode && usuario.idade <= 10}
                 />
               )}
@@ -464,14 +464,14 @@ export function SpatialGame({
                   <span>{`${activeSequence.length} passos`}</span>
                 </div>
                 <div className="phase-chip">
-                  <strong>Adaptacao</strong>
+                  <strong>Adaptação</strong>
                   <span>{`${sessionDifficulty.tempoResposta}s para responder`}</span>
                 </div>
               </div>
 
               <div className={`${isAdvancedMode ? "status-row compact-status-row" : ""}`}>
                 <div className="meter-box">
-                  <strong>Tempo de observacao</strong>
+                  <strong>Tempo de observação</strong>
                   <span>{phase === "showing" ? `${revealLeft}s restantes` : `${sessionDifficulty.revealSeconds}s por rodada`}</span>
                 </div>
                 {isAdvancedMode ? (
@@ -517,7 +517,7 @@ export function SpatialGame({
 
               <div className="response-timer-row response-timer-row-near-board">
                 <TimerDisplay
-                  label={phase === "showing" ? "Observacao" : phase === "answering" ? "Resposta" : "Tempo"}
+                  label={phase === "showing" ? "Observação" : phase === "answering" ? "Resposta" : "Tempo"}
                   value={phase === "showing" ? `${revealLeft}s` : phase === "answering" ? `${answerSeconds}s` : "--"}
                   tone={phase === "showing" || phase === "answering" ? "active" : "neutral"}
                 />
@@ -535,7 +535,7 @@ export function SpatialGame({
                   ? showChildVisuals
                     ? selectedMoves.map((item) => directionLabelMap[item]).join(" - ")
                     : selectedMoves.map((item) => directionLabelMap[item]).join(" - ")
-                  : "Sua sequencia de direcoes aparecera aqui."}
+                  : "Sua sequência de direções aparecerá aqui."}
               </div>
 
               <SpatialBoard path={userPath} />

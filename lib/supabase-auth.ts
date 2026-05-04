@@ -84,7 +84,7 @@ export function clearStoredSupabaseSession() {
 }
 
 export async function signInWithSupabase(email: string, password: string) {
-  if (!hasSupabaseAuthConfig()) return { error: "Supabase nao configurado.", session: null };
+  if (!hasSupabaseAuthConfig()) return { error: "Supabase não configurado.", session: null };
 
   const response = await supabaseFetch("/token?grant_type=password", {
     method: "POST",
@@ -94,7 +94,7 @@ export async function signInWithSupabase(email: string, password: string) {
   const result = (await response.json()) as SupabaseAuthResponse;
   if (!response.ok || !result.session) {
     return {
-      error: result.error_description || result.msg || "Nao foi possivel autenticar no Supabase.",
+      error: result.error_description || result.msg || "Não foi possível autenticar no Supabase.",
       session: null,
     };
   }
@@ -108,7 +108,7 @@ export async function signUpWithSupabase(
   password: string,
   metadata: { nome: string; avatar: string; idade: number },
 ) {
-  if (!hasSupabaseAuthConfig()) return { error: "Supabase nao configurado.", session: null, user: null };
+  if (!hasSupabaseAuthConfig()) return { error: "Supabase não configurado.", session: null, user: null };
 
   const response = await supabaseFetch("/signup", {
     method: "POST",
@@ -122,7 +122,7 @@ export async function signUpWithSupabase(
   const result = (await response.json()) as SupabaseAuthResponse;
   if (!response.ok) {
     return {
-      error: result.error_description || result.msg || "Nao foi possivel criar a conta no Supabase.",
+      error: result.error_description || result.msg || "Não foi possível criar a conta no Supabase.",
       session: null,
       user: null,
     };
@@ -137,7 +137,7 @@ export async function signUpWithSupabase(
 
 export async function requestSupabaseRecovery(email: string) {
   if (!hasSupabaseAuthConfig()) {
-    return "Supabase nao configurado para recuperacao remota.";
+    return "Supabase não configurado para recuperação remota.";
   }
 
   const response = await supabaseFetch("/recover", {
@@ -146,8 +146,8 @@ export async function requestSupabaseRecovery(email: string) {
   });
 
   if (!response.ok) {
-    return "Nao foi possivel iniciar a recuperacao pelo Supabase.";
+    return "Não foi possível iniciar a recuperação pelo Supabase.";
   }
 
-  return "Se este email existir no Supabase, um link de recuperacao sera enviado.";
+  return "Se este email existir no Supabase, um link de recuperação será enviado.";
 }

@@ -299,7 +299,7 @@ export function getRemoteBackendStatus(): RemoteBackendStatus {
       mode,
       ready: false,
       provider: "Local",
-      description: "Modo local ativo. O app funciona no navegador e ja aceita migracao para backend online.",
+      description: "Modo local ativo. O app funciona no navegador e já aceita migração para backend online.",
     };
   }
 
@@ -308,7 +308,7 @@ export function getRemoteBackendStatus(): RemoteBackendStatus {
       mode,
       ready: true,
       provider: "Supabase",
-      description: "Modo remoto configurado com credenciais publicas para autenticar e sincronizar progresso online.",
+      description: "Modo remoto configurado com credenciais públicas para autenticar e sincronizar progresso online.",
     };
   }
 
@@ -875,7 +875,7 @@ const localRepository: AppRepository = {
     const remoteOverview = await loadAdminOverviewFromApi(adminCode);
     if (remoteOverview) return mergeLocalOverviewFields(remoteOverview);
     if (!isLocalAdminCodeValid(adminCode)) {
-      throw new Error("Acesso administrativo nao autorizado.");
+      throw new Error("Acesso administrativo não autorizado.");
     }
 
     const users = listUsers();
@@ -908,7 +908,7 @@ const localRepository: AppRepository = {
       return;
     }
     if (!isLocalAdminCodeValid(adminCode)) {
-      throw new Error("Acesso administrativo nao autorizado.");
+      throw new Error("Acesso administrativo não autorizado.");
     }
 
     if (status === "excluido") {
@@ -924,7 +924,7 @@ const localRepository: AppRepository = {
     const remoteResult = await resetAdminDataFromApi(adminCode);
     const canResetLocally = isLocalAdminCodeValid(adminCode);
     if (!remoteResult?.ok && !canResetLocally) {
-      throw new Error("Acesso administrativo nao autorizado.");
+      throw new Error("Acesso administrativo não autorizado.");
     }
 
     resetTrainingDataForAllUsers();
@@ -944,7 +944,7 @@ const localRepository: AppRepository = {
       return remoteResult.helpRequests;
     }
     if (!isLocalAdminCodeValid(adminCode)) {
-      throw new Error("Acesso administrativo nao autorizado.");
+      throw new Error("Acesso administrativo não autorizado.");
     }
 
     const current = loadHelpRequests();
@@ -959,7 +959,7 @@ const localRepository: AppRepository = {
   simulateRecovery: (email) => {
     if (hasSupabaseAuthConfig()) {
       void requestSupabaseRecovery(email);
-      return "Se este email existir, um fluxo de recuperacao sera iniciado pelo Supabase.";
+      return "Se este email existir, um fluxo de recuperação será iniciado pelo Supabase.";
     }
     return simulateRecovery(email);
   },
@@ -988,7 +988,7 @@ const remoteRepository: AppRepository = {
     });
 
     const result = await parseJson<RegisterResult>(response);
-    if (!result?.user) return result ?? { error: "Nao foi possivel cadastrar no backend remoto.", user: null };
+    if (!result?.user) return result ?? { error: "Não foi possível cadastrar no backend remoto.", user: null };
     return { ...result, user: { ...result.user, turma } };
   },
   updateUserProfile: async (email, profile) => {
@@ -1016,7 +1016,7 @@ const remoteRepository: AppRepository = {
     });
     const result = await parseJson<ProgressState>(response);
     if (!result) {
-      throw new Error("O backend remoto ainda nao expôs a rota de progresso.");
+      throw new Error("O backend remoto ainda não expôs a rota de progresso.");
     }
     return result;
   },
@@ -1095,14 +1095,14 @@ const remoteRepository: AppRepository = {
   loadAdminOverview: async (adminCode) => {
     const overview = await loadAdminOverviewFromApi(adminCode);
     if (!overview) {
-      throw new Error("Nao foi possivel carregar a visao administrativa online.");
+      throw new Error("Não foi possível carregar a visao administrativa online.");
     }
     return overview;
   },
   updateManagedUserStatus: async (email, status, adminCode) => {
     const result = await updateManagedUserStatusFromApi(email, status, adminCode);
     if (!result?.ok) {
-      throw new Error("Nao foi possivel atualizar o usuario no backend administrativo.");
+      throw new Error("Não foi possível atualizar o usuário no backend administrativo.");
     }
   },
   resetAllTrainingData: async () => {
@@ -1115,7 +1115,7 @@ const remoteRepository: AppRepository = {
   },
   ensureAdminUser: async () => null,
   simulateRecovery: () =>
-    "Modo remoto preparado. Em producao, use um endpoint de recuperacao com email e token temporario.",
+    "Modo remoto preparado. Em produção, use um endpoint de recuperação com email e token temporário.",
 };
 
 let cachedRepository: AppRepository | null = null;
@@ -1136,5 +1136,5 @@ export function getDataModeLabel(mode: DataMode) {
 export function getDataModeDescription(mode: DataMode) {
   return mode === "remote"
     ? "Pronto para usar API real de contas e progresso online."
-    : "Salva no navegador, mas a interface ja esta preparada para migrar para API.";
+    : "Salva no navegador, mas a interface já está preparada para migrar para API.";
 }

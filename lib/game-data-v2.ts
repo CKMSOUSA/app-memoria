@@ -25,12 +25,12 @@ export const memoryChallenges: MemoryChallenge[] = [
     nome: "Natureza e estudo",
     nomeInfantil: "Bichos e escola",
     variacoes: [
-      ["gato", "arvore", "rio", "porta", "lapis"],
+      ["gato", "arvore", "rio", "porta", "lápis"],
       ["flor", "caderno", "pedra", "ponte", "borracha"],
       ["folha", "caneta", "chuva", "trilha", "mochila"],
     ],
     variacoesInfantis: [
-      ["gato", "flor", "rio", "cola", "lapis"],
+      ["gato", "flor", "rio", "cola", "lápis"],
       ["pato", "nuvem", "livro", "tinta", "folha"],
       ["abelha", "sol", "caderno", "chuva", "borracha"],
     ],
@@ -57,7 +57,7 @@ export const memoryChallenges: MemoryChallenge[] = [
   },
   {
     id: 4,
-    difficultyLabel: "Intermediaria",
+    difficultyLabel: "Intermediária",
     nome: "Cenario noturno",
     nomeInfantil: "Noite calma",
     variacoes: [
@@ -75,7 +75,7 @@ export const memoryChallenges: MemoryChallenge[] = [
   },
   {
     id: 5,
-    difficultyLabel: "Avancada",
+    difficultyLabel: "Avançada",
     nome: "Cores em foco",
     nomeInfantil: "Cores brincantes",
     variacoes: [
@@ -102,13 +102,13 @@ export const attentionChallenges: AttentionChallenge[] = [
     variacoes: [
       {
         instrucao: "Clique apenas nas letras T antes do tempo acabar.",
-        instrucaoInfantil: "Ache so as letras T. Toque nelas bem rapido.",
+        instrucaoInfantil: "Ache só as letras T. Toque nelas bem rápido.",
         alvo: "T",
         grade: ["T", "O", "Q", "T", "D", "T", "Q", "O", "T", "D", "T", "O"],
         gradeInfantil: ["T", "O", "T", "D", "Q", "T", "O", "T"],
       },
       {
-        instrucao: "Encontre somente os simbolos T nesta grade.",
+        instrucao: "Encontre somente os símbolos T nesta grade.",
         instrucaoInfantil: "Procure as letras T escondidas nesta rodada.",
         alvo: "T",
         grade: ["P", "T", "R", "B", "T", "N", "T", "C", "L", "T", "V", "T"],
@@ -133,7 +133,7 @@ export const attentionChallenges: AttentionChallenge[] = [
     variacoes: [
       {
         instrucao: "Encontre somente as letras A na grade.",
-        instrucaoInfantil: "Toque so nas letras A.",
+        instrucaoInfantil: "Toque só nas letras A.",
         alvo: "A",
         grade: ["A", "M", "A", "R", "V", "A", "N", "X", "A", "H", "K", "A"],
         gradeInfantil: ["A", "M", "A", "R", "A", "N", "X", "A"],
@@ -159,26 +159,26 @@ export const attentionChallenges: AttentionChallenge[] = [
   {
     id: 3,
     difficultyLabel: "Menos facil",
-    nome: "Atencao seletiva",
-    nomeInfantil: "Missao do numero 7",
+    nome: "Atenção seletiva",
+    nomeInfantil: "Missao do número 7",
     variacoes: [
       {
-        instrucao: "Selecione apenas os numeros 7 e ignore os demais.",
-        instrucaoInfantil: "Clique so no numero 7.",
+        instrucao: "Selecione apenas os números 7 e ignore os demais.",
+        instrucaoInfantil: "Clique só no número 7.",
         alvo: "7",
         grade: ["7", "1", "4", "7", "9", "2", "7", "3", "7", "6", "8", "7"],
         gradeInfantil: ["7", "1", "7", "2", "7", "3", "6", "7"],
       },
       {
-        instrucao: "Encontre todos os numeros 7 nesta grade variada.",
-        instrucaoInfantil: "Os numeros 7 mudaram de lugar. Ache todos.",
+        instrucao: "Encontre todos os números 7 nesta grade variada.",
+        instrucaoInfantil: "Os números 7 mudaram de lugar. Ache todos.",
         alvo: "7",
         grade: ["5", "7", "2", "7", "4", "8", "7", "0", "7", "6", "7", "3"],
         gradeInfantil: ["5", "7", "2", "7", "8", "7", "0", "7"],
       },
       {
-        instrucao: "Seu foco agora e clicar apenas nos 7 o mais rapido possivel.",
-        instrucaoInfantil: "Va rapido, mas toque so no 7.",
+        instrucao: "Seu foco agora é clicar apenas nos 7 o mais rápido possível.",
+        instrucaoInfantil: "Va rápido, mas toque só no 7.",
         alvo: "7",
         grade: ["7", "9", "7", "2", "1", "7", "5", "7", "4", "7", "8", "6"],
         gradeInfantil: ["7", "9", "7", "2", "7", "5", "7", "4"],
@@ -194,8 +194,8 @@ export const exclusiveChallenges: ExclusiveChallenge[] = [
     id: 1,
     audience: "infantil",
     difficultyLabel: "Muito facil",
-    nome: "Parada da Sequencia",
-    descricao: "Veja a sequencia de figuras-palavra e toque na mesma ordem.",
+    nome: "Parada da Sequência",
+    descricao: "Veja a sequência de figuras-palavra e toque na mesma ordem.",
     minimoParaConcluir: 3,
     variacoes: [
       {
@@ -221,19 +221,19 @@ export const exclusiveChallenges: ExclusiveChallenge[] = [
   {
     id: 2,
     audience: "adolescente",
-    difficultyLabel: "Intermediaria",
-    nome: "Codigo Relampago",
-    descricao: "Decore a sequencia de codigos curtos e reconstrua na ordem correta.",
+    difficultyLabel: "Intermediária",
+    nome: "Código Relampago",
+    descricao: "Decore a sequência de códigos curtos e reconstrua na ordem correta.",
     minimoParaConcluir: 4,
     variacoes: [
       {
-        prompt: "Memorize a ordem dos codigos e monte novamente.",
+        prompt: "Memorize a ordem dos códigos e monte novamente.",
         sequence: ["A7", "K2", "M9", "R4"],
         revealSeconds: 6,
         options: ["A7", "K2", "M9", "R4", "Q8", "L3"],
       },
       {
-        prompt: "Os codigos mudaram. Tente manter foco e velocidade.",
+        prompt: "Os códigos mudaram. Tente manter foco e velocidade.",
         sequence: ["T5", "B1", "N6", "Z3"],
         revealSeconds: 6,
         options: ["T5", "B1", "N6", "Z3", "Y4", "H2"],
@@ -249,13 +249,13 @@ export const exclusiveChallenges: ExclusiveChallenge[] = [
   {
     id: 3,
     audience: "adulto",
-    difficultyLabel: "Avancada",
-    nome: "Sequencia Executiva",
-    descricao: "Observe blocos mistos de letras e numeros e reproduza sem repetir erros.",
+    difficultyLabel: "Avançada",
+    nome: "Sequência Executiva",
+    descricao: "Observe blocos mistos de letras e números e reproduza sem repetir erros.",
     minimoParaConcluir: 5,
     variacoes: [
       {
-        prompt: "Memorize a sequencia de identificadores curtos.",
+        prompt: "Memorize a sequência de identificadores curtos.",
         sequence: ["AX3", "Q7", "LM2", "R5", "TN8"],
         revealSeconds: 6,
         options: ["AX3", "Q7", "LM2", "R5", "TN8", "B4", "K9"],
@@ -267,7 +267,7 @@ export const exclusiveChallenges: ExclusiveChallenge[] = [
         options: ["M4", "PX8", "A2", "CZ7", "L9", "T3", "H6"],
       },
       {
-        prompt: "Ultima rodada: mais compressao de tempo e mais distractores.",
+        prompt: "Última rodada: mais compressao de tempo e mais distratores.",
         sequence: ["VR1", "D8", "K5", "NA3", "Q2", "T7"],
         revealSeconds: 5,
         options: ["VR1", "D8", "K5", "NA3", "Q2", "T7", "X4", "B9"],
@@ -293,14 +293,14 @@ export const spatialChallenges: SpatialChallenge[] = [
         options: ["cima", "baixo", "esquerda", "direita"],
       },
       {
-        prompt: "A rota mudou. Mantenha a referencia espacial e repita.",
+        prompt: "A rota mudou. Mantenha a referência espacial e repita.",
         promptInfantil: "O caminho mudou. Repita as setas certinhas.",
         sequence: ["esquerda", "cima", "direita", "baixo"],
         revealSeconds: 6,
         options: ["cima", "baixo", "esquerda", "direita"],
       },
       {
-        prompt: "Nova rota com curvas mais rapidas.",
+        prompt: "Nova rota com curvas mais rápidas.",
         promptInfantil: "Agora o robo virou mais vezes. Tente de novo.",
         sequence: ["cima", "cima", "esquerda", "baixo", "direita"],
         revealSeconds: 7,
@@ -317,7 +317,7 @@ export const spatialChallenges: SpatialChallenge[] = [
     tempoResposta: 16,
     variacoes: [
       {
-        prompt: "Memorize a sequencia de deslocamentos no mapa.",
+        prompt: "Memorize a sequência de deslocamentos no mapa.",
         promptInfantil: "Guarde o caminho do mapa e monte depois.",
         sequence: ["direita", "cima", "cima", "esquerda", "baixo"],
         revealSeconds: 6,
@@ -325,13 +325,13 @@ export const spatialChallenges: SpatialChallenge[] = [
       },
       {
         prompt: "Reproduza o trajeto sem inverter lados.",
-        promptInfantil: "Cuidado para nao trocar esquerda com direita.",
+        promptInfantil: "Cuidado para não trocar esquerda com direita.",
         sequence: ["baixo", "direita", "cima", "direita", "baixo"],
         revealSeconds: 6,
         options: ["cima", "baixo", "esquerda", "direita"],
       },
       {
-        prompt: "Mais uma rota para desafiar sua orientacao espacial.",
+        prompt: "Mais uma rota para desafiar sua orientação espacial.",
         promptInfantil: "Novo caminho no mapa. Siga a ordem certa.",
         sequence: ["esquerda", "baixo", "baixo", "direita", "cima"],
         revealSeconds: 7,
@@ -355,15 +355,15 @@ export const spatialChallenges: SpatialChallenge[] = [
         options: ["cima", "baixo", "esquerda", "direita"],
       },
       {
-        prompt: "Agora a rota exige mais controle de direcao.",
+        prompt: "Agora a rota exige mais controle de direção.",
         promptInfantil: "Mais curvas. Aperte as setas com calma.",
         sequence: ["direita", "direita", "cima", "esquerda", "baixo", "baixo"],
         revealSeconds: 7,
         options: ["cima", "baixo", "esquerda", "direita"],
       },
       {
-        prompt: "Ultima rota: mais longa e com menos margem de erro.",
-        promptInfantil: "Ultimo caminho. Tente lembrar tudo na ordem.",
+        prompt: "Última rota: mais longa e com menos margem de erro.",
+        promptInfantil: "Último caminho. Tente lembrar tudo na ordem.",
         sequence: ["esquerda", "cima", "direita", "direita", "baixo", "esquerda"],
         revealSeconds: 7,
         options: ["cima", "baixo", "esquerda", "direita"],

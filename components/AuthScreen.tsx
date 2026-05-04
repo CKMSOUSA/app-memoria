@@ -22,7 +22,7 @@ type AuthScreenProps = {
 
 const registrationRoleOptions: Array<{ value: Exclude<Usuario["role"], "admin">; label: string }> = [
   { value: "aluno", label: "Aluno" },
-  { value: "responsavel", label: "Responsavel" },
+  { value: "responsavel", label: "Responsável" },
   { value: "professor", label: "Professor" },
 ];
 
@@ -76,7 +76,7 @@ export function AuthScreen({
 
       const idadeNumero = Number(idade);
       if (!Number.isInteger(idadeNumero) || idadeNumero < 6 || idadeNumero > 99) {
-        setMensagem("Informe uma idade valida entre 6 e 99 anos.");
+        setMensagem("Informe uma idade válida entre 6 e 99 anos.");
         return;
       }
 
@@ -101,7 +101,7 @@ export function AuthScreen({
             <p className="eyebrow">Treino cognitivo</p>
             <h1>{titulo}</h1>
             <p className="muted">
-              Treine memoria, atencao, comparacao e orientacao espacial com fases curtas, progressivas e guiadas.
+              Treine memória, atenção, comparação e orientação espacial com fases curtas, progressivas e guiadas.
             </p>
           </div>
           <div className="hero-badge">Base pronta para backend online</div>
@@ -111,7 +111,7 @@ export function AuthScreen({
           <label className="field">
             <span>Nome</span>
             <input
-              placeholder="Como voce quer aparecer no app"
+              placeholder="Como você quer aparecer no app"
               value={nome}
               onChange={(event) => {
                 resetMessage();
@@ -125,7 +125,7 @@ export function AuthScreen({
           <label className="field">
             <span>Email</span>
             <input
-              placeholder="voce@email.com"
+              placeholder="você@email.com"
               value={email}
               onChange={(event) => {
                 resetMessage();
@@ -234,17 +234,17 @@ export function AuthScreen({
 
         {tela === "recuperar" && (
           <button className="btn btn-primary" onClick={handleRecover} disabled={!email}>
-            Simular recuperacao
+            Simular recuperação
           </button>
         )}
 
         {tela === "adminAcesso" && (
           <>
             <p className="notice notice-ok">
-              Use esta entrada apenas para abrir a area administrativa com o codigo exclusivo de liberacao.
+              Use esta entrada apenas para abrir a área administrativa com o código exclusivo de liberação.
             </p>
             <button className="btn btn-primary" onClick={() => onChangeScreen("adminConfirm")}>
-              Continuar para codigo admin
+              Continuar para código admin
             </button>
           </>
         )}
@@ -277,7 +277,7 @@ export function AuthScreen({
 
         <div className="demo-box">
           <strong>Conta de teste</strong>
-          <span>Nome: Usuario teste</span>
+          <span>Nome: Usuário teste</span>
           <span>Email: user@email.com</span>
           <span>Senha: 123456</span>
           <span>Perfil: admin</span>

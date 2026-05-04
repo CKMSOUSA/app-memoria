@@ -9,8 +9,8 @@ import type {
 export const advancedMemoryChallenges: MemoryChallenge[] = [
   {
     id: 101,
-    difficultyLabel: "Muito dificil",
-    nome: "Interferencia semantica",
+    difficultyLabel: "Muito difícil",
+    nome: "Interferencia semântica",
     variacoes: [
       ["carta", "carta", "mapa", "marco", "marca", "marte", "marcha", "marfim"],
       ["prato", "trato", "trapo", "praga", "prazo", "prumo", "prisma", "prado"],
@@ -21,7 +21,7 @@ export const advancedMemoryChallenges: MemoryChallenge[] = [
   },
   {
     id: 102,
-    difficultyLabel: "Extremamente dificil",
+    difficultyLabel: "Extremamente difícil",
     nome: "Blocos cruzados",
     variacoes: [
       ["AX7", "BQ2", "CM9", "DN4", "EP6", "FR1", "GS8", "HT3", "IV5"],
@@ -34,7 +34,7 @@ export const advancedMemoryChallenges: MemoryChallenge[] = [
   {
     id: 103,
     difficultyLabel: "Elite cognitiva",
-    nome: "Sequencia encadeada",
+    nome: "Sequência encadeada",
     variacoes: [
       ["norte", "ponte", "fonte", "fronte", "monte", "conte", "corte", "sorte", "suporte", "aporte"],
       ["vetor", "setor", "motor", "mentor", "menor", "tenor", "vapor", "valor", "calor", "cobor"],
@@ -48,21 +48,21 @@ export const advancedMemoryChallenges: MemoryChallenge[] = [
 export const advancedAttentionChallenges: AttentionChallenge[] = [
   {
     id: 101,
-    difficultyLabel: "Muito dificil",
-    nome: "Filtro de simbolos mistos",
+    difficultyLabel: "Muito difícil",
+    nome: "Filtro de símbolos mistos",
     variacoes: [
       {
-        instrucao: "Clique apenas no simbolo AX entre letras e codigos muito parecidos.",
+        instrucao: "Clique apenas no símbolo AX entre letras e códigos muito parecidos.",
         alvo: "AX",
         grade: ["AX", "AХ", "XA", "AX", "A1", "XA", "AX", "AK", "AX", "A-X", "AX", "A8", "AX", "AZ", "XA", "AX"],
       },
       {
-        instrucao: "Clique apenas no simbolo R7 sem se distrair com inversoes e trocas.",
+        instrucao: "Clique apenas no símbolo R7 sem se distrair com inversões e trocas.",
         alvo: "R7",
         grade: ["R7", "R1", "7R", "R7", "RT", "R7", "P7", "R7", "RZ", "R7", "17", "R7", "TR", "R7", "R?", "7R"],
       },
       {
-        instrucao: "Clique apenas no simbolo KQ em uma grade de alta interferencia visual.",
+        instrucao: "Clique apenas no símbolo KQ em uma grade de alta interferencia visual.",
         alvo: "KQ",
         grade: ["KQ", "KO", "QK", "KQ", "KG", "KQ", "KR", "KQ", "XQ", "QK", "KQ", "K0", "KQ", "KC", "QK", "KQ"],
       },
@@ -72,7 +72,7 @@ export const advancedAttentionChallenges: AttentionChallenge[] = [
   },
   {
     id: 102,
-    difficultyLabel: "Extremamente dificil",
+    difficultyLabel: "Extremamente difícil",
     nome: "Busca densa com distratores",
     variacoes: [
       {
@@ -97,7 +97,7 @@ export const advancedAttentionChallenges: AttentionChallenge[] = [
   {
     id: 103,
     difficultyLabel: "Elite cognitiva",
-    nome: "Atencao seletiva maxima",
+    nome: "Atenção seletiva máxima",
     variacoes: [
       {
         instrucao: "Clique apenas em VT2. Os distratores alternam ordem, traço e dígitos próximos.",
@@ -123,25 +123,25 @@ export const advancedAttentionChallenges: AttentionChallenge[] = [
 export const advancedComparisonChallenges: ComparisonChallenge[] = [
   {
     id: 101,
-    difficultyLabel: "Muito dificil",
-    nome: "Comparacao multi-criterio",
+    difficultyLabel: "Muito difícil",
+    nome: "Comparação multi-critério",
     variacoes: [
       {
-        prompt: "Escolha a opcao com maior valor total, considerando a soma de todos os termos.",
+        prompt: "Escolha a opção com maior valor total, considerando a soma de todos os termos.",
         rounds: [
-          { left: "17 + 8 + 4", right: "13 + 9 + 8", correct: "right", explanation: "30 e maior que 29." },
-          { left: "22 + 7 + 5", right: "19 + 9 + 7", correct: "right", explanation: "35 e maior que 34." },
-          { left: "14 + 14 + 3", right: "12 + 11 + 9", correct: "right", explanation: "32 e maior que 31." },
-          { left: "25 + 6 + 2", right: "18 + 8 + 7", correct: "left", explanation: "33 e maior que 33? Nao. Aqui empata, mas a regra secundaria favorece o maior primeiro termo, 25." },
+          { left: "17 + 8 + 4", right: "13 + 9 + 8", correct: "right", explanation: "30 é maior que 29." },
+          { left: "22 + 7 + 5", right: "19 + 9 + 7", correct: "right", explanation: "35 é maior que 34." },
+          { left: "14 + 14 + 3", right: "12 + 11 + 9", correct: "right", explanation: "32 é maior que 31." },
+          { left: "25 + 6 + 2", right: "18 + 8 + 7", correct: "left", explanation: "33 é maior que 33? Não. Aqui empata, mas a regra secundária favorece o maior primeiro termo, 25." },
         ],
       },
       {
-        prompt: "Escolha a opcao cuja cadeia alfabetica tem a palavra que viria por ultimo no dicionario.",
+        prompt: "Escolha a opção cuja cadeia alfabetica tem a palavra que viria por último no dicionario.",
         rounds: [
           { left: "canto", right: "canudo", correct: "right", explanation: "\"canudo\" vem depois de \"canto\"." },
           { left: "trama", right: "trapo", correct: "right", explanation: "\"trapo\" vem depois de \"trama\"." },
           { left: "vetor", right: "veste", correct: "right", explanation: "\"veste\" vem depois de \"vetor\"." },
-          { left: "luz", right: "luso", correct: "right", explanation: "\"luso\" vem depois de \"luz\" porque 's' antecede fim de palavra? Nao. Em ordem lexicografica, a palavra curta vem antes; logo \"luso\" vem depois." },
+          { left: "luz", right: "luso", correct: "right", explanation: "\"luso\" vem depois de \"luz\" porque 's' antecede fim de palavra? Não. Em ordem lexicográfica, a palavra curta vem antes; logo \"luso\" vem depois." },
         ],
       },
     ],
@@ -150,16 +150,16 @@ export const advancedComparisonChallenges: ComparisonChallenge[] = [
   },
   {
     id: 102,
-    difficultyLabel: "Extremamente dificil",
-    nome: "Decisao com duas regras",
+    difficultyLabel: "Extremamente difícil",
+    nome: "Decisão com duas regras",
     variacoes: [
       {
-        prompt: "Escolha a opcao com a menor media aritmetica.",
+        prompt: "Escolha a opção com a menor média aritmetica.",
         rounds: [
-          { left: "18, 21, 24", right: "16, 23, 20", correct: "right", explanation: "A media da direita e 19,67; a da esquerda e 21." },
-          { left: "9, 15, 27", right: "12, 18, 18", correct: "right", explanation: "16 e menor que 17." },
-          { left: "40, 10, 14", right: "22, 20, 18", correct: "right", explanation: "20 e menor que 21,33." },
-          { left: "7, 14, 28", right: "10, 12, 20", correct: "right", explanation: "14 e menor que 16,33." },
+          { left: "18, 21, 24", right: "16, 23, 20", correct: "right", explanation: "A média da direita é 19,67; a da esquerda é 21." },
+          { left: "9, 15, 27", right: "12, 18, 18", correct: "right", explanation: "16 é menor que 17." },
+          { left: "40, 10, 14", right: "22, 20, 18", correct: "right", explanation: "20 é menor que 21,33." },
+          { left: "7, 14, 28", right: "10, 12, 20", correct: "right", explanation: "14 é menor que 16,33." },
         ],
       },
       {
@@ -178,10 +178,10 @@ export const advancedComparisonChallenges: ComparisonChallenge[] = [
   {
     id: 103,
     difficultyLabel: "Elite cognitiva",
-    nome: "Comparacao abstrata",
+    nome: "Comparação abstrata",
     variacoes: [
       {
-        prompt: "Escolha a opcao com maior crescimento proporcional entre o primeiro e o ultimo termo.",
+        prompt: "Escolha a opção com maior crescimento proporcional entre o primeiro e o último termo.",
         rounds: [
           { left: "4 -> 20", right: "6 -> 24", correct: "left", explanation: "20/4 = 5, maior que 24/6 = 4." },
           { left: "3 -> 18", right: "5 -> 20", correct: "left", explanation: "18/3 = 6, maior que 20/5 = 4." },
@@ -190,10 +190,10 @@ export const advancedComparisonChallenges: ComparisonChallenge[] = [
         ],
       },
       {
-        prompt: "Escolha a opcao cuja sequencia tem mais alternancias de categoria.",
+        prompt: "Escolha a opção cuja sequência tem mais alternancias de categoria.",
         rounds: [
           { left: "vogal, consoante, vogal, consoante", right: "vogal, vogal, consoante, consoante", correct: "left", explanation: "A esquerda alterna em todos os passos." },
-          { left: "par, impar, par, impar", right: "par, par, impar, impar", correct: "left", explanation: "A esquerda alterna mais." },
+          { left: "par, ímpar, par, ímpar", right: "par, par, ímpar, ímpar", correct: "left", explanation: "A esquerda alterna mais." },
           { left: "frio, quente, frio, quente", right: "frio, frio, quente, quente", correct: "left", explanation: "A esquerda alterna em todos os passos." },
           { left: "azul, verde, azul, verde", right: "azul, azul, verde, verde", correct: "left", explanation: "A esquerda alterna mais categorias." },
         ],
@@ -207,7 +207,7 @@ export const advancedComparisonChallenges: ComparisonChallenge[] = [
 export const advancedSpatialChallenges: SpatialChallenge[] = [
   {
     id: 101,
-    difficultyLabel: "Muito dificil",
+    difficultyLabel: "Muito difícil",
     nome: "Rota longa com retorno",
     variacoes: [
       { prompt: "Observe a rota completa e reconstrua exatamente cada mudança de direção.", sequence: ["cima", "cima", "direita", "baixo", "direita", "cima", "esquerda", "baixo"], revealSeconds: 7, options: ["cima", "baixo", "esquerda", "direita"] },
@@ -219,7 +219,7 @@ export const advancedSpatialChallenges: SpatialChallenge[] = [
   },
   {
     id: 102,
-    difficultyLabel: "Extremamente dificil",
+    difficultyLabel: "Extremamente difícil",
     nome: "Mapa com interferencia",
     variacoes: [
       { prompt: "Reconstrua uma rota de alta densidade sem perder a ordem.", sequence: ["cima", "direita", "direita", "baixo", "esquerda", "cima", "cima", "direita", "baixo"], revealSeconds: 6, options: ["cima", "baixo", "esquerda", "direita"] },
@@ -232,7 +232,7 @@ export const advancedSpatialChallenges: SpatialChallenge[] = [
   {
     id: 103,
     difficultyLabel: "Elite cognitiva",
-    nome: "Sequencia espacial extrema",
+    nome: "Sequência espacial extrema",
     variacoes: [
       { prompt: "Memorize uma rota extensa com múltiplos retornos e mudanças de eixo.", sequence: ["cima", "direita", "cima", "esquerda", "baixo", "direita", "direita", "cima", "esquerda", "baixo"], revealSeconds: 5, options: ["cima", "baixo", "esquerda", "direita"] },
       { prompt: "Observe, retenha e reproduza uma rota longa sob tempo reduzido.", sequence: ["baixo", "baixo", "direita", "cima", "esquerda", "cima", "direita", "baixo", "direita", "cima"], revealSeconds: 5, options: ["cima", "baixo", "esquerda", "direita"] },
@@ -246,8 +246,8 @@ export const advancedSpatialChallenges: SpatialChallenge[] = [
 export const advancedLogicChallenges: LogicChallenge[] = [
   {
     id: 101,
-    difficultyLabel: "Muito dificil",
-    nome: "Padroes alternados",
+    difficultyLabel: "Muito difícil",
+    nome: "Padrões alternados",
     variacoes: [
       {
         prompt: "Descubra a regra composta e escolha o próximo termo correto.",
@@ -273,8 +273,8 @@ export const advancedLogicChallenges: LogicChallenge[] = [
   },
   {
     id: 102,
-    difficultyLabel: "Extremamente dificil",
-    nome: "Raciocinio serial composto",
+    difficultyLabel: "Extremamente difícil",
+    nome: "Raciocínio serial composto",
     variacoes: [
       {
         prompt: "As séries combinam progressão, alternância e compressão de padrão.",
@@ -301,7 +301,7 @@ export const advancedLogicChallenges: LogicChallenge[] = [
   {
     id: 103,
     difficultyLabel: "Elite cognitiva",
-    nome: "Inferencia de alto nivel",
+    nome: "Inferencia de alto nível",
     variacoes: [
       {
         prompt: "As séries exigem manter duas ou três regras ativas ao mesmo tempo.",

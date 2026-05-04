@@ -53,12 +53,12 @@ type AdminPanelOption = "visao-geral" | "usuarios" | "ajuda" | "rotinas" | "audi
 const userStatusLabels: Record<Usuario["status"], string> = {
   ativo: "Ativo",
   bloqueado: "Bloqueado",
-  excluido: "Excluido",
+  excluido: "Excluído",
 };
 
 const userRoleLabels: Record<Usuario["role"], string> = {
   aluno: "Aluno",
-  responsavel: "Responsavel",
+  responsavel: "Responsável",
   professor: "Professor",
   admin: "Administrador",
 };
@@ -282,10 +282,10 @@ export function AdminScreen({
 
   const panelOptions: Array<{ id: AdminPanelOption; label: string; caption: string }> = [
     { id: "visao-geral", label: "Visao geral", caption: "Riscos, indicadores e rankings" },
-    { id: "usuarios", label: "Usuarios", caption: "Busca, bloqueio e acompanhamento" },
+    { id: "usuarios", label: "Usuários", caption: "Busca, bloqueio e acompanhamento" },
     { id: "ajuda", label: "Ajuda", caption: "Mensagens e respostas" },
-    { id: "rotinas", label: "Rotinas", caption: "Turmas, vinculos e prescricoes" },
-    { id: "auditoria", label: "Auditoria", caption: "Reset, historico e rastreio" },
+    { id: "rotinas", label: "Rotinas", caption: "Turmas, vínculos e prescrições" },
+    { id: "auditoria", label: "Auditoria", caption: "Reset, histórico e rastreio" },
   ];
 
   return (
@@ -329,7 +329,7 @@ export function AdminScreen({
               </button>
               <button type="button" className="admin-nav-button admin-nav-button-danger" onClick={onLogout}>
                 <strong>Sair</strong>
-                <span>Encerrar sessao administrativa</span>
+                <span>Encerrar sessão administrativa</span>
               </button>
             </div>
           </aside>
@@ -338,9 +338,9 @@ export function AdminScreen({
             <header className="game-header">
               <div>
                 <p className="eyebrow admin-area-title">Home administrativa</p>
-                <h1 className="admin-home-heading">Operacao central do aplicativo</h1>
+                <h1 className="admin-home-heading">Operação central do aplicativo</h1>
                 <p className="muted">
-                  Entrada dedicada para operacao, alertas criticos e acoes rapidas sem depender do dashboard do aluno.
+                  Entrada dedicada para operação, alertas críticos e ações rápidas sem depender do dashboard do aluno.
                 </p>
               </div>
               <div className="button-row">
@@ -370,7 +370,7 @@ export function AdminScreen({
                   disabled={resettingAllData}
                   onClick={async () => {
                     const confirmed = window.confirm(
-                      "Remover todos os usuarios nao administradores? Isso vai apagar contas, progresso, historico, pedidos, vinculos e demais dados associados, preservando apenas o administrativo.",
+                      "Remover todos os usuários não administradores? Isso vai apagar contas, progresso, histórico, pedidos, vínculos e demais dados associados, preservando apenas o administrativo.",
                     );
                     if (!confirmed) return;
 
@@ -387,7 +387,7 @@ export function AdminScreen({
                     }
                   }}
                 >
-                  {resettingAllData ? "Limpando usuarios..." : "Limpar usuarios nao admin"}
+                  {resettingAllData ? "Limpando usuários..." : "Limpar usuários não admin"}
                 </button>
               </div>
               <input
@@ -413,8 +413,8 @@ export function AdminScreen({
         <section className="panel admin-priority-panel">
           <div className="section-head">
             <div>
-              <h3>Alertas criticos no topo</h3>
-              <span className="small-muted">Itens que pedem acao primeiro</span>
+              <h3>Alertas críticos no topo</h3>
+              <span className="small-muted">Itens que pedem ação primeiro</span>
             </div>
             <span className="pill">{criticalAlerts.length} prioridade alta</span>
           </div>
@@ -442,7 +442,7 @@ export function AdminScreen({
 
         <section className="panel admin-quick-actions-panel">
           <div className="section-head">
-            <h3>Atalhos de acao rapida</h3>
+            <h3>Atalhos de ação rápida</h3>
             <span className="small-muted">Fluxos operacionais mais usados em um clique</span>
           </div>
           <div className="admin-quick-actions-grid">
@@ -456,8 +456,8 @@ export function AdminScreen({
                 openPanel("usuarios", usersSectionRef.current);
               }}
             >
-              <strong>Bloquear usuario</strong>
-              <span>{`${manageableActiveUsersCount} perfil(is) elegivel(is) para revisao`}</span>
+              <strong>Bloquear usuário</strong>
+              <span>{`${manageableActiveUsersCount} perfil(is) elegível(is) para revisão`}</span>
             </button>
             <button
               className="admin-quick-action admin-quick-action-info"
@@ -472,15 +472,15 @@ export function AdminScreen({
               <span>{`${openHelpRequestsCount} pedido(s) em aberto`}</span>
             </button>
             <button className="admin-quick-action admin-quick-action-neutral" type="button" onClick={handleExportAdminPdf}>
-              <strong>Exportar relatorio</strong>
-              <span>Gerar PDF consolidado com usuarios, ajuda e observacoes</span>
+              <strong>Exportar relatório</strong>
+              <span>Gerar PDF consolidado com usuários, ajuda e observações</span>
             </button>
             <button
               className="admin-quick-action admin-quick-action-danger"
               type="button"
               onClick={async () => {
                 const confirmed = window.confirm(
-                  "Remover todos os usuarios nao administradores? Isso vai apagar contas, progresso, historico, pedidos, vinculos e demais dados associados, preservando apenas o administrativo.",
+                  "Remover todos os usuários não administradores? Isso vai apagar contas, progresso, histórico, pedidos, vínculos e demais dados associados, preservando apenas o administrativo.",
                 );
                 if (!confirmed) return;
 
@@ -499,7 +499,7 @@ export function AdminScreen({
               }}
             >
               <strong>{resettingAllData ? "Resetando dados..." : "Resetar dados"}</strong>
-              <span>Limpar usuarios nao admin e registrar a acao na auditoria</span>
+              <span>Limpar usuários não admin e registrar a ação na auditoria</span>
             </button>
           </div>
         </section>
@@ -507,24 +507,24 @@ export function AdminScreen({
         {activePanel === "visao-geral" ? (
         <section className="stats-grid">
           <article className="stat-card">
-            <p className="small-muted">Usuarios monitorados</p>
+            <p className="small-muted">Usuários monitorados</p>
             <h3>{normalizedHistories.length}</h3>
             <p className="muted">Leitura local das contas cadastradas no app.</p>
           </article>
           <article className="stat-card">
-            <p className="small-muted">Sessoes registradas</p>
+            <p className="small-muted">Sessões registradas</p>
             <h3>{normalizedHistories.reduce((sum, item) => sum + item.history.length, 0)}</h3>
             <p className="muted">Cada rodada concluida gera um registro para relatorios.</p>
           </article>
           <article className="stat-card">
-            <p className="small-muted">Conclusoes totais</p>
+            <p className="small-muted">Conclusões totais</p>
             <h3>{normalizedHistories.reduce((sum, item) => sum + item.history.filter((entry) => entry.completed).length, 0)}</h3>
-            <p className="muted">Ajuda a acompanhar aderencia e evolucao geral.</p>
+            <p className="muted">Ajuda a acompanhar aderência e evolução geral.</p>
           </article>
           <article className="stat-card">
             <p className="small-muted">Pedidos de ajuda</p>
             <h3>{helpRequests.length}</h3>
-            <p className="muted">Duvidas registradas pelos usuarios dentro do app.</p>
+            <p className="muted">Dúvidas registradas pelos usuários dentro do app.</p>
           </article>
           <article className="stat-card">
             <p className="small-muted">Rotinas agendadas</p>
@@ -532,9 +532,9 @@ export function AdminScreen({
             <p className="muted">Lembretes e agendas de treino ativos no produto.</p>
           </article>
           <article className="stat-card">
-            <p className="small-muted">Sessoes prescritas</p>
+            <p className="small-muted">Sessões prescritas</p>
             <h3>{prescriptions.length}</h3>
-            <p className="muted">Blocos orientados por professor ou responsavel.</p>
+            <p className="muted">Blocos orientados por professor ou responsável.</p>
           </article>
         </section>
         ) : null}
@@ -542,8 +542,8 @@ export function AdminScreen({
         {activePanel === "visao-geral" ? (
         <section className="panel admin-status-panel">
           <div className="section-head">
-            <h3>Status dos usuarios</h3>
-            <span className="small-muted">Controle rapido de acesso ao aplicativo</span>
+            <h3>Status dos usuários</h3>
+            <span className="small-muted">Controle rápido de acesso ao aplicativo</span>
           </div>
           <div className="admin-status-grid">
             <div className="admin-status-card admin-status-card-active">
@@ -566,7 +566,7 @@ export function AdminScreen({
         <section className="panel admin-alerts-panel">
           <div className="section-head">
             <h3>Alertas inteligentes</h3>
-            <span className="small-muted">{adminAlerts.length} alerta(s) priorizados para acao</span>
+            <span className="small-muted">{adminAlerts.length} alerta(s) priorizados para ação</span>
           </div>
           {adminAlerts.length > 0 ? (
             <div className="admin-alert-grid">
@@ -577,7 +577,7 @@ export function AdminScreen({
                       <h3>{alert.title}</h3>
                       <p className="small-muted">{alert.name}</p>
                     </div>
-                    <span className="pill">{alert.severity === "alta" ? "Alta" : alert.severity === "media" ? "Media" : "Baixa"}</span>
+                    <span className="pill">{alert.severity === "alta" ? "Alta" : alert.severity === "media" ? "Média" : "Baixa"}</span>
                   </div>
                   <p className="muted">{alert.summary}</p>
                   <p className="small-muted">{alert.recommendation}</p>
@@ -585,7 +585,7 @@ export function AdminScreen({
               ))}
             </div>
           ) : (
-            <p className="small-muted">Nenhum alerta critico agora. O grupo esta sem sinais fortes de abandono ou queda.</p>
+            <p className="small-muted">Nenhum alerta crítico agora. O grupo está sem sinais fortes de abandono ou queda.</p>
           )}
         </section>
         ) : null}
@@ -594,7 +594,7 @@ export function AdminScreen({
         <section className="panel">
           <div className="section-head">
             <h3>Rankings privados do produto</h3>
-            <span className="small-muted">Leitura consolidada por desempenho e evolucao</span>
+            <span className="small-muted">Leitura consolidada por desempenho e evolução</span>
           </div>
           <div className="admin-alert-grid">
             <article className="admin-class-card">
@@ -610,7 +610,7 @@ export function AdminScreen({
               </div>
             </article>
             <article className="admin-class-card">
-              <h3>Evolucao recente</h3>
+              <h3>Evolução recente</h3>
               <div className="ranking-list">
                 {evolutionRanking.map((entry, index) => (
                   <div key={entry.email} className="ranking-item">
@@ -629,7 +629,7 @@ export function AdminScreen({
         <section className="panel admin-toolbar">
           <div className="section-head">
             <h3>Busca e filtros</h3>
-            <span className="small-muted">Refine usuarios, sessoes e duvidas</span>
+            <span className="small-muted">Refine usuários, sessões e dúvidas</span>
           </div>
 
           <div className="admin-toolbar-grid">
@@ -638,12 +638,12 @@ export function AdminScreen({
               <input
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
-                placeholder="Ex.: Ana, Turma Alfa, professor, memoria ou fase 3"
+                placeholder="Ex.: Ana, Turma Alfa, professor, memória ou fase 3"
               />
             </label>
 
             <label className="field">
-              <span>Status do usuario</span>
+              <span>Status do usuário</span>
               <select
                 className="text-input"
                 value={userStatusFilter}
@@ -652,7 +652,7 @@ export function AdminScreen({
                 <option value="todos">Todos</option>
                 <option value="ativo">Ativos</option>
                 <option value="bloqueado">Bloqueados</option>
-                <option value="excluido">Excluidos</option>
+                <option value="excluido">Excluídos</option>
               </select>
             </label>
 
@@ -665,7 +665,7 @@ export function AdminScreen({
               >
                 <option value="todos">Todos</option>
                 <option value="aluno">Alunos</option>
-                <option value="responsavel">Responsaveis</option>
+                <option value="responsavel">Responsáveis</option>
                 <option value="professor">Professores</option>
                 <option value="admin">Administradores</option>
               </select>
@@ -695,21 +695,21 @@ export function AdminScreen({
             </label>
 
             <label className="field">
-              <span>Nivel medio</span>
+              <span>Nível médio</span>
               <select className="text-input" value={levelFilter} onChange={(event) => setLevelFilter(event.target.value as typeof levelFilter)}>
                 <option value="todos">Todos</option>
                 <option value="iniciante">Iniciante</option>
                 <option value="intermediario">Intermediario</option>
-                <option value="avancado">Avancado</option>
+                <option value="avancado">Avançado</option>
               </select>
             </label>
 
             <label className="field">
-              <span>Tendencia</span>
+              <span>Tendência</span>
               <select className="text-input" value={trendFilter} onChange={(event) => setTrendFilter(event.target.value as typeof trendFilter)}>
                 <option value="todas">Todas</option>
                 <option value="subindo">Subindo</option>
-                <option value="estavel">Estavel</option>
+                <option value="estavel">Estável</option>
                 <option value="caindo">Caindo</option>
               </select>
             </label>
@@ -734,7 +734,7 @@ export function AdminScreen({
         <section className="panel">
           <div className="section-head">
             <h3>Painel de adesao</h3>
-            <span className="small-muted">Leitura de frequencia, risco e abandono</span>
+            <span className="small-muted">Leitura de frequência, risco e abandono</span>
           </div>
           <div className="admin-status-grid">
             <div className="admin-status-card admin-status-card-active">
@@ -743,7 +743,7 @@ export function AdminScreen({
             </div>
             <div className="admin-status-card admin-status-card-blocked">
               <strong>{adherencePanel.attention}</strong>
-              <span>Precisam atencao</span>
+              <span>Precisam atenção</span>
             </div>
             <div className="admin-status-card admin-status-card-deleted">
               <strong>{adherencePanel.inactive}</strong>
@@ -765,12 +765,12 @@ export function AdminScreen({
         {activePanel === "rotinas" ? (
         <section className="panel">
           <div className="section-head">
-            <h3>Vinculos explicitos</h3>
-            <span className="small-muted">Conecte professor ou responsavel a alunos especificos</span>
+            <h3>Vínculos explícitos</h3>
+            <span className="small-muted">Conecte professor ou responsável a alunos especificos</span>
           </div>
           <div className="admin-toolbar-grid">
             <label className="field">
-              <span>Email do professor ou responsavel</span>
+              <span>Email do professor ou responsável</span>
               <input value={linkOwnerEmail} onChange={(event) => setLinkOwnerEmail(event.target.value)} placeholder="adulto@email.com" />
             </label>
             <label className="field">
@@ -778,10 +778,10 @@ export function AdminScreen({
               <input value={linkStudentEmail} onChange={(event) => setLinkStudentEmail(event.target.value)} placeholder="aluno@email.com" />
             </label>
             <label className="field">
-              <span>Tipo de vinculo</span>
+              <span>Tipo de vínculo</span>
               <select className="text-input" value={linkRelationship} onChange={(event) => setLinkRelationship(event.target.value as typeof linkRelationship)}>
                 <option value="professor">Professor</option>
-                <option value="responsavel">Responsavel</option>
+                <option value="responsavel">Responsável</option>
               </select>
             </label>
             <div className="field">
@@ -799,7 +799,7 @@ export function AdminScreen({
                   setLinkStudentEmail("");
                 }}
               >
-                Salvar vinculo
+                Salvar vínculo
               </button>
             </div>
           </div>
@@ -807,13 +807,13 @@ export function AdminScreen({
             {userLinks.length > 0 ? (
               userLinks.slice(0, 10).map((item) => (
                 <article key={item.id} className="admin-class-card">
-                  <h3>{item.relationship === "professor" ? "Professor" : "Responsavel"}</h3>
+                  <h3>{item.relationship === "professor" ? "Professor" : "Responsável"}</h3>
                   <p className="small-muted">{item.ownerEmail}</p>
                   <p className="muted">{`Aluno vinculado: ${item.studentEmail}`}</p>
                 </article>
               ))
             ) : (
-              <p className="small-muted">Ainda nao ha vinculos explicitos registrados.</p>
+              <p className="small-muted">Ainda não há vínculos explícitos registrados.</p>
             )}
           </div>
         </section>
@@ -846,7 +846,7 @@ export function AdminScreen({
                   <p className="small-muted">
                     {turma.latestActivity
                       ? `Ultima atividade registrada em ${new Date(turma.latestActivity).toLocaleDateString("pt-BR")}.`
-                      : "Ainda sem sessoes registradas nesta turma."}
+                      : "Ainda sem sessões registradas nesta turma."}
                   </p>
                 </article>
               ))}
@@ -898,11 +898,11 @@ export function AdminScreen({
                       <span>{user.pontos}</span>
                     </div>
                     <div className="phase-chip">
-                      <strong>Sessoes</strong>
+                      <strong>Sessões</strong>
                       <span>{summary.totalSessions}</span>
                     </div>
                     <div className="phase-chip">
-                      <strong>Media</strong>
+                      <strong>Média</strong>
                       <span>{summary.averageScore}</span>
                     </div>
                     <div className="phase-chip">
@@ -927,10 +927,10 @@ export function AdminScreen({
                       {updatingUserEmail === user.email
                         ? "Atualizando..."
                         : user.status === "excluido"
-                          ? "Usuario excluido"
+                          ? "Usuário excluído"
                         : user.status === "bloqueado"
-                          ? "Desbloquear usuario"
-                          : "Bloquear usuario"}
+                          ? "Desbloquear usuário"
+                          : "Bloquear usuário"}
                     </button>
                     <button
                       className="btn btn-secondary"
@@ -949,7 +949,7 @@ export function AdminScreen({
                         }
                       }}
                     >
-                      {user.status === "excluido" ? "Usuario excluido" : "Excluir usuario"}
+                      {user.status === "excluido" ? "Usuário excluído" : "Excluir usuário"}
                     </button>
                   </div>
 
@@ -964,7 +964,7 @@ export function AdminScreen({
                   </div>
 
                   <div className="admin-history">
-                    <strong>Ultimas sessoes</strong>
+                    <strong>Últimas sessões</strong>
                     {history.length > 0 ? (
                       history.slice(0, 4).map((entry) => (
                         <div key={entry.id} className="admin-history-item">
@@ -974,7 +974,7 @@ export function AdminScreen({
                         </div>
                       ))
                     ) : (
-                      <p className="small-muted">Ainda nao ha sessoes registradas para este usuario.</p>
+                      <p className="small-muted">Ainda não há sessões registradas para este usuário.</p>
                     )}
                   </div>
 
@@ -984,7 +984,7 @@ export function AdminScreen({
                       const savedObservation = getObservation(user.email, category);
                       return (
                         <label key={key} className="field field-compact">
-                          <span>{category === "clinica" ? "Observacao clinica" : "Observacao pedagogica"}</span>
+                          <span>{category === "clinica" ? "Observação clínica" : "Observação pedagógica"}</span>
                           <textarea
                             className="text-input admin-reply-input"
                             rows={4}
@@ -997,7 +997,7 @@ export function AdminScreen({
                             }
                             placeholder={
                               category === "clinica"
-                                ? "Registre sinais clinicos, adaptacoes ou pontos de atencao."
+                                ? "Registre sinais clínicos, adaptações ou pontos de atenção."
                                 : "Registre estrategias pedagogicas, resposta a atividade e proximos passos."
                             }
                           />
@@ -1028,7 +1028,7 @@ export function AdminScreen({
                               }
                             }}
                           >
-                            {savingObservationKey === key ? "Salvando..." : "Salvar observacao"}
+                            {savingObservationKey === key ? "Salvando..." : "Salvar observação"}
                           </button>
                         </label>
                       );
@@ -1045,7 +1045,7 @@ export function AdminScreen({
         {activePanel === "ajuda" ? (
         <section ref={helpSectionRef} className="panel">
           <div className="section-head">
-            <h3>Duvidas enviadas</h3>
+            <h3>Dúvidas enviadas</h3>
             <span className="small-muted">{filteredHelpRequests.length} item(ns) encontrado(s)</span>
           </div>
           <div className="admin-toolbar-grid">
@@ -1091,12 +1091,12 @@ export function AdminScreen({
                           [request.id]: event.target.value,
                         }))
                       }
-                      placeholder="Escreva uma orientacao curta para o usuario."
+                      placeholder="Escreva uma orientação curta para o usuário."
                     />
                   </label>
                   {request.adminReply ? (
                     <p className="admin-reply-preview">
-                      <strong>Ultima resposta enviada:</strong> {request.adminReply}
+                      <strong>Última resposta enviada:</strong> {request.adminReply}
                     </p>
                   ) : null}
                   <div className="button-row">
@@ -1126,7 +1126,7 @@ export function AdminScreen({
                 </article>
               ))
             ) : (
-              <p className="small-muted">Nenhuma duvida corresponde aos filtros atuais.</p>
+              <p className="small-muted">Nenhuma dúvida corresponde aos filtros atuais.</p>
             )}
           </div>
         </section>
@@ -1135,7 +1135,7 @@ export function AdminScreen({
         {activePanel === "rotinas" ? (
         <section className="panel">
           <div className="section-head">
-            <h3>Agenda e prescricoes do produto</h3>
+            <h3>Agenda e prescrições do produto</h3>
             <span className="small-muted">{`${reminders.length} rotina(s) e ${prescriptions.length} sessao(oes) prescrita(s)`}</span>
           </div>
           <div className="admin-alert-grid">
@@ -1150,13 +1150,13 @@ export function AdminScreen({
               )}
             </article>
             <article className="admin-class-card">
-              <h3>Sessoes prescritas</h3>
+              <h3>Sessões prescritas</h3>
               {prescriptions.length > 0 ? (
                 prescriptions.slice(0, 8).map((item) => (
                   <p key={item.id} className="small-muted">{`${item.title} · ${item.challengeName} · ${item.status} · ${item.assignedByName}`}</p>
                 ))
               ) : (
-                <p className="small-muted">Ainda sem sessoes prescritas.</p>
+                <p className="small-muted">Ainda sem sessões prescritas.</p>
               )}
             </article>
           </div>
@@ -1166,7 +1166,7 @@ export function AdminScreen({
         {activePanel === "auditoria" ? (
         <section ref={auditSectionRef} className="panel">
           <div className="section-head">
-            <h3>Log de acoes administrativas</h3>
+            <h3>Log de ações administrativas</h3>
             <span className="small-muted">{auditLog.length} registro(s) recentes</span>
           </div>
           <div className="faq-list">
@@ -1183,7 +1183,7 @@ export function AdminScreen({
                 </article>
               ))
             ) : (
-              <p className="small-muted">{restoringBackup ? "Restaurando backup..." : "Ainda nao ha acoes auditadas."}</p>
+              <p className="small-muted">{restoringBackup ? "Restaurando backup..." : "Ainda não há ações auditadas."}</p>
             )}
           </div>
         </section>
