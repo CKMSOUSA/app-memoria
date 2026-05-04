@@ -33,6 +33,8 @@ import type { DataMode, ProgressState, SessionRecord, SessionMode, Tela, Usuario
 
 const repository = getAppRepository();
 
+type ManagedHistoryState = Array<{ user: Usuario; history: SessionRecord[]; progress?: ProgressState }>;
+
 function shouldShowOnboarding(user: Usuario | null) {
   return Boolean(user && user.role !== "admin" && !user.onboardingCompletedAt);
 }
@@ -46,6 +48,21 @@ function getHomeScreenForUser(user: Usuario | null, adminConfirmed = false): Tel
   return "dashboard";
 }
 
+async function loadManagedHistoriesForUser(activeUser: Usuario): Promise<ManagedHistoryState> {
+  if (activeUser.role !== "admin") return [];
+
+  const [allHistories, users] = await Promise.all([repository.loadAllHistories(), repository.listUsers()]);
+  const usersByEmail = new Map(users.map((item) => [item.email, item]));
+
+  return Promise.all(
+    allHistories.map(async (entry) => ({
+      user: usersByEmail.get(entry.user.email) ?? entry.user,
+      history: entry.history,
+      progress: await repository.loadProgress(entry.user.email),
+    })),
+  );
+}
+
 export default function Page() {
   const [tela, setTela] = useState<Tela>("login");
   const [usuario, setUsuario] = useState<Usuario | null>(null);
@@ -57,7 +74,7 @@ export default function Page() {
   const [prescriptions, setPrescriptions] = useState<PrescriptionSession[]>([]);
   const [userLinks, setUserLinks] = useState<UserLink[]>([]);
   const [auditLog, setAuditLog] = useState<AdminAuditEntry[]>([]);
-  const [adminHistories, setAdminHistories] = useState<Array<{ user: Usuario; history: SessionRecord[]; progress?: ProgressState }>>([]);
+  const [adminHistories, setAdminHistories] = useState<ManagedHistoryState>([]);
   const [adminConfirmed, setAdminConfirmed] = useState(false);
   const [adminAccessCode, setAdminAccessCode] = useState("");
   const [dataMode, setDataMode] = useState<DataMode>(repository.mode);
@@ -114,8 +131,10 @@ export default function Page() {
         } catch {
           setPrescriptions([]);
         }
+        let loadedUserLinks: UserLink[] = [];
         try {
-          setUserLinks(await repository.loadUserLinks());
+          loadedUserLinks = await repository.loadUserLinks();
+          setUserLinks(loadedUserLinks);
         } catch {
           setUserLinks([]);
         }
@@ -124,22 +143,10 @@ export default function Page() {
         } catch {
           setAuditLog([]);
         }
-        if (activeUser.role !== "aluno") {
-          try {
-            const allHistories = await repository.loadAllHistories();
-            const users = await repository.listUsers();
-            const usersByEmail = new Map(users.map((item) => [item.email, item]));
-            const enriched = await Promise.all(
-              allHistories.map(async (entry) => ({
-                user: usersByEmail.get(entry.user.email) ?? entry.user,
-                history: entry.history,
-                progress: await repository.loadProgress(entry.user.email),
-              })),
-            );
-            setAdminHistories(enriched);
-          } catch {
-            setAdminHistories([]);
-          }
+        try {
+          setAdminHistories(await loadManagedHistoriesForUser(activeUser));
+        } catch {
+          setAdminHistories([]);
         }
         setTela(getHomeScreenForUser(activeUser, false));
       }
@@ -231,8 +238,10 @@ export default function Page() {
     } catch {
       setPrescriptions([]);
     }
+    let loadedUserLinks: UserLink[] = [];
     try {
-      setUserLinks(await repository.loadUserLinks());
+      loadedUserLinks = await repository.loadUserLinks();
+      setUserLinks(loadedUserLinks);
     } catch {
       setUserLinks([]);
     }
@@ -241,22 +250,10 @@ export default function Page() {
     } catch {
       setAuditLog([]);
     }
-    if (activeUser.role !== "aluno") {
-      try {
-        const allHistories = await repository.loadAllHistories();
-        const users = await repository.listUsers();
-        const usersByEmail = new Map(users.map((item) => [item.email, item]));
-        const enriched = await Promise.all(
-          allHistories.map(async (entry) => ({
-            user: usersByEmail.get(entry.user.email) ?? entry.user,
-            history: entry.history,
-            progress: await repository.loadProgress(entry.user.email),
-          })),
-        );
-        setAdminHistories(enriched);
-      } catch {
-        setAdminHistories([]);
-      }
+    try {
+      setAdminHistories(await loadManagedHistoriesForUser(activeUser));
+    } catch {
+      setAdminHistories([]);
     }
     setTela(getHomeScreenForUser(activeUser, false));
     return activeUser;
@@ -371,22 +368,17 @@ export default function Page() {
     } catch {
       setPrescriptions([]);
     }
-    if (activeUser.role !== "aluno") {
-      try {
-        const allHistories = await repository.loadAllHistories();
-        const users = await repository.listUsers();
-        const usersByEmail = new Map(users.map((item) => [item.email, item]));
-        const enriched = await Promise.all(
-          allHistories.map(async (entry) => ({
-            user: usersByEmail.get(entry.user.email) ?? entry.user,
-            history: entry.history,
-            progress: await repository.loadProgress(entry.user.email),
-          })),
-        );
-        setAdminHistories(enriched);
-      } catch {
-        setAdminHistories([]);
-      }
+    let loadedUserLinks: UserLink[] = [];
+    try {
+      loadedUserLinks = await repository.loadUserLinks();
+      setUserLinks(loadedUserLinks);
+    } catch {
+      setUserLinks([]);
+    }
+    try {
+      setAdminHistories(await loadManagedHistoriesForUser(activeUser));
+    } catch {
+      setAdminHistories([]);
     }
   }
 

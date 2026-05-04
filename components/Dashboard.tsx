@@ -1,6 +1,6 @@
 "use client";
 
-import { type ReactNode, useState } from "react";
+import { type ReactNode, useEffect, useState } from "react";
 
 import { AppPreferencesPanel } from "@/components/AppPreferencesPanel";
 import { InternalAssistant } from "@/components/InternalAssistant";
@@ -65,6 +65,14 @@ import type {
 
 type TrailMode = "memoria" | "visual" | "atencao" | "comparacao" | "espacial" | "logica";
 type DashboardTab = "hoje" | "progresso" | "rotina" | "insights";
+
+const processReflectionPrompts = [
+  "Antes de responder, perceba: o que esta acontecendo primeiro, o que vem depois, e onde voce costuma se apressar?",
+  "Qual parte desta tarefa pede cuidado, mesmo parecendo simples?",
+  "Que pista voce pode observar antes de escolher uma resposta?",
+  "Se voce errar, que informacao o erro pode te dar sobre o proximo passo?",
+  "O que muda quando voce espera alguns segundos antes de agir?",
+];
 
 type DashboardProps = {
   usuario: Usuario;
@@ -1039,6 +1047,9 @@ export function Dashboard({
   }
   const [activeTrailTab, setActiveTrailTab] = useState<TrailMode>("memoria");
   const [activeDashboardTab, setActiveDashboardTab] = useState<DashboardTab>("hoje");
+  const [reflectionPromptIndex, setReflectionPromptIndex] = useState(0);
+  const [reflectionSecondsLeft, setReflectionSecondsLeft] = useState(20);
+  const [reflectionOpen, setReflectionOpen] = useState(false);
   const trailTabs: Array<{
     id: TrailMode;
     label: string;
@@ -1094,6 +1105,24 @@ export function Dashboard({
       caption: usuario.role === "admin" ? "Analises e operacao" : "Ajustes e leitura",
     },
   ];
+  const reflectionPrompt = processReflectionPrompts[reflectionPromptIndex] ?? processReflectionPrompts[0];
+  const reflectionComplete = reflectionOpen && reflectionSecondsLeft === 0;
+
+  useEffect(() => {
+    if (!reflectionOpen || reflectionSecondsLeft === 0) return undefined;
+
+    const timerId = window.setTimeout(() => {
+      setReflectionSecondsLeft((current) => Math.max(0, current - 1));
+    }, 1000);
+
+    return () => window.clearTimeout(timerId);
+  }, [reflectionOpen, reflectionSecondsLeft]);
+
+  function startProcessReflection() {
+    setReflectionPromptIndex((current) => (current + 1) % processReflectionPrompts.length);
+    setReflectionSecondsLeft(20);
+    setReflectionOpen(true);
+  }
 
   return (
     <main className="shell shell-dashboard">
@@ -1231,6 +1260,24 @@ export function Dashboard({
               </button>
             ))}
           </div>
+          <button className="process-pause-button" type="button" onClick={startProcessReflection}>
+            Pare e Pense
+          </button>
+          {reflectionOpen ? (
+            <article className="process-reflection-card" aria-live="polite">
+              <div>
+                <p className="small-muted">Mentalidade de processo</p>
+                <h3>{reflectionComplete ? "Agora escolha com calma" : `${reflectionSecondsLeft}s para observar`}</h3>
+                <p className="muted">{reflectionPrompt}</p>
+              </div>
+              <div className="process-reflection-meter" aria-label={`${reflectionSecondsLeft} segundos restantes`}>
+                <span style={{ width: `${((20 - reflectionSecondsLeft) / 20) * 100}%` }} />
+              </div>
+              {reflectionComplete ? (
+                <p className="process-reflection-done">Quando a resposta nascer, siga pelo proximo passo com atencao.</p>
+              ) : null}
+            </article>
+          ) : null}
         </section>
 
         {activeDashboardTab === "progresso" ? (

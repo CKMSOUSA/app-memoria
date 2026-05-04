@@ -179,7 +179,7 @@ export function AdminScreen({
       }
     >();
 
-    for (const { user, history } of filteredHistories) {
+    for (const { user, history } of normalizedHistories) {
       const turmaNome = user.turma?.trim() || "Sem turma";
       const current = grouped.get(turmaNome) ?? {
         name: turmaNome,
@@ -221,7 +221,7 @@ export function AdminScreen({
         completionRate: item.total > 0 ? Math.round(item.completionRate / item.total) : 0,
       }))
       .sort((left, right) => right.total - left.total || left.name.localeCompare(right.name));
-  }, [filteredHistories]);
+  }, [normalizedHistories]);
 
   const filteredHelpRequests = useMemo(() => {
     const query = search.trim().toLowerCase();
@@ -823,7 +823,7 @@ export function AdminScreen({
         <section className="panel admin-class-panel">
           <div className="section-head">
             <h3>Visao por turma</h3>
-            <span className="small-muted">{turmaSummaries.length} grupo(s) com usuarios nos filtros atuais</span>
+            <span className="small-muted">{turmaSummaries.length} grupo(s) cadastrados na base administrativa</span>
           </div>
           {turmaSummaries.length > 0 ? (
             <div className="admin-class-grid">
@@ -852,7 +852,7 @@ export function AdminScreen({
               ))}
             </div>
           ) : (
-            <p className="small-muted">Nenhuma turma corresponde aos filtros atuais.</p>
+            <p className="small-muted">Nenhuma turma cadastrada no momento.</p>
           )}
         </section>
         ) : null}
@@ -1047,6 +1047,28 @@ export function AdminScreen({
           <div className="section-head">
             <h3>Duvidas enviadas</h3>
             <span className="small-muted">{filteredHelpRequests.length} item(ns) encontrado(s)</span>
+          </div>
+          <div className="admin-toolbar-grid">
+            <label className="field">
+              <span>Buscar em pedidos de ajuda</span>
+              <input
+                value={search}
+                onChange={(event) => setSearch(event.target.value)}
+                placeholder="Ex.: nome, email, assunto ou mensagem"
+              />
+            </label>
+            <label className="field">
+              <span>Status da ajuda</span>
+              <select
+                className="text-input"
+                value={helpStatusFilter}
+                onChange={(event) => setHelpStatusFilter(event.target.value as "todas" | HelpRequest["status"])}
+              >
+                <option value="todas">Todas</option>
+                <option value="aberta">Abertas</option>
+                <option value="respondida">Respondidas</option>
+              </select>
+            </label>
           </div>
           <div className="faq-list">
             {filteredHelpRequests.length > 0 ? (
