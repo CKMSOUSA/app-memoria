@@ -1150,6 +1150,7 @@ export function Dashboard({
   const [reflectionPromptIndex, setReflectionPromptIndex] = useState(0);
   const [reflectionSecondsLeft, setReflectionSecondsLeft] = useState(REFLECTION_SECONDS);
   const [reflectionOpen, setReflectionOpen] = useState(false);
+  const [reflectionHistory, setReflectionHistory] = useState<string[]>([]);
   const trailTabs: Array<{
     id: TrailMode;
     label: string;
@@ -1219,12 +1220,17 @@ export function Dashboard({
   }, [reflectionOpen, reflectionSecondsLeft]);
 
   function startProcessReflection() {
-    setReflectionPromptIndex((current) => {
-      if (processReflectionPrompts.length <= 1) return current;
+    const randomIndex = Math.floor(Math.random() * processReflectionPrompts.length);
+    const nextIndex =
+      processReflectionPrompts.length <= 1
+        ? reflectionPromptIndex
+        : randomIndex === reflectionPromptIndex
+          ? (randomIndex + 1) % processReflectionPrompts.length
+          : randomIndex;
+    const nextPrompt = processReflectionPrompts[nextIndex] ?? processReflectionPrompts[0];
 
-      const next = Math.floor(Math.random() * processReflectionPrompts.length);
-      return next === current ? (next + 1) % processReflectionPrompts.length : next;
-    });
+    setReflectionPromptIndex(nextIndex);
+    setReflectionHistory((current) => [nextPrompt, ...current.filter((item) => item !== nextPrompt)].slice(0, 3));
     setReflectionSecondsLeft(REFLECTION_SECONDS);
     setReflectionOpen(true);
   }
@@ -1380,6 +1386,14 @@ export function Dashboard({
               </div>
               {reflectionComplete ? (
                 <p className="process-reflection-done">Guarde a percepção que apareceu e siga com calma.</p>
+              ) : null}
+              {reflectionHistory.length > 1 ? (
+                <div className="process-reflection-history">
+                  <span className="small-muted">Pausas recentes</span>
+                  {reflectionHistory.slice(1).map((item) => (
+                    <p key={item}>{item}</p>
+                  ))}
+                </div>
               ) : null}
             </article>
           ) : null}

@@ -703,6 +703,22 @@ h2 {
   font-weight: 800;
 }
 
+.process-reflection-history {
+  display: grid;
+  gap: 6px;
+  padding-top: 4px;
+}
+
+.process-reflection-history p {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(127, 45, 45, 0.08);
+  color: #5f2a2a;
+  font-size: 14px;
+  line-height: 1.35;
+}
+
 .dashboard-disclosure {
   padding: 0;
   overflow: hidden;
@@ -1469,6 +1485,29 @@ h2 {
   border: 1px solid rgba(44, 99, 135, 0.18);
   color: #27536f;
   font-weight: 700;
+}
+
+.review-reflection-card {
+  display: grid;
+  gap: 6px;
+  padding: 16px;
+  border-radius: 16px;
+  border: 1px solid rgba(82, 124, 103, 0.22);
+  background: rgba(240, 248, 242, 0.92);
+  color: #244c3b;
+}
+
+.review-reflection-card strong {
+  font-size: 18px;
+}
+
+.review-reflection-card p {
+  margin: 0;
+  line-height: 1.45;
+}
+
+.review-reflection-action {
+  font-weight: 800;
 }
 
 .spatial-board {
