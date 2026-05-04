@@ -1219,7 +1219,12 @@ export function Dashboard({
   }, [reflectionOpen, reflectionSecondsLeft]);
 
   function startProcessReflection() {
-    setReflectionPromptIndex((current) => (current + 1) % processReflectionPrompts.length);
+    setReflectionPromptIndex((current) => {
+      if (processReflectionPrompts.length <= 1) return current;
+
+      const next = Math.floor(Math.random() * processReflectionPrompts.length);
+      return next === current ? (next + 1) % processReflectionPrompts.length : next;
+    });
     setReflectionSecondsLeft(REFLECTION_SECONDS);
     setReflectionOpen(true);
   }
