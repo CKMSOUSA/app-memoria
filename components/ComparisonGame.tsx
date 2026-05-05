@@ -242,7 +242,7 @@ export function ComparisonGame({
       <section className="game-card">
         <header className="game-header">
           <div>
-            <p className="eyebrow">{isAdvancedMode ? "Testes Avancados" : "Trilha de comparação"}</p>
+            <p className="eyebrow">{isAdvancedMode ? "Testes Avançados" : "Trilha de comparação"}</p>
             <h1>{isAdvancedMode ? "Comparação de critério composto" : "Compare e escolha a opção correta"}</h1>
             <p className="muted">
               {isAdvancedMode

@@ -160,7 +160,7 @@ export const attentionChallenges: AttentionChallenge[] = [
     id: 3,
     difficultyLabel: "Menos fácil",
     nome: "Atenção seletiva",
-    nomeInfantil: "Missao do número 7",
+    nomeInfantil: "Missão do número 7",
     variacoes: [
       {
         instrucao: "Selecione apenas os números 7 e ignore os demais.",

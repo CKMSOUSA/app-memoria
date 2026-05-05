@@ -699,7 +699,7 @@ export function AdminScreen({
               <select className="text-input" value={levelFilter} onChange={(event) => setLevelFilter(event.target.value as typeof levelFilter)}>
                 <option value="todos">Todos</option>
                 <option value="iniciante">Iniciante</option>
-                <option value="intermediario">Intermediario</option>
+                <option value="intermediario">Intermediário</option>
                 <option value="avancado">Avançado</option>
               </select>
             </label>

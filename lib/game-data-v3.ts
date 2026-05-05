@@ -240,19 +240,19 @@ export const visualChallenges: VisualMemoryChallenge[] = visualSets.map((items, 
 const attentionSeeds = [
   { nome: "Foco em T", nomeInfantil: "Caca ao T", alvo: "T", distratores: ["O", "Q", "D", "P", "R"] },
   { nome: "Busca por A", nomeInfantil: "Caca ao A", alvo: "A", distratores: ["M", "R", "V", "N", "X"] },
-  { nome: "Número 7", nomeInfantil: "Missao do 7", alvo: "7", distratores: ["1", "4", "9", "2", "6"] },
+  { nome: "Número 7", nomeInfantil: "Missão do 7", alvo: "7", distratores: ["1", "4", "9", "2", "6"] },
   { nome: "Foco em B", nomeInfantil: "Caca ao B", alvo: "B", distratores: ["P", "D", "R", "E", "H"] },
-  { nome: "Número 3", nomeInfantil: "Missao do 3", alvo: "3", distratores: ["8", "5", "6", "9", "2"] },
+  { nome: "Número 3", nomeInfantil: "Missão do 3", alvo: "3", distratores: ["8", "5", "6", "9", "2"] },
   { nome: "Foco em M", nomeInfantil: "Caca ao M", alvo: "M", distratores: ["N", "W", "H", "K", "V"] },
-  { nome: "Número 5", nomeInfantil: "Missao do 5", alvo: "5", distratores: ["2", "8", "9", "6", "3"] },
+  { nome: "Número 5", nomeInfantil: "Missão do 5", alvo: "5", distratores: ["2", "8", "9", "6", "3"] },
   { nome: "Foco em L", nomeInfantil: "Caca ao L", alvo: "L", distratores: ["I", "T", "J", "F", "E"] },
-  { nome: "Número 8", nomeInfantil: "Missao do 8", alvo: "8", distratores: ["3", "0", "6", "9", "2"] },
+  { nome: "Número 8", nomeInfantil: "Missão do 8", alvo: "8", distratores: ["3", "0", "6", "9", "2"] },
   { nome: "Foco em C", nomeInfantil: "Caca ao C", alvo: "C", distratores: ["G", "O", "Q", "S", "U"] },
-  { nome: "Número 4", nomeInfantil: "Missao do 4", alvo: "4", distratores: ["1", "7", "9", "6", "8"] },
+  { nome: "Número 4", nomeInfantil: "Missão do 4", alvo: "4", distratores: ["1", "7", "9", "6", "8"] },
   { nome: "Foco em P", nomeInfantil: "Caca ao P", alvo: "P", distratores: ["R", "B", "D", "F", "K"] },
-  { nome: "Número 6", nomeInfantil: "Missao do 6", alvo: "6", distratores: ["8", "9", "3", "5", "2"] },
+  { nome: "Número 6", nomeInfantil: "Missão do 6", alvo: "6", distratores: ["8", "9", "3", "5", "2"] },
   { nome: "Foco em S", nomeInfantil: "Caca ao S", alvo: "S", distratores: ["Z", "C", "G", "E", "A"] },
-  { nome: "Número 9", nomeInfantil: "Missao do 9", alvo: "9", distratores: ["8", "6", "3", "5", "0"] },
+  { nome: "Número 9", nomeInfantil: "Missão do 9", alvo: "9", distratores: ["8", "6", "3", "5", "0"] },
 ];
 
 function buildAttentionVariation(alvo: string, distractors: string[], offset: number) {
@@ -713,7 +713,7 @@ const logicSeeds = [
     ],
   },
   {
-    nome: "Analise rápida",
+    nome: "Análise rápida",
     nomeInfantil: "Raciocínio final",
     rounds: [
       { prompt: "Encontre o próximo termo.", sequence: ["10", "9", "8"], options: ["7", "6", "9"], correctAnswer: "7", explanation: "A sequência diminui de 1 em 1." },

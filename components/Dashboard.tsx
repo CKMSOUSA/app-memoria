@@ -70,7 +70,7 @@ const REFLECTION_SECONDS = 40;
 
 const processReflectionPrompts = [
   "O que está ocupando sua mente neste momento?",
-  "Que sensacao aparece quando você fica alguns segundos sem pressa?",
+  "Que sensação aparece quando você fica alguns segundos sem pressa?",
   "O que você quer cuidar melhor hoje?",
   "Qual pensamento merece ser observado sem virar uma ação imediata?",
   "O que este pequeno intervalo muda no seu jeito de perceber o tempo?",
@@ -86,7 +86,7 @@ const processReflectionPrompts = [
   "O que você quer lembrar quando terminar esta pausa?",
   "Qual atitude sua combina com a pessoa que você quer ser?",
   "O que você pode observar sem tentar mudar imediatamente?",
-  "Qual parte do seu dia pediu mais paciencia?",
+  "Qual parte do seu dia pediu mais paciência?",
   "O que você aprendeu recentemente sobre esperar?",
   "Que pequena decisão pode melhorar seu próximo momento?",
   "O que você está sentindo que ainda não colocou em palavras?",
@@ -101,20 +101,20 @@ const processReflectionPrompts = [
   "O que você quer soltar antes de continuar?",
   "Que parte de você precisa de gentileza agora?",
   "O que mudou dentro de você desde o começo do dia?",
-  "Qual lembranca boa pode te acompanhar por alguns segundos?",
+  "Qual lembrança boa pode te acompanhar por alguns segundos?",
   "O que você quer perceber melhor ao seu redor?",
   "Que pequena coisa está funcionando bem hoje?",
   "Qual pensamento merece menos pressa?",
   "O que você pode fazer sem se cobrar tanto?",
   "Que pergunta você faria para si mesmo agora?",
-  "O que você quer cultivar com repetição e paciencia?",
+  "O que você quer cultivar com repetição e paciência?",
   "Qual detalhe do ambiente você ainda não tinha notado?",
   "O que você pode agradecer sem precisar explicar?",
   "Que escolha ajudaria você a ficar mais inteiro agora?",
   "O que significa estar atento neste momento?",
   "Qual parte do tempo você costuma apressar?",
   "O que você pode fazer para respeitar seu ritmo?",
-  "Que sensacao aparece quando você não precisa responder logo?",
+  "Que sensação aparece quando você não precisa responder logo?",
   "O que você gostaria de cuidar com mais carinho?",
   "Qual pensamento pode esperar mais um pouco?",
   "O que você quer fazer com mais intenção?",
@@ -161,7 +161,7 @@ const processReflectionPrompts = [
   "O que você faria se pudesse agir com mais calma?",
   "Qual parte deste momento parece suficiente?",
   "O que você quer lembrar quando sentir pressa?",
-  "Que pensamento pode virar curiosidade em vez de cobranca?",
+  "Que pensamento pode virar curiosidade em vez de cobrança?",
   "O que você pode aprender com uma pausa curta?",
   "Qual sentimento você pode nomear sem tentar consertar?",
   "O que você quer preservar dentro de você hoje?",
@@ -346,7 +346,7 @@ function getGoalLabel(goal: Usuario["goal"]) {
     case "atencao":
       return "Melhorar atenção";
     case "pedagogico":
-      return "Reforco pedagógico";
+      return "Reforço pedagógico";
     case "rotina":
       return "Criar rotina";
     default:
@@ -359,7 +359,7 @@ function getLevelLabel(level: Usuario["selfReportedLevel"]) {
     case "iniciante":
       return "Iniciante";
     case "intermediario":
-      return "Intermediario";
+      return "Intermediário";
     case "avancado":
       return "Avançado";
     default:
@@ -548,7 +548,7 @@ function MissionCard({
   return (
     <article className={`engagement-card mission-card ${completed ? "mission-card-complete" : ""}`}>
       <div className="section-head">
-        <p className="engagement-tag">{cadence === "diaria" ? "Missao diaria" : "Missao semanal"}</p>
+        <p className="engagement-tag">{cadence === "diaria" ? "Missão diária" : "Missão semanal"}</p>
         <span className={`pill ${completed ? "pill-success" : "pill-neutral"}`}>{completed ? "Cumprida" : "Em curso"}</span>
       </div>
       <h3>{title}</h3>
@@ -1272,7 +1272,7 @@ export function Dashboard({
             Trilha exclusiva
           </button>
           <button className="btn btn-side" onClick={onOpenAdvanced}>
-            Testes Avancados
+            Testes Avançados
           </button>
         </SidebarMenuGroup>
         <button className="btn btn-side" onClick={onOpenProfile}>
@@ -1559,7 +1559,7 @@ export function Dashboard({
 
         <section className="panel">
           <div className="section-head">
-            <h3>Missoes diarias e semanais</h3>
+            <h3>Missões diárias e semanais</h3>
             <span className="small-muted">Metas curtas para manter frequência e dar direção ao próximo treino</span>
           </div>
           <div className="engagement-grid">
@@ -1659,7 +1659,7 @@ export function Dashboard({
 
         <section className="panel">
           <div className="section-head">
-            <h3>Relatorios por habilidade</h3>
+            <h3>Relatórios por habilidade</h3>
             <span className="ability-section-subtitle">Leitura separada de memória, atenção, velocidade e raciocínio</span>
           </div>
           <div className="insight-grid">

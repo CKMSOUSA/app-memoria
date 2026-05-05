@@ -17,12 +17,12 @@ const goalOptions: Array<{ value: NonNullable<Usuario["goal"]>; label: string; d
   { value: "rotina", label: "Criar rotina", description: "Ganhar constância com sessões curtas e frequentes." },
   { value: "memoria", label: "Fortalecer memória", description: "Priorizar evocação, consolidação e revisão." },
   { value: "atencao", label: "Melhorar atenção", description: "Treinar foco, ritmo e redução de impulsos." },
-  { value: "pedagogico", label: "Reforco pedagógico", description: "Usar o treino como apoio escolar e de organização." },
+  { value: "pedagogico", label: "Reforço pedagógico", description: "Usar o treino como apoio escolar e de organização." },
 ];
 
 const levelOptions: Array<{ value: NonNullable<Usuario["selfReportedLevel"]>; label: string; description: string }> = [
   { value: "iniciante", label: "Iniciante", description: "Quero começar leve e ganhar confiança." },
-  { value: "intermediario", label: "Intermediario", description: "Já consigo manter uma rotina moderada." },
+  { value: "intermediario", label: "Intermediário", description: "Já consigo manter uma rotina moderada." },
   { value: "avancado", label: "Avançado", description: "Quero desafios mais puxados e ritmo alto." },
 ];
 

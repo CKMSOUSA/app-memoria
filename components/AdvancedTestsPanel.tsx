@@ -47,7 +47,7 @@ export function AdvancedTestsPanel({
       <section className="game-card">
         <header className="game-header">
           <div>
-            <p className="eyebrow">Testes Avancados</p>
+            <p className="eyebrow">Testes Avançados</p>
             <h1>Painel de alta complexidade cognitiva</h1>
             <p className="muted">
               Esta área ignora adaptação por idade e apresenta somente desafios em grau muito difícil, extremamente difícil e elite cognitiva.

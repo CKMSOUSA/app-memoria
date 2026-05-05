@@ -228,7 +228,7 @@ export function LogicGame({
       <section className="game-card">
         <header className="game-header">
           <div>
-            <p className="eyebrow">{isAdvancedMode ? "Testes Avancados" : "Trilha de lógica"}</p>
+            <p className="eyebrow">{isAdvancedMode ? "Testes Avançados" : "Trilha de lógica"}</p>
             <h1>{isAdvancedMode ? "Lógica em nível extremo" : "Descubra a regra e escolha o próximo termo"}</h1>
             <p className="muted">
               {isAdvancedMode

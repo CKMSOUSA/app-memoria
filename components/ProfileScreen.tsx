@@ -9,12 +9,12 @@ const goalLabels: Record<NonNullable<Usuario["goal"]>, string> = {
   memoria: "Fortalecer memória",
   atencao: "Melhorar atenção",
   rotina: "Criar rotina de treino",
-  pedagogico: "Reforco pedagógico",
+  pedagogico: "Reforço pedagógico",
 };
 
 const levelLabels: Record<NonNullable<Usuario["selfReportedLevel"]>, string> = {
   iniciante: "Iniciante",
-  intermediario: "Intermediario",
+  intermediario: "Intermediário",
   avancado: "Avançado",
 };
 

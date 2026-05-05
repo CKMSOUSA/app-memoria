@@ -566,7 +566,7 @@ export function getEngagementMissions(history: SessionRecord[], progresso: Progr
     {
       id: "daily-start",
       cadence: "diaria",
-      title: "Missao diaria de arranque",
+      title: "Missão diária de arranque",
       summary: "Concluir uma sessão curta no dia para manter frequência e reduzir abandono.",
       progressLabel: `${Math.min(todayCompleted, 1)}/1 sessão concluída hoje`,
       completed: todayCompleted >= 1,
@@ -575,7 +575,7 @@ export function getEngagementMissions(history: SessionRecord[], progresso: Progr
     {
       id: "daily-smart",
       cadence: "diaria",
-      title: "Missao diaria orientada",
+      title: "Missão diária orientada",
       summary: `Abrir a atividade sugerida hoje: ${recommendation.challengeName} em ${getSessionModeLabel(recommendation.mode)}.`,
       progressLabel: recommendationDone ? "Atividade sugerida feita hoje" : "Falta concluir a atividade sugerida",
       completed: recommendationDone,
@@ -584,7 +584,7 @@ export function getEngagementMissions(history: SessionRecord[], progresso: Progr
     {
       id: "weekly-variety",
       cadence: "semanal",
-      title: "Missao semanal de variedade",
+      title: "Missão semanal de variedade",
       summary: "Alternar trilhas para treinar foco, evocação e raciocínio dentro da mesma semana.",
       progressLabel: `${Math.min(weeklyModes.size, 3)}/3 trilhas diferentes na semana`,
       completed: weeklyModes.size >= 3,
@@ -593,7 +593,7 @@ export function getEngagementMissions(history: SessionRecord[], progresso: Progr
     {
       id: "weekly-consistency",
       cadence: "semanal",
-      title: "Missao semanal de consistencia",
+      title: "Missão semanal de consistência",
       summary: "Completar pelo menos três sessões na semana e manter score médio em crescimento.",
       progressLabel: `${Math.min(weeklyCompleted, 3)}/3 sessões concluídas · média ${weeklyAverage}`,
       completed: weeklyCompleted >= 3,
@@ -691,7 +691,7 @@ export function getThemedTracks(idade: number, history: SessionRecord[], progres
       id: "desafio-elite",
       title: "Desafio elite",
       label: "Trilha tematica",
-      summary: "Direciona para desafios de maior densidade e prepara a transição para os testes avancados.",
+      summary: "Direciona para desafios de maior densidade e prepara a transição para os testes avançados.",
       audienceHint: "Pensada para quem já sustenta boa constância e quer acelerar complexidade.",
       primaryMode: "espacial",
       challengeId: spatialStarter.challengeId,
