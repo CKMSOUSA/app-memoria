@@ -655,6 +655,25 @@ h2 {
   box-shadow: 0 22px 34px rgba(184, 75, 75, 0.28);
 }
 
+.process-main-button {
+  width: 100%;
+  min-height: 66px;
+  padding: 16px 22px;
+  border: 1px solid rgba(82, 124, 103, 0.32);
+  border-radius: 16px;
+  background: linear-gradient(135deg, #527c67 0%, #315f4c 100%);
+  color: white;
+  box-shadow: 0 16px 28px rgba(82, 124, 103, 0.2);
+  font-size: 22px;
+  font-weight: 900;
+  text-align: center;
+}
+
+.process-main-button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 20px 32px rgba(82, 124, 103, 0.26);
+}
+
 .process-reflection-card {
   display: grid;
   gap: 14px;

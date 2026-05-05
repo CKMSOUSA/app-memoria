@@ -1319,6 +1319,9 @@ export function Dashboard({
           <button className="process-pause-button" type="button" onClick={startProcessReflection}>
             Pare e Pense
           </button>
+          <button className="process-main-button" type="button" onClick={onOpenProcess}>
+            Procrastinação
+          </button>
           {reflectionOpen ? (
             <article className="process-reflection-card" aria-live="polite">
               <div>
