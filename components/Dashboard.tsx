@@ -1006,27 +1006,6 @@ export function Dashboard({
   const relevantObservations = getRelevantObservations(observations, usuario.email);
   const upcomingReminders = getUpcomingReminders(reminders, usuario.email, usuario.turma ?? null);
   const relevantPrescriptions = getRelevantPrescriptions(prescriptions, usuario);
-  const latestSession = history[0] ?? null;
-  const continueTraining = latestSession
-    ? {
-        mode: latestSession.mode,
-        title: latestSession.completed
-          ? `Próxima etapa em ${getSessionModeLabel(smartRecommendation.mode)}`
-          : `Retomar ${getSessionModeLabel(latestSession.mode)}`,
-        summary: latestSession.completed
-          ? `${smartRecommendation.reason} Seu foco atual está alinhado com ${getGoalLabel(usuario.goal)}.`
-          : `Sua última sessão ficou em ${getSessionModeLabel(latestSession.mode)} na fase ${latestSession.challengeId}. Retome enquanto o contexto ainda está fresco.`,
-        highlight: latestSession.completed
-          ? `${smartRecommendation.challengeName} · ${getGoalLabel(usuario.goal)} · ${usuario.weeklyAvailability ?? 3} dia(s)/semana`
-          : `Fase ${latestSession.challengeId} · score ${latestSession.score} · ${latestSession.completed ? "concluída" : "em aberto"}`,
-      }
-    : {
-        mode: smartRecommendation.mode,
-        title: `Começar por ${getSessionModeLabel(smartRecommendation.mode)}`,
-        summary: `${smartRecommendation.reason} Vamos iniciar pelo foco ${getGoalLabel(usuario.goal)} com nível ${getLevelLabel(usuario.selfReportedLevel)}.`,
-        highlight: `${smartRecommendation.challengeName} · ${usuario.weeklyAvailability ?? 3} dia(s)/semana`,
-      };
-
   function handleExportPdf() {
     exportUserReportPdf({
       usuario,
@@ -1103,7 +1082,7 @@ export function Dashboard({
     { id: "visual", label: "Memória visual", title: "Trilha de memória visual", rate: visualRate, progressMap: progresso.visual },
     { id: "atencao", label: "Atenção", title: "Trilha de atenção", rate: atencaoRate, progressMap: progresso.atencao },
     { id: "processo", label: "Procrastinação", title: "Trilha Procrastinação", rate: processoRate, progressMap: progresso.processo },
-    { id: "visaoFocada", label: "Visão focada", title: "Trilha de visão focada", rate: visaoFocadaRate, progressMap: progresso.visaoFocada },
+    { id: "visaoFocada", label: "Foco", title: "Trilha de visão focada", rate: visaoFocadaRate, progressMap: progresso.visaoFocada },
     {
       id: "comparacao",
       label: "Comparação",
@@ -1130,10 +1109,6 @@ export function Dashboard({
     if (mode === "processo") return onOpenProcess();
     if (mode === "visaoFocada") return onOpenFocusVision();
     return onOpenLogic();
-  };
-  const openSessionMode = (mode: SessionMode) => {
-    if (mode === "especial") return onOpenSpecial();
-    return openMode(mode);
   };
   const dashboardTabs: Array<{ id: DashboardTab; label: string; caption: string }> = [
     { id: "hoje", label: "Hoje", caption: "Próximo passo e rotina imediata" },
@@ -1197,7 +1172,7 @@ export function Dashboard({
             Procrastinação
           </button>
           <button className="btn btn-side" onClick={onOpenFocusVision}>
-            Visão focada
+            Foco
           </button>
           <button className="btn btn-side" onClick={onOpenComparison}>
             Jogo de comparação
@@ -1251,20 +1226,6 @@ export function Dashboard({
               Seu progresso fica salvo por desafio. Os pontos só aumentam quando você supera seu melhor resultado em
               cada fase.
             </p>
-            <div className="topbar-actions">
-              <button className="btn btn-primary" onClick={() => openSessionMode(continueTraining.mode)}>
-                Continuar treino
-              </button>
-              <button className="btn btn-secondary" onClick={() => setActiveDashboardTab("progresso")}>
-                Ver progresso
-              </button>
-              <button className="btn btn-secondary" onClick={() => setActiveDashboardTab("rotina")}>
-                Abrir rotina
-              </button>
-              <button className="btn btn-secondary btn-process-topbar" onClick={onOpenProcess}>
-                Procrastinação
-              </button>
-            </div>
           </div>
           <div className="topbar-right">
             <div className="topbar-support-actions">
@@ -1311,13 +1272,23 @@ export function Dashboard({
                 type="button"
                 role="tab"
                 aria-selected={activeDashboardTab === tab.id}
-                className={`dashboard-tab ${activeDashboardTab === tab.id ? "dashboard-tab-active" : ""}`}
+                className={`dashboard-tab dashboard-tab-${tab.id} ${activeDashboardTab === tab.id ? "dashboard-tab-active" : ""}`}
                 onClick={() => setActiveDashboardTab(tab.id)}
               >
                 <span className="trail-tab-label">{tab.label}</span>
                 <span className="trail-tab-rate">{tab.caption}</span>
               </button>
             ))}
+          </div>
+          <div className="dashboard-action-cards">
+            <button className="dashboard-action-card dashboard-action-process" type="button" onClick={onOpenProcess}>
+              <span className="trail-tab-label">Procrastinação</span>
+              <span className="trail-tab-rate">Começo, meio e fim</span>
+            </button>
+            <button className="dashboard-action-card dashboard-action-focus" type="button" onClick={onOpenFocusVision}>
+              <span className="trail-tab-label">Foco</span>
+              <span className="trail-tab-rate">Foco central e periférico</span>
+            </button>
           </div>
           <button className="process-pause-button" type="button" onClick={startProcessReflection}>
             Pare e Pense
@@ -1649,13 +1620,13 @@ export function Dashboard({
             </button>
           </article>
           <article className="quick-card quick-card-focus-vision">
-            <p className="small-muted">Visão focada</p>
+            <p className="small-muted">Foco</p>
             <h3>Ache o alvo sem perder o centro</h3>
             <p className="muted">
               Treino de foco central e visão periférica com 30 jogos em progressão híbrida inteligente.
             </p>
             <button className="btn btn-primary" onClick={onOpenFocusVision}>
-              Abrir visão focada
+              Abrir Foco
             </button>
           </article>
           <article className="quick-card">
