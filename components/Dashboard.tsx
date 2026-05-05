@@ -24,6 +24,7 @@ import {
   attentionChallenges,
   comparisonChallenges,
   exclusiveChallenges,
+  focusVisionChallenges,
   logicChallenges,
   memoryChallenges,
   processChallenges,
@@ -64,7 +65,7 @@ import type {
   Usuario,
 } from "@/lib/types";
 
-type TrailMode = "memoria" | "visual" | "atencao" | "comparacao" | "espacial" | "logica" | "processo";
+type TrailMode = "memoria" | "visual" | "atencao" | "comparacao" | "espacial" | "logica" | "processo" | "visaoFocada";
 type DashboardTab = "hoje" | "progresso" | "rotina" | "insights";
 
 const REFLECTION_SECONDS = 40;
@@ -185,6 +186,7 @@ type DashboardProps = {
   onOpenSpatial: () => void;
   onOpenLogic: () => void;
   onOpenProcess: () => void;
+  onOpenFocusVision: () => void;
   onOpenProfile: () => void;
   onOpenSpecial: () => void;
   onOpenAdvanced: () => void;
@@ -224,7 +226,8 @@ function ProgressList({
       | ProgressState["comparacao"]
       | ProgressState["espacial"]
       | ProgressState["logica"]
-      | ProgressState["processo"];
+      | ProgressState["processo"]
+      | ProgressState["visaoFocada"];
 }) {
   const challenges =
     mode === "memoria"
@@ -239,7 +242,9 @@ function ProgressList({
             ? spatialChallenges
             : mode === "logica"
               ? logicChallenges
-              : processChallenges;
+              : mode === "processo"
+                ? processChallenges
+                : focusVisionChallenges;
 
   return (
     <section className="panel">
@@ -1008,6 +1013,7 @@ export function Dashboard({
   onOpenSpatial,
   onOpenLogic,
   onOpenProcess,
+  onOpenFocusVision,
   onOpenProfile,
   onOpenSpecial,
   onOpenAdvanced,
@@ -1035,6 +1041,7 @@ export function Dashboard({
   const comparacaoRate = getCompletionRate(progresso.comparacao);
   const espacialRate = getCompletionRate(progresso.espacial);
   const processoRate = getCompletionRate(progresso.processo);
+  const visaoFocadaRate = getCompletionRate(progresso.visaoFocada);
   const currentAudience = getAudienceFromAge(usuario.idade);
   const specialChallenges = exclusiveChallenges.filter((item) => item.audience === currentAudience);
   const especialRate = getCompletionRateForIds(
@@ -1167,15 +1174,17 @@ export function Dashboard({
       | ProgressState["memoria"]
       | ProgressState["visual"]
       | ProgressState["atencao"]
-    | ProgressState["comparacao"]
-    | ProgressState["espacial"]
-    | ProgressState["logica"]
-    | ProgressState["processo"];
+      | ProgressState["comparacao"]
+      | ProgressState["espacial"]
+      | ProgressState["logica"]
+      | ProgressState["processo"]
+      | ProgressState["visaoFocada"];
   }> = [
     { id: "memoria", label: "Memória", title: "Trilha de memória", rate: memoriaRate, progressMap: progresso.memoria },
     { id: "visual", label: "Memória visual", title: "Trilha de memória visual", rate: visualRate, progressMap: progresso.visual },
     { id: "atencao", label: "Atenção", title: "Trilha de atenção", rate: atencaoRate, progressMap: progresso.atencao },
     { id: "processo", label: "Procrastinação", title: "Trilha Procrastinação", rate: processoRate, progressMap: progresso.processo },
+    { id: "visaoFocada", label: "Visão focada", title: "Trilha de visão focada", rate: visaoFocadaRate, progressMap: progresso.visaoFocada },
     {
       id: "comparacao",
       label: "Comparação",
@@ -1200,6 +1209,7 @@ export function Dashboard({
     if (mode === "comparacao") return onOpenComparison();
     if (mode === "espacial") return onOpenSpatial();
     if (mode === "processo") return onOpenProcess();
+    if (mode === "visaoFocada") return onOpenFocusVision();
     return onOpenLogic();
   };
   const openSessionMode = (mode: SessionMode) => {
@@ -1801,6 +1811,16 @@ export function Dashboard({
             </p>
             <button className="btn btn-primary" onClick={onOpenProcess}>
               Abrir Procrastinação
+            </button>
+          </article>
+          <article className="quick-card quick-card-focus-vision">
+            <p className="small-muted">Visão focada</p>
+            <h3>Ache o alvo sem perder o centro</h3>
+            <p className="muted">
+              Treino de foco central e visão periférica com 30 jogos em progressão híbrida inteligente.
+            </p>
+            <button className="btn btn-primary" onClick={onOpenFocusVision}>
+              Abrir visão focada
             </button>
           </article>
           <article className="quick-card">

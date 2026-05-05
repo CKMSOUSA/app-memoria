@@ -18,6 +18,7 @@ export type Tela =
   | "logica"
   | "logicaAvancada"
   | "processo"
+  | "visaoFocada"
   | "perfil"
   | "especial"
   | "ajuda"
@@ -69,6 +70,7 @@ export type ProgressState = {
   espacial: Record<number, ChallengeProgress>;
   logica: Record<number, ChallengeProgress>;
   processo: Record<number, ChallengeProgress>;
+  visaoFocada: Record<number, ChallengeProgress>;
   especial: Record<number, ChallengeProgress>;
 };
 
@@ -331,6 +333,25 @@ export type ProcessChallenge = {
   tempoLimite: number;
   minimoParaConcluir: number;
   variacoes: ProcessVariation[];
+};
+
+export type FocusVisionVariation = {
+  instrucao: string;
+  alvo: string;
+  distratores: string[];
+  gridSize: number;
+  targetCount: number;
+};
+
+export type FocusVisionChallenge = {
+  id: number;
+  difficultyLabel: "Fácil" | "Médio" | "Complexo avançado";
+  nome: string;
+  descricao: string;
+  variacoes: FocusVisionVariation[];
+  tempoLimite: number;
+  minimoParaConcluir: number;
+  unlockGroup: "iniciante" | "intermediario" | "avancado";
 };
 
 export type VisualMemoryChallenge = {

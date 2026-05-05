@@ -41,6 +41,7 @@ import {
   attentionChallenges,
   comparisonChallenges,
   exclusiveChallenges,
+  focusVisionChallenges,
   logicChallenges,
   memoryChallenges,
   processChallenges,
@@ -58,6 +59,7 @@ test("createDefaultProgress prepares the three progress tracks", () => {
   assert.ok(Object.keys(progress.espacial).length > 0);
   assert.ok(Object.keys(progress.logica).length > 0);
   assert.ok(Object.keys(progress.processo).length > 0);
+  assert.ok(Object.keys(progress.visaoFocada).length > 0);
   assert.ok(Object.keys(progress.especial).length > 0);
 });
 
@@ -69,6 +71,10 @@ test("expanded tracks expose the requested amount of phases", () => {
   assert.equal(spatialChallenges.length, 15);
   assert.equal(logicChallenges.length, 15);
   assert.equal(processChallenges.length, 5);
+  assert.equal(focusVisionChallenges.length, 30);
+  assert.equal(focusVisionChallenges.filter((item) => item.difficultyLabel === "Fácil").length, 10);
+  assert.equal(focusVisionChallenges.filter((item) => item.difficultyLabel === "Médio").length, 10);
+  assert.equal(focusVisionChallenges.filter((item) => item.difficultyLabel === "Complexo avançado").length, 10);
   assert.equal(exclusiveChallenges.filter((item) => item.audience === "infantil").length, 10);
   assert.equal(exclusiveChallenges.filter((item) => item.audience === "adolescente").length, 10);
   assert.equal(exclusiveChallenges.filter((item) => item.audience === "adulto").length, 10);
@@ -107,6 +113,7 @@ test("mergeProgress preserves saved data while filling missing challenges", () =
   assert.equal(merged.espacial[1].attempts, 0);
   assert.equal(merged.logica[1].attempts, 0);
   assert.equal(merged.processo[1].attempts, 0);
+  assert.equal(merged.visaoFocada[1].attempts, 0);
   assert.equal(merged.especial[101].attempts, 0);
 });
 

@@ -9,6 +9,7 @@ import { AudienceGame } from "@/components/AudienceGame";
 import { AuthScreen } from "@/components/AuthScreen";
 import { ComparisonGame } from "@/components/ComparisonGame";
 import { Dashboard } from "@/components/Dashboard";
+import { FocusVisionGame } from "@/components/FocusVisionGame";
 import { HelpScreen } from "@/components/HelpScreen";
 import { applyAppSettingsToDocument, registerOfflineSupport, useAppSettingsState } from "@/lib/app-settings";
 import { getOfflineSyncStatus, subscribeOfflineSyncStatus, type OfflineSyncStatus } from "@/lib/offline-store";
@@ -693,6 +694,7 @@ export default function Page() {
           tela === "logica" ||
           tela === "logicaAvancada" ||
           tela === "processo" ||
+          tela === "visaoFocada" ||
           tela === "perfil" ||
           tela === "especial" ||
           tela === "ajuda" ||
@@ -916,6 +918,22 @@ export default function Page() {
     );
   }
 
+  if (tela === "visaoFocada") {
+    return (
+      <FocusVisionGame
+        usuario={usuario}
+        progresso={progresso.visaoFocada}
+        onBack={() => setTela("dashboard")}
+        onRememberVariation={(challengeId, variationIndex) =>
+          persistVariation("visaoFocada", challengeId, variationIndex)
+        }
+        onSaveResult={(challengeId, score, timeSeconds, completed, variationIndex) =>
+          persistResult("visaoFocada", challengeId, score, timeSeconds, completed, variationIndex)
+        }
+      />
+    );
+  }
+
   if (tela === "onboarding") {
     return <OnboardingScreen usuario={usuario} onSave={handleCompleteOnboarding} />;
   }
@@ -1013,6 +1031,7 @@ export default function Page() {
       onOpenSpatial={() => setTela("espacial")}
       onOpenLogic={() => setTela("logica")}
       onOpenProcess={() => setTela("processo")}
+      onOpenFocusVision={() => setTela("visaoFocada")}
       onOpenProfile={() => setTela("perfil")}
       onOpenSpecial={() => setTela("especial")}
       onOpenAdvanced={() => setTela("testesAvancados")}

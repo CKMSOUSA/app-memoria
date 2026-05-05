@@ -9,6 +9,7 @@ import {
   attentionChallenges,
   comparisonChallenges,
   exclusiveChallenges,
+  focusVisionChallenges,
   logicChallenges,
   memoryChallenges,
   processChallenges,
@@ -44,6 +45,7 @@ export function createDefaultProgress(): ProgressState {
     espacial: Object.fromEntries(spatialCatalog.map((challenge) => [challenge.id, defaultChallengeProgress()])),
     logica: Object.fromEntries(logicCatalog.map((challenge) => [challenge.id, defaultChallengeProgress()])),
     processo: Object.fromEntries(processChallenges.map((challenge) => [challenge.id, defaultChallengeProgress()])),
+    visaoFocada: Object.fromEntries(focusVisionChallenges.map((challenge) => [challenge.id, defaultChallengeProgress()])),
     especial: Object.fromEntries(exclusiveChallenges.map((challenge) => [challenge.id, defaultChallengeProgress()])),
   };
 }
@@ -100,6 +102,13 @@ export function mergeProgress(saved?: Partial<ProgressState> | null): ProgressSt
     };
   }
 
+  for (const challenge of focusVisionChallenges) {
+    base.visaoFocada[challenge.id] = {
+      ...base.visaoFocada[challenge.id],
+      ...(saved?.visaoFocada?.[challenge.id] ?? {}),
+    };
+  }
+
   for (const challenge of exclusiveChallenges) {
     base.especial[challenge.id] = {
       ...base.especial[challenge.id],
@@ -139,6 +148,8 @@ export function getSessionModeLabel(mode: SessionMode) {
       return "Lógica";
     case "processo":
       return "Procrastinação";
+    case "visaoFocada":
+      return "Visão focada";
     default:
       return "Trilha exclusiva";
   }
@@ -193,6 +204,21 @@ export function isChallengeUnlockedInOrder(
   if (challengeIndex <= 0) return true;
   const previousId = challengeIds[challengeIndex - 1];
   return progressMap[previousId]?.completed ?? false;
+}
+
+export function isChallengeUnlockedFlex(
+  progressMap: Record<number, { completed: boolean; attempts: number; bestScore: number }>,
+  challengeIds: number[],
+  challengeId: number,
+) {
+  const challengeIndex = challengeIds.indexOf(challengeId);
+  if (challengeIndex <= 0) return true;
+
+  const previousId = challengeIds[challengeIndex - 1];
+  const previousProgress = progressMap[previousId];
+  if (!previousProgress) return false;
+
+  return previousProgress.completed || previousProgress.attempts >= 3 || previousProgress.bestScore >= 70;
 }
 
 export function normalizeText(value: string) {

@@ -221,3 +221,35 @@ export function evaluateLogicRound({
     completed,
   };
 }
+
+export function evaluateFocusVisionRound({
+  foundCount,
+  totalTargets,
+  wrongClicks,
+  elapsedSeconds,
+  timeLimit,
+  minimumToComplete,
+}: {
+  foundCount: number;
+  totalTargets: number;
+  wrongClicks: number;
+  elapsedSeconds: number;
+  timeLimit: number;
+  minimumToComplete: number;
+}) {
+  const accuracy = totalTargets > 0 ? foundCount / totalTargets : 0;
+  const peripheralScore = Math.round(accuracy * 100);
+  const speedBonus = Math.max(0, timeLimit - elapsedSeconds);
+  const score = Math.max(0, Math.min(100, Math.round(peripheralScore + speedBonus * 0.6 - wrongClicks * 5)));
+  const completed = foundCount >= minimumToComplete || peripheralScore >= 70;
+
+  return {
+    foundCount,
+    totalTargets,
+    wrongClicks,
+    elapsedSeconds,
+    peripheralScore,
+    score,
+    completed,
+  };
+}

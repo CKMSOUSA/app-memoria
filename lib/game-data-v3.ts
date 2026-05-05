@@ -2,6 +2,7 @@ import type {
   AttentionChallenge,
   ComparisonChallenge,
   ExclusiveChallenge,
+  FocusVisionChallenge,
   LogicChallenge,
   MemoryChallenge,
   ProcessChallenge,
@@ -1005,3 +1006,57 @@ export const processChallenges: ProcessChallenge[] = [
     ],
   },
 ];
+
+const focusVisionSeeds = [
+  { alvo: "A", distratores: ["Â", "Ã", "R", "V", "N", "M"] },
+  { alvo: "E", distratores: ["F", "Ê", "B", "P", "R", "L"] },
+  { alvo: "O", distratores: ["Q", "C", "D", "0", "G", "U"] },
+  { alvo: "T", distratores: ["I", "L", "F", "Y", "J", "H"] },
+  { alvo: "S", distratores: ["Z", "C", "G", "5", "E", "A"] },
+  { alvo: "P", distratores: ["B", "R", "D", "F", "K", "Q"] },
+  { alvo: "7", distratores: ["1", "4", "9", "2", "Z", "T"] },
+  { alvo: "3", distratores: ["8", "5", "6", "9", "B", "E"] },
+  { alvo: "6", distratores: ["8", "9", "G", "5", "3", "0"] },
+  { alvo: "M", distratores: ["N", "W", "H", "K", "V", "A"] },
+];
+
+function rotateDistractors(items: string[], shift: number) {
+  return rotateItems(items, shift);
+}
+
+function createFocusVisionChallenges(): FocusVisionChallenge[] {
+  return Array.from({ length: 30 }, (_, index) => {
+    const levelIndex = Math.floor(index / 10);
+    const seed = focusVisionSeeds[index % focusVisionSeeds.length];
+    const difficultyLabel = levelIndex === 0 ? "Fácil" : levelIndex === 1 ? "Médio" : "Complexo avançado";
+    const unlockGroup = levelIndex === 0 ? "iniciante" : levelIndex === 1 ? "intermediario" : "avancado";
+    const gridSize = levelIndex === 0 ? 7 : levelIndex === 1 ? 9 : 11;
+    const targetCount = levelIndex === 0 ? 5 + (index % 3) : levelIndex === 1 ? 7 + (index % 4) : 9 + (index % 5);
+    const tempoLimite = levelIndex === 0 ? 36 - (index % 4) : levelIndex === 1 ? 34 - (index % 5) : 32 - (index % 6);
+    const minimoParaConcluir = Math.max(3, Math.ceil(targetCount * 0.7));
+
+    return {
+      id: index + 1,
+      difficultyLabel,
+      unlockGroup,
+      nome: `Ache o alvo sem perder o centro ${index + 1}`,
+      descricao:
+        levelIndex === 0
+          ? "Mantenha o ponto central como referência e encontre letras alvo ao redor."
+          : levelIndex === 1
+            ? "Varra o cenário em volta do centro, sem fixar longamente em cada ponto."
+            : "Combine foco central estável com varredura periférica em uma grade densa.",
+      tempoLimite,
+      minimoParaConcluir,
+      variacoes: [0, 1, 2].map((variation) => ({
+        instrucao: "Mantenha o olhar voltado ao ponto central e procure o alvo na periferia visual.",
+        alvo: seed.alvo,
+        distratores: rotateDistractors(seed.distratores, variation + levelIndex),
+        gridSize,
+        targetCount,
+      })),
+    };
+  });
+}
+
+export const focusVisionChallenges: FocusVisionChallenge[] = createFocusVisionChallenges();
