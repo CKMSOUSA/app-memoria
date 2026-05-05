@@ -11,6 +11,7 @@ import {
   exclusiveChallenges,
   logicChallenges,
   memoryChallenges,
+  processChallenges,
   spatialChallenges,
   visualChallenges,
 } from "@/lib/game-data-v3";
@@ -42,6 +43,7 @@ export function createDefaultProgress(): ProgressState {
     comparacao: Object.fromEntries(comparisonCatalog.map((challenge) => [challenge.id, defaultChallengeProgress()])),
     espacial: Object.fromEntries(spatialCatalog.map((challenge) => [challenge.id, defaultChallengeProgress()])),
     logica: Object.fromEntries(logicCatalog.map((challenge) => [challenge.id, defaultChallengeProgress()])),
+    processo: Object.fromEntries(processChallenges.map((challenge) => [challenge.id, defaultChallengeProgress()])),
     especial: Object.fromEntries(exclusiveChallenges.map((challenge) => [challenge.id, defaultChallengeProgress()])),
   };
 }
@@ -91,6 +93,13 @@ export function mergeProgress(saved?: Partial<ProgressState> | null): ProgressSt
     };
   }
 
+  for (const challenge of processChallenges) {
+    base.processo[challenge.id] = {
+      ...base.processo[challenge.id],
+      ...(saved?.processo?.[challenge.id] ?? {}),
+    };
+  }
+
   for (const challenge of exclusiveChallenges) {
     base.especial[challenge.id] = {
       ...base.especial[challenge.id],
@@ -128,6 +137,8 @@ export function getSessionModeLabel(mode: SessionMode) {
       return "Orientação espacial";
     case "logica":
       return "Lógica";
+    case "processo":
+      return "Processo";
     default:
       return "Trilha exclusiva";
   }

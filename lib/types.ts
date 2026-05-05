@@ -17,6 +17,7 @@ export type Tela =
   | "espacialAvancada"
   | "logica"
   | "logicaAvancada"
+  | "processo"
   | "perfil"
   | "especial"
   | "ajuda"
@@ -67,6 +68,7 @@ export type ProgressState = {
   comparacao: Record<number, ChallengeProgress>;
   espacial: Record<number, ChallengeProgress>;
   logica: Record<number, ChallengeProgress>;
+  processo: Record<number, ChallengeProgress>;
   especial: Record<number, ChallengeProgress>;
 };
 
@@ -305,6 +307,30 @@ export type LogicChallenge = {
   variacoes: LogicVariation[];
   tempoLimite: number;
   minimoParaConcluir: number;
+};
+
+export type ProcessStep = {
+  stage: "começo" | "meio" | "fim";
+  prompt: string;
+  options: string[];
+  correctAnswer: string;
+  feedback: string;
+};
+
+export type ProcessVariation = {
+  title: string;
+  context: string;
+  steps: ProcessStep[];
+};
+
+export type ProcessChallenge = {
+  id: number;
+  difficultyLabel: string;
+  nome: string;
+  descricao: string;
+  tempoLimite: number;
+  minimoParaConcluir: number;
+  variacoes: ProcessVariation[];
 };
 
 export type VisualMemoryChallenge = {

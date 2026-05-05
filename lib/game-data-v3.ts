@@ -4,6 +4,7 @@ import type {
   ExclusiveChallenge,
   LogicChallenge,
   MemoryChallenge,
+  ProcessChallenge,
   SpatialChallenge,
   VisualMemoryChallenge,
 } from "@/lib/types";
@@ -788,3 +789,219 @@ export const logicChallenges: LogicChallenge[] = logicSeeds.map((seed, index) =>
   tempoLimite: Math.max(14, 24 - Math.floor(index / 2)),
   minimoParaConcluir: Math.min(3, 2 + Math.floor(index / 6)),
 }));
+
+export const processChallenges: ProcessChallenge[] = [
+  {
+    id: 1,
+    difficultyLabel: "Primeiro ciclo",
+    nome: "Começar pequeno",
+    descricao: "Treina a passagem completa por começo, meio e fim com uma tarefa simples.",
+    tempoLimite: 90,
+    minimoParaConcluir: 3,
+    variacoes: [
+      {
+        title: "Organizar a mesa",
+        context: "A jogada só termina quando você escolhe a abertura, executa a ação central e fecha o ciclo.",
+        steps: [
+          {
+            stage: "começo",
+            prompt: "Qual é o primeiro passo organizado?",
+            options: ["Escolher um único canto da mesa", "Pensar em tudo que falta fazer", "Abrir outra atividade"],
+            correctAnswer: "Escolher um único canto da mesa",
+            feedback: "Começar pequeno reduz a barreira de entrada.",
+          },
+          {
+            stage: "meio",
+            prompt: "O que mantém o processo andando?",
+            options: ["Separar apenas três itens", "Trocar de tarefa quando ficar chato", "Esperar vontade aparecer"],
+            correctAnswer: "Separar apenas três itens",
+            feedback: "O meio precisa de uma ação concreta, não de motivação perfeita.",
+          },
+          {
+            stage: "fim",
+            prompt: "Como fechar a jogada?",
+            options: ["Guardar o último item e confirmar que terminou", "Deixar para revisar depois", "Começar outra coisa imediatamente"],
+            correctAnswer: "Guardar o último item e confirmar que terminou",
+            feedback: "Fechar torna o ciclo visível para o cérebro.",
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: 2,
+    difficultyLabel: "Sequência curta",
+    nome: "Tarefa com bordas",
+    descricao: "Ajuda o aluno a reconhecer o limite da tarefa antes de agir.",
+    tempoLimite: 100,
+    minimoParaConcluir: 3,
+    variacoes: [
+      {
+        title: "Responder uma mensagem",
+        context: "Complete a sequência mínima sem pular o encerramento.",
+        steps: [
+          {
+            stage: "começo",
+            prompt: "Qual abertura evita procrastinação?",
+            options: ["Ler a mensagem e definir uma resposta curta", "Reler várias vezes sem decidir", "Esperar estar com mais energia"],
+            correctAnswer: "Ler a mensagem e definir uma resposta curta",
+            feedback: "Uma resposta pequena já cria movimento.",
+          },
+          {
+            stage: "meio",
+            prompt: "Qual ação pertence ao meio?",
+            options: ["Escrever a resposta em uma frase", "Abrir outra conversa", "Pesquisar algo sem necessidade"],
+            correctAnswer: "Escrever a resposta em uma frase",
+            feedback: "O meio é a parte em que a ação acontece.",
+          },
+          {
+            stage: "fim",
+            prompt: "Qual fechamento conclui o ciclo?",
+            options: ["Enviar e sair da conversa", "Deixar em rascunho sem decidir", "Começar a editar sem fim"],
+            correctAnswer: "Enviar e sair da conversa",
+            feedback: "Finalizar diminui pendências mentais.",
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: 3,
+    difficultyLabel: "Processo sustentado",
+    nome: "Do plano ao fechamento",
+    descricao: "Treina continuar quando a tarefa já começou, mas ainda não terminou.",
+    tempoLimite: 110,
+    minimoParaConcluir: 4,
+    variacoes: [
+      {
+        title: "Estudar por alguns minutos",
+        context: "A sequência tem quatro etapas para reforçar começo, execução e encerramento consciente.",
+        steps: [
+          {
+            stage: "começo",
+            prompt: "Como preparar a entrada?",
+            options: ["Escolher uma página ou exercício", "Separar cinco assuntos diferentes", "Esperar ter muito tempo"],
+            correctAnswer: "Escolher uma página ou exercício",
+            feedback: "Entrada clara evita excesso de escolha.",
+          },
+          {
+            stage: "meio",
+            prompt: "Qual é a primeira ação de execução?",
+            options: ["Ler o enunciado até entender a tarefa", "Pular para outra matéria", "Conferir notificações"],
+            correctAnswer: "Ler o enunciado até entender a tarefa",
+            feedback: "Entender a tarefa sustenta o meio.",
+          },
+          {
+            stage: "meio",
+            prompt: "O que fazer quando dá vontade de parar?",
+            options: ["Concluir a etapa atual antes de decidir", "Fechar tudo imediatamente", "Começar uma nova tarefa"],
+            correctAnswer: "Concluir a etapa atual antes de decidir",
+            feedback: "A regra é terminar a menor unidade aberta.",
+          },
+          {
+            stage: "fim",
+            prompt: "Qual gesto marca o fim?",
+            options: ["Anotar o que foi concluído", "Deixar a aba aberta para depois", "Apagar o progresso"],
+            correctAnswer: "Anotar o que foi concluído",
+            feedback: "Registrar o fim ajuda a perceber avanço real.",
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: 4,
+    difficultyLabel: "Resistência à fuga",
+    nome: "Não abandonar no meio",
+    descricao: "Reforça a regra de terminar a menor sequência antes de trocar de atividade.",
+    tempoLimite: 120,
+    minimoParaConcluir: 4,
+    variacoes: [
+      {
+        title: "Arrumar a mochila",
+        context: "A jogada fica aberta até o ciclo mínimo ser concluído.",
+        steps: [
+          {
+            stage: "começo",
+            prompt: "Qual começo é mais objetivo?",
+            options: ["Separar os itens necessários", "Pensar em todas as tarefas da semana", "Abrir outro aplicativo"],
+            correctAnswer: "Separar os itens necessários",
+            feedback: "Começar é escolher o recorte certo.",
+          },
+          {
+            stage: "meio",
+            prompt: "Qual ação mantém a ordem?",
+            options: ["Colocar os itens por categoria", "Jogar tudo sem conferir", "Parar no primeiro incômodo"],
+            correctAnswer: "Colocar os itens por categoria",
+            feedback: "Categoria cria meio organizado.",
+          },
+          {
+            stage: "meio",
+            prompt: "Se faltar um item, qual é a melhor resposta?",
+            options: ["Marcar o item faltante e continuar", "Abandonar a mochila aberta", "Trocar para outra tarefa"],
+            correctAnswer: "Marcar o item faltante e continuar",
+            feedback: "Obstáculo não precisa encerrar o processo.",
+          },
+          {
+            stage: "fim",
+            prompt: "Qual fechamento é completo?",
+            options: ["Fechar a mochila e revisar a lista", "Deixar aberta para lembrar depois", "Começar uma nova organização"],
+            correctAnswer: "Fechar a mochila e revisar a lista",
+            feedback: "Fechar e revisar dá borda ao processo.",
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: 5,
+    difficultyLabel: "Ciclo completo",
+    nome: "Terminar com intenção",
+    descricao: "Treina processo com mais etapas e fechamento reflexivo.",
+    tempoLimite: 130,
+    minimoParaConcluir: 5,
+    variacoes: [
+      {
+        title: "Resolver uma pendência curta",
+        context: "O objetivo não é fazer tudo, é completar uma sequência mínima com começo, meio e fim.",
+        steps: [
+          {
+            stage: "começo",
+            prompt: "Qual escolha abre melhor o ciclo?",
+            options: ["Definir a menor pendência possível", "Escolher a tarefa mais assustadora", "Esperar a pressão aumentar"],
+            correctAnswer: "Definir a menor pendência possível",
+            feedback: "A menor pendência possível reduz adiamento.",
+          },
+          {
+            stage: "começo",
+            prompt: "Antes de agir, o que ajuda?",
+            options: ["Nomear o resultado esperado", "Abrir várias opções", "Fazer outra pausa sem objetivo"],
+            correctAnswer: "Nomear o resultado esperado",
+            feedback: "Resultado esperado dá direção.",
+          },
+          {
+            stage: "meio",
+            prompt: "Qual ação pertence ao centro do processo?",
+            options: ["Executar uma parte concreta", "Replanejar indefinidamente", "Comparar com outras pessoas"],
+            correctAnswer: "Executar uma parte concreta",
+            feedback: "Processo precisa de ação observável.",
+          },
+          {
+            stage: "meio",
+            prompt: "Como lidar com a vontade de trocar de tarefa?",
+            options: ["Ficar até concluir a etapa atual", "Abrir uma tarefa mais fácil", "Parar sem registrar nada"],
+            correctAnswer: "Ficar até concluir a etapa atual",
+            feedback: "Essa é a musculatura contra a procrastinação.",
+          },
+          {
+            stage: "fim",
+            prompt: "Qual fechamento mostra que acabou?",
+            options: ["Confirmar o que foi terminado e limpar o espaço", "Deixar quase pronto", "Guardar sem olhar"],
+            correctAnswer: "Confirmar o que foi terminado e limpar o espaço",
+            feedback: "Finalizar com intenção transforma esforço em conclusão.",
+          },
+        ],
+      },
+    ],
+  },
+];

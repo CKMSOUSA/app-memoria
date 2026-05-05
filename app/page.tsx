@@ -24,6 +24,7 @@ import type {
 } from "@/lib/types";
 import { MemoryGame } from "@/components/MemoryGame";
 import { OnboardingScreen } from "@/components/OnboardingScreen";
+import { ProcessGame } from "@/components/ProcessGame";
 import { ProfileScreen } from "@/components/ProfileScreen";
 import { SpatialGame } from "@/components/SpatialGame";
 import { VisualMemoryGame } from "@/components/VisualMemoryGame";
@@ -691,6 +692,7 @@ export default function Page() {
           tela === "espacialAvancada" ||
           tela === "logica" ||
           tela === "logicaAvancada" ||
+          tela === "processo" ||
           tela === "perfil" ||
           tela === "especial" ||
           tela === "ajuda" ||
@@ -898,6 +900,22 @@ export default function Page() {
     );
   }
 
+  if (tela === "processo") {
+    return (
+      <ProcessGame
+        usuario={usuario}
+        progresso={progresso.processo}
+        onBack={() => setTela("dashboard")}
+        onRememberVariation={(challengeId, variationIndex) =>
+          persistVariation("processo", challengeId, variationIndex)
+        }
+        onSaveResult={(challengeId, score, timeSeconds, completed, variationIndex) =>
+          persistResult("processo", challengeId, score, timeSeconds, completed, variationIndex)
+        }
+      />
+    );
+  }
+
   if (tela === "onboarding") {
     return <OnboardingScreen usuario={usuario} onSave={handleCompleteOnboarding} />;
   }
@@ -994,6 +1012,7 @@ export default function Page() {
       onOpenComparison={() => setTela("comparacao")}
       onOpenSpatial={() => setTela("espacial")}
       onOpenLogic={() => setTela("logica")}
+      onOpenProcess={() => setTela("processo")}
       onOpenProfile={() => setTela("perfil")}
       onOpenSpecial={() => setTela("especial")}
       onOpenAdvanced={() => setTela("testesAvancados")}

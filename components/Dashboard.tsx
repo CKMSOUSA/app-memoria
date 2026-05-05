@@ -26,6 +26,7 @@ import {
   exclusiveChallenges,
   logicChallenges,
   memoryChallenges,
+  processChallenges,
   spatialChallenges,
   visualChallenges,
 } from "@/lib/game-data-v3";
@@ -63,7 +64,7 @@ import type {
   Usuario,
 } from "@/lib/types";
 
-type TrailMode = "memoria" | "visual" | "atencao" | "comparacao" | "espacial" | "logica";
+type TrailMode = "memoria" | "visual" | "atencao" | "comparacao" | "espacial" | "logica" | "processo";
 type DashboardTab = "hoje" | "progresso" | "rotina" | "insights";
 
 const REFLECTION_SECONDS = 40;
@@ -183,6 +184,7 @@ type DashboardProps = {
   onOpenComparison: () => void;
   onOpenSpatial: () => void;
   onOpenLogic: () => void;
+  onOpenProcess: () => void;
   onOpenProfile: () => void;
   onOpenSpecial: () => void;
   onOpenAdvanced: () => void;
@@ -219,22 +221,25 @@ function ProgressList({
     | ProgressState["memoria"]
     | ProgressState["visual"]
     | ProgressState["atencao"]
-    | ProgressState["comparacao"]
-    | ProgressState["espacial"]
-    | ProgressState["logica"];
+      | ProgressState["comparacao"]
+      | ProgressState["espacial"]
+      | ProgressState["logica"]
+      | ProgressState["processo"];
 }) {
   const challenges =
     mode === "memoria"
       ? memoryChallenges
       : mode === "visual"
         ? visualChallenges
-      : mode === "atencao"
-        ? attentionChallenges
+        : mode === "atencao"
+          ? attentionChallenges
         : mode === "comparacao"
           ? comparisonChallenges
           : mode === "espacial"
             ? spatialChallenges
-            : logicChallenges;
+            : mode === "logica"
+              ? logicChallenges
+              : processChallenges;
 
   return (
     <section className="panel">
@@ -1002,6 +1007,7 @@ export function Dashboard({
   onOpenComparison,
   onOpenSpatial,
   onOpenLogic,
+  onOpenProcess,
   onOpenProfile,
   onOpenSpecial,
   onOpenAdvanced,
@@ -1028,6 +1034,7 @@ export function Dashboard({
   const atencaoRate = getCompletionRate(progresso.atencao);
   const comparacaoRate = getCompletionRate(progresso.comparacao);
   const espacialRate = getCompletionRate(progresso.espacial);
+  const processoRate = getCompletionRate(progresso.processo);
   const currentAudience = getAudienceFromAge(usuario.idade);
   const specialChallenges = exclusiveChallenges.filter((item) => item.audience === currentAudience);
   const especialRate = getCompletionRateForIds(
@@ -1160,13 +1167,15 @@ export function Dashboard({
       | ProgressState["memoria"]
       | ProgressState["visual"]
       | ProgressState["atencao"]
-      | ProgressState["comparacao"]
-      | ProgressState["espacial"]
-      | ProgressState["logica"];
+    | ProgressState["comparacao"]
+    | ProgressState["espacial"]
+    | ProgressState["logica"]
+    | ProgressState["processo"];
   }> = [
     { id: "memoria", label: "Memória", title: "Trilha de memória", rate: memoriaRate, progressMap: progresso.memoria },
     { id: "visual", label: "Memória visual", title: "Trilha de memória visual", rate: visualRate, progressMap: progresso.visual },
     { id: "atencao", label: "Atenção", title: "Trilha de atenção", rate: atencaoRate, progressMap: progresso.atencao },
+    { id: "processo", label: "Processo", title: "Trilha de processo", rate: processoRate, progressMap: progresso.processo },
     {
       id: "comparacao",
       label: "Comparação",
@@ -1190,6 +1199,7 @@ export function Dashboard({
     if (mode === "atencao") return onOpenAttention();
     if (mode === "comparacao") return onOpenComparison();
     if (mode === "espacial") return onOpenSpatial();
+    if (mode === "processo") return onOpenProcess();
     return onOpenLogic();
   };
   const openSessionMode = (mode: SessionMode) => {
@@ -1781,6 +1791,16 @@ export function Dashboard({
             <p className="small-muted">{`${smartRecommendation.objective} Próxima fase: ${smartRecommendation.challengeName}.`}</p>
             <button className="btn btn-primary" onClick={() => openMode(smartRecommendation.mode)}>
               Abrir atividade sugerida
+            </button>
+          </article>
+          <article className="quick-card quick-card-process">
+            <p className="small-muted">Antiprocrastinação</p>
+            <h3>Começo, meio e fim</h3>
+            <p className="muted">
+              Treino curto com sequência obrigatória: escolha uma entrada, sustente o meio e feche a jogada antes de sair.
+            </p>
+            <button className="btn btn-primary" onClick={onOpenProcess}>
+              Abrir trilha de processo
             </button>
           </article>
           <article className="quick-card">

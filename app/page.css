@@ -1510,6 +1510,59 @@ h2 {
   font-weight: 800;
 }
 
+.process-game-card .game-grid {
+  align-items: stretch;
+}
+
+.process-play-panel {
+  align-content: start;
+}
+
+.process-cycle-meter {
+  height: 14px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(82, 124, 103, 0.12);
+}
+
+.process-cycle-meter span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #527c67 0%, #cf7a5c 100%);
+  transition: width 0.25s ease;
+}
+
+.process-step-card {
+  display: grid;
+  gap: 12px;
+  padding: 18px;
+  border-radius: 18px;
+  border: 1px solid rgba(82, 124, 103, 0.2);
+  background: rgba(240, 248, 242, 0.9);
+}
+
+.process-step-card strong {
+  color: #244c3b;
+  font-size: 24px;
+  line-height: 1.25;
+}
+
+.process-options {
+  display: grid;
+  gap: 12px;
+}
+
+.process-option-card {
+  min-height: 74px;
+  justify-content: center;
+  color: var(--ink-strong);
+  font-size: 17px;
+  font-weight: 800;
+  line-height: 1.25;
+  text-align: center;
+}
+
 .spatial-board {
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
@@ -2065,6 +2118,11 @@ h2 {
 .quick-card-highlight {
   border-color: rgba(74, 137, 178, 0.24);
   background: linear-gradient(135deg, rgba(239, 247, 252, 0.96) 0%, rgba(255, 251, 244, 0.96) 100%);
+}
+
+.quick-card-process {
+  border-color: rgba(82, 124, 103, 0.28);
+  background: linear-gradient(135deg, rgba(240, 248, 242, 0.98) 0%, rgba(255, 255, 255, 0.92) 100%);
 }
 
 .settings-grid {
