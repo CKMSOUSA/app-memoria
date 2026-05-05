@@ -611,7 +611,7 @@ function ThemedTrackCard({
       <h3>{title}</h3>
       <p className="muted">{summary}</p>
       <p className="small-muted">{audienceHint}</p>
-      <p className="engagement-highlight">{`Comecar por ${challengeName}`}</p>
+      <p className="engagement-highlight">{`Começar por ${challengeName}`}</p>
       <button className="btn btn-secondary" onClick={onOpen}>
         Abrir trilha
       </button>
@@ -1089,7 +1089,7 @@ export function Dashboard({
       }
     : {
         mode: smartRecommendation.mode,
-        title: `Comecar por ${getSessionModeLabel(smartRecommendation.mode)}`,
+        title: `Começar por ${getSessionModeLabel(smartRecommendation.mode)}`,
         summary: `${smartRecommendation.reason} Vamos iniciar pelo foco ${getGoalLabel(usuario.goal)} com nivel ${getLevelLabel(usuario.selfReportedLevel)}.`,
         highlight: `${smartRecommendation.challengeName} · ${usuario.weeklyAvailability ?? 3} dia(s)/semana`,
       };
