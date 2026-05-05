@@ -1261,6 +1261,9 @@ export function Dashboard({
               <button className="btn btn-secondary" onClick={() => setActiveDashboardTab("rotina")}>
                 Abrir rotina
               </button>
+              <button className="btn btn-secondary btn-process-topbar" onClick={onOpenProcess}>
+                Procrastinação
+              </button>
             </div>
           </div>
           <div className="topbar-right">
@@ -1318,9 +1321,6 @@ export function Dashboard({
           </div>
           <button className="process-pause-button" type="button" onClick={startProcessReflection}>
             Pare e Pense
-          </button>
-          <button className="process-main-button" type="button" onClick={onOpenProcess}>
-            Procrastinação
           </button>
           {reflectionOpen ? (
             <article className="process-reflection-card" aria-live="polite">
