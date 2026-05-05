@@ -47,7 +47,6 @@ import {
   getAbilityInsights,
   getAutomaticDiagnostic,
   getCooperativeCycle,
-  getEngagementMissions,
   getGuidedSessions,
   getPerformanceTrends,
   getSmartRecommendation,
@@ -344,11 +343,6 @@ function DisclosureSection({
   );
 }
 
-function formatSyncTimestamp(value: string | null) {
-  if (!value) return "Ainda não houve sincronização confirmada.";
-  return `Última sincronização em ${new Date(value).toLocaleString("pt-BR")}.`;
-}
-
 function getGoalLabel(goal: Usuario["goal"]) {
   switch (goal) {
     case "memoria":
@@ -375,80 +369,6 @@ function getLevelLabel(level: Usuario["selfReportedLevel"]) {
     default:
       return "Não definido";
   }
-}
-
-function ContinueTrainingCard({
-  title,
-  summary,
-  highlight,
-  onOpen,
-}: {
-  title: string;
-  summary: string;
-  highlight: string;
-  onOpen: () => void;
-}) {
-  return (
-    <article className="continue-card">
-      <p className="engagement-tag">Continuar treino</p>
-      <h3>{title}</h3>
-      <p className="muted">{summary}</p>
-      <p className="engagement-highlight">{highlight}</p>
-      <button className="btn btn-primary" onClick={onOpen}>
-        Retomar agora
-      </button>
-    </article>
-  );
-}
-
-function SyncStatusCard({
-  isOffline,
-  offlineSyncStatus,
-}: {
-  isOffline: boolean;
-  offlineSyncStatus: OfflineSyncStatus;
-}) {
-  const hasError = Boolean(offlineSyncStatus.lastError);
-  const pendingCount = offlineSyncStatus.pendingCount;
-  const statusLabel = isOffline
-    ? "Offline"
-    : offlineSyncStatus.isSyncing
-      ? "Sincronizando"
-      : hasError
-        ? "Erro de sincronizacao"
-        : pendingCount > 0
-          ? "Sincronizacao pendente"
-          : "Sincronizado";
-  const summary = isOffline
-    ? "O app continua funcionando e vai reenviar seus dados quando a conexao voltar."
-    : hasError
-      ? offlineSyncStatus.lastError ?? "Falha ao sincronizar os dados recentes."
-      : pendingCount > 0
-        ? `${pendingCount} alteração(ões) aguardando envio para o modo online.`
-        : formatSyncTimestamp(offlineSyncStatus.lastSyncedAt);
-
-  return (
-    <article className={`sync-status-card ${isOffline ? "sync-status-card-offline" : hasError ? "sync-status-card-error" : "sync-status-card-ok"}`}>
-      <div className="section-head">
-        <div>
-          <p className="engagement-tag">Status dos dados</p>
-          <h3>{statusLabel}</h3>
-        </div>
-        <span className="pill">{pendingCount} pendencia(s)</span>
-      </div>
-      <p className="muted">{summary}</p>
-      <div className="sync-status-grid">
-        <div className="profile-chip">
-          <strong>Fila offline</strong>
-          <span>{pendingCount > 0 ? `${pendingCount} item(ns)` : "Vazia"}</span>
-        </div>
-        <div className="profile-chip">
-          <strong>Modo atual</strong>
-          <span>{isOffline ? "Salvando offline" : "Online com fallback"}</span>
-        </div>
-      </div>
-    </article>
-  );
 }
 
 function AbilityCard({
@@ -1072,7 +992,6 @@ export function Dashboard({
   const diagnostic = getAutomaticDiagnostic(usuario.idade, history, progresso);
   const smartRecommendation = getSmartRecommendation(history, progresso);
   const guidedSessions = getGuidedSessions(usuario.idade, history, progresso);
-  const engagementMissions = getEngagementMissions(history, progresso);
   const achievementInsights = getAchievementInsights(history, progresso);
   const themedTracks = getThemedTracks(usuario.idade, history, progresso);
   const cooperativeCycle = getCooperativeCycle(usuario, history, progresso);
@@ -1273,6 +1192,12 @@ export function Dashboard({
           </button>
           <button className="btn btn-side" onClick={onOpenAttention}>
             Jogo de atenção
+          </button>
+          <button className="btn btn-side" onClick={onOpenProcess}>
+            Procrastinação
+          </button>
+          <button className="btn btn-side" onClick={onOpenFocusVision}>
+            Visão focada
           </button>
           <button className="btn btn-side" onClick={onOpenComparison}>
             Jogo de comparação
@@ -1481,21 +1406,6 @@ export function Dashboard({
           </section>
         ) : null}
 
-        {activeDashboardTab === "hoje" ? (
-          <>
-        <section className="continue-sync-grid">
-          <ContinueTrainingCard
-            title={continueTraining.title}
-            summary={continueTraining.summary}
-            highlight={continueTraining.highlight}
-            onOpen={() => openSessionMode(continueTraining.mode)}
-          />
-          <SyncStatusCard isOffline={isOffline} offlineSyncStatus={offlineSyncStatus} />
-        </section>
-
-          </>
-        ) : null}
-
         {activeDashboardTab === "insights" ? (
         <AppPreferencesPanel
           settings={settings}
@@ -1519,84 +1429,6 @@ export function Dashboard({
             onOpenSpecial={onOpenSpecial}
           />
           ) : null
-        ) : null}
-
-        {activeDashboardTab === "hoje" ? (
-          <>
-        {(usuario.role === "professor" || usuario.role === "responsavel") ? (
-          <section className="panel">
-            <div className="section-head">
-              <h3>Rotina orientada do grupo</h3>
-              <span className="small-muted">Agenda, lembretes e sessões prescritas para o ciclo atual</span>
-            </div>
-            <div className="engagement-grid">
-              <ReminderPlanner
-                turma={usuario.turma ?? null}
-                reminders={upcomingReminders}
-                onSave={(input) =>
-                  onSaveReminder({
-                    ...input,
-                    ownerEmail: usuario.email,
-                  })
-                }
-              />
-              <PrescriptionPanel
-                usuario={usuario}
-                prescriptions={relevantPrescriptions}
-                onSave={onSavePrescription}
-                onUpdateStatus={onUpdatePrescriptionStatus}
-              />
-            </div>
-          </section>
-        ) : null}
-
-        {usuario.role === "aluno" ? (
-          <section className="panel">
-            <div className="section-head">
-              <h3>Minha agenda guiada</h3>
-              <span className="small-muted">Lembretes e sessões que chegaram para este perfil</span>
-            </div>
-            <div className="engagement-grid">
-              <article className="engagement-card planner-card">
-                <h3>Lembretes ativos</h3>
-                {upcomingReminders.length > 0 ? (
-                  upcomingReminders.map((item) => (
-                    <p key={item.id} className="small-muted">{`${item.title} · ${item.daysOfWeek.join(", ")} · ${item.durationMinutes} min`}</p>
-                  ))
-                ) : (
-                  <p className="small-muted">Nenhum lembrete ativo para este perfil ainda.</p>
-                )}
-              </article>
-              <PrescriptionPanel
-                usuario={usuario}
-                prescriptions={relevantPrescriptions}
-                onSave={onSavePrescription}
-                onUpdateStatus={onUpdatePrescriptionStatus}
-              />
-            </div>
-          </section>
-        ) : null}
-
-        <section className="panel">
-          <div className="section-head">
-            <h3>Missões diárias e semanais</h3>
-            <span className="small-muted">Metas curtas para manter frequência e dar direção ao próximo treino</span>
-          </div>
-          <div className="engagement-grid">
-            {engagementMissions.map((mission) => (
-              <MissionCard
-                key={mission.id}
-                cadence={mission.cadence}
-                title={mission.title}
-                summary={mission.summary}
-                progressLabel={mission.progressLabel}
-                completed={mission.completed}
-                onOpen={() => openMode(mission.primaryMode)}
-              />
-            ))}
-          </div>
-        </section>
-          </>
         ) : null}
 
         {activeDashboardTab === "insights" ? (
