@@ -28,6 +28,20 @@ type ProcessGameProps = {
 type Phase = "idle" | "playing" | "result";
 type StepRecord = { prompt: string; selected: string; correct: string; ok: boolean; feedback: string };
 
+const processClosingPrompts = [
+  "Qual foi a menor parte que você conseguiu terminar agora?",
+  "Em que momento deu vontade de pular o meio da tarefa?",
+  "O que ajudou você a fechar o ciclo sem deixar aberto?",
+  "Que gesto pequeno marcou o fim desta jogada?",
+  "Como você poderia repetir esse começo, meio e fim fora do aplicativo?",
+];
+
+const stageLabels: Record<"começo" | "meio" | "fim", string> = {
+  começo: "Começo",
+  meio: "Meio",
+  fim: "Fim",
+};
+
 export function ProcessGame({
   usuario,
   progresso,
@@ -57,6 +71,7 @@ export function ProcessGame({
   const variation = challenge.variacoes[variationIndex] ?? challenge.variacoes[0];
   const currentStep = variation.steps[currentStepIndex] ?? variation.steps[0];
   const challengeNumber = challengeIds.indexOf(challenge.id) + 1;
+  const closingPrompt = processClosingPrompts[(challenge.id + variationIndex) % processClosingPrompts.length];
   const progressPercent =
     phase === "result" ? 100 : Math.round((currentStepIndex / Math.max(variation.steps.length, 1)) * 100);
 
@@ -239,6 +254,23 @@ export function ProcessGame({
               ]}
               note="O objetivo desta trilha é treinar a sensação de tarefa fechada: escolher, atravessar o meio e concluir."
             />
+            {review.completed ? (
+              <article className="review-reflection-card process-closing-card">
+                <strong>Fechamento consciente</strong>
+                <p>{closingPrompt}</p>
+                <p className="review-reflection-action">
+                  Leve a resposta em silêncio por alguns segundos antes de avançar.
+                </p>
+              </article>
+            ) : (
+              <article className="review-reflection-card process-closing-card">
+                <strong>Ciclo ainda aberto</strong>
+                <p>Volte para a menor etapa possível e atravesse o processo até aparecer um fim claro.</p>
+                <p className="review-reflection-action">
+                  O treino aqui é permanecer até concluir, não acertar rápido.
+                </p>
+              </article>
+            )}
             <div className="review-grid">
               {stepRecords.map((record, index) => (
                 <div key={`${record.prompt}-${index}`} className={`review-column ${record.ok ? "review-good" : "review-bad"}`}>
@@ -315,7 +347,7 @@ export function ProcessGame({
               </div>
 
               <div className="process-step-card">
-                <span className="pill">{currentStep.stage}</span>
+                <span className="pill">{stageLabels[currentStep.stage]}</span>
                 <strong>{phase === "playing" ? currentStep.prompt : "Inicie o ciclo para abrir a primeira etapa."}</strong>
                 <p className="muted">{feedback || challenge.descricao}</p>
               </div>

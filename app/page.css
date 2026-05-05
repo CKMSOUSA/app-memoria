@@ -1563,6 +1563,11 @@ h2 {
   text-align: center;
 }
 
+.process-closing-card {
+  margin: 12px 0 16px;
+  border-color: rgba(82, 124, 103, 0.3);
+}
+
 .spatial-board {
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
