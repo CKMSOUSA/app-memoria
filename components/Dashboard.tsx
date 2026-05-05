@@ -1353,7 +1353,7 @@ export function Dashboard({
 
         <section className="panel dashboard-tabs-panel">
           <div className="section-head">
-            <h3>Navegacao rápida</h3>
+            <h3>Navegação rápida</h3>
             <span className="small-muted">Abra só o grupo de informações que você quer ver agora</span>
           </div>
           <div className="dashboard-tabs" role="tablist" aria-label="Abas do dashboard">
@@ -1440,7 +1440,7 @@ export function Dashboard({
             <CompactMetricCard
               label="Comparação"
               value={`${comparacaoRate}%`}
-              caption="Comparacoes de quantidade, valor, ordem e tamanho"
+              caption="Comparações de quantidade, valor, ordem e tamanho"
             />
             <CompactMetricCard
               label="Orientação"

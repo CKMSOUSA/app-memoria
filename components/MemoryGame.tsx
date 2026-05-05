@@ -474,12 +474,12 @@ export function MemoryGame({
                 </div>
                 <div className="phase-chip">
                   <strong>Adaptação</strong>
-                  <span>{`${sessionDifficulty.tempoMemorizacao}s de memorizacao`}</span>
+                  <span>{`${sessionDifficulty.tempoMemorizacao}s de memorização`}</span>
                 </div>
               </div>
 
               <div className="meter-box">
-                <strong>Tempo de memorizacao</strong>
+                <strong>Tempo de memorização</strong>
                 <span>{phase === "memorizing" ? `${countdown}s restantes` : "Pronto para iniciar"}</span>
               </div>
             </section>
@@ -514,7 +514,7 @@ export function MemoryGame({
 
               <div className="response-timer-row response-timer-row-near-board">
                 <TimerDisplay
-                  label={phase === "memorizing" ? "Memorizacao" : phase === "answering" ? "Resposta" : "Tempo"}
+                  label={phase === "memorizing" ? "Memorização" : phase === "answering" ? "Resposta" : "Tempo"}
                   value={phase === "memorizing" ? `${countdown}s` : phase === "answering" ? `${answerSeconds}s` : "--"}
                   tone={phase === "memorizing" || phase === "answering" ? "active" : "neutral"}
                 />

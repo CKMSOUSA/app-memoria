@@ -464,7 +464,7 @@ export default function Page() {
         actorName: usuario.nome,
         action: "observation_saved",
         targetEmail: email,
-        description: `Observacao ${category} atualizada para ${email}.`,
+        description: `Observação ${category} atualizada para ${email}.`,
       }),
     );
   }

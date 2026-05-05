@@ -24,7 +24,7 @@ const advancedTracks = [
   },
   {
     title: "Orientação espacial",
-    description: "Rotas extensas com retorno, cruzamento de eixo e pouca janela de memorizacao.",
+    description: "Rotas extensas com retorno, cruzamento de eixo e pouca janela de memorização.",
   },
   {
     title: "Lógica",

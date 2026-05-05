@@ -357,7 +357,7 @@ export function ComparisonGame({
                 title="Como jogar"
                 objective="Leia o critério da fase e escolha, em cada comparação, qual lado atende melhor a esse critério."
                 steps={[
-                  "Clique em Iniciar rodada para abrir a sequência de comparacoes.",
+                  "Clique em Iniciar rodada para abrir a sequência de comparações.",
                   "Leia o critério da fase antes de responder.",
                   "Escolha entre a opção esquerda e a direita em cada rodada.",
                   "No fim, compare suas respostas com a correção explicada.",

@@ -457,7 +457,7 @@ const comparisonSeeds: ComparisonSeed[] = [
     nome: "Comparação mista",
     nomeInfantil: "Comparação final",
     prompt:
-      "Em cada rodada, compare as duas opções e escolha a que atende ao critério correto. Algumas comparacoes pedem o maior valor, outras a palavra mais longa ou a opção numericamente superior. Leia com calma e decida qual lado faz mais sentido.",
+      "Em cada rodada, compare as duas opções e escolha a que atende ao critério correto. Algumas comparações pedem o maior valor, outras a palavra mais longa ou a opção numericamente superior. Leia com calma e decida qual lado faz mais sentido.",
     promptInfantil:
       "Olhe as duas opções, pense no que está sendo comparado e toque no lado certo. Pode ser o maior número, a palavra maior ou o maior valor.",
     pairs: [

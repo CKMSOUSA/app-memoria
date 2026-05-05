@@ -113,7 +113,7 @@ export function AppPreferencesPanel({ settings, isOffline, offlineSyncStatus, on
           onChange={() => onUpdateSettings({ visibleFocus: !settings.visibleFocus })}
         />
         <SettingToggle
-          label="Navegacao por teclado"
+          label="Navegação por teclado"
           description="Mantem a interface preparada para setas, tabulação e leitura de tela."
           checked={settings.keyboardNavigation}
           onChange={() => onUpdateSettings({ keyboardNavigation: !settings.keyboardNavigation })}
