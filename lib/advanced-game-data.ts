@@ -62,7 +62,7 @@ export const advancedAttentionChallenges: AttentionChallenge[] = [
         grade: ["R7", "R1", "7R", "R7", "RT", "R7", "P7", "R7", "RZ", "R7", "17", "R7", "TR", "R7", "R?", "7R"],
       },
       {
-        instrucao: "Clique apenas no símbolo KQ em uma grade de alta interferencia visual.",
+        instrucao: "Clique apenas no símbolo KQ em uma grade de alta interferência visual.",
         alvo: "KQ",
         grade: ["KQ", "KO", "QK", "KQ", "KG", "KQ", "KR", "KQ", "XQ", "QK", "KQ", "K0", "KQ", "KC", "QK", "KQ"],
       },
@@ -136,7 +136,7 @@ export const advancedComparisonChallenges: ComparisonChallenge[] = [
         ],
       },
       {
-        prompt: "Escolha a opção cuja cadeia alfabetica tem a palavra que viria por último no dicionario.",
+        prompt: "Escolha a opção cuja cadeia alfabética tem a palavra que viria por último no dicionário.",
         rounds: [
           { left: "canto", right: "canudo", correct: "right", explanation: "\"canudo\" vem depois de \"canto\"." },
           { left: "trama", right: "trapo", correct: "right", explanation: "\"trapo\" vem depois de \"trama\"." },
@@ -154,7 +154,7 @@ export const advancedComparisonChallenges: ComparisonChallenge[] = [
     nome: "Decisão com duas regras",
     variacoes: [
       {
-        prompt: "Escolha a opção com a menor média aritmetica.",
+        prompt: "Escolha a opção com a menor média aritmética.",
         rounds: [
           { left: "18, 21, 24", right: "16, 23, 20", correct: "right", explanation: "A média da direita é 19,67; a da esquerda é 21." },
           { left: "9, 15, 27", right: "12, 18, 18", correct: "right", explanation: "16 é menor que 17." },
@@ -190,7 +190,7 @@ export const advancedComparisonChallenges: ComparisonChallenge[] = [
         ],
       },
       {
-        prompt: "Escolha a opção cuja sequência tem mais alternancias de categoria.",
+        prompt: "Escolha a opção cuja sequência tem mais alternâncias de categoria.",
         rounds: [
           { left: "vogal, consoante, vogal, consoante", right: "vogal, vogal, consoante, consoante", correct: "left", explanation: "A esquerda alterna em todos os passos." },
           { left: "par, ímpar, par, ímpar", right: "par, par, ímpar, ímpar", correct: "left", explanation: "A esquerda alterna mais." },
@@ -220,7 +220,7 @@ export const advancedSpatialChallenges: SpatialChallenge[] = [
   {
     id: 102,
     difficultyLabel: "Extremamente difícil",
-    nome: "Mapa com interferencia",
+    nome: "Mapa com interferência",
     variacoes: [
       { prompt: "Reconstrua uma rota de alta densidade sem perder a ordem.", sequence: ["cima", "direita", "direita", "baixo", "esquerda", "cima", "cima", "direita", "baixo"], revealSeconds: 6, options: ["cima", "baixo", "esquerda", "direita"] },
       { prompt: "Observe a rota e responda sob carga espacial prolongada.", sequence: ["esquerda", "cima", "direita", "direita", "baixo", "baixo", "esquerda", "cima", "direita"], revealSeconds: 6, options: ["cima", "baixo", "esquerda", "direita"] },

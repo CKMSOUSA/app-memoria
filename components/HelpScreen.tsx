@@ -12,7 +12,7 @@ type HelpScreenProps = {
 
 const FAQ_ITEMS = [
   {
-    question: "Como comeco uma rodada?",
+    question: "Como começo uma rodada?",
     answer: "Entre no jogo desejado, leia a caixa de instruções e clique em 'Iniciar rodada'. A fase passa a valer quando a rodada começa.",
   },
   {

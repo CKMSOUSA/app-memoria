@@ -387,7 +387,7 @@ export function AttentionGame({
                   { label: "Erros", value: String(review.wrongClicks) },
                   { label: "Tempo", value: `${review.elapsedSeconds}s` },
                 ]}
-              note="Observe se você perdeu por pressa ou por clicar no símbolo errado. O foco seletivo melhora quando erro e velocidade entram em equilibrio."
+              note="Observe se você perdeu por pressa ou por clicar no símbolo errado. O foco seletivo melhora quando erro e velocidade entram em equilíbrio."
             />
             {!review.completed ? (
               <p className="review-note">
@@ -466,7 +466,7 @@ export function AttentionGame({
                 steps={[
                   "Confira o símbolo alvo antes de iniciar a rodada.",
                   "Clique em Iniciar rodada para liberar a grade.",
-                  "Toque apenas nas celulas com o alvo correto antes do tempo acabar.",
+                  "Toque apenas nas células com o alvo correto antes do tempo acabar.",
                   "No final, veja quantos alvos encontrou e quantos erros cometeu.",
                 ]}
                 tip={
@@ -488,7 +488,7 @@ export function AttentionGame({
                 </div>
                 <div className="phase-chip">
                   <strong>Grade</strong>
-                  <span>{`${gradeVisivel.length} celulas`}</span>
+                  <span>{`${gradeVisivel.length} células`}</span>
                 </div>
                 <div className="phase-chip">
                   <strong>Adaptação</strong>

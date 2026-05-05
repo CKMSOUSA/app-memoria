@@ -3,7 +3,7 @@ import type { AttentionChallenge, ExclusiveChallenge, MemoryChallenge, SpatialCh
 export const memoryChallenges: MemoryChallenge[] = [
   {
     id: 1,
-    difficultyLabel: "Muito facil",
+    difficultyLabel: "Muito fácil",
     nome: "Objetos do cotidiano",
     nomeInfantil: "Coisas da casa",
     variacoes: [
@@ -21,7 +21,7 @@ export const memoryChallenges: MemoryChallenge[] = [
   },
   {
     id: 2,
-    difficultyLabel: "Facil",
+    difficultyLabel: "Fácil",
     nome: "Natureza e estudo",
     nomeInfantil: "Bichos e escola",
     variacoes: [
@@ -39,7 +39,7 @@ export const memoryChallenges: MemoryChallenge[] = [
   },
   {
     id: 3,
-    difficultyLabel: "Menos facil",
+    difficultyLabel: "Menos fácil",
     nome: "Movimento e rotina",
     nomeInfantil: "Passeio do dia",
     variacoes: [
@@ -62,13 +62,13 @@ export const memoryChallenges: MemoryChallenge[] = [
     nomeInfantil: "Noite calma",
     variacoes: [
       ["lua", "estrela", "ceu", "noite", "nuvem"],
-      ["cometa", "sombra", "vento", "silencio", "brisa"],
+      ["cometa", "sombra", "vento", "silêncio", "brisa"],
       ["neblina", "lanterna", "constelacao", "sereno", "aurora"],
     ],
     variacoesInfantis: [
       ["lua", "estrela", "ceu", "sono", "nuvem"],
       ["vento", "luz", "coberta", "janela", "noite"],
-      ["sereno", "silencio", "lanterna", "cometa", "pijama"],
+      ["sereno", "silêncio", "lanterna", "cometa", "pijama"],
     ],
     tempoMemorizacao: 6,
     minimoParaConcluir: 4,
@@ -96,7 +96,7 @@ export const memoryChallenges: MemoryChallenge[] = [
 export const attentionChallenges: AttentionChallenge[] = [
   {
     id: 1,
-    difficultyLabel: "Muito facil",
+    difficultyLabel: "Muito fácil",
     nome: "Foco em triangulos",
     nomeInfantil: "Caça a letra T",
     variacoes: [
@@ -127,7 +127,7 @@ export const attentionChallenges: AttentionChallenge[] = [
   },
   {
     id: 2,
-    difficultyLabel: "Facil",
+    difficultyLabel: "Fácil",
     nome: "Busca por letras",
     nomeInfantil: "Caça a letra A",
     variacoes: [
@@ -158,7 +158,7 @@ export const attentionChallenges: AttentionChallenge[] = [
   },
   {
     id: 3,
-    difficultyLabel: "Menos facil",
+    difficultyLabel: "Menos fácil",
     nome: "Atenção seletiva",
     nomeInfantil: "Missao do número 7",
     variacoes: [
@@ -193,7 +193,7 @@ export const exclusiveChallenges: ExclusiveChallenge[] = [
   {
     id: 1,
     audience: "infantil",
-    difficultyLabel: "Muito facil",
+    difficultyLabel: "Muito fácil",
     nome: "Parada da Sequência",
     descricao: "Veja a sequência de figuras-palavra e toque na mesma ordem.",
     minimoParaConcluir: 3,
@@ -239,7 +239,7 @@ export const exclusiveChallenges: ExclusiveChallenge[] = [
         options: ["T5", "B1", "N6", "Z3", "Y4", "H2"],
       },
       {
-        prompt: "Nova rodada com mais interferencia visual.",
+        prompt: "Nova rodada com mais interferência visual.",
         sequence: ["C8", "P4", "D7", "S1", "V6"],
         revealSeconds: 7,
         options: ["C8", "P4", "D7", "S1", "V6", "W2", "F9"],
@@ -261,7 +261,7 @@ export const exclusiveChallenges: ExclusiveChallenge[] = [
         options: ["AX3", "Q7", "LM2", "R5", "TN8", "B4", "K9"],
       },
       {
-        prompt: "Mais densidade de informacao. Reconstrua a ordem completa.",
+        prompt: "Mais densidade de informação. Reconstrua a ordem completa.",
         sequence: ["M4", "PX8", "A2", "CZ7", "L9"],
         revealSeconds: 5,
         options: ["M4", "PX8", "A2", "CZ7", "L9", "T3", "H6"],
@@ -279,7 +279,7 @@ export const exclusiveChallenges: ExclusiveChallenge[] = [
 export const spatialChallenges: SpatialChallenge[] = [
   {
     id: 1,
-    difficultyLabel: "Muito facil",
+    difficultyLabel: "Muito fácil",
     nome: "Rota do explorador",
     nomeInfantil: "Caminho do robo",
     minimoParaConcluir: 3,
@@ -310,7 +310,7 @@ export const spatialChallenges: SpatialChallenge[] = [
   },
   {
     id: 2,
-    difficultyLabel: "Facil",
+    difficultyLabel: "Fácil",
     nome: "Mapa mental",
     nomeInfantil: "Mapa dos passos",
     minimoParaConcluir: 4,
@@ -341,7 +341,7 @@ export const spatialChallenges: SpatialChallenge[] = [
   },
   {
     id: 3,
-    difficultyLabel: "Menos facil",
+    difficultyLabel: "Menos fácil",
     nome: "Rotacao e destino",
     nomeInfantil: "Giro do foguete",
     minimoParaConcluir: 5,

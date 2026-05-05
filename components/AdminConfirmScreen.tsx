@@ -21,7 +21,7 @@ export function AdminConfirmScreen({ usuario, onBack, onConfirm }: AdminConfirmS
 
     const ok = await onConfirm(code.trim());
     if (!ok) {
-      setNotice("Código de confirmação invalido.");
+      setNotice("Código de confirmação inválido.");
     }
   }
 
@@ -30,7 +30,7 @@ export function AdminConfirmScreen({ usuario, onBack, onConfirm }: AdminConfirmS
       <section className="auth-card">
         <div className="hero-block">
           <div>
-            <p className="eyebrow">Confirmacao administrativa</p>
+            <p className="eyebrow">Confirmação administrativa</p>
             <h1>Confirme o acesso de admin</h1>
             <p className="muted">
               {usuario

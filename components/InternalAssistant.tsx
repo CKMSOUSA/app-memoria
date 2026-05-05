@@ -53,7 +53,7 @@ export function InternalAssistant({
     if (objective === "memoria") {
       return {
         title: "Sugestão para memória",
-        summary: `O diagnostico atual indica comecar em ${diagnostic.starters.find((item) => item.mode === "memoria")?.challengeName ?? "memoria"} e combinar com memória visual quando possivel.`,
+        summary: `O diagnóstico atual indica começar em ${diagnostic.starters.find((item) => item.mode === "memoria")?.challengeName ?? "memoria"} e combinar com memória visual quando possível.`,
         actionMode: "memoria" as const,
         actionLabel: "Abrir memória",
       };

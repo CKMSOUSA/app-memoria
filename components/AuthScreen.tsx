@@ -60,7 +60,7 @@ export function AuthScreen({
     startTransition(async () => {
       const user = await onLogin(email, senha);
       if (!user) {
-        setMensagem("Email ou senha invalidos.");
+        setMensagem("Email ou senha inválidos.");
       } else {
         setMensagem("");
       }

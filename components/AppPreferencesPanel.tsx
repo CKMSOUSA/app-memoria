@@ -33,10 +33,10 @@ function SettingToggle({
 }
 
 function getOfflineSummary(isOffline: boolean, offlineSyncStatus: OfflineSyncStatus) {
-  if (!offlineSyncStatus.isSupported) return "Offline basico no navegador atual";
+  if (!offlineSyncStatus.isSupported) return "Offline básico no navegador atual";
   if (offlineSyncStatus.isSyncing) return "Sincronizando dados salvos offline";
   if (isOffline && offlineSyncStatus.pendingCount > 0) {
-    return `${offlineSyncStatus.pendingCount} acao(oes) aguardando envio`;
+    return `${offlineSyncStatus.pendingCount} ação(oes) aguardando envio`;
   }
   if (isOffline) return "Modo offline ativo";
   if (offlineSyncStatus.pendingCount > 0) return `${offlineSyncStatus.pendingCount} item(ns) aguardando sincronizacao`;

@@ -77,9 +77,9 @@ const processReflectionPrompts = [
   "Que significado você quer colocar no que vai fazer agora?",
   "O que você nota no seu corpo quando para por alguns segundos?",
   "Que escolha simples pode deixar este momento mais consciente?",
-  "Qual foi a melhor parte do seu dia ate agora?",
+  "Qual foi a melhor parte do seu dia até agora?",
   "O que você gostaria de entender melhor sobre si mesmo?",
-  "Que coisa pequena merece sua gratidao neste momento?",
+  "Que coisa pequena merece sua gratidão neste momento?",
   "O que você pode fazer com mais calma hoje?",
   "Qual sentimento está mais presente agora?",
   "Que pensamento você pode deixar passar sem brigar com ele?",
@@ -90,17 +90,17 @@ const processReflectionPrompts = [
   "O que você aprendeu recentemente sobre esperar?",
   "Que pequena decisão pode melhorar seu próximo momento?",
   "O que você está sentindo que ainda não colocou em palavras?",
-  "Qual barulho ou silencio você percebe agora?",
+  "Qual barulho ou silêncio você percebe agora?",
   "O que seu corpo parece estar pedindo neste instante?",
-  "Que coisa você pode fazer com mais presenca?",
+  "Que coisa você pode fazer com mais presença?",
   "Qual pensamento está tentando correr na sua frente?",
   "O que fica mais claro quando você respira devagar?",
-  "Que valor você quer praticar nos proximos minutos?",
+  "Que valor você quer praticar nos próximos minutos?",
   "O que você pode aceitar por enquanto?",
   "Qual cuidado simples você pode ter consigo hoje?",
   "O que você quer soltar antes de continuar?",
   "Que parte de você precisa de gentileza agora?",
-  "O que mudou dentro de você desde o comeco do dia?",
+  "O que mudou dentro de você desde o começo do dia?",
   "Qual lembranca boa pode te acompanhar por alguns segundos?",
   "O que você quer perceber melhor ao seu redor?",
   "Que pequena coisa está funcionando bem hoje?",
@@ -117,22 +117,22 @@ const processReflectionPrompts = [
   "Que sensacao aparece quando você não precisa responder logo?",
   "O que você gostaria de cuidar com mais carinho?",
   "Qual pensamento pode esperar mais um pouco?",
-  "O que você quer fazer com mais intencao?",
+  "O que você quer fazer com mais intenção?",
   "Que qualidade você quer trazer para este momento?",
-  "O que você percebe quando escuta sua propria respiracao?",
+  "O que você percebe quando escuta sua própria respiração?",
   "Qual parte do seu corpo está mais relaxada agora?",
   "Qual parte do seu corpo está pedindo atenção?",
   "O que você pode notar sem julgar?",
-  "Que coisa simples pode te ajudar a recomecar?",
+  "Que coisa simples pode te ajudar a recomeçar?",
   "O que você quer lembrar sobre o valor da pausa?",
-  "Qual emocao merece espaco sem pressa?",
+  "Qual emoção merece espaço sem pressa?",
   "O que você pode fazer hoje que tenha significado?",
   "Que tipo de pessoa você quer ser no próximo gesto?",
   "O que você está tentando controlar demais?",
   "O que você pode deixar acontecer no seu tempo?",
   "Que pensamento te aproxima de uma escolha melhor?",
   "O que você pode observar no intervalo entre uma ideia e outra?",
-  "Qual foi uma pequena vitoria recente?",
+  "Qual foi uma pequena vitória recente?",
   "O que você quer aprender com este momento de espera?",
   "Que coisa importante não precisa ser resolvida agora?",
   "O que você pode fazer com mais leveza?",
@@ -142,7 +142,7 @@ const processReflectionPrompts = [
   "Qual cuidado você ofereceria a um amigo neste momento?",
   "Você pode oferecer esse mesmo cuidado a si mesmo?",
   "O que você quer fazer devagar para fazer melhor?",
-  "Qual habito você quer fortalecer aos poucos?",
+  "Qual hábito você quer fortalecer aos poucos?",
   "O que você pode escolher mesmo quando existe pressa?",
   "Que coisa te ajuda a voltar para o presente?",
   "O que você nota no seu rosto quando para por alguns segundos?",
@@ -170,7 +170,7 @@ const processReflectionPrompts = [
   "Qual direção você quer dar para sua atenção?",
   "O que você percebe quando não precisa provar nada?",
   "Que parte da sua rotina pode ganhar mais sentido?",
-  "O que você quer fazer porque importa, não porque e urgente?",
+  "O que você quer fazer porque importa, não porque é urgente?",
   "O que você pode respeitar no seu próprio ritmo?",
 ];
 
@@ -241,7 +241,7 @@ function ProgressList({
       <div className="section-head">
         <h3>{title}</h3>
         <span className="small-muted">
-          {Object.values(progressMap).filter((item) => item.completed).length}/{challenges.length} concluidos
+          {Object.values(progressMap).filter((item) => item.completed).length}/{challenges.length} concluídos
         </span>
       </div>
 
@@ -257,7 +257,7 @@ function ProgressList({
                   {`Fase ${challenge.id} - ${challenge.difficultyLabel}: ${challenge.nome}`}
                 </p>
                 <p className="small-muted">
-                  {unlocked ? "Liberado" : "Bloqueado ate concluir o anterior"} · Melhor score {progress.bestScore}
+                  {unlocked ? "Liberado" : "Bloqueado até concluir o anterior"} · Melhor score {progress.bestScore}
                 </p>
               </div>
               <span className={`pill ${progress.completed ? "pill-success" : unlocked ? "pill-neutral" : "pill-locked"}`}>
@@ -414,7 +414,7 @@ function SyncStatusCard({
     : hasError
       ? offlineSyncStatus.lastError ?? "Falha ao sincronizar os dados recentes."
       : pendingCount > 0
-        ? `${pendingCount} alteracao(oes) aguardando envio para o modo online.`
+        ? `${pendingCount} alteração(ões) aguardando envio para o modo online.`
         : formatSyncTimestamp(offlineSyncStatus.lastSyncedAt);
 
   return (
@@ -876,7 +876,7 @@ function PrescriptionPanel({
             <p className="small-muted">{`${item.challengeName} · ${item.objective}`}</p>
             {usuario.role === "aluno" && item.status === "pendente" ? (
               <button className="btn btn-secondary" onClick={() => void onUpdateStatus(item.id, "concluida")}>
-                Marcar como concluida
+                Marcar como concluída
               </button>
             ) : null}
           </div>
@@ -896,7 +896,7 @@ function ComparativeCard({
   return (
     <section className="panel">
       <div className="section-head">
-        <h3>Comparativo por periodo</h3>
+        <h3>Comparativo por período</h3>
         <button className="btn btn-secondary btn-export-report" onClick={onExport}>
           Exportar comparativo
         </button>
@@ -965,7 +965,7 @@ function ObservationTimeline({
             </article>
           ))
         ) : (
-          <p className="small-muted">Ainda não há observações clinicas ou pedagogicas para este perfil.</p>
+          <p className="small-muted">Ainda não há observações clínicas ou pedagógicas para este perfil.</p>
         )}
       </div>
     </section>
@@ -1082,10 +1082,10 @@ export function Dashboard({
           : `Retomar ${getSessionModeLabel(latestSession.mode)}`,
         summary: latestSession.completed
           ? `${smartRecommendation.reason} Seu foco atual esta alinhado com ${getGoalLabel(usuario.goal)}.`
-          : `Sua ultima sessao ficou em ${getSessionModeLabel(latestSession.mode)} na fase ${latestSession.challengeId}. Retome enquanto o contexto ainda esta fresco.`,
+          : `Sua última sessão ficou em ${getSessionModeLabel(latestSession.mode)} na fase ${latestSession.challengeId}. Retome enquanto o contexto ainda está fresco.`,
         highlight: latestSession.completed
           ? `${smartRecommendation.challengeName} · ${getGoalLabel(usuario.goal)} · ${usuario.weeklyAvailability ?? 3} dia(s)/semana`
-          : `Fase ${latestSession.challengeId} · score ${latestSession.score} · ${latestSession.completed ? "concluida" : "em aberto"}`,
+          : `Fase ${latestSession.challengeId} · score ${latestSession.score} · ${latestSession.completed ? "concluída" : "em aberto"}`,
       }
     : {
         mode: smartRecommendation.mode,
@@ -1100,7 +1100,7 @@ export function Dashboard({
       generatedAt: new Date().toLocaleString("pt-BR"),
       summary: [
         { label: "Sessões", value: String(resumo.totalSessions), caption: "Rodadas registradas no histórico" },
-        { label: "Concluidas", value: String(resumo.completedSessions), caption: "Sessões com meta atingida" },
+        { label: "Concluídas", value: String(resumo.completedSessions), caption: "Sessões com meta atingida" },
         { label: "Média", value: String(resumo.averageScore), caption: "Pontuação média por sessão" },
         {
           label: "Modo forte",
@@ -1354,7 +1354,7 @@ export function Dashboard({
         <section className="panel dashboard-tabs-panel">
           <div className="section-head">
             <h3>Navegacao rápida</h3>
-            <span className="small-muted">Abra só o grupo de informacoes que você quer ver agora</span>
+            <span className="small-muted">Abra só o grupo de informações que você quer ver agora</span>
           </div>
           <div className="dashboard-tabs" role="tablist" aria-label="Abas do dashboard">
             {dashboardTabs.map((tab) => (
@@ -1378,7 +1378,7 @@ export function Dashboard({
             <article className="process-reflection-card" aria-live="polite">
               <div>
                 <p className="small-muted process-reflection-label">Pausa de reflexão</p>
-                <h3>{reflectionComplete ? "Pausa concluida" : `${reflectionSecondsLeft}s para pensar`}</h3>
+                <h3>{reflectionComplete ? "Pausa concluída" : `${reflectionSecondsLeft}s para pensar`}</h3>
                 <p className="muted process-reflection-question">{reflectionPrompt}</p>
               </div>
               <div className="process-reflection-meter" aria-label={`${reflectionSecondsLeft} segundos restantes`}>
@@ -1402,7 +1402,7 @@ export function Dashboard({
         {activeDashboardTab === "progresso" ? (
           <section className="panel metrics-panel">
           <div className="section-head">
-            <h3>{`Resumo do treino: Status ${usuario.premium ? "Premium" : "Basico"}`}</h3>
+            <h3>{`Resumo do treino: Status ${usuario.premium ? "Premium" : "Básico"}`}</h3>
             <span className="small-muted">Indicadores principais do desempenho atual</span>
           </div>
           <div className="metrics-strip">
@@ -1435,7 +1435,7 @@ export function Dashboard({
             <CompactMetricCard
               label="Atenção"
               value={`${atencaoRate}%`}
-              caption="Percentual de desafios concluidos em foco seletivo"
+              caption="Percentual de desafios concluídos em foco seletivo"
             />
             <CompactMetricCard
               label="Comparação"
@@ -1622,7 +1622,7 @@ export function Dashboard({
               <div className="section-head">
                 <h3>Relatório de desempenho</h3>
                 <div className="section-head-actions">
-                  <span className="small-muted">Resumo automatico das suas sessões</span>
+                  <span className="small-muted">Resumo automático das suas sessões</span>
                   <button className="btn btn-secondary btn-export-report" onClick={handleExportPdf}>
                     Exportar PDF
                   </button>
@@ -1630,7 +1630,7 @@ export function Dashboard({
               </div>
               <div className="stats-grid">
                 <StatCard label="Sessões" value={String(resumo.totalSessions)} caption="Rodadas registradas no histórico" />
-                <StatCard label="Concluidas" value={String(resumo.completedSessions)} caption="Sessões com meta atingida" />
+                <StatCard label="Concluídas" value={String(resumo.completedSessions)} caption="Sessões com meta atingida" />
                 <StatCard label="Média" value={String(resumo.averageScore)} caption="Pontuação média por sessão" />
                 <StatCard label="Modo forte" value={getSessionModeLabel(resumo.strongestMode)} caption="Trilha com melhor desempenho acumulado" />
               </div>
@@ -1765,7 +1765,7 @@ export function Dashboard({
               title="Trilha Adulta"
               audience="adulto"
               currentAudience={currentAudience}
-              description="Mais densidade de informacao, menos tempo e metas mais exigentes por fase."
+              description="Mais densidade de informação, menos tempo e metas mais exigentes por fase."
             />
           </div>
         </DisclosureSection>
@@ -1846,9 +1846,9 @@ export function Dashboard({
             </div>
             <ul className="clean-list">
               <li>{`Prioridade principal: ${smartRecommendation.challengeName} em ${getSessionModeLabel(smartRecommendation.mode)}`}</li>
-              <li>{`Memoria: priorize "${memoriaRecomendada?.nome ?? "primeiro desafio"}" na proxima sessao`}</li>
-              <li>{`Atencao: priorize "${atencaoRecomendada?.nome ?? "primeiro desafio"}" para variar o treino`}</li>
-              <li>{`Comparacao: priorize "${comparacaoRecomendada?.nome ?? "primeiro desafio"}" para ampliar o raciocinio comparativo`}</li>
+              <li>{`Memória: priorize "${memoriaRecomendada?.nome ?? "primeiro desafio"}" na próxima sessão`}</li>
+              <li>{`Atenção: priorize "${atencaoRecomendada?.nome ?? "primeiro desafio"}" para variar o treino`}</li>
+              <li>{`Comparação: priorize "${comparacaoRecomendada?.nome ?? "primeiro desafio"}" para ampliar o raciocínio comparativo`}</li>
               <li>As fases liberam em ordem, entao concluir bem a atual ajuda a manter a trilha pedagógica</li>
             </ul>
           </div>
@@ -1887,7 +1887,7 @@ export function Dashboard({
 
         <DisclosureSection
           title="Trilhas tematicas"
-          caption="Atalhos prontos para foco escolar, agilidade mental, reabilitacao e desafio elite"
+          caption="Atalhos prontos para foco escolar, agilidade mental, reabilitação e desafio elite"
         >
           <div className="engagement-grid">
             {themedTracks.map((track) => (
@@ -1969,7 +1969,7 @@ export function Dashboard({
                 onClick={() => setActiveTrailTab(trail.id)}
               >
                 <span className="trail-tab-label">{trail.label}</span>
-                <span className="trail-tab-rate">{trail.rate}% concluidos</span>
+                <span className="trail-tab-rate">{trail.rate}% concluídos</span>
               </button>
             ))}
           </div>

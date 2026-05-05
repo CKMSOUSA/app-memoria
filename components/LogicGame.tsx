@@ -232,7 +232,7 @@ export function LogicGame({
             <h1>{isAdvancedMode ? "Lógica em nível extremo" : "Descubra a regra e escolha o próximo termo"}</h1>
             <p className="muted">
               {isAdvancedMode
-                ? "As fases avançadas combinam duas ou tres regras ao mesmo tempo e reduzem a margem para resposta por impulso."
+                ? "As fases avançadas combinam duas ou três regras ao mesmo tempo e reduzem a margem para resposta por impulso."
                 : "Essa trilha trabalha raciocínio sequencial, padrões e previsão de próximo passo."}
             </p>
           </div>
@@ -286,11 +286,11 @@ export function LogicGame({
                 { label: "Erros", value: String(review.mistakes.length) },
                 { label: "Sequencias", value: String(activeRounds.length) },
               ]}
-              note="Leia a explicacao correta depois de cada rodada. Isso ajuda a reconhecer o padrão com mais rapidez na proxima tentativa."
+              note="Leia a explicação correta depois de cada rodada. Isso ajuda a reconhecer o padrão com mais rapidez na próxima tentativa."
             />
             {!review.completed && review.mistakes.length > 0 ? (
               <p className="review-note">
-                {`Onde errou: a(s) sequência(s) ${review.mistakes.map((item) => item + 1).join(", ")} precisam de revisao. Veja a regra explicada em cada card.`}
+                {`Onde errou: a(s) sequência(s) ${review.mistakes.map((item) => item + 1).join(", ")} precisam de revisão. Veja a regra explicada em cada card.`}
               </p>
             ) : null}
 
@@ -300,7 +300,7 @@ export function LogicGame({
                 const correct = review.hits.includes(index);
                 return (
                   <div key={`${round.prompt}-${index}`} className={`review-column ${correct ? "review-good" : "review-bad"}`}>
-                    <strong>{`Sequencia ${index + 1}`}</strong>
+                    <strong>{`Sequência ${index + 1}`}</strong>
                     <span>{round.sequence.join(" - ")}</span>
                     <span>{`Sua resposta: ${userAnswer ?? "sem resposta"}`}</span>
                     <span>{`Correta: ${round.correctAnswer}`}</span>
@@ -337,11 +337,11 @@ export function LogicGame({
                   "Clique em Iniciar rodada para abrir a serie de sequências.",
                   "Leia a sequência com calma e procure a regra de repetição, crescimento ou alternancia.",
                   "Escolha a melhor opção para completar a sequência.",
-                  "Ao final, compare sua resposta com a explicacao correta.",
+                  "Ao final, compare sua resposta com a explicação correta.",
                 ]}
                 tip={
                   isAdvancedMode
-                    ? "Nos testes avancados, procure mais de uma regra. Se uma explicacao parecer simples demais, provavelmente há outra camada."
+                    ? "Nos testes avançados, procure mais de uma regra. Se uma explicação parecer simples demais, provavelmente há outra camada."
                     : "Nem toda sequência cresce de 1 em 1. Algumas alternam, dobram ou pulam letras."
                 }
                 isChild={!isAdvancedMode && usuario.idade <= 10}

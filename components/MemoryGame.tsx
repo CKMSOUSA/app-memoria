@@ -377,7 +377,7 @@ export function MemoryGame({
                     ? "Excelente. Agora tente repetir mantendo a mesma precisão."
                     : review.missedWords.length > 0
                       ? `Onde errou: faltou lembrar ${review.missedWords.length} figura(s). Observe a coluna "Faltaram" antes de tentar de novo.`
-                      : "Onde errou: havia selecao extra. Compare os erros marcados com as figuras corretas."
+                      : "Onde errou: havia seleção extra. Compare os erros marcados com as figuras corretas."
                 }
               />
 

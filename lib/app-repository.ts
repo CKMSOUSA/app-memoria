@@ -1095,7 +1095,7 @@ const remoteRepository: AppRepository = {
   loadAdminOverview: async (adminCode) => {
     const overview = await loadAdminOverviewFromApi(adminCode);
     if (!overview) {
-      throw new Error("Não foi possível carregar a visao administrativa online.");
+      throw new Error("Não foi possível carregar a visão administrativa online.");
     }
     return overview;
   },

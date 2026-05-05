@@ -281,7 +281,7 @@ export function AdminScreen({
   }
 
   const panelOptions: Array<{ id: AdminPanelOption; label: string; caption: string }> = [
-    { id: "visao-geral", label: "Visao geral", caption: "Riscos, indicadores e rankings" },
+    { id: "visao-geral", label: "Visão geral", caption: "Riscos, indicadores e rankings" },
     { id: "usuarios", label: "Usuários", caption: "Busca, bloqueio e acompanhamento" },
     { id: "ajuda", label: "Ajuda", caption: "Mensagens e respostas" },
     { id: "rotinas", label: "Rotinas", caption: "Turmas, vínculos e prescrições" },
@@ -375,7 +375,7 @@ export function AdminScreen({
                     if (!confirmed) return;
 
                     const finalConfirmed = window.confirm(
-                      "Confirmacao final: apenas as contas administrativas serao mantidas. Deseja continuar?",
+                      "Confirmação final: apenas as contas administrativas serão mantidas. Deseja continuar?",
                     );
                     if (!finalConfirmed) return;
 
@@ -485,7 +485,7 @@ export function AdminScreen({
                 if (!confirmed) return;
 
                 const finalConfirmed = window.confirm(
-                  "Confirmacao final: apenas as contas administrativas serao mantidas. Deseja continuar?",
+                  "Confirmação final: apenas as contas administrativas serão mantidas. Deseja continuar?",
                 );
                 if (!finalConfirmed) return;
 
@@ -514,7 +514,7 @@ export function AdminScreen({
           <article className="stat-card">
             <p className="small-muted">Sessões registradas</p>
             <h3>{normalizedHistories.reduce((sum, item) => sum + item.history.length, 0)}</h3>
-            <p className="muted">Cada rodada concluida gera um registro para relatorios.</p>
+            <p className="muted">Cada rodada concluída gera um registro para relatórios.</p>
           </article>
           <article className="stat-card">
             <p className="small-muted">Conclusões totais</p>
@@ -723,7 +723,7 @@ export function AdminScreen({
               >
                 <option value="todas">Todas</option>
                 <option value="pendente">Pendentes</option>
-                <option value="concluida">Concluidas</option>
+                <option value="concluida">Concluídas</option>
               </select>
             </label>
           </div>
@@ -822,7 +822,7 @@ export function AdminScreen({
         {activePanel === "rotinas" ? (
         <section className="panel admin-class-panel">
           <div className="section-head">
-            <h3>Visao por turma</h3>
+            <h3>Visão por turma</h3>
             <span className="small-muted">{turmaSummaries.length} grupo(s) cadastrados na base administrativa</span>
           </div>
           {turmaSummaries.length > 0 ? (
@@ -839,10 +839,10 @@ export function AdminScreen({
                   <div className="admin-class-metrics">
                     <span>{`${turma.alunos} aluno(s)`}</span>
                     <span>{`${turma.professores} professor(es)`}</span>
-                    <span>{`${turma.responsaveis} responsavel(is)`}</span>
+                    <span>{`${turma.responsaveis} responsável(is)`}</span>
                     {turma.admins > 0 ? <span>{`${turma.admins} admin`}</span> : null}
                   </div>
-                  <p className="muted">{`Media consolidada da turma: ${turma.averageScore} pontos.`}</p>
+                  <p className="muted">{`Média consolidada da turma: ${turma.averageScore} pontos.`}</p>
                   <p className="small-muted">
                     {turma.latestActivity
                       ? `Ultima atividade registrada em ${new Date(turma.latestActivity).toLocaleDateString("pt-BR")}.`
@@ -954,12 +954,12 @@ export function AdminScreen({
                   </div>
 
                   <div className="admin-progress-grid">
-                    <span>{`Memoria ${getCompletionRate(effectiveProgress.memoria)}%`}</span>
+                    <span>{`Memória ${getCompletionRate(effectiveProgress.memoria)}%`}</span>
                     <span>{`Visual ${getCompletionRate(effectiveProgress.visual)}%`}</span>
-                    <span>{`Atencao ${getCompletionRate(effectiveProgress.atencao)}%`}</span>
-                    <span>{`Comparacao ${getCompletionRate(effectiveProgress.comparacao)}%`}</span>
+                    <span>{`Atenção ${getCompletionRate(effectiveProgress.atencao)}%`}</span>
+                    <span>{`Comparação ${getCompletionRate(effectiveProgress.comparacao)}%`}</span>
                     <span>{`Espacial ${getCompletionRate(effectiveProgress.espacial)}%`}</span>
-                    <span>{`Logica ${getCompletionRate(effectiveProgress.logica)}%`}</span>
+                    <span>{`Lógica ${getCompletionRate(effectiveProgress.logica)}%`}</span>
                     <span>{`Exclusiva ${getCompletionRate(effectiveProgress.especial)}%`}</span>
                   </div>
 
@@ -998,7 +998,7 @@ export function AdminScreen({
                             placeholder={
                               category === "clinica"
                                 ? "Registre sinais clínicos, adaptações ou pontos de atenção."
-                                : "Registre estrategias pedagogicas, resposta a atividade e proximos passos."
+                                : "Registre estratégias pedagógicas, resposta a atividade e próximos passos."
                             }
                           />
                           {savedObservation ? (
@@ -1136,7 +1136,7 @@ export function AdminScreen({
         <section className="panel">
           <div className="section-head">
             <h3>Agenda e prescrições do produto</h3>
-            <span className="small-muted">{`${reminders.length} rotina(s) e ${prescriptions.length} sessao(oes) prescrita(s)`}</span>
+            <span className="small-muted">{`${reminders.length} rotina(s) e ${prescriptions.length} sessão(ões) prescrita(s)`}</span>
           </div>
           <div className="admin-alert-grid">
             <article className="admin-class-card">

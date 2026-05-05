@@ -12,7 +12,7 @@ type AdvancedTestsPanelProps = {
 const advancedTracks = [
   {
     title: "Memória",
-    description: "Listas longas, interferencia semântica e códigos muito parecidos.",
+    description: "Listas longas, interferência semântica e códigos muito parecidos.",
   },
   {
     title: "Atenção",
@@ -28,7 +28,7 @@ const advancedTracks = [
   },
   {
     title: "Lógica",
-    description: "Series compostas por duas ou tres regras simultaneas, em nível extremo.",
+    description: "Séries compostas por duas ou três regras simultâneas, em nível extremo.",
   },
 ];
 

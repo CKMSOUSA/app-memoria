@@ -237,7 +237,7 @@ function describeAbilitySummary(title: string, score: number, strongestModeLabel
   if (score >= 48) {
     return `${title} está estável, mas ainda pode ganhar consistencia quando você alterna com ${weakestModeLabel.toLowerCase()}.`;
   }
-  return `${title} pede reforco imediato. O padrao recente indica revisar ${weakestModeLabel.toLowerCase()} com mais frequencia.`;
+  return `${title} pede reforço imediato. O padrão recente indica revisar ${weakestModeLabel.toLowerCase()} com mais frequência.`;
 }
 
 export function getAbilityInsights(history: SessionRecord[], progresso: ProgressState): AbilityInsight[] {
@@ -476,7 +476,7 @@ export function getSmartRecommendation(history: SessionRecord[], progresso: Prog
   const objectiveByMode: Record<CoreMode, string> = {
     memoria: "Reforçar memória de trabalho com evocação curta e mais precisa.",
     visual: "Reforçar memória visual e localização com menos dispersao.",
-    atencao: "Reduzir erro recorrente de selecao e melhorar constância de foco.",
+    atencao: "Reduzir erro recorrente de seleção e melhorar constância de foco.",
     comparacao: "Estabilizar critério de decisão antes de subir a velocidade.",
     espacial: "Reconstruir sequencias espaciais com mais seguranca.",
     logica: "Recuperar leitura de regra e previsão de padrão com menos impulsividade.",
@@ -568,7 +568,7 @@ export function getEngagementMissions(history: SessionRecord[], progresso: Progr
       cadence: "diaria",
       title: "Missao diaria de arranque",
       summary: "Concluir uma sessão curta no dia para manter frequência e reduzir abandono.",
-      progressLabel: `${Math.min(todayCompleted, 1)}/1 sessao concluida hoje`,
+      progressLabel: `${Math.min(todayCompleted, 1)}/1 sessão concluída hoje`,
       completed: todayCompleted >= 1,
       primaryMode: recommendation.mode,
     },
@@ -594,7 +594,7 @@ export function getEngagementMissions(history: SessionRecord[], progresso: Progr
       id: "weekly-consistency",
       cadence: "semanal",
       title: "Missao semanal de consistencia",
-      summary: "Completar pelo menos tres sessões na semana e manter score médio em crescimento.",
+      summary: "Completar pelo menos três sessões na semana e manter score médio em crescimento.",
       progressLabel: `${Math.min(weeklyCompleted, 3)}/3 sessões concluídas · média ${weeklyAverage}`,
       completed: weeklyCompleted >= 3,
       primaryMode: "memoria",
@@ -716,7 +716,7 @@ export function getCooperativeCycle(
   const cadence =
     weeklyTrend?.direction === "caindo"
       ? "Acompanhar duas vezes nesta semana, com revisão curta apos cada sessão."
-      : "Acompanhar uma vez por semana e revisar o bloco concluido no mesmo dia.";
+      : "Acompanhar uma vez por semana e revisar o bloco concluído no mesmo dia.";
 
   return {
     title: "Modo cooperativo guiado",

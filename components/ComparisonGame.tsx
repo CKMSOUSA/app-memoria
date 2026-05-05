@@ -317,7 +317,7 @@ export function ComparisonGame({
                     key={`${round.left}-${round.right}-${index}`}
                     className={`review-column ${correct ? "review-good" : "review-bad"}`}
                   >
-                    <strong>{`Comparacao ${index + 1}`}</strong>
+                    <strong>{`Comparação ${index + 1}`}</strong>
                     <span>{`${round.left} x ${round.right}`}</span>
                     <span>{`Sua resposta: ${userAnswer === "left" ? round.left : userAnswer === "right" ? round.right : "sem resposta"}`}</span>
                     <span>{`Correta: ${round.correct === "left" ? round.left : round.right}`}</span>
@@ -463,7 +463,7 @@ export function ComparisonGame({
               </div>
 
               <p className="muted comparison-helper">
-                Clique na opção correta para passar para a proxima comparação.
+                Clique na opção correta para passar para a próxima comparação.
               </p>
             </section>
           </div>

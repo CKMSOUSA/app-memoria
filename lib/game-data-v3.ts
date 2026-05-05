@@ -9,9 +9,9 @@ import type {
 } from "@/lib/types";
 
 const PHASE_LABELS_15 = [
-  "Muito facil",
-  "Facil",
-  "Menos facil",
+  "Muito fácil",
+  "Fácil",
+  "Menos fácil",
   "Intermediária",
   "Intermediária plus",
   "Desafiadora",
@@ -27,9 +27,9 @@ const PHASE_LABELS_15 = [
 ];
 
 const PHASE_LABELS_10 = [
-  "Muito facil",
-  "Facil",
-  "Menos facil",
+  "Muito fácil",
+  "Fácil",
+  "Menos fácil",
   "Intermediária",
   "Intermediária plus",
   "Desafiadora",
@@ -68,8 +68,8 @@ const memorySeeds: MemorySeed[] = [
   {
     nome: "Cenario noturno",
     nomeInfantil: "Noite calma",
-    adulto: [["lua", "estrela", "ceu", "noite", "nuvem"], ["cometa", "sombra", "vento", "silencio", "brisa"], ["neblina", "lanterna", "constelacao", "sereno", "aurora"]],
-    infantil: [["lua", "estrela", "ceu", "sono", "nuvem"], ["vento", "luz", "coberta", "janela", "noite"], ["sereno", "silencio", "lanterna", "cometa", "pijama"]],
+    adulto: [["lua", "estrela", "céu", "noite", "nuvem"], ["cometa", "sombra", "vento", "silêncio", "brisa"], ["neblina", "lanterna", "constelação", "sereno", "aurora"]],
+    infantil: [["lua", "estrela", "céu", "sono", "nuvem"], ["vento", "luz", "coberta", "janela", "noite"], ["sereno", "silêncio", "lanterna", "cometa", "pijama"]],
   },
   {
     nome: "Cores em foco",
@@ -93,7 +93,7 @@ const memorySeeds: MemorySeed[] = [
     nome: "Praia e clima",
     nomeInfantil: "Dia de sol",
     adulto: [["mar", "areia", "guarda-sol", "onda", "toalha"], ["concha", "vento", "quiosque", "protetor", "calor"], ["piscina", "boia", "brisa", "cadeira", "horizonte"]],
-    infantil: [["sol", "mar", "areia", "bola", "toalha"], ["balde", "boia", "onda", "suco", "pazinha"], ["concha", "vento", "oculos", "agua", "castelo"]],
+    infantil: [["sol", "mar", "areia", "bola", "toalha"], ["balde", "boia", "onda", "suco", "pazinha"], ["concha", "vento", "oculos", "água", "castelo"]],
   },
   {
     nome: "Escritório e trabalho",
@@ -128,8 +128,8 @@ const memorySeeds: MemorySeed[] = [
   {
     nome: "Corpo e saúde",
     nomeInfantil: "Cuidando do corpo",
-    adulto: [["sono", "agua", "fruta", "consulta", "passos"], ["respiracao", "alongamento", "energia", "saúde", "descanso"], ["vitamina", "corrida", "exame", "rotina", "equilibrio"]],
-    infantil: [["agua", "fruta", "sono", "pulo", "banho"], ["escova", "suco", "correr", "sorriso", "leite"], ["maca", "brinca", "dorme", "medico", "toalha"]],
+    adulto: [["sono", "água", "fruta", "consulta", "passos"], ["respiração", "alongamento", "energia", "saúde", "descanso"], ["vitamina", "corrida", "exame", "rotina", "equilíbrio"]],
+    infantil: [["água", "fruta", "sono", "pulo", "banho"], ["escova", "suco", "correr", "sorriso", "leite"], ["maca", "brinca", "dorme", "medico", "toalha"]],
   },
   {
     nome: "Tecnologia e casa conectada",
@@ -140,7 +140,7 @@ const memorySeeds: MemorySeed[] = [
 ];
 
 const functionalAdultMemorySets = [
-  ["remedio", "agua", "cafe", "agenda", "chave"],
+  ["remedio", "água", "cafe", "agenda", "chave"],
   ["consulta", "documento", "oculos", "telefone", "carteira"],
   ["mercado", "lista", "leite", "fruta", "troco"],
   ["conta", "senha", "banco", "cartao", "recibo"],
@@ -153,7 +153,7 @@ const functionalAdultMemorySets = [
   ["cozinha", "geladeira", "validade", "etiqueta", "pote"],
   ["compromisso", "hora", "local", "contato", "mensagem"],
   ["pagamento", "boleto", "vencimento", "valor", "comprovante"],
-  ["rotina", "caminhada", "agua", "alongamento", "descanso"],
+  ["rotina", "caminhada", "água", "alongamento", "descanso"],
   ["emergencia", "telefone", "vizinho", "chave", "documento"],
 ];
 
@@ -218,7 +218,7 @@ function buildVisualVariation(baseItems: string[], extraItems: string[]) {
 export const visualChallenges: VisualMemoryChallenge[] = visualSets.map((items, index) => ({
   id: index + 1,
   difficultyLabel: PHASE_LABELS_15[index],
-  nome: `Memoria visual ${index + 1}`,
+  nome: `Memória visual ${index + 1}`,
   nomeInfantil:
     index < 5
       ? index % 2 === 0
@@ -366,9 +366,9 @@ const comparisonSeeds: ComparisonSeed[] = [
     ],
   },
   {
-    nome: "Ordem alfabetica inicial",
+    nome: "Ordem alfabética inicial",
     nomeInfantil: "Qual vem primeiro?",
-    prompt: "Escolha a palavra que vem primeiro na ordem alfabetica.",
+    prompt: "Escolha a palavra que vem primeiro na ordem alfabética.",
     promptInfantil: "Toque na palavra que vem primeiro no alfabeto.",
     pairs: [
       { left: "abelha", right: "tigre", correct: "left", explanation: "\"abelha\" vem antes de \"tigre\"." },
@@ -377,9 +377,9 @@ const comparisonSeeds: ComparisonSeed[] = [
     ],
   },
   {
-    nome: "Ordem alfabetica final",
+    nome: "Ordem alfabética final",
     nomeInfantil: "Qual vem depois?",
-    prompt: "Escolha a palavra que vem depois na ordem alfabetica.",
+    prompt: "Escolha a palavra que vem depois na ordem alfabética.",
     promptInfantil: "Toque na palavra que vem depois no alfabeto.",
     pairs: [
       { left: "barco", right: "casa", correct: "right", explanation: "\"casa\" vem depois de \"barco\"." },
@@ -512,7 +512,7 @@ export const comparisonChallenges: ComparisonChallenge[] = comparisonSeeds.map((
   nomeInfantil: seed.nomeInfantil,
   variacoes: [0, 1, 2, 3, 4].map((variation) => ({
     prompt: seed.prompt,
-    promptInfantil: `${seed.promptInfantil} Para criancas pequenas, o app tambem usa figuras geometricas e conjuntos visuais.`,
+    promptInfantil: `${seed.promptInfantil} Para crianças pequenas, o app também usa figuras geométricas e conjuntos visuais.`,
     rounds: rotatePairs(seed.pairs, variation),
     roundsAte10: rotatePairs(buildShapeRounds(index), variation),
   })),
@@ -580,7 +580,7 @@ const exclusiveInfantil: ExclusiveSeed[] = [
 const exclusiveAdolescente: ExclusiveSeed[] = [
   { nome: "Código 1", descricao: "Sequencias curtas de códigos e símbolos.", sequencias: [["A7", "K2", "M9", "R4"], ["T5", "B1", "N6", "Z3"], ["C8", "P4", "D7", "S1"]] },
   { nome: "Código 2", descricao: "Mais ritmo e controle de ordem.", sequencias: [["L3", "Q8", "H2", "V5"], ["R6", "M1", "T9", "B4"], ["N7", "D2", "K5", "P8"]] },
-  { nome: "Código 3", descricao: "Agora com maior interferencia visual.", sequencias: [["X4", "C7", "A2", "J9", "L1"], ["B8", "M3", "R5", "T2", "Q6"], ["P4", "D9", "N1", "S7", "K3"]] },
+  { nome: "Código 3", descricao: "Agora com maior interferência visual.", sequencias: [["X4", "C7", "A2", "J9", "L1"], ["B8", "M3", "R5", "T2", "Q6"], ["P4", "D9", "N1", "S7", "K3"]] },
   { nome: "Código 4", descricao: "Sequencias de cinco itens.", sequencias: [["A1", "B2", "C3", "D4", "E5"], ["K9", "L8", "M7", "N6", "O5"], ["T1", "R2", "Q3", "P4", "M5"]] },
   { nome: "Código 5", descricao: "Trocas rápidas entre letras e números.", sequencias: [["AX3", "B7", "CZ1", "D4", "E9"], ["F2", "GX8", "H1", "JT6", "K3"], ["L9", "M5", "N2", "P8", "Q1"]] },
   { nome: "Código 6", descricao: "Fase intermediária alta.", sequencias: [["V4", "T8", "R2", "P6", "M1"], ["C5", "D1", "F9", "H4", "J7"], ["K2", "L6", "N8", "Q3", "S5"]] },
@@ -591,16 +591,16 @@ const exclusiveAdolescente: ExclusiveSeed[] = [
 ];
 
 const exclusiveAdulto: ExclusiveSeed[] = [
-  { nome: "Memória funcional 1", descricao: "Sequencias de rotina diaria para adultos e idosos.", sequencias: [["remedio", "agua", "cafe", "chave", "agenda"], ["oculos", "telefone", "carteira", "porta", "luz"], ["lista", "mercado", "leite", "fruta", "troco"]] },
+  { nome: "Memória funcional 1", descricao: "Sequencias de rotina diaria para adultos e idosos.", sequencias: [["remedio", "água", "cafe", "chave", "agenda"], ["oculos", "telefone", "carteira", "porta", "luz"], ["lista", "mercado", "leite", "fruta", "troco"]] },
   { nome: "Memória funcional 2", descricao: "Compromissos, horarios e pequenos recados.", sequencias: [["consulta", "documento", "horario", "endereco", "telefone"], ["banco", "senha", "cartao", "recibo", "pasta"], ["visita", "nome", "sala", "presente", "foto"]] },
-  { nome: "Memória funcional 3", descricao: "Rotinas de casa com ordem e seguranca.", sequencias: [["fogao", "panela", "alarme", "janela", "porta", "chave"], ["geladeira", "validade", "pote", "etiqueta", "lista", "lixeira"], ["lampada", "controle", "cadeira", "copo", "remedio", "agua"]] },
-  { nome: "Memória funcional 4", descricao: "Sequencias de farmacia, dose e horario.", sequencias: [["farmacia", "receita", "remedio", "dose", "agua", "horario"], ["caixa", "rotulo", "manha", "almoco", "noite", "agenda"], ["telefone", "medico", "exame", "pasta", "data", "retorno"]] },
+  { nome: "Memória funcional 3", descricao: "Rotinas de casa com ordem e seguranca.", sequencias: [["fogao", "panela", "alarme", "janela", "porta", "chave"], ["geladeira", "validade", "pote", "etiqueta", "lista", "lixeira"], ["lampada", "controle", "cadeira", "copo", "remedio", "água"]] },
+  { nome: "Memória funcional 4", descricao: "Sequencias de farmacia, dose e horario.", sequencias: [["farmacia", "receita", "remedio", "dose", "água", "horario"], ["caixa", "rotulo", "manha", "almoco", "noite", "agenda"], ["telefone", "medico", "exame", "pasta", "data", "retorno"]] },
   { nome: "Memória funcional 5", descricao: "Planejamento de saidas e deslocamentos.", sequencias: [["endereco", "ponto", "onibus", "bilhete", "rota", "telefone", "chave"], ["taxi", "carteira", "documento", "consulta", "recepcao", "senha", "retorno"], ["mercado", "lista", "sacola", "cartao", "nota", "troco", "porta"]] },
-  { nome: "Memória funcional 6", descricao: "Organização financeira simples.", sequencias: [["boleto", "valor", "vencimento", "banco", "senha", "recibo", "pasta"], ["cartao", "compra", "nota", "troco", "limite", "data", "arquivo"], ["conta", "agua", "luz", "telefone", "pagamento", "comprovante", "agenda"]] },
-  { nome: "Memória funcional 7", descricao: "Listas maiores com interferencia cotidiana.", sequencias: [["remedio", "agua", "cafe", "jornal", "telefone", "chave", "mercado", "lista"], ["consulta", "oculos", "documento", "pasta", "rota", "recepcao", "senha", "retorno"], ["fogao", "janela", "porta", "luz", "alarme", "carteira", "celular", "agenda"]] },
-  { nome: "Memória funcional 8", descricao: "Sequencias longas para memória de trabalho.", sequencias: [["exame", "data", "horario", "endereco", "documento", "pasta", "telefone", "retorno"], ["mercado", "lista", "arroz", "leite", "fruta", "cartao", "nota", "troco"], ["remedio", "dose", "manha", "agua", "almoco", "noite", "agenda", "alarme"]] },
+  { nome: "Memória funcional 6", descricao: "Organização financeira simples.", sequencias: [["boleto", "valor", "vencimento", "banco", "senha", "recibo", "pasta"], ["cartao", "compra", "nota", "troco", "limite", "data", "arquivo"], ["conta", "água", "luz", "telefone", "pagamento", "comprovante", "agenda"]] },
+  { nome: "Memória funcional 7", descricao: "Listas maiores com interferência cotidiana.", sequencias: [["remedio", "água", "cafe", "jornal", "telefone", "chave", "mercado", "lista"], ["consulta", "oculos", "documento", "pasta", "rota", "recepcao", "senha", "retorno"], ["fogao", "janela", "porta", "luz", "alarme", "carteira", "celular", "agenda"]] },
+  { nome: "Memória funcional 8", descricao: "Sequencias longas para memória de trabalho.", sequencias: [["exame", "data", "horario", "endereco", "documento", "pasta", "telefone", "retorno"], ["mercado", "lista", "arroz", "leite", "fruta", "cartao", "nota", "troco"], ["remedio", "dose", "manha", "água", "almoco", "noite", "agenda", "alarme"]] },
   { nome: "Memória funcional 9", descricao: "Alta exigencia com tarefas encadeadas.", sequencias: [["agenda", "consulta", "documento", "exame", "recepcao", "senha", "medico", "retorno", "telefone"], ["cozinha", "fogao", "panela", "alarme", "geladeira", "validade", "pote", "lixeira", "porta"], ["banco", "boleto", "valor", "senha", "pagamento", "recibo", "pasta", "data", "arquivo"]] },
-  { nome: "Memória funcional 10", descricao: "Fase final com memória funcional e planejamento.", sequencias: [["emergencia", "telefone", "vizinho", "documento", "chave", "endereco", "remedio", "agua", "porta"], ["compromisso", "hora", "local", "contato", "mensagem", "carteira", "rota", "retorno", "agenda"], ["rotina", "caminhada", "agua", "alongamento", "descanso", "remedio", "jornal", "telefone", "luz"]] },
+  { nome: "Memória funcional 10", descricao: "Fase final com memória funcional e planejamento.", sequencias: [["emergencia", "telefone", "vizinho", "documento", "chave", "endereco", "remedio", "água", "porta"], ["compromisso", "hora", "local", "contato", "mensagem", "carteira", "rota", "retorno", "agenda"], ["rotina", "caminhada", "água", "alongamento", "descanso", "remedio", "jornal", "telefone", "luz"]] },
 ];
 
 function createExclusiveChallenges(audience: "infantil" | "adolescente" | "adulto", baseId: number, seeds: ExclusiveSeed[]) {
@@ -678,7 +678,7 @@ const logicSeeds = [
   },
   {
     nome: "Sequência por 3",
-    nomeInfantil: "Pulos de tres",
+    nomeInfantil: "Pulos de três",
     rounds: [
       { prompt: "Descubra o próximo valor.", sequence: ["3", "6", "9"], options: ["10", "12", "15"], correctAnswer: "12", explanation: "A sequência cresce de 3 em 3." },
       { prompt: "Descubra o próximo valor.", sequence: ["12", "15", "18"], options: ["19", "21", "24"], correctAnswer: "21", explanation: "A sequência cresce de 3 em 3." },

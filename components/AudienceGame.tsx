@@ -193,13 +193,13 @@ export function AudienceGame({ usuario, progresso, onBack, onRememberVariation, 
         <section className="panel exclusive-panel">
           <div className="section-head">
             <h3>Escolha a fase exclusiva</h3>
-            <span className="small-muted">{`${completedCount}/${audienceChallenges.length} concluidas nesta trilha`}</span>
+            <span className="small-muted">{`${completedCount}/${audienceChallenges.length} concluídas nesta trilha`}</span>
           </div>
           <div className="tabs-grid">
             {audienceChallenges.map((item, index) => {
               const unlocked = isAudienceChallengeUnlocked(item.id);
               const progress = progresso[item.id];
-              const status = progress?.completed ? "Concluida" : unlocked ? "Liberada" : "Bloqueada";
+              const status = progress?.completed ? "Concluída" : unlocked ? "Liberada" : "Bloqueada";
 
               return (
                 <button
@@ -383,7 +383,7 @@ export function AudienceGame({ usuario, progresso, onBack, onRememberVariation, 
 
               <textarea
                 className="text-input area-input exclusive-answer-input"
-                placeholder="Digite os itens na mesma ordem, separados por espaco, virgula ou quebra de linha."
+                placeholder="Digite os itens na mesma ordem, separados por espaço, vírgula ou quebra de linha."
                 value={response}
                 disabled={phase !== "answering"}
                 onChange={(event) => setResponse(event.target.value)}
@@ -412,7 +412,7 @@ export function AudienceGame({ usuario, progresso, onBack, onRememberVariation, 
               tip={
                 settings.therapeuticMode
                   ? "No modo terapêutico, a sequência fica mais curta e a carga visual fica mais controlada."
-                  : "A fase só conta como concluida quando você atinge a meta de itens certos em ordem."
+                  : "A fase só conta como concluída quando você atinge a meta de itens certos em ordem."
               }
               isChild={usuario.idade <= 10}
             />

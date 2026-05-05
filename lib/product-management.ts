@@ -137,7 +137,7 @@ export function getPrivateClassRanking(histories: ManagedHistory[], turma: strin
         score: mode === "score" ? currentMonth.averageScore : evolution,
         subtitle:
           mode === "score"
-            ? `${currentMonth.sessions} sessao(oes) no periodo`
+            ? `${currentMonth.sessions} sessão(ões) no período`
             : `${evolution >= 0 ? "+" : ""}${evolution} ponto(s) no último ciclo`,
       };
     })
@@ -161,8 +161,8 @@ export function getRolePanelInsight(usuario: Usuario, histories: ManagedHistory[
     title: usuario.role === "professor" ? "Painel do professor" : "Painel do responsável",
     summary:
       usuario.role === "professor"
-        ? "Visao agrupada da turma com foco em aderência, progresso e próximo bloco prescrito."
-        : "Visao de acompanhamento do grupo ou rotina compartilhada, com foco em constância e apoio no treino.",
+        ? "Visão agrupada da turma com foco em aderência, progresso e próximo bloco prescrito."
+        : "Visão de acompanhamento do grupo ou rotina compartilhada, com foco em constância e apoio no treino.",
     cards: [
       { label: "Alunos acompanhados", value: String(managed.length), caption: "Perfis de aluno vinculados pela mesma turma ou grupo." },
       { label: "Média consolidada", value: String(averageScore || 0), caption: "Leitura agregada do desempenho recente do grupo." },
@@ -238,7 +238,7 @@ export function getFormalEvaluationProtocol(usuario: Usuario, history: SessionRe
   const comparative = getComparativeReportInsights(history);
   return {
     title: "Modo avaliacao formal",
-    summary: `Versao mais padronizada para ${usuario.nome}, com menos interferencia visual e leitura mais tecnica do desempenho.`,
+    summary: `Versão mais padronizada para ${usuario.nome}, com menos interferência visual e leitura mais técnica do desempenho.`,
     rules: [
       "Ativar contraste controlado, foco visível e redução de estimulos.",
       "Aplicar sequência curta: memória, atenção, comparação e lógica.",
@@ -300,13 +300,13 @@ export function getAutomaticGoals(history: SessionRecord[], progresso: ProgressS
   return [
     {
       title: "Meta de frequência da semana",
-      progressLabel: `${Math.min(recentWeek.sessions, 3)}/3 sessoes registradas`,
-      summary: "Manter tres blocos curtos na semana para consolidar rotina.",
+      progressLabel: `${Math.min(recentWeek.sessions, 3)}/3 sessões registradas`,
+      summary: "Manter três blocos curtos na semana para consolidar rotina.",
     },
     {
       title: "Meta de consolidação principal",
       progressLabel: `${getSessionModeLabel(recommendation.mode)} · fase ${recommendation.challengeId}`,
-      summary: `Priorizar ${recommendation.challengeName} ate estabilizar conclusao e reduzir erro recorrente.`,
+      summary: `Priorizar ${recommendation.challengeName} até estabilizar conclusao e reduzir erro recorrente.`,
     },
     {
       title: "Meta de variedade cognitiva",
@@ -335,7 +335,7 @@ export function getAdherencePanel(histories: ManagedHistory[]): AdherenceInsight
         label,
         summary:
           label === "regular"
-            ? `${recentWeek.sessions} sessoes na semana com rotina ativa.`
+            ? `${recentWeek.sessions} sessões na semana com rotina ativa.`
             : label === "attention"
               ? "Treino recente baixo; vale retomar com meta curta."
               : "Sem registros recentes; risco de abandono mais alto.",

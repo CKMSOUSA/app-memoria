@@ -24,7 +24,7 @@ function createPrintWindow(title: string) {
         .pill { display: inline-block; padding: 6px 10px; border-radius: 999px; background: #f3f4f6; font-weight: 700; margin-right: 8px; margin-bottom: 8px; }
         .muted { color: #6b7280; }
         .line { margin: 8px 0; }
-        @media print { body { margin: 18px; } .page-break { page-break-before: always; } }
+        @média print { body { margin: 18px; } .page-break { page-break-before: always; } }
       </style>
     </head>
     <body></body>
@@ -136,7 +136,7 @@ export function exportAdminReportPdf(input: {
      <div class="grid">
        <div class="card"><strong>Usuarios monitorados</strong><div class="line">${input.users.length}</div></div>
        <div class="card"><strong>Pedidos de ajuda</strong><div class="line">${input.helpRequests.length}</div></div>
-       <div class="card"><strong>Observacoes clinicas/pedagogicas</strong><div class="line">${input.observations.length}</div></div>
+       <div class="card"><strong>Observações clínicas/pedagógicas</strong><div class="line">${input.observations.length}</div></div>
        <div class="card"><strong>Sessoes registradas</strong><div class="line">${input.users.reduce((sum, item) => sum + item.history.length, 0)}</div></div>
      </div>`,
   );
@@ -158,7 +158,7 @@ export function exportAdminReportPdf(input: {
 
   writeSection(
     printWindow,
-    `<h2 class="page-break">Observacoes clinicas e pedagogicas</h2>
+    `<h2 class="page-break">Observações clínicas e pedagógicas</h2>
      ${
        input.observations.length > 0
          ? input.observations
@@ -202,7 +202,7 @@ export function exportComparativeReportPdf(input: {
 
   writeSection(
     printWindow,
-    `<h1>Comparativo por periodo</h1>
+    `<h1>Comparativo por período</h1>
      <p class="meta">${input.usuario.nome} • ${input.usuario.email} • Gerado em ${input.generatedAt}</p>`,
   );
 
