@@ -196,10 +196,10 @@ export function ProcessGame({
       <section className="game-card process-game-card">
         <header className="game-header">
           <div>
-            <p className="eyebrow">Trilha de processo</p>
+            <p className="eyebrow">Trilha Procrastinação</p>
             <h1>Começo, meio e fim</h1>
             <p className="muted">
-              Complete uma sequência mínima antes de encerrar a jogada. O treino trabalha início, permanência e fechamento.
+              Complete uma sequência mínima antes de encerrar a jogada. O treino trabalha início, permanência e fechamento para reduzir a procrastinação.
             </p>
           </div>
           <div className="button-row">

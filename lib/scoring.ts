@@ -138,7 +138,7 @@ export function getSessionModeLabel(mode: SessionMode) {
     case "logica":
       return "Lógica";
     case "processo":
-      return "Processo";
+      return "Procrastinação";
     default:
       return "Trilha exclusiva";
   }

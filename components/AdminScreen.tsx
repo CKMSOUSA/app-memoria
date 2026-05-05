@@ -960,7 +960,7 @@ export function AdminScreen({
                     <span>{`Comparação ${getCompletionRate(effectiveProgress.comparacao)}%`}</span>
                     <span>{`Espacial ${getCompletionRate(effectiveProgress.espacial)}%`}</span>
                     <span>{`Lógica ${getCompletionRate(effectiveProgress.logica)}%`}</span>
-                    <span>{`Processo ${getCompletionRate(effectiveProgress.processo)}%`}</span>
+                    <span>{`Procrastinação ${getCompletionRate(effectiveProgress.processo)}%`}</span>
                     <span>{`Exclusiva ${getCompletionRate(effectiveProgress.especial)}%`}</span>
                   </div>
 

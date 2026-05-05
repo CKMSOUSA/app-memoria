@@ -1175,7 +1175,7 @@ export function Dashboard({
     { id: "memoria", label: "Memória", title: "Trilha de memória", rate: memoriaRate, progressMap: progresso.memoria },
     { id: "visual", label: "Memória visual", title: "Trilha de memória visual", rate: visualRate, progressMap: progresso.visual },
     { id: "atencao", label: "Atenção", title: "Trilha de atenção", rate: atencaoRate, progressMap: progresso.atencao },
-    { id: "processo", label: "Processo", title: "Trilha de processo", rate: processoRate, progressMap: progresso.processo },
+    { id: "processo", label: "Procrastinação", title: "Trilha Procrastinação", rate: processoRate, progressMap: progresso.processo },
     {
       id: "comparacao",
       label: "Comparação",
@@ -1794,13 +1794,13 @@ export function Dashboard({
             </button>
           </article>
           <article className="quick-card quick-card-process">
-            <p className="small-muted">Antiprocrastinação</p>
+            <p className="small-muted">Procrastinação</p>
             <h3>Começo, meio e fim</h3>
             <p className="muted">
               Treino curto com sequência obrigatória: escolha uma entrada, sustente o meio e feche a jogada antes de sair.
             </p>
             <button className="btn btn-primary" onClick={onOpenProcess}>
-              Abrir trilha de processo
+              Abrir Procrastinação
             </button>
           </article>
           <article className="quick-card">
