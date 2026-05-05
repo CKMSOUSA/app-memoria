@@ -50,7 +50,7 @@ export function HelpScreen({ usuario, requests, onBack, onSubmit }: HelpScreenPr
     });
     setSubject("");
     setMessage("");
-    setNotice("Sua dúvida foi registrada com sucesso. Ela tambem aparece na área administrativa.");
+    setNotice("Sua dúvida foi registrada com sucesso. Ela também aparece na área administrativa.");
     setIsSending(false);
   }
 

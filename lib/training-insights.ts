@@ -232,10 +232,10 @@ function describeAbilityLevel(score: number): AbilityInsight["level"] {
 
 function describeAbilitySummary(title: string, score: number, strongestModeLabel: string, weakestModeLabel: string) {
   if (score >= 74) {
-    return `${title} esta forte agora, com base consistente em ${strongestModeLabel.toLowerCase()}.`;
+    return `${title} está forte agora, com base consistente em ${strongestModeLabel.toLowerCase()}.`;
   }
   if (score >= 48) {
-    return `${title} está estável, mas ainda pode ganhar consistencia quando você alterna com ${weakestModeLabel.toLowerCase()}.`;
+    return `${title} está estável, mas ainda pode ganhar consistência quando você alterna com ${weakestModeLabel.toLowerCase()}.`;
   }
   return `${title} pede reforço imediato. O padrão recente indica revisar ${weakestModeLabel.toLowerCase()} com mais frequência.`;
 }
@@ -486,7 +486,7 @@ export function getSmartRecommendation(history: SessionRecord[], progresso: Prog
     mode: weakestMode,
     challengeId,
     challengeName,
-    title: `Proxima atividade inteligente: ${getSessionModeLabel(weakestMode)}`,
+    title: `Próxima atividade inteligente: ${getSessionModeLabel(weakestMode)}`,
     reason: reasonByMode[weakestMode],
     objective: objectiveByMode[weakestMode],
   };
@@ -715,7 +715,7 @@ export function getCooperativeCycle(
         : "Professor ou responsável";
   const cadence =
     weeklyTrend?.direction === "caindo"
-      ? "Acompanhar duas vezes nesta semana, com revisão curta apos cada sessão."
+      ? "Acompanhar duas vezes nesta semana, com revisão curta após cada sessão."
       : "Acompanhar uma vez por semana e revisar o bloco concluído no mesmo dia.";
 
   return {

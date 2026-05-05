@@ -34,7 +34,7 @@ export function AdminConfirmScreen({ usuario, onBack, onConfirm }: AdminConfirmS
             <h1>Confirme o acesso de admin</h1>
             <p className="muted">
               {usuario
-                ? `${usuario.nome}, sua conta ja tem perfil administrativo. Agora confirme o codigo extra para abrir a area administrativa.`
+                ? `${usuario.nome}, sua conta já tem perfil administrativo. Agora confirme o código extra para abrir a área administrativa.`
                 : "Digite o código exclusivo para abrir a área administrativa a partir da tela inicial do app."}
             </p>
           </div>

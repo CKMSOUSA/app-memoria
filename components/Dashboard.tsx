@@ -335,8 +335,8 @@ function DisclosureSection({
 }
 
 function formatSyncTimestamp(value: string | null) {
-  if (!value) return "Ainda não houve sincronizacao confirmada.";
-  return `Ultima sincronizacao em ${new Date(value).toLocaleString("pt-BR")}.`;
+  if (!value) return "Ainda não houve sincronização confirmada.";
+  return `Última sincronização em ${new Date(value).toLocaleString("pt-BR")}.`;
 }
 
 function getGoalLabel(goal: Usuario["goal"]) {
@@ -575,7 +575,7 @@ function AchievementCard({
   highlight: string;
 }) {
   const categoryLabel =
-    category === "consistencia" ? "Consistencia" : category === "precisao" ? "Precisão" : "Evolução";
+    category === "consistencia" ? "Consistência" : category === "precisao" ? "Precisão" : "Evolução";
 
   return (
     <article className={`engagement-card achievement-card ${unlocked ? "achievement-card-unlocked" : ""}`}>
@@ -1078,10 +1078,10 @@ export function Dashboard({
     ? {
         mode: latestSession.mode,
         title: latestSession.completed
-          ? `Proxima etapa em ${getSessionModeLabel(smartRecommendation.mode)}`
+          ? `Próxima etapa em ${getSessionModeLabel(smartRecommendation.mode)}`
           : `Retomar ${getSessionModeLabel(latestSession.mode)}`,
         summary: latestSession.completed
-          ? `${smartRecommendation.reason} Seu foco atual esta alinhado com ${getGoalLabel(usuario.goal)}.`
+          ? `${smartRecommendation.reason} Seu foco atual está alinhado com ${getGoalLabel(usuario.goal)}.`
           : `Sua última sessão ficou em ${getSessionModeLabel(latestSession.mode)} na fase ${latestSession.challengeId}. Retome enquanto o contexto ainda está fresco.`,
         highlight: latestSession.completed
           ? `${smartRecommendation.challengeName} · ${getGoalLabel(usuario.goal)} · ${usuario.weeklyAvailability ?? 3} dia(s)/semana`
@@ -1090,7 +1090,7 @@ export function Dashboard({
     : {
         mode: smartRecommendation.mode,
         title: `Começar por ${getSessionModeLabel(smartRecommendation.mode)}`,
-        summary: `${smartRecommendation.reason} Vamos iniciar pelo foco ${getGoalLabel(usuario.goal)} com nivel ${getLevelLabel(usuario.selfReportedLevel)}.`,
+        summary: `${smartRecommendation.reason} Vamos iniciar pelo foco ${getGoalLabel(usuario.goal)} com nível ${getLevelLabel(usuario.selfReportedLevel)}.`,
         highlight: `${smartRecommendation.challengeName} · ${usuario.weeklyAvailability ?? 3} dia(s)/semana`,
       };
 
@@ -1299,7 +1299,7 @@ export function Dashboard({
           <div className="topbar-main">
             <p className="eyebrow">Painel do usuário</p>
             <div className="dashboard-title-row">
-              <h1 className="dashboard-title">{`Ola, ${usuario.nome}`}</h1>
+              <h1 className="dashboard-title">{`Olá, ${usuario.nome}`}</h1>
               <span className="dashboard-age-chip">{getAgeLabel(usuario.idade)}</span>
             </div>
             <p className="muted">
@@ -1338,7 +1338,7 @@ export function Dashboard({
                 <h3>{getAudienceLabel(currentAudience)}</h3>
                 <p className="muted">
                   {currentAudience === "infantil"
-                    ? "Painel com linguagem mais lúdica, jogos concretos e reforco positivo para crianças."
+                    ? "Painel com linguagem mais lúdica, jogos concretos e reforço positivo para crianças."
                     : currentAudience === "adolescente"
                       ? "Painel com ritmo mais rápido, metas intermediarias e desafios de foco e codificacao."
                       : "Painel com maior densidade, rotina objetiva e desafios com mais carga cognitiva."}
@@ -1699,7 +1699,7 @@ export function Dashboard({
         <section className="panel">
           <div className="section-head">
             <h3>Conquistas visuais</h3>
-            <span className="small-muted">Reconhecimentos por consistencia, precisão e evolução, não só por pontuação</span>
+            <span className="small-muted">Reconhecimentos por consistência, precisão e evolução, não só por pontuação</span>
           </div>
           <div className="engagement-grid">
             {achievementInsights.map((achievement) => (
@@ -1778,7 +1778,7 @@ export function Dashboard({
             <p className="small-muted">Recomendação inteligente</p>
             <h3>{smartRecommendation.title}</h3>
             <p className="muted">{smartRecommendation.reason}</p>
-            <p className="small-muted">{`${smartRecommendation.objective} Proxima fase: ${smartRecommendation.challengeName}.`}</p>
+            <p className="small-muted">{`${smartRecommendation.objective} Próxima fase: ${smartRecommendation.challengeName}.`}</p>
             <button className="btn btn-primary" onClick={() => openMode(smartRecommendation.mode)}>
               Abrir atividade sugerida
             </button>

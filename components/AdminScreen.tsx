@@ -834,7 +834,7 @@ export function AdminScreen({
                       <h3>{turma.name}</h3>
                       <p className="small-muted">{turma.total} perfil(is) vinculado(s)</p>
                     </div>
-                    <span className="pill">{`${turma.completionRate}% conclusao`}</span>
+                    <span className="pill">{`${turma.completionRate}% conclusão`}</span>
                   </div>
                   <div className="admin-class-metrics">
                     <span>{`${turma.alunos} aluno(s)`}</span>
@@ -845,7 +845,7 @@ export function AdminScreen({
                   <p className="muted">{`Média consolidada da turma: ${turma.averageScore} pontos.`}</p>
                   <p className="small-muted">
                     {turma.latestActivity
-                      ? `Ultima atividade registrada em ${new Date(turma.latestActivity).toLocaleDateString("pt-BR")}.`
+                      ? `Última atividade registrada em ${new Date(turma.latestActivity).toLocaleDateString("pt-BR")}.`
                       : "Ainda sem sessões registradas nesta turma."}
                   </p>
                 </article>
@@ -937,7 +937,7 @@ export function AdminScreen({
                       disabled={updatingUserEmail === user.email || user.role === "admin" || user.status === "excluido"}
                       onClick={async () => {
                         const confirmed = window.confirm(
-                          `Excluir ${user.nome}? O usuario perdera progresso, historico e pedidos de ajuda salvos.`,
+                          `Excluir ${user.nome}? O usuário perderá progresso, histórico e pedidos de ajuda salvos.`,
                         );
                         if (!confirmed) return;
 

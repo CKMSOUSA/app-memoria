@@ -240,7 +240,7 @@ export function getFormalEvaluationProtocol(usuario: Usuario, history: SessionRe
     title: "Modo avaliacao formal",
     summary: `Versão mais padronizada para ${usuario.nome}, com menos interferência visual e leitura mais técnica do desempenho.`,
     rules: [
-      "Ativar contraste controlado, foco visível e redução de estimulos.",
+      "Ativar contraste controlado, foco visível e redução de estímulos.",
       "Aplicar sequência curta: memória, atenção, comparação e lógica.",
       `Registrar comparativos principais: ${comparative[0]?.label.toLowerCase() ?? "score médio"} e ${comparative[1]?.label.toLowerCase() ?? "conclusão semanal"}.`,
       "Evitar interrupções durante a sessão e revisar apenas ao final de cada bloco.",
@@ -306,7 +306,7 @@ export function getAutomaticGoals(history: SessionRecord[], progresso: ProgressS
     {
       title: "Meta de consolidação principal",
       progressLabel: `${getSessionModeLabel(recommendation.mode)} · fase ${recommendation.challengeId}`,
-      summary: `Priorizar ${recommendation.challengeName} até estabilizar conclusao e reduzir erro recorrente.`,
+      summary: `Priorizar ${recommendation.challengeName} até estabilizar conclusão e reduzir erro recorrente.`,
     },
     {
       title: "Meta de variedade cognitiva",

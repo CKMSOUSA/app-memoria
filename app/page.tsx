@@ -431,7 +431,7 @@ export default function Page() {
           actorName: usuario.nome,
           action: "user_status_updated",
           targetEmail: email,
-          description: `Status do usuario ${email} alterado para ${status}.`,
+          description: `Status do usuário ${email} alterado para ${status}.`,
         }),
       );
     }
@@ -522,7 +522,7 @@ export default function Page() {
           actorName: usuario.nome,
           action: "prescription_saved",
           targetEmail: input.assignedToEmail,
-          description: `Sessao prescrita ${input.title} para ${input.assignedToEmail}.`,
+          description: `Sessão prescrita ${input.title} para ${input.assignedToEmail}.`,
         }),
       );
     }
@@ -539,7 +539,7 @@ export default function Page() {
           actorName: usuario.nome,
           action: "prescription_completed",
           targetEmail: prescription?.assignedToEmail ?? null,
-          description: `Sessao ${prescription?.title ?? id} marcada como ${status}.`,
+          description: `Sessão ${prescription?.title ?? id} marcada como ${status}.`,
         }),
       );
     }
@@ -555,7 +555,7 @@ export default function Page() {
           actorName: usuario.nome,
           action: "user_link_saved",
           targetEmail: input.studentEmail,
-          description: `Vinculo ${input.relationship} criado entre ${input.ownerEmail} e ${input.studentEmail}.`,
+          description: `Vínculo ${input.relationship} criado entre ${input.ownerEmail} e ${input.studentEmail}.`,
         }),
       );
     }

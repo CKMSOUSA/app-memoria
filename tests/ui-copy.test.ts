@@ -35,3 +35,21 @@ test("internal technical keys stay unaccented while user-facing labels may be ac
   assert.doesNotMatch(source, /"raciocínio"/);
   assert.doesNotMatch(source, /sequências:/);
 });
+
+
+test("reported unaccented words do not remain in visible copy", () => {
+  const files = [
+    "app/page.tsx",
+    "components/AdminScreen.tsx",
+    "components/AppPreferencesPanel.tsx",
+    "components/Dashboard.tsx",
+    "components/MemoryGame.tsx",
+    "components/ComparisonGame.tsx",
+    "lib/game-data-v3.ts",
+    "lib/training-insights.ts",
+    "lib/report-pdf.ts",
+  ];
+  const source = files.map((file) => readFileSync(join(projectRoot, file), "utf8")).join("\n");
+
+  assert.doesNotMatch(source, /\b(evocacao|Comecar|comecar|Navegacao|memorizacao|Memorizacao|comparacoes|correcao|Observacao)\b/);
+});

@@ -41,7 +41,7 @@ function getOfflineSummary(isOffline: boolean, offlineSyncStatus: OfflineSyncSta
   if (isOffline) return "Modo offline ativo";
   if (offlineSyncStatus.pendingCount > 0) return `${offlineSyncStatus.pendingCount} item(ns) aguardando sincronizacao`;
   if (offlineSyncStatus.lastSyncedAt) return `Sincronizado em ${new Date(offlineSyncStatus.lastSyncedAt).toLocaleTimeString("pt-BR")}`;
-  return "Offline pronto apos o primeiro acesso";
+  return "Offline pronto após o primeiro acesso";
 }
 
 export function AppPreferencesPanel({ settings, isOffline, offlineSyncStatus, onUpdateSettings }: AppPreferencesPanelProps) {
@@ -95,7 +95,7 @@ export function AppPreferencesPanel({ settings, isOffline, offlineSyncStatus, on
           onChange={() => onUpdateSettings({ therapeuticMode: !settings.therapeuticMode })}
         />
         <SettingToggle
-          label="Estimulos reduzidos"
+          label="Estímulos reduzidos"
           description="Diminui brilho, profundidade visual e excesso de destaque na tela."
           checked={settings.reducedStimuli}
           onChange={() => onUpdateSettings({ reducedStimuli: !settings.reducedStimuli })}
