@@ -663,7 +663,7 @@ h2 {
 }
 
 .dashboard-card-marked .trail-tab-label,
-.dashboard-option-card-marked h3 {
+.dashboard-option-card-marked .dashboard-option-toggle strong {
   color: #8b2f1f;
 }
 
@@ -685,7 +685,7 @@ h2 {
   display: grid;
   align-content: start;
   gap: 14px;
-  min-height: 148px;
+  min-height: 116px;
   padding: 16px;
   border: 1px solid rgba(255, 255, 255, 0.74);
   border-radius: 18px;
@@ -694,8 +694,44 @@ h2 {
   box-shadow: 0 12px 22px rgba(56, 45, 35, 0.08);
 }
 
-.dashboard-option-card h3 {
-  margin: 0 0 4px;
+.dashboard-option-toggle {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+}
+
+.dashboard-option-toggle strong {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 20px;
+}
+
+.dashboard-option-toggle small {
+  display: block;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
+.dashboard-option-chevron {
+  display: inline-grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 30px;
+  height: 30px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.72);
+  color: #8b2f1f;
+  font-size: 22px;
+  font-weight: 900;
 }
 
 .dashboard-option-list {

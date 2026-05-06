@@ -67,6 +67,7 @@ import type {
 
 type TrailMode = "memoria" | "visual" | "atencao" | "comparacao" | "espacial" | "logica" | "processo" | "visaoFocada";
 type DashboardTab = "hoje" | "progresso" | "rotina" | "insights";
+type QuickGroup = "base" | "especial" | "avancado" | "explorar";
 
 const processReflectionPrompts = [
   "O que está ocupando sua mente neste momento?",
@@ -1069,6 +1070,7 @@ export function Dashboard({
   const [activeTrailTab, setActiveTrailTab] = useState<TrailMode>("memoria");
   const [activeDashboardTab, setActiveDashboardTab] = useState<DashboardTab>("hoje");
   const [activeQuickAction, setActiveQuickAction] = useState("hoje");
+  const [activeQuickGroup, setActiveQuickGroup] = useState<QuickGroup | null>(null);
   const trailTabs: Array<{
     id: TrailMode;
     label: string;
@@ -1151,6 +1153,10 @@ export function Dashboard({
   function runQuickAction(id: string, action: () => void) {
     setActiveQuickAction(id);
     action();
+  }
+  function toggleQuickGroup(group: QuickGroup) {
+    setActiveQuickGroup((current) => (current === group ? null : group));
+    setActiveQuickAction(group);
   }
 
   return (
@@ -1312,77 +1318,145 @@ export function Dashboard({
             <span className="small-muted">Abra só o grupo de informações que você quer ver agora</span>
           </div>
           <div className="dashboard-quick-grid" role="navigation" aria-label="Navegação rápida">
-            <article className={`dashboard-option-card dashboard-option-base ${activeQuickAction.startsWith("base-") ? "dashboard-option-card-marked" : ""}`}>
-              <div>
-                <h3>Treino Base</h3>
-                <p className="small-muted">Mesmas opções da guia lateral</p>
-              </div>
-              <div className="dashboard-option-list">
-                {baseTrainingActions.map((action) => (
-                  <button
-                    key={action.label}
-                    className={`btn btn-secondary dashboard-option-button ${activeQuickAction === `base-${action.label}` ? "dashboard-option-button-marked" : ""}`}
-                    type="button"
-                    onClick={() => runQuickAction(`base-${action.label}`, action.onOpen)}
-                  >
-                    {action.label}
-                  </button>
-                ))}
-              </div>
+            <article
+              className={`dashboard-option-card dashboard-option-base ${
+                activeQuickGroup === "base" || activeQuickAction.startsWith("base-") ? "dashboard-option-card-marked" : ""
+              }`}
+            >
+              <button
+                className="dashboard-option-toggle"
+                type="button"
+                aria-expanded={activeQuickGroup === "base"}
+                aria-controls="quick-base-options"
+                onClick={() => toggleQuickGroup("base")}
+              >
+                <span>
+                  <strong>Treino Base</strong>
+                  <small>Mesmas opções da guia lateral</small>
+                </span>
+                <span className="dashboard-option-chevron" aria-hidden="true">
+                  {activeQuickGroup === "base" ? "−" : "+"}
+                </span>
+              </button>
+              {activeQuickGroup === "base" ? (
+                <div className="dashboard-option-list" id="quick-base-options">
+                  {baseTrainingActions.map((action) => (
+                    <button
+                      key={action.label}
+                      className={`btn btn-secondary dashboard-option-button ${activeQuickAction === `base-${action.label}` ? "dashboard-option-button-marked" : ""}`}
+                      type="button"
+                      onClick={() => runQuickAction(`base-${action.label}`, action.onOpen)}
+                    >
+                      {action.label}
+                    </button>
+                  ))}
+                </div>
+              ) : null}
             </article>
-            <article className={`dashboard-option-card dashboard-option-special ${activeQuickAction.startsWith("especial-") ? "dashboard-option-card-marked" : ""}`}>
-              <div>
-                <h3>Trilha Exclusiva</h3>
-                <p className="small-muted">Sequência personalizada por público</p>
-              </div>
-              <div className="dashboard-option-list">
-                {specialActions.map((action) => (
-                  <button
-                    key={action.label}
-                    className={`btn btn-secondary dashboard-option-button ${activeQuickAction === `especial-${action.label}` ? "dashboard-option-button-marked" : ""}`}
-                    type="button"
-                    onClick={() => runQuickAction(`especial-${action.label}`, action.onOpen)}
-                  >
-                    {action.label}
-                  </button>
-                ))}
-              </div>
+            <article
+              className={`dashboard-option-card dashboard-option-special ${
+                activeQuickGroup === "especial" || activeQuickAction.startsWith("especial-") ? "dashboard-option-card-marked" : ""
+              }`}
+            >
+              <button
+                className="dashboard-option-toggle"
+                type="button"
+                aria-expanded={activeQuickGroup === "especial"}
+                aria-controls="quick-special-options"
+                onClick={() => toggleQuickGroup("especial")}
+              >
+                <span>
+                  <strong>Trilha Exclusiva</strong>
+                  <small>Sequência personalizada por público</small>
+                </span>
+                <span className="dashboard-option-chevron" aria-hidden="true">
+                  {activeQuickGroup === "especial" ? "−" : "+"}
+                </span>
+              </button>
+              {activeQuickGroup === "especial" ? (
+                <div className="dashboard-option-list" id="quick-special-options">
+                  {specialActions.map((action) => (
+                    <button
+                      key={action.label}
+                      className={`btn btn-secondary dashboard-option-button ${activeQuickAction === `especial-${action.label}` ? "dashboard-option-button-marked" : ""}`}
+                      type="button"
+                      onClick={() => runQuickAction(`especial-${action.label}`, action.onOpen)}
+                    >
+                      {action.label}
+                    </button>
+                  ))}
+                </div>
+              ) : null}
             </article>
-            <article className={`dashboard-option-card dashboard-option-advanced ${activeQuickAction.startsWith("avancado-") ? "dashboard-option-card-marked" : ""}`}>
-              <div>
-                <h3>Testes Avançados</h3>
-                <p className="small-muted">Desafios com maior carga cognitiva</p>
-              </div>
-              <div className="dashboard-option-list">
-                {advancedActions.map((action) => (
-                  <button
-                    key={action.label}
-                    className={`btn btn-secondary dashboard-option-button ${activeQuickAction === `avancado-${action.label}` ? "dashboard-option-button-marked" : ""}`}
-                    type="button"
-                    onClick={() => runQuickAction(`avancado-${action.label}`, action.onOpen)}
-                  >
-                    {action.label}
-                  </button>
-                ))}
-              </div>
+            <article
+              className={`dashboard-option-card dashboard-option-advanced ${
+                activeQuickGroup === "avancado" || activeQuickAction.startsWith("avancado-") ? "dashboard-option-card-marked" : ""
+              }`}
+            >
+              <button
+                className="dashboard-option-toggle"
+                type="button"
+                aria-expanded={activeQuickGroup === "avancado"}
+                aria-controls="quick-advanced-options"
+                onClick={() => toggleQuickGroup("avancado")}
+              >
+                <span>
+                  <strong>Testes Avançados</strong>
+                  <small>Desafios com maior carga cognitiva</small>
+                </span>
+                <span className="dashboard-option-chevron" aria-hidden="true">
+                  {activeQuickGroup === "avancado" ? "−" : "+"}
+                </span>
+              </button>
+              {activeQuickGroup === "avancado" ? (
+                <div className="dashboard-option-list" id="quick-advanced-options">
+                  {advancedActions.map((action) => (
+                    <button
+                      key={action.label}
+                      className={`btn btn-secondary dashboard-option-button ${activeQuickAction === `avancado-${action.label}` ? "dashboard-option-button-marked" : ""}`}
+                      type="button"
+                      onClick={() => runQuickAction(`avancado-${action.label}`, action.onOpen)}
+                    >
+                      {action.label}
+                    </button>
+                  ))}
+                </div>
+              ) : null}
             </article>
-            <article className={`dashboard-option-card dashboard-option-explore ${activeQuickAction.startsWith("explorar-") ? "dashboard-option-card-marked" : ""}`}>
-              <div>
-                <h3>Explorar mais</h3>
-                <p className="small-muted">Mesmas opções da guia lateral</p>
-              </div>
-              <div className="dashboard-option-list">
-                {exploreActions.map((action) => (
-                  <button
-                    key={action.label}
-                    className={`btn btn-secondary dashboard-option-button ${activeQuickAction === `explorar-${action.label}` ? "dashboard-option-button-marked" : ""}`}
-                    type="button"
-                    onClick={() => runQuickAction(`explorar-${action.label}`, action.onOpen)}
-                  >
-                    {action.label}
-                  </button>
-                ))}
-              </div>
+            <article
+              className={`dashboard-option-card dashboard-option-explore ${
+                activeQuickGroup === "explorar" || activeQuickAction.startsWith("explorar-") ? "dashboard-option-card-marked" : ""
+              }`}
+            >
+              <button
+                className="dashboard-option-toggle"
+                type="button"
+                aria-expanded={activeQuickGroup === "explorar"}
+                aria-controls="quick-explore-options"
+                onClick={() => toggleQuickGroup("explorar")}
+              >
+                <span>
+                  <strong>Explorar mais</strong>
+                  <small>Mesmas opções da guia lateral</small>
+                </span>
+                <span className="dashboard-option-chevron" aria-hidden="true">
+                  {activeQuickGroup === "explorar" ? "−" : "+"}
+                </span>
+              </button>
+              {activeQuickGroup === "explorar" ? (
+                <div className="dashboard-option-list" id="quick-explore-options">
+                  {exploreActions.map((action) => (
+                    <button
+                      key={action.label}
+                      className={`btn btn-secondary dashboard-option-button ${activeQuickAction === `explorar-${action.label}` ? "dashboard-option-button-marked" : ""}`}
+                      type="button"
+                      onClick={() => runQuickAction(`explorar-${action.label}`, action.onOpen)}
+                    >
+                      {action.label}
+                    </button>
+                  ))}
+                </div>
+              ) : null}
             </article>
           </div>
         </section>
