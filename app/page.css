@@ -73,6 +73,10 @@
   justify-content: flex-end;
 }
 
+.topbar.panel {
+  width: min(820px, 100%);
+}
+
 .topbar-personal {
   width: 100%;
   display: grid;
@@ -123,10 +127,10 @@
 
 .btn-topbar-profile,
 .btn-topbar-help {
-  padding: 8px 12px;
-  min-height: 36px;
+  padding: 8px 13px;
+  min-height: 38px;
   border-radius: 999px;
-  font-size: 13px;
+  font-size: 15px;
 }
 
 .dashboard-title {
@@ -623,6 +627,7 @@ h2 {
 .dashboard-tabs-panel {
   display: grid;
   gap: 16px;
+  width: min(920px, 100%);
 }
 
 .dashboard-primary-cards {
@@ -652,10 +657,10 @@ h2 {
 .dashboard-action-card {
   display: grid;
   gap: 8px;
-  flex: 1 1 210px;
+  flex: 0 1 220px;
   min-width: 180px;
-  min-height: 104px;
-  padding: 18px 18px;
+  min-height: 96px;
+  padding: 16px 16px;
   border-radius: 18px;
   border: 1px solid rgba(255, 255, 255, 0.72);
   background: rgba(255, 255, 255, 0.7);
@@ -722,8 +727,8 @@ h2 {
 
 .dashboard-quick-grid {
   display: grid;
-  gap: 14px;
-  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
 }
 
 .dashboard-option-card {
