@@ -609,7 +609,7 @@ h2 {
 
 .dashboard-tabs-panel {
   display: grid;
-  gap: 14px;
+  gap: 16px;
 }
 
 .dashboard-tabs {
@@ -618,9 +618,22 @@ h2 {
   flex-wrap: wrap;
 }
 
-.dashboard-tab {
+.dashboard-quick-buttons {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.dashboard-quick-button {
+  border-color: rgba(99, 88, 74, 0.16);
+  background: rgba(255, 255, 255, 0.86);
+}
+
+.dashboard-tab,
+.dashboard-action-card {
   display: grid;
   gap: 4px;
+  flex: 1 1 210px;
   min-width: 180px;
   padding: 14px 16px;
   border-radius: 18px;
@@ -650,24 +663,6 @@ h2 {
 .dashboard-tab-active {
   border-color: rgba(207, 95, 60, 0.3);
   box-shadow: 0 14px 26px rgba(207, 95, 60, 0.12);
-}
-
-.dashboard-action-cards {
-  display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-
-.dashboard-action-card {
-  display: grid;
-  gap: 4px;
-  min-width: 180px;
-  padding: 14px 16px;
-  border-radius: 18px;
-  border: 1px solid rgba(255, 255, 255, 0.72);
-  text-align: left;
-  color: var(--ink-strong);
-  box-shadow: 0 12px 22px rgba(56, 45, 35, 0.08);
 }
 
 .dashboard-action-process {

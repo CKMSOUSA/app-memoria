@@ -1105,8 +1105,7 @@ export function Dashboard({
     if (mode === "visaoFocada") return onOpenFocusVision();
     return onOpenLogic();
   };
-  const dashboardTabs: Array<{ id: DashboardTab; label: string; caption: string }> = [
-    { id: "hoje", label: "Hoje", caption: "Próximo passo e rotina imediata" },
+  const sidebarDashboardTabs: Array<{ id: Exclude<DashboardTab, "hoje">; label: string; caption: string }> = [
     { id: "progresso", label: "Progresso", caption: "Evolução e trilhas" },
     { id: "rotina", label: "Rotina", caption: "Planos, sugestões e agenda" },
     {
@@ -1126,7 +1125,24 @@ export function Dashboard({
           </div>
         </div>
         <p className="sidebar-label">Treino diario</p>
-        <button className="btn btn-side btn-side-active">Dashboard</button>
+        <button
+          className={`btn btn-side ${activeDashboardTab === "hoje" ? "btn-side-active" : ""}`}
+          onClick={() => setActiveDashboardTab("hoje")}
+        >
+          Dashboard
+        </button>
+        <SidebarMenuGroup title="Painel" defaultOpen>
+          {sidebarDashboardTabs.map((tab) => (
+            <button
+              key={tab.id}
+              className={`btn btn-side ${activeDashboardTab === tab.id ? "btn-side-active" : ""}`}
+              onClick={() => setActiveDashboardTab(tab.id)}
+              title={tab.caption}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </SidebarMenuGroup>
         <SidebarMenuGroup title="Treinos base" defaultOpen>
           <button className="btn btn-side" onClick={onOpenMemory}>
             Jogo de memória
@@ -1226,34 +1242,31 @@ export function Dashboard({
           </div>
         </header>
 
-        <PauseReflectionButton
-          className="dashboard-reflection-slot"
-          variant="alarm"
-          prompts={processReflectionPrompts}
-          doneMessage="Guarde a percepção que apareceu e siga com calma."
-        />
-
         <section className="panel dashboard-tabs-panel">
           <div className="section-head">
             <h3>Navegação rápida</h3>
             <span className="small-muted">Abra só o grupo de informações que você quer ver agora</span>
           </div>
-          <div className="dashboard-tabs" role="tablist" aria-label="Abas do dashboard">
-            {dashboardTabs.map((tab) => (
-              <button
-                key={tab.id}
-                type="button"
-                role="tab"
-                aria-selected={activeDashboardTab === tab.id}
-                className={`dashboard-tab dashboard-tab-${tab.id} ${activeDashboardTab === tab.id ? "dashboard-tab-active" : ""}`}
-                onClick={() => setActiveDashboardTab(tab.id)}
-              >
-                <span className="trail-tab-label">{tab.label}</span>
-                <span className="trail-tab-rate">{tab.caption}</span>
-              </button>
-            ))}
+          <div className="dashboard-quick-buttons" aria-label="Acessos principais">
+            <button className="btn btn-secondary dashboard-quick-button" type="button" onClick={onOpenMemory}>
+              Treino Base
+            </button>
+            <button className="btn btn-secondary dashboard-quick-button" type="button" onClick={onOpenSpecial}>
+              Trilha Exclusiva
+            </button>
+            <button className="btn btn-secondary dashboard-quick-button" type="button" onClick={onOpenAdvanced}>
+              Testes avançados
+            </button>
           </div>
-          <div className="dashboard-action-cards">
+          <div className="dashboard-tabs" role="navigation" aria-label="Navegação rápida">
+            <button
+              type="button"
+              className={`dashboard-tab dashboard-tab-hoje ${activeDashboardTab === "hoje" ? "dashboard-tab-active" : ""}`}
+              onClick={() => setActiveDashboardTab("hoje")}
+            >
+              <span className="trail-tab-label">Hoje</span>
+              <span className="trail-tab-rate">Próximo passo e rotina imediata</span>
+            </button>
             <button className="dashboard-action-card dashboard-action-process" type="button" onClick={onOpenProcess}>
               <span className="trail-tab-label">Procrastinação</span>
               <span className="trail-tab-rate">Começo, meio e fim</span>
@@ -1264,6 +1277,13 @@ export function Dashboard({
             </button>
           </div>
         </section>
+
+        <PauseReflectionButton
+          className="dashboard-reflection-slot"
+          variant="alarm"
+          prompts={processReflectionPrompts}
+          doneMessage="Guarde a percepção que apareceu e siga com calma."
+        />
 
         {activeDashboardTab === "progresso" ? (
           <section className="panel metrics-panel">
