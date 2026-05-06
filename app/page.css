@@ -55,9 +55,10 @@
 
 .topbar-right {
   display: grid;
-  gap: 12px;
+  gap: 8px;
   justify-items: end;
-  width: min(430px, 100%);
+  width: auto;
+  max-width: 100%;
 }
 
 .topbar-main {
@@ -67,6 +68,8 @@
 }
 
 .topbar-support-actions {
+  gap: 8px;
+  align-items: center;
   justify-content: flex-end;
 }
 
@@ -89,15 +92,17 @@
 }
 
 .btn-topbar-profile {
-  background: linear-gradient(135deg, #2c6387 0%, #4a89b2 100%);
-  color: white;
-  box-shadow: 0 14px 24px rgba(44, 99, 135, 0.2);
+  background: rgba(240, 249, 255, 0.82);
+  color: #27536f;
+  border: 1px solid rgba(44, 99, 135, 0.18);
+  box-shadow: none;
 }
 
 .btn-topbar-help {
-  background: linear-gradient(135deg, #2d8a54 0%, #51a878 100%);
-  color: white;
-  box-shadow: 0 14px 24px rgba(45, 138, 84, 0.2);
+  background: rgba(240, 250, 244, 0.82);
+  color: #286f49;
+  border: 1px solid rgba(45, 138, 84, 0.18);
+  box-shadow: none;
 }
 
 .btn-admin-back {
@@ -114,6 +119,14 @@
   min-height: 44px;
   border-radius: 14px;
   font-size: 15px;
+}
+
+.btn-topbar-profile,
+.btn-topbar-help {
+  padding: 8px 12px;
+  min-height: 36px;
+  border-radius: 999px;
+  font-size: 13px;
 }
 
 .dashboard-title {
