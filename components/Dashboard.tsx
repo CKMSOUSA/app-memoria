@@ -1201,13 +1201,13 @@ export function Dashboard({
               {action.label}
             </button>
           ))}
+          <button className="btn btn-side" onClick={() => onOpenSpecial()}>
+            Trilha exclusiva
+          </button>
+          <button className="btn btn-side" onClick={onOpenAdvanced}>
+            Testes Avançados
+          </button>
         </SidebarMenuGroup>
-        <button className="btn btn-side" onClick={() => onOpenSpecial()}>
-          Trilha exclusiva
-        </button>
-        <button className="btn btn-side" onClick={onOpenAdvanced}>
-          Testes Avançados
-        </button>
         <button className="btn btn-side" onClick={onOpenProfile}>
           Perfil
         </button>
