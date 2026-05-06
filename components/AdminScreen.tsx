@@ -272,6 +272,17 @@ export function AdminScreen({
     () => helpRequests.filter((request) => request.status === "aberta").length,
     [helpRequests],
   );
+  const nominalUserSearch = search.trim().toLowerCase();
+  const hasNominalUserSearch = nominalUserSearch.length >= 2;
+  const visibleUserHistories = useMemo(() => {
+    if (!hasNominalUserSearch) return [];
+
+    return filteredHistories.filter(({ user }) => {
+      const name = user.nome.toLowerCase();
+      const email = user.email.toLowerCase();
+      return name.includes(nominalUserSearch) || email.includes(nominalUserSearch);
+    });
+  }, [filteredHistories, hasNominalUserSearch, nominalUserSearch]);
   function getObservation(email: string, category: ClinicalObservation["category"]) {
     return observations.find((item) => item.email === email && item.category === category) ?? null;
   }
@@ -451,11 +462,11 @@ export function AdminScreen({
 
           <div className="admin-toolbar-grid">
             <label className="field">
-              <span>Buscar por nome, email, trilha ou fase</span>
+              <span>Buscar aluno por nome ou e-mail</span>
               <input
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
-                placeholder="Ex.: Ana, Turma Alfa, professor, memória ou fase 3"
+                placeholder="Digite ao menos 2 letras do nome ou e-mail"
               />
             </label>
 
@@ -642,14 +653,29 @@ export function AdminScreen({
         </section>
         ) : null}
 
-        {activePanel === "usuarios" ? (
+        {activePanel === "usuarios" && !hasNominalUserSearch ? (
+        <section className="panel admin-privacy-panel">
+          <div className="section-head">
+            <div>
+              <h3>Localizar aluno</h3>
+              <span className="small-muted">Os dados individuais só aparecem depois de uma busca nominal.</span>
+            </div>
+            <span className="pill">Acesso protegido</span>
+          </div>
+          <p className="muted">
+            Digite nome ou e-mail no campo de busca para abrir o resumo do aluno solicitado.
+          </p>
+        </section>
+        ) : null}
+
+        {activePanel === "usuarios" && hasNominalUserSearch ? (
         <section className="panel">
           <div className="section-head">
             <h3>Resumo por aluno</h3>
-            <span className="small-muted">{filteredHistories.length} perfil(is) encontrado(s)</span>
+            <span className="small-muted">{visibleUserHistories.length} perfil(is) encontrado(s)</span>
           </div>
           <div className="admin-grid">
-            {filteredHistories.map(({ user, history, progress }) => {
+            {visibleUserHistories.map(({ user, history, progress }) => {
               const summary = getReportSummary(history);
               const effectiveProgress = progress ?? progressoAtual;
               return (
@@ -825,7 +851,9 @@ export function AdminScreen({
               );
             })}
           </div>
-          {filteredHistories.length === 0 ? <p className="small-muted">Nenhum aluno corresponde aos filtros atuais.</p> : null}
+          {visibleUserHistories.length === 0 ? (
+            <p className="small-muted">Nenhum aluno corresponde ao nome ou e-mail informado.</p>
+          ) : null}
         </section>
         ) : null}
 

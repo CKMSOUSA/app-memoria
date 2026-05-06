@@ -2680,6 +2680,13 @@ h2 {
   background: linear-gradient(135deg, rgba(247, 250, 252, 0.96) 0%, rgba(255, 251, 244, 0.98) 100%);
 }
 
+.admin-privacy-panel {
+  display: grid;
+  gap: 12px;
+  border-color: rgba(74, 137, 178, 0.14);
+  background: linear-gradient(135deg, rgba(240, 247, 252, 0.94) 0%, rgba(255, 251, 244, 0.98) 100%);
+}
+
 .admin-options-panel {
   display: grid;
   gap: 16px;
