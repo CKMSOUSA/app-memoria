@@ -1294,6 +1294,7 @@ export function Dashboard({
             className="dashboard-reflection-slot"
             variant="alarm"
             prompts={processReflectionPrompts}
+            title="Pausa para reflexão (40 segundos para sair do automático)"
             doneMessage="Guarde a percepção que apareceu e siga com calma."
           />
           <section className={`topbar-personal panel audience-hero audience-${currentAudience}`}>
