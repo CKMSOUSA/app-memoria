@@ -186,8 +186,13 @@ type DashboardProps = {
   onOpenProcess: () => void;
   onOpenFocusVision: () => void;
   onOpenProfile: () => void;
-  onOpenSpecial: () => void;
+  onOpenSpecial: (challengeId?: number) => void;
   onOpenAdvanced: () => void;
+  onOpenAdvancedMemory: () => void;
+  onOpenAdvancedAttention: () => void;
+  onOpenAdvancedComparison: () => void;
+  onOpenAdvancedSpatial: () => void;
+  onOpenAdvancedLogic: () => void;
   onOpenHelp: () => void;
   onOpenAdmin: () => void;
   onLogout: () => void;
@@ -936,6 +941,11 @@ export function Dashboard({
   onOpenProfile,
   onOpenSpecial,
   onOpenAdvanced,
+  onOpenAdvancedMemory,
+  onOpenAdvancedAttention,
+  onOpenAdvancedComparison,
+  onOpenAdvancedSpatial,
+  onOpenAdvancedLogic,
   onOpenHelp,
   onOpenAdmin,
   onLogout,
@@ -1058,6 +1068,7 @@ export function Dashboard({
   }
   const [activeTrailTab, setActiveTrailTab] = useState<TrailMode>("memoria");
   const [activeDashboardTab, setActiveDashboardTab] = useState<DashboardTab>("hoje");
+  const [activeQuickAction, setActiveQuickAction] = useState("hoje");
   const trailTabs: Array<{
     id: TrailMode;
     label: string;
@@ -1126,6 +1137,22 @@ export function Dashboard({
     { label: "Orientação espacial", onOpen: onOpenSpatial },
     { label: "Jogo de lógica", onOpen: onOpenLogic },
   ];
+  const specialActions = specialChallenges.map((challenge) => ({
+    label: challenge.nome,
+    onOpen: () => onOpenSpecial(challenge.id),
+  }));
+  const advancedActions = [
+    { label: "Memória", onOpen: onOpenAdvancedMemory },
+    { label: "Atenção", onOpen: onOpenAdvancedAttention },
+    { label: "Comparação", onOpen: onOpenAdvancedComparison },
+    { label: "Orientação espacial", onOpen: onOpenAdvancedSpatial },
+    { label: "Lógica", onOpen: onOpenAdvancedLogic },
+  ];
+  function runQuickAction(id: string, action: () => void) {
+    setActiveQuickAction(id);
+    action();
+  }
+
   return (
     <main className="shell shell-dashboard">
       <aside className="sidebar">
@@ -1169,7 +1196,7 @@ export function Dashboard({
             </button>
           ))}
         </SidebarMenuGroup>
-        <button className="btn btn-side" onClick={onOpenSpecial}>
+        <button className="btn btn-side" onClick={() => onOpenSpecial()}>
           Trilha exclusiva
         </button>
         <button className="btn btn-side" onClick={onOpenAdvanced}>
@@ -1233,7 +1260,7 @@ export function Dashboard({
                       : "Painel com maior densidade, rotina objetiva e desafios com mais carga cognitiva."}
                 </p>
               </div>
-              <button className="btn btn-primary" onClick={onOpenSpecial}>
+              <button className="btn btn-primary" onClick={() => onOpenSpecial()}>
                 Abrir minijogo
               </button>
             </section>
@@ -1243,63 +1270,33 @@ export function Dashboard({
         <section className="dashboard-primary-cards" aria-label="Acessos em destaque">
           <button
             type="button"
-            className={`dashboard-tab dashboard-tab-hoje ${activeDashboardTab === "hoje" ? "dashboard-tab-active" : ""}`}
-            onClick={() => setActiveDashboardTab("hoje")}
+            className={`dashboard-tab dashboard-tab-hoje ${activeDashboardTab === "hoje" ? "dashboard-tab-active" : ""} ${
+              activeQuickAction === "hoje" ? "dashboard-card-marked" : ""
+            }`}
+            onClick={() => {
+              setActiveQuickAction("hoje");
+              setActiveDashboardTab("hoje");
+            }}
           >
             <span className="trail-tab-label">Hoje</span>
             <span className="trail-tab-rate">Próximo passo e rotina imediata</span>
           </button>
-          <button className="dashboard-action-card dashboard-action-process" type="button" onClick={onOpenProcess}>
+          <button
+            className={`dashboard-action-card dashboard-action-process ${activeQuickAction === "processo" ? "dashboard-card-marked" : ""}`}
+            type="button"
+            onClick={() => runQuickAction("processo", onOpenProcess)}
+          >
             <span className="trail-tab-label">Procrastinação</span>
             <span className="trail-tab-rate">Começo, meio e fim</span>
           </button>
-          <button className="dashboard-action-card dashboard-action-focus" type="button" onClick={onOpenFocusVision}>
+          <button
+            className={`dashboard-action-card dashboard-action-focus ${activeQuickAction === "foco" ? "dashboard-card-marked" : ""}`}
+            type="button"
+            onClick={() => runQuickAction("foco", onOpenFocusVision)}
+          >
             <span className="trail-tab-label">Foco</span>
             <span className="trail-tab-rate">Foco central e periférico</span>
           </button>
-        </section>
-
-        <section className="panel dashboard-tabs-panel">
-          <div className="section-head">
-            <h3>Navegação rápida</h3>
-            <span className="small-muted">Abra só o grupo de informações que você quer ver agora</span>
-          </div>
-          <div className="dashboard-quick-grid" role="navigation" aria-label="Navegação rápida">
-            <article className="dashboard-option-card dashboard-option-base">
-              <div>
-                <h3>Treino Base</h3>
-                <p className="small-muted">Mesmas opções da guia lateral</p>
-              </div>
-              <div className="dashboard-option-list">
-                {baseTrainingActions.map((action) => (
-                  <button key={action.label} className="btn btn-secondary dashboard-option-button" type="button" onClick={action.onOpen}>
-                    {action.label}
-                  </button>
-                ))}
-              </div>
-            </article>
-            <button className="dashboard-option-card dashboard-option-special" type="button" onClick={onOpenSpecial}>
-              <span className="trail-tab-label">Trilha Exclusiva</span>
-              <span className="trail-tab-rate">Sequência personalizada por público</span>
-            </button>
-            <button className="dashboard-option-card dashboard-option-advanced" type="button" onClick={onOpenAdvanced}>
-              <span className="trail-tab-label">Testes Avançados</span>
-              <span className="trail-tab-rate">Desafios com maior carga cognitiva</span>
-            </button>
-            <article className="dashboard-option-card dashboard-option-explore">
-              <div>
-                <h3>Explorar mais</h3>
-                <p className="small-muted">Mesmas opções da guia lateral</p>
-              </div>
-              <div className="dashboard-option-list">
-                {exploreActions.map((action) => (
-                  <button key={action.label} className="btn btn-secondary dashboard-option-button" type="button" onClick={action.onOpen}>
-                    {action.label}
-                  </button>
-                ))}
-              </div>
-            </article>
-          </div>
         </section>
 
         <PauseReflectionButton
@@ -1308,6 +1305,87 @@ export function Dashboard({
           prompts={processReflectionPrompts}
           doneMessage="Guarde a percepção que apareceu e siga com calma."
         />
+
+        <section className="panel dashboard-tabs-panel">
+          <div className="section-head">
+            <h3>Navegação rápida</h3>
+            <span className="small-muted">Abra só o grupo de informações que você quer ver agora</span>
+          </div>
+          <div className="dashboard-quick-grid" role="navigation" aria-label="Navegação rápida">
+            <article className={`dashboard-option-card dashboard-option-base ${activeQuickAction.startsWith("base-") ? "dashboard-option-card-marked" : ""}`}>
+              <div>
+                <h3>Treino Base</h3>
+                <p className="small-muted">Mesmas opções da guia lateral</p>
+              </div>
+              <div className="dashboard-option-list">
+                {baseTrainingActions.map((action) => (
+                  <button
+                    key={action.label}
+                    className={`btn btn-secondary dashboard-option-button ${activeQuickAction === `base-${action.label}` ? "dashboard-option-button-marked" : ""}`}
+                    type="button"
+                    onClick={() => runQuickAction(`base-${action.label}`, action.onOpen)}
+                  >
+                    {action.label}
+                  </button>
+                ))}
+              </div>
+            </article>
+            <article className={`dashboard-option-card dashboard-option-special ${activeQuickAction.startsWith("especial-") ? "dashboard-option-card-marked" : ""}`}>
+              <div>
+                <h3>Trilha Exclusiva</h3>
+                <p className="small-muted">Sequência personalizada por público</p>
+              </div>
+              <div className="dashboard-option-list">
+                {specialActions.map((action) => (
+                  <button
+                    key={action.label}
+                    className={`btn btn-secondary dashboard-option-button ${activeQuickAction === `especial-${action.label}` ? "dashboard-option-button-marked" : ""}`}
+                    type="button"
+                    onClick={() => runQuickAction(`especial-${action.label}`, action.onOpen)}
+                  >
+                    {action.label}
+                  </button>
+                ))}
+              </div>
+            </article>
+            <article className={`dashboard-option-card dashboard-option-advanced ${activeQuickAction.startsWith("avancado-") ? "dashboard-option-card-marked" : ""}`}>
+              <div>
+                <h3>Testes Avançados</h3>
+                <p className="small-muted">Desafios com maior carga cognitiva</p>
+              </div>
+              <div className="dashboard-option-list">
+                {advancedActions.map((action) => (
+                  <button
+                    key={action.label}
+                    className={`btn btn-secondary dashboard-option-button ${activeQuickAction === `avancado-${action.label}` ? "dashboard-option-button-marked" : ""}`}
+                    type="button"
+                    onClick={() => runQuickAction(`avancado-${action.label}`, action.onOpen)}
+                  >
+                    {action.label}
+                  </button>
+                ))}
+              </div>
+            </article>
+            <article className={`dashboard-option-card dashboard-option-explore ${activeQuickAction.startsWith("explorar-") ? "dashboard-option-card-marked" : ""}`}>
+              <div>
+                <h3>Explorar mais</h3>
+                <p className="small-muted">Mesmas opções da guia lateral</p>
+              </div>
+              <div className="dashboard-option-list">
+                {exploreActions.map((action) => (
+                  <button
+                    key={action.label}
+                    className={`btn btn-secondary dashboard-option-button ${activeQuickAction === `explorar-${action.label}` ? "dashboard-option-button-marked" : ""}`}
+                    type="button"
+                    onClick={() => runQuickAction(`explorar-${action.label}`, action.onOpen)}
+                  >
+                    {action.label}
+                  </button>
+                ))}
+              </div>
+            </article>
+          </div>
+        </section>
 
         {activeDashboardTab === "progresso" ? (
           <section className="panel metrics-panel">

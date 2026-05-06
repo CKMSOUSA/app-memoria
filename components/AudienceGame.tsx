@@ -14,6 +14,7 @@ import type { ProgressState, Usuario } from "@/lib/types";
 type AudienceGameProps = {
   usuario: Usuario;
   progresso: ProgressState["especial"];
+  initialChallengeId?: number | null;
   onBack: () => void;
   onRememberVariation: (challengeId: number, variationIndex: number) => void;
   onSaveResult: (
@@ -27,7 +28,7 @@ type AudienceGameProps = {
 
 type Phase = "idle" | "showing" | "answering" | "result";
 
-export function AudienceGame({ usuario, progresso, onBack, onRememberVariation, onSaveResult }: AudienceGameProps) {
+export function AudienceGame({ usuario, progresso, initialChallengeId = null, onBack, onRememberVariation, onSaveResult }: AudienceGameProps) {
   const audience = getAudienceFromAge(usuario.idade);
   const audienceChallenges = useMemo(
     () => exclusiveChallenges.filter((item) => item.audience === audience),
@@ -71,10 +72,14 @@ export function AudienceGame({ usuario, progresso, onBack, onRememberVariation, 
 
   useEffect(() => {
     if (audienceChallenges.length === 0) return;
+    if (initialChallengeId && audienceChallenges.some((item) => item.id === initialChallengeId)) {
+      setSelectedId(initialChallengeId);
+      return;
+    }
     setSelectedId((current) =>
       audienceChallenges.some((item) => item.id === current) ? current : audienceChallenges[0].id,
     );
-  }, [audienceChallenges]);
+  }, [audienceChallenges, initialChallengeId]);
 
   useEffect(() => {
     const lastVariationIndex = progressoRef.current[challenge.id]?.lastVariationIndex ?? null;

@@ -79,6 +79,7 @@ export default function Page() {
   const [adminHistories, setAdminHistories] = useState<ManagedHistoryState>([]);
   const [adminConfirmed, setAdminConfirmed] = useState(false);
   const [adminAccessCode, setAdminAccessCode] = useState("");
+  const [exclusiveStartId, setExclusiveStartId] = useState<number | null>(null);
   const [dataMode, setDataMode] = useState<DataMode>(repository.mode);
   const [ready, setReady] = useState(false);
   const [isOffline, setIsOffline] = useState(false);
@@ -288,7 +289,13 @@ export default function Page() {
     setUserLinks([]);
     setAuditLog([]);
     setAdminHistories([]);
+    setExclusiveStartId(null);
     setTela("login");
+  }
+
+  function handleOpenSpecial(challengeId?: number) {
+    setExclusiveStartId(challengeId ?? null);
+    setTela("especial");
   }
 
   async function handleSaveProfile(
@@ -891,6 +898,7 @@ export default function Page() {
       <AudienceGame
         usuario={usuario}
         progresso={progresso.especial}
+        initialChallengeId={exclusiveStartId}
         onBack={() => setTela("dashboard")}
         onSaveResult={(challengeId, score, timeSeconds, completed, variationIndex) =>
           persistResult("especial", challengeId, score, timeSeconds, completed, variationIndex)
@@ -1033,8 +1041,13 @@ export default function Page() {
       onOpenProcess={() => setTela("processo")}
       onOpenFocusVision={() => setTela("visaoFocada")}
       onOpenProfile={() => setTela("perfil")}
-      onOpenSpecial={() => setTela("especial")}
+      onOpenSpecial={handleOpenSpecial}
       onOpenAdvanced={() => setTela("testesAvancados")}
+      onOpenAdvancedMemory={() => setTela("memoriaAvancada")}
+      onOpenAdvancedAttention={() => setTela("atencaoAvancada")}
+      onOpenAdvancedComparison={() => setTela("comparacaoAvancada")}
+      onOpenAdvancedSpatial={() => setTela("espacialAvancada")}
+      onOpenAdvancedLogic={() => setTela("logicaAvancada")}
       onOpenHelp={() => setTela("ajuda")}
       onOpenAdmin={handleOpenAdmin}
       onLogout={handleLogout}
