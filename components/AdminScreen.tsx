@@ -2,7 +2,7 @@
 
 import { useMemo, useRef, useState } from "react";
 
-import { getAdherencePanel, getFilteredManagedHistories, getPrivateClassRanking, summarizeAuditLog } from "@/lib/product-management";
+import { getAdherencePanel, getFilteredManagedHistories, summarizeAuditLog } from "@/lib/product-management";
 import { exportAdminReportPdf } from "@/lib/report-pdf";
 import { getCompletionRate, getReportSummary, getSessionModeLabel } from "@/lib/scoring";
 import { getAdminAlerts } from "@/lib/training-insights";
@@ -15,6 +15,7 @@ import type {
   ProgressState,
   ReminderSchedule,
   SessionRecord,
+  Tela,
   UserLink,
   Usuario,
 } from "@/lib/types";
@@ -46,9 +47,49 @@ type AdminScreenProps = {
   onSaveUserLink: (input: Omit<UserLink, "id" | "createdAt">) => Promise<void>;
   onExportBackup: () => Promise<BackupData>;
   onRestoreBackup: (backup: BackupData) => Promise<void>;
+  onOpenTest: (screen: Tela) => void;
 };
 
-type AdminPanelOption = "visao-geral" | "usuarios" | "ajuda" | "rotinas" | "auditoria";
+type AdminPanelOption = "visao-geral" | "usuarios" | "testes" | "ajuda" | "rotinas" | "auditoria";
+
+const adminTestGroups: Array<{
+  title: string;
+  caption: string;
+  tests: Array<{ label: string; caption: string; screen: Tela }>;
+}> = [
+  {
+    title: "Treino base",
+    caption: "Jogos principais usados no treino diário.",
+    tests: [
+      { label: "Memória", caption: "Evocação, seleção e correção de figuras.", screen: "memoria" },
+      { label: "Memória visual", caption: "Sequências visuais com exposição breve.", screen: "visual" },
+      { label: "Atenção", caption: "Busca de alvos e controle de foco.", screen: "atencao" },
+      { label: "Comparação", caption: "Discriminação entre alternativas parecidas.", screen: "comparacao" },
+      { label: "Orientação espacial", caption: "Rotas, posição e memória de percurso.", screen: "espacial" },
+      { label: "Lógica", caption: "Padrões, sequências e regras.", screen: "logica" },
+    ],
+  },
+  {
+    title: "Explorar mais",
+    caption: "Trilhas complementares e experiências personalizadas.",
+    tests: [
+      { label: "Procrastinação", caption: "Processos com começo, meio e fim.", screen: "processo" },
+      { label: "Foco", caption: "Visão focada e percepção periférica.", screen: "visaoFocada" },
+      { label: "Trilha exclusiva", caption: "Experiência personalizada por perfil.", screen: "especial" },
+    ],
+  },
+  {
+    title: "Testes avançados",
+    caption: "Versões mais exigentes para validação administrativa.",
+    tests: [
+      { label: "Memória avançada", caption: "Rodadas de memória com maior carga.", screen: "memoriaAvancada" },
+      { label: "Atenção avançada", caption: "Grades mais complexas e controle de alvo.", screen: "atencaoAvancada" },
+      { label: "Comparação avançada", caption: "Diferenças sutis e rodadas em sequência.", screen: "comparacaoAvancada" },
+      { label: "Orientação avançada", caption: "Percursos mais longos e variações difíceis.", screen: "espacialAvancada" },
+      { label: "Lógica avançada", caption: "Regras mais abstratas e sequenciais.", screen: "logicaAvancada" },
+    ],
+  },
+];
 
 const userStatusLabels: Record<Usuario["status"], string> = {
   ativo: "Ativo",
@@ -82,10 +123,8 @@ export function AdminScreen({
   onSaveUserLink,
   onExportBackup,
   onRestoreBackup,
+  onOpenTest,
 }: AdminScreenProps) {
-  const usersSectionRef = useRef<HTMLElement | null>(null);
-  const helpSectionRef = useRef<HTMLElement | null>(null);
-  const auditSectionRef = useRef<HTMLElement | null>(null);
   const normalizedHistories = useMemo(
     () => (histories.length > 0 ? histories : [{ user: usuario, history: [], progress: progressoAtual }]),
     [histories, progressoAtual, usuario],
@@ -110,19 +149,9 @@ export function AdminScreen({
   const [replyDrafts, setReplyDrafts] = useState<Record<string, string>>({});
   const [observationDrafts, setObservationDrafts] = useState<Record<string, string>>({});
   const [activePanel, setActivePanel] = useState<AdminPanelOption>("visao-geral");
-  const userStatusSummary = useMemo(
-    () => ({
-      ativo: normalizedHistories.filter(({ user }) => user.status === "ativo").length,
-      bloqueado: normalizedHistories.filter(({ user }) => user.status === "bloqueado").length,
-      excluido: normalizedHistories.filter(({ user }) => user.status === "excluido").length,
-    }),
-    [normalizedHistories],
-  );
   const adminAlerts = useMemo(() => getAdminAlerts(normalizedHistories), [normalizedHistories]);
   const criticalAlerts = useMemo(() => adminAlerts.filter((alert) => alert.severity === "alta"), [adminAlerts]);
   const adherencePanel = useMemo(() => getAdherencePanel(normalizedHistories), [normalizedHistories]);
-  const scoreRanking = useMemo(() => getPrivateClassRanking(normalizedHistories, null, "score"), [normalizedHistories]);
-  const evolutionRanking = useMemo(() => getPrivateClassRanking(normalizedHistories, null, "evolucao"), [normalizedHistories]);
 
   const filteredHistories = useMemo(() => {
     const query = search.trim().toLowerCase();
@@ -243,25 +272,6 @@ export function AdminScreen({
     () => helpRequests.filter((request) => request.status === "aberta").length,
     [helpRequests],
   );
-  const manageableActiveUsersCount = useMemo(
-    () =>
-      normalizedHistories.filter(
-        ({ user }) => user.role !== "admin" && user.status !== "bloqueado" && user.status !== "excluido",
-      ).length,
-    [normalizedHistories],
-  );
-
-  function scrollToSection(target: HTMLElement | null) {
-    target?.scrollIntoView({ behavior: "smooth", block: "start" });
-  }
-
-  function openPanel(panel: AdminPanelOption, target?: HTMLElement | null) {
-    setActivePanel(panel);
-    if (target) {
-      window.setTimeout(() => scrollToSection(target), 80);
-    }
-  }
-
   function getObservation(email: string, category: ClinicalObservation["category"]) {
     return observations.find((item) => item.email === email && item.category === category) ?? null;
   }
@@ -283,6 +293,7 @@ export function AdminScreen({
   const panelOptions: Array<{ id: AdminPanelOption; label: string; caption: string }> = [
     { id: "visao-geral", label: "Visão geral", caption: "Riscos, indicadores e rankings" },
     { id: "usuarios", label: "Usuários", caption: "Busca, bloqueio e acompanhamento" },
+    { id: "testes", label: "Testes", caption: "Abrir jogos como administrador" },
     { id: "ajuda", label: "Ajuda", caption: "Mensagens e respostas" },
     { id: "rotinas", label: "Rotinas", caption: "Turmas, vínculos e prescrições" },
     { id: "auditoria", label: "Auditoria", caption: "Reset, histórico e rastreio" },
@@ -300,32 +311,26 @@ export function AdminScreen({
                 <p className="sidebar-email">{usuario.email}</p>
               </div>
             </div>
-            <p className="sidebar-label">Administracao</p>
+            <p className="sidebar-label">Administração</p>
             <div className="admin-sidebar-nav">
-              {panelOptions
-                .filter((option) => option.id !== "ajuda")
-                .map((option) => (
-                  <button
-                    key={option.id}
-                    type="button"
-                    className={`admin-nav-button ${activePanel === option.id ? "admin-nav-button-active" : ""}`}
-                    onClick={() => setActivePanel(option.id)}
-                  >
-                    <strong>{option.label}</strong>
-                    <span>{option.caption}</span>
-                  </button>
-                ))}
+              {panelOptions.map((option) => (
+                <button
+                  key={option.id}
+                  type="button"
+                  aria-pressed={activePanel === option.id}
+                  className={`admin-nav-button ${activePanel === option.id ? "admin-nav-button-active" : ""}`}
+                  onClick={() => setActivePanel(option.id)}
+                >
+                  <strong>{option.label}</strong>
+                  <span>{option.caption}</span>
+                </button>
+              ))}
+            </div>
+            <div className="admin-sidebar-actions">
+              <p className="sidebar-label">Conta</p>
               <button type="button" className="admin-nav-button" onClick={onBack}>
                 <strong>Meu perfil</strong>
                 <span>Editar dados do administrador</span>
-              </button>
-              <button
-                type="button"
-                className={`admin-nav-button ${activePanel === "ajuda" ? "admin-nav-button-active" : ""}`}
-                onClick={() => setActivePanel("ajuda")}
-              >
-                <strong>Ajuda</strong>
-                <span>Pedidos, mensagens e respostas</span>
               </button>
               <button type="button" className="admin-nav-button admin-nav-button-danger" onClick={onLogout}>
                 <strong>Sair</strong>
@@ -340,55 +345,8 @@ export function AdminScreen({
                 <p className="eyebrow admin-area-title">Home administrativa</p>
                 <h1 className="admin-home-heading">Operação central do aplicativo</h1>
                 <p className="muted">
-                  Entrada dedicada para operação, alertas críticos e ações rápidas sem depender do dashboard do aluno.
+                  Entrada limpa para acompanhar sinais essenciais. As ações específicas ficam organizadas no menu lateral.
                 </p>
-              </div>
-              <div className="button-row">
-                <button className="btn btn-secondary btn-export-report" onClick={handleExportAdminPdf}>
-                  Exportar PDF
-                </button>
-                <button
-                  className="btn btn-secondary"
-                  onClick={async () => {
-                    const backup = await onExportBackup();
-                    const blob = new Blob([JSON.stringify(backup, null, 2)], { type: "application/json" });
-                    const url = URL.createObjectURL(blob);
-                    const anchor = document.createElement("a");
-                    anchor.href = url;
-                    anchor.download = `backup-app-memoria-${new Date().toISOString().slice(0, 10)}.json`;
-                    anchor.click();
-                    URL.revokeObjectURL(url);
-                  }}
-                >
-                  Exportar backup
-                </button>
-                <button className="btn btn-secondary" onClick={() => backupInputRef.current?.click()}>
-                  Restaurar backup
-                </button>
-                <button
-                  className="btn btn-secondary"
-                  disabled={resettingAllData}
-                  onClick={async () => {
-                    const confirmed = window.confirm(
-                      "Remover todos os usuários não administradores? Isso vai apagar contas, progresso, histórico, pedidos, vínculos e demais dados associados, preservando apenas o administrativo.",
-                    );
-                    if (!confirmed) return;
-
-                    const finalConfirmed = window.confirm(
-                      "Confirmação final: apenas as contas administrativas serão mantidas. Deseja continuar?",
-                    );
-                    if (!finalConfirmed) return;
-
-                    setResettingAllData(true);
-                    try {
-                      await onResetAllTrainingData();
-                    } finally {
-                      setResettingAllData(false);
-                    }
-                  }}
-                >
-                  {resettingAllData ? "Limpando usuários..." : "Limpar usuários não admin"}
-                </button>
               </div>
               <input
                 ref={backupInputRef}
@@ -410,218 +368,77 @@ export function AdminScreen({
               />
             </header>
 
-        <section className="panel admin-priority-panel">
+        {activePanel === "visao-geral" ? (
+        <section className="panel admin-home-summary-panel">
           <div className="section-head">
             <div>
-              <h3>Alertas críticos no topo</h3>
-              <span className="small-muted">Itens que pedem ação primeiro</span>
+              <h3>Resumo essencial</h3>
+              <span className="small-muted">Somente os sinais que ajudam a decidir o próximo passo</span>
             </div>
-            <span className="pill">{criticalAlerts.length} prioridade alta</span>
+            <span className="pill">{criticalAlerts.length} prioridade(s)</span>
           </div>
-          {criticalAlerts.length > 0 ? (
-            <div className="admin-critical-list">
-              {criticalAlerts.slice(0, 4).map((alert, index) => (
-                <article key={`${alert.email}-${alert.category}-${alert.title}`} className="admin-critical-card">
-                  <div className="section-head">
-                    <div>
-                      <p className="small-muted">{`Prioridade ${index + 1}`}</p>
-                      <h3>{alert.title}</h3>
-                    </div>
-                    <span className="pill">Alta</span>
-                  </div>
-                  <p className="small-muted">{alert.name}</p>
-                  <p className="muted">{alert.summary}</p>
-                  <p className="small-muted">{alert.recommendation}</p>
-                </article>
-              ))}
+          <div className="admin-status-grid">
+            <div className="admin-status-card admin-status-card-active">
+              <strong>{normalizedHistories.length}</strong>
+              <span>Perfis</span>
             </div>
+            <div className="admin-status-card admin-status-card-blocked">
+              <strong>{criticalAlerts.length}</strong>
+              <span>Prioridade alta</span>
+            </div>
+            <div className="admin-status-card admin-status-card-active">
+              <strong>{openHelpRequestsCount}</strong>
+              <span>Ajuda aberta</span>
+            </div>
+            <div className="admin-status-card admin-status-card-deleted">
+              <strong>{adherencePanel.attention + adherencePanel.inactive}</strong>
+              <span>Atenção de rotina</span>
+            </div>
+          </div>
+          {criticalAlerts[0] ? (
+            <article className="admin-critical-card admin-critical-card-compact">
+              <div>
+                <p className="small-muted">Prioridade principal</p>
+                <h3>{criticalAlerts[0].title}</h3>
+              </div>
+              <p className="muted">{criticalAlerts[0].summary}</p>
+            </article>
           ) : (
             <p className="small-muted">Nenhum alerta de prioridade alta no momento.</p>
           )}
         </section>
-
-        <section className="panel admin-quick-actions-panel">
-          <div className="section-head">
-            <h3>Atalhos de ação rápida</h3>
-            <span className="small-muted">Fluxos operacionais mais usados em um clique</span>
-          </div>
-          <div className="admin-quick-actions-grid">
-            <button
-              className="admin-quick-action admin-quick-action-warning"
-              type="button"
-              onClick={() => {
-                setSearch("");
-                setUserRoleFilter("aluno");
-                setUserStatusFilter("ativo");
-                openPanel("usuarios", usersSectionRef.current);
-              }}
-            >
-              <strong>Bloquear usuário</strong>
-              <span>{`${manageableActiveUsersCount} perfil(is) elegível(is) para revisão`}</span>
-            </button>
-            <button
-              className="admin-quick-action admin-quick-action-info"
-              type="button"
-              onClick={() => {
-                setSearch("");
-                setHelpStatusFilter("aberta");
-                openPanel("ajuda", helpSectionRef.current);
-              }}
-            >
-              <strong>Responder ajuda</strong>
-              <span>{`${openHelpRequestsCount} pedido(s) em aberto`}</span>
-            </button>
-            <button className="admin-quick-action admin-quick-action-neutral" type="button" onClick={handleExportAdminPdf}>
-              <strong>Exportar relatório</strong>
-              <span>Gerar PDF consolidado com usuários, ajuda e observações</span>
-            </button>
-            <button
-              className="admin-quick-action admin-quick-action-danger"
-              type="button"
-              onClick={async () => {
-                const confirmed = window.confirm(
-                  "Remover todos os usuários não administradores? Isso vai apagar contas, progresso, histórico, pedidos, vínculos e demais dados associados, preservando apenas o administrativo.",
-                );
-                if (!confirmed) return;
-
-                const finalConfirmed = window.confirm(
-                  "Confirmação final: apenas as contas administrativas serão mantidas. Deseja continuar?",
-                );
-                if (!finalConfirmed) return;
-
-                setResettingAllData(true);
-                try {
-                  await onResetAllTrainingData();
-                  openPanel("auditoria", auditSectionRef.current);
-                } finally {
-                  setResettingAllData(false);
-                }
-              }}
-            >
-              <strong>{resettingAllData ? "Resetando dados..." : "Resetar dados"}</strong>
-              <span>Limpar usuários não admin e registrar a ação na auditoria</span>
-            </button>
-          </div>
-        </section>
-
-        {activePanel === "visao-geral" ? (
-        <section className="stats-grid">
-          <article className="stat-card">
-            <p className="small-muted">Usuários monitorados</p>
-            <h3>{normalizedHistories.length}</h3>
-            <p className="muted">Leitura local das contas cadastradas no app.</p>
-          </article>
-          <article className="stat-card">
-            <p className="small-muted">Sessões registradas</p>
-            <h3>{normalizedHistories.reduce((sum, item) => sum + item.history.length, 0)}</h3>
-            <p className="muted">Cada rodada concluída gera um registro para relatórios.</p>
-          </article>
-          <article className="stat-card">
-            <p className="small-muted">Conclusões totais</p>
-            <h3>{normalizedHistories.reduce((sum, item) => sum + item.history.filter((entry) => entry.completed).length, 0)}</h3>
-            <p className="muted">Ajuda a acompanhar aderência e evolução geral.</p>
-          </article>
-          <article className="stat-card">
-            <p className="small-muted">Pedidos de ajuda</p>
-            <h3>{helpRequests.length}</h3>
-            <p className="muted">Dúvidas registradas pelos usuários dentro do app.</p>
-          </article>
-          <article className="stat-card">
-            <p className="small-muted">Rotinas agendadas</p>
-            <h3>{reminders.length}</h3>
-            <p className="muted">Lembretes e agendas de treino ativos no produto.</p>
-          </article>
-          <article className="stat-card">
-            <p className="small-muted">Sessões prescritas</p>
-            <h3>{prescriptions.length}</h3>
-            <p className="muted">Blocos orientados por professor ou responsável.</p>
-          </article>
-        </section>
         ) : null}
 
-        {activePanel === "visao-geral" ? (
-        <section className="panel admin-status-panel">
+        {activePanel === "testes" ? (
+        <section className="panel admin-options-panel admin-test-panel">
           <div className="section-head">
-            <h3>Status dos usuários</h3>
-            <span className="small-muted">Controle rápido de acesso ao aplicativo</span>
-          </div>
-          <div className="admin-status-grid">
-            <div className="admin-status-card admin-status-card-active">
-              <strong>{userStatusSummary.ativo}</strong>
-              <span>Ativos</span>
+            <div>
+              <h3>Acesso administrativo aos testes</h3>
+              <span className="small-muted">Atalhos de validação com retorno automático para a Home Administrativa</span>
             </div>
-            <div className="admin-status-card admin-status-card-blocked">
-              <strong>{userStatusSummary.bloqueado}</strong>
-              <span>Bloqueados</span>
-            </div>
-            <div className="admin-status-card admin-status-card-deleted">
-              <strong>{userStatusSummary.excluido}</strong>
-              <span>Excluidos</span>
-            </div>
+            <span className="pill">Modo administrador</span>
           </div>
-        </section>
-        ) : null}
-
-        {activePanel === "visao-geral" ? (
-        <section className="panel admin-alerts-panel">
-          <div className="section-head">
-            <h3>Alertas inteligentes</h3>
-            <span className="small-muted">{adminAlerts.length} alerta(s) priorizados para ação</span>
-          </div>
-          {adminAlerts.length > 0 ? (
-            <div className="admin-alert-grid">
-              {adminAlerts.map((alert) => (
-                <article key={`${alert.email}-${alert.category}-${alert.title}`} className={`admin-alert-card admin-alert-${alert.severity}`}>
-                  <div className="section-head">
-                    <div>
-                      <h3>{alert.title}</h3>
-                      <p className="small-muted">{alert.name}</p>
-                    </div>
-                    <span className="pill">{alert.severity === "alta" ? "Alta" : alert.severity === "media" ? "Média" : "Baixa"}</span>
-                  </div>
-                  <p className="muted">{alert.summary}</p>
-                  <p className="small-muted">{alert.recommendation}</p>
-                </article>
-              ))}
-            </div>
-          ) : (
-            <p className="small-muted">Nenhum alerta crítico agora. O grupo está sem sinais fortes de abandono ou queda.</p>
-          )}
-        </section>
-        ) : null}
-
-        {activePanel === "visao-geral" ? (
-        <section className="panel">
-          <div className="section-head">
-            <h3>Rankings privados do produto</h3>
-            <span className="small-muted">Leitura consolidada por desempenho e evolução</span>
-          </div>
-          <div className="admin-alert-grid">
-            <article className="admin-class-card">
-              <h3>Desempenho consolidado</h3>
-              <div className="ranking-list">
-                {scoreRanking.map((entry, index) => (
-                  <div key={entry.email} className="ranking-item">
-                    <strong>{`${index + 1}. ${entry.name}`}</strong>
-                    <span>{entry.score}</span>
-                    <p className="small-muted">{entry.subtitle}</p>
-                  </div>
+          {adminTestGroups.map((group) => (
+            <div key={group.title} className="admin-test-group">
+              <div>
+                <h3>{group.title}</h3>
+                <p className="small-muted">{group.caption}</p>
+              </div>
+              <div className="admin-options-grid">
+                {group.tests.map((test) => (
+                  <button
+                    key={test.screen}
+                    type="button"
+                    className="admin-option-card admin-test-card"
+                    onClick={() => onOpenTest(test.screen)}
+                  >
+                    <strong>{test.label}</strong>
+                    <span>{test.caption}</span>
+                  </button>
                 ))}
               </div>
-            </article>
-            <article className="admin-class-card">
-              <h3>Evolução recente</h3>
-              <div className="ranking-list">
-                {evolutionRanking.map((entry, index) => (
-                  <div key={entry.email} className="ranking-item">
-                    <strong>{`${index + 1}. ${entry.name}`}</strong>
-                    <span>{entry.score >= 0 ? `+${entry.score}` : entry.score}</span>
-                    <p className="small-muted">{entry.subtitle}</p>
-                  </div>
-                ))}
-              </div>
-            </article>
-          </div>
+            </div>
+          ))}
         </section>
         ) : null}
 
@@ -730,38 +547,6 @@ export function AdminScreen({
         </section>
         ) : null}
 
-        {activePanel === "visao-geral" ? (
-        <section className="panel">
-          <div className="section-head">
-            <h3>Painel de adesao</h3>
-            <span className="small-muted">Leitura de frequência, risco e abandono</span>
-          </div>
-          <div className="admin-status-grid">
-            <div className="admin-status-card admin-status-card-active">
-              <strong>{adherencePanel.regular}</strong>
-              <span>Rotina ativa</span>
-            </div>
-            <div className="admin-status-card admin-status-card-blocked">
-              <strong>{adherencePanel.attention}</strong>
-              <span>Precisam atenção</span>
-            </div>
-            <div className="admin-status-card admin-status-card-deleted">
-              <strong>{adherencePanel.inactive}</strong>
-              <span>Inativos</span>
-            </div>
-          </div>
-          <div className="admin-alert-grid">
-            {adherencePanel.entries.slice(0, 8).map((entry) => (
-              <article key={entry.email} className={`admin-alert-card admin-alert-${entry.label === "regular" ? "baixa" : entry.label === "attention" ? "media" : "alta"}`}>
-                <h3>{entry.name}</h3>
-                <p className="small-muted">{entry.email}</p>
-                <p className="muted">{entry.summary}</p>
-              </article>
-            ))}
-          </div>
-        </section>
-        ) : null}
-
         {activePanel === "rotinas" ? (
         <section className="panel">
           <div className="section-head">
@@ -858,7 +643,7 @@ export function AdminScreen({
         ) : null}
 
         {activePanel === "usuarios" ? (
-        <section ref={usersSectionRef} className="panel">
+        <section className="panel">
           <div className="section-head">
             <h3>Resumo por aluno</h3>
             <span className="small-muted">{filteredHistories.length} perfil(is) encontrado(s)</span>
@@ -1045,7 +830,7 @@ export function AdminScreen({
         ) : null}
 
         {activePanel === "ajuda" ? (
-        <section ref={helpSectionRef} className="panel">
+        <section className="panel">
           <div className="section-head">
             <h3>Dúvidas enviadas</h3>
             <span className="small-muted">{filteredHelpRequests.length} item(ns) encontrado(s)</span>
@@ -1166,7 +951,70 @@ export function AdminScreen({
         ) : null}
 
         {activePanel === "auditoria" ? (
-        <section ref={auditSectionRef} className="panel">
+        <>
+        <section className="panel admin-options-panel">
+          <div className="section-head">
+            <div>
+              <h3>Ferramentas administrativas</h3>
+              <span className="small-muted">Exportação, backup e reset ficam reunidos aqui</span>
+            </div>
+            <span className="pill">Ações sensíveis</span>
+          </div>
+          <div className="admin-options-grid">
+            <button className="admin-option-card" type="button" onClick={handleExportAdminPdf}>
+              <strong>Exportar PDF</strong>
+              <span>Relatório consolidado com usuários, ajuda e observações.</span>
+            </button>
+            <button
+              className="admin-option-card"
+              type="button"
+              onClick={async () => {
+                const backup = await onExportBackup();
+                const blob = new Blob([JSON.stringify(backup, null, 2)], { type: "application/json" });
+                const url = URL.createObjectURL(blob);
+                const anchor = document.createElement("a");
+                anchor.href = url;
+                anchor.download = `backup-app-memoria-${new Date().toISOString().slice(0, 10)}.json`;
+                anchor.click();
+                URL.revokeObjectURL(url);
+              }}
+            >
+              <strong>Exportar backup</strong>
+              <span>Baixar uma cópia completa dos dados administrativos.</span>
+            </button>
+            <button className="admin-option-card" type="button" onClick={() => backupInputRef.current?.click()}>
+              <strong>Restaurar backup</strong>
+              <span>Carregar um arquivo JSON salvo anteriormente.</span>
+            </button>
+            <button
+              className="admin-option-card admin-option-card-danger"
+              type="button"
+              disabled={resettingAllData}
+              onClick={async () => {
+                const confirmed = window.confirm(
+                  "Remover todos os usuários não administradores? Isso vai apagar contas, progresso, histórico, pedidos, vínculos e demais dados associados, preservando apenas o administrativo.",
+                );
+                if (!confirmed) return;
+
+                const finalConfirmed = window.confirm(
+                  "Confirmação final: apenas as contas administrativas serão mantidas. Deseja continuar?",
+                );
+                if (!finalConfirmed) return;
+
+                setResettingAllData(true);
+                try {
+                  await onResetAllTrainingData();
+                } finally {
+                  setResettingAllData(false);
+                }
+              }}
+            >
+              <strong>{resettingAllData ? "Limpando usuários..." : "Limpar usuários não admin"}</strong>
+              <span>Remover contas e dados não administrativos.</span>
+            </button>
+          </div>
+        </section>
+        <section className="panel">
           <div className="section-head">
             <h3>Log de ações administrativas</h3>
             <span className="small-muted">{auditLog.length} registro(s) recentes</span>
@@ -1189,6 +1037,7 @@ export function AdminScreen({
             )}
           </div>
         </section>
+        </>
         ) : null}
           </div>
         </div>

@@ -36,6 +36,7 @@ import type { DataMode, ProgressState, SessionRecord, SessionMode, Tela, Usuario
 const repository = getAppRepository();
 
 type ManagedHistoryState = Array<{ user: Usuario; history: SessionRecord[]; progress?: ProgressState }>;
+type GameReturnScreen = Extract<Tela, "dashboard" | "testesAvancados" | "admin">;
 
 function shouldShowOnboarding(user: Usuario | null) {
   return Boolean(user && user.role !== "admin" && !user.onboardingCompletedAt);
@@ -80,6 +81,7 @@ export default function Page() {
   const [adminConfirmed, setAdminConfirmed] = useState(false);
   const [adminAccessCode, setAdminAccessCode] = useState("");
   const [exclusiveStartId, setExclusiveStartId] = useState<number | null>(null);
+  const [gameReturnScreen, setGameReturnScreen] = useState<GameReturnScreen | null>(null);
   const [dataMode, setDataMode] = useState<DataMode>(repository.mode);
   const [ready, setReady] = useState(false);
   const [isOffline, setIsOffline] = useState(false);
@@ -290,12 +292,26 @@ export default function Page() {
     setAuditLog([]);
     setAdminHistories([]);
     setExclusiveStartId(null);
+    setGameReturnScreen(null);
     setTela("login");
   }
 
   function handleOpenSpecial(challengeId?: number) {
+    setGameReturnScreen(null);
     setExclusiveStartId(challengeId ?? null);
     setTela("especial");
+  }
+
+  function handleGameBack(defaultScreen: GameReturnScreen) {
+    const nextScreen = gameReturnScreen ?? defaultScreen;
+    setGameReturnScreen(null);
+    setTela(nextScreen);
+  }
+
+  function handleOpenAdminTest(screen: Tela) {
+    setExclusiveStartId(null);
+    setGameReturnScreen("admin");
+    setTela(screen);
   }
 
   async function handleSaveProfile(
@@ -723,7 +739,7 @@ export default function Page() {
       <MemoryGame
         usuario={usuario}
         progresso={progresso.memoria}
-        onBack={() => setTela("dashboard")}
+        onBack={() => handleGameBack("dashboard")}
         onRememberVariation={(challengeId, variationIndex) =>
           persistVariation("memoria", challengeId, variationIndex)
         }
@@ -739,7 +755,7 @@ export default function Page() {
       <MemoryGame
         usuario={usuario}
         progresso={progresso.memoria}
-        onBack={() => setTela("testesAvancados")}
+        onBack={() => handleGameBack("testesAvancados")}
         onRememberVariation={(challengeId, variationIndex) =>
           persistVariation("memoria", challengeId, variationIndex)
         }
@@ -756,7 +772,7 @@ export default function Page() {
       <VisualMemoryGame
         usuario={usuario}
         progresso={progresso.visual}
-        onBack={() => setTela("dashboard")}
+        onBack={() => handleGameBack("dashboard")}
         onRememberVariation={(challengeId, variationIndex) => persistVariation("visual", challengeId, variationIndex)}
         onSaveResult={(challengeId, score, timeSeconds, completed, variationIndex) =>
           persistResult("visual", challengeId, score, timeSeconds, completed, variationIndex)
@@ -770,7 +786,7 @@ export default function Page() {
       <AttentionGame
         usuario={usuario}
         progresso={progresso.atencao}
-        onBack={() => setTela("dashboard")}
+        onBack={() => handleGameBack("dashboard")}
         onRememberVariation={(challengeId, variationIndex) =>
           persistVariation("atencao", challengeId, variationIndex)
         }
@@ -786,7 +802,7 @@ export default function Page() {
       <AttentionGame
         usuario={usuario}
         progresso={progresso.atencao}
-        onBack={() => setTela("testesAvancados")}
+        onBack={() => handleGameBack("testesAvancados")}
         onRememberVariation={(challengeId, variationIndex) =>
           persistVariation("atencao", challengeId, variationIndex)
         }
@@ -803,7 +819,7 @@ export default function Page() {
       <ComparisonGame
         usuario={usuario}
         progresso={progresso.comparacao}
-        onBack={() => setTela("dashboard")}
+        onBack={() => handleGameBack("dashboard")}
         onRememberVariation={(challengeId, variationIndex) =>
           persistVariation("comparacao", challengeId, variationIndex)
         }
@@ -819,7 +835,7 @@ export default function Page() {
       <ComparisonGame
         usuario={usuario}
         progresso={progresso.comparacao}
-        onBack={() => setTela("testesAvancados")}
+        onBack={() => handleGameBack("testesAvancados")}
         onRememberVariation={(challengeId, variationIndex) =>
           persistVariation("comparacao", challengeId, variationIndex)
         }
@@ -836,7 +852,7 @@ export default function Page() {
       <SpatialGame
         usuario={usuario}
         progresso={progresso.espacial}
-        onBack={() => setTela("dashboard")}
+        onBack={() => handleGameBack("dashboard")}
         onRememberVariation={(challengeId, variationIndex) =>
           persistVariation("espacial", challengeId, variationIndex)
         }
@@ -852,7 +868,7 @@ export default function Page() {
       <SpatialGame
         usuario={usuario}
         progresso={progresso.espacial}
-        onBack={() => setTela("testesAvancados")}
+        onBack={() => handleGameBack("testesAvancados")}
         onRememberVariation={(challengeId, variationIndex) =>
           persistVariation("espacial", challengeId, variationIndex)
         }
@@ -869,7 +885,7 @@ export default function Page() {
       <LogicGame
         usuario={usuario}
         progresso={progresso.logica}
-        onBack={() => setTela("dashboard")}
+        onBack={() => handleGameBack("dashboard")}
         onRememberVariation={(challengeId, variationIndex) => persistVariation("logica", challengeId, variationIndex)}
         onSaveResult={(challengeId, score, timeSeconds, completed, variationIndex) =>
           persistResult("logica", challengeId, score, timeSeconds, completed, variationIndex)
@@ -883,7 +899,7 @@ export default function Page() {
       <LogicGame
         usuario={usuario}
         progresso={progresso.logica}
-        onBack={() => setTela("testesAvancados")}
+        onBack={() => handleGameBack("testesAvancados")}
         onRememberVariation={(challengeId, variationIndex) => persistVariation("logica", challengeId, variationIndex)}
         onSaveResult={(challengeId, score, timeSeconds, completed, variationIndex) =>
           persistResult("logica", challengeId, score, timeSeconds, completed, variationIndex)
@@ -899,7 +915,7 @@ export default function Page() {
         usuario={usuario}
         progresso={progresso.especial}
         initialChallengeId={exclusiveStartId}
-        onBack={() => setTela("dashboard")}
+        onBack={() => handleGameBack("dashboard")}
         onSaveResult={(challengeId, score, timeSeconds, completed, variationIndex) =>
           persistResult("especial", challengeId, score, timeSeconds, completed, variationIndex)
         }
@@ -915,7 +931,7 @@ export default function Page() {
       <ProcessGame
         usuario={usuario}
         progresso={progresso.processo}
-        onBack={() => setTela("dashboard")}
+        onBack={() => handleGameBack("dashboard")}
         onRememberVariation={(challengeId, variationIndex) =>
           persistVariation("processo", challengeId, variationIndex)
         }
@@ -931,7 +947,7 @@ export default function Page() {
       <FocusVisionGame
         usuario={usuario}
         progresso={progresso.visaoFocada}
-        onBack={() => setTela("dashboard")}
+        onBack={() => handleGameBack("dashboard")}
         onRememberVariation={(challengeId, variationIndex) =>
           persistVariation("visaoFocada", challengeId, variationIndex)
         }
@@ -1000,6 +1016,7 @@ export default function Page() {
         onSaveUserLink={handleSaveUserLink}
         onExportBackup={() => repository.exportBackupData()}
         onRestoreBackup={handleRestoreBackup}
+        onOpenTest={handleOpenAdminTest}
       />
     );
   }
