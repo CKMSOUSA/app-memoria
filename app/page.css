@@ -803,7 +803,8 @@ h2 {
 }
 
 .dashboard-reflection-slot {
-  margin: 2px 0;
+  width: 100%;
+  margin: 8px 0 4px;
 }
 
 .pause-reflection-button {
@@ -815,11 +816,11 @@ h2 {
   position: relative;
   display: grid;
   place-items: center;
-  width: clamp(138px, 18vw, 178px);
+  width: clamp(104px, 11vw, 132px);
   aspect-ratio: 1;
   padding: 0;
   overflow: hidden;
-  border: 10px solid #e6e2dc;
+  border: 8px solid #e6e2dc;
   border-radius: 999px;
   background:
     radial-gradient(circle at 36% 28%, rgba(255, 255, 255, 0.72) 0 10%, transparent 32%),
@@ -853,9 +854,9 @@ h2 {
 .pause-reflection-button-label {
   position: relative;
   z-index: 1;
-  max-width: 90px;
+  max-width: 74px;
   text-align: center;
-  font-size: 22px;
+  font-size: 17px;
   line-height: 1.02;
   text-shadow: 0 2px 7px rgba(72, 0, 0, 0.45);
 }
@@ -899,7 +900,25 @@ h2 {
 }
 
 .pause-reflection-alarm .pause-reflection-card {
-  max-width: 760px;
+  max-width: 900px;
+}
+
+.pause-reflection-card-alarm {
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 18px;
+}
+
+.pause-reflection-card-main {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+}
+
+.pause-reflection-card-action {
+  display: grid;
+  align-items: center;
+  justify-items: end;
 }
 
 .pause-reflection-card h3 {
@@ -951,22 +970,6 @@ h2 {
   margin: 0;
   color: #7f2d2d;
   font-weight: 800;
-}
-
-.pause-reflection-history {
-  display: grid;
-  gap: 6px;
-  padding-top: 4px;
-}
-
-.pause-reflection-history p {
-  margin: 0;
-  padding: 10px 12px;
-  border-radius: 12px;
-  background: rgba(127, 45, 45, 0.08);
-  color: #5f2a2a;
-  font-size: 14px;
-  line-height: 1.35;
 }
 
 .dashboard-disclosure {
@@ -3084,6 +3087,14 @@ h2 {
 
   .report-panel .stats-grid {
     grid-template-columns: 1fr;
+  }
+
+  .pause-reflection-card-alarm {
+    grid-template-columns: 1fr;
+  }
+
+  .pause-reflection-card-action {
+    justify-items: center;
   }
 
   .admin-home-heading {
