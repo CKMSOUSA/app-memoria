@@ -319,35 +319,39 @@ export function FocusVisionGame({
                 tip="Se perceber que está caçando letra por letra, volte ao ponto central e faça uma varredura ampla."
                 isChild={usuario.idade <= 10}
               />
-              <div className="attention-banner">
-                <strong>Alvo</strong>
-                <div className="target-pill">{variation.alvo}</div>
-              </div>
-              <div className="phase-summary">
-                <div className="phase-chip">
-                  <strong>Meta</strong>
-                  <span>{`${challenge.minimoParaConcluir}/${variation.targetCount} alvos`}</span>
-                </div>
-                <div className="phase-chip">
-                  <strong>Grade</strong>
-                  <span>{`${variation.gridSize} x ${variation.gridSize}`}</span>
-                </div>
-                <div className="phase-chip">
-                  <strong>Tempo</strong>
-                  <span>{`${challenge.tempoLimite}s`}</span>
-                </div>
-              </div>
-              <p className="review-note">{feedback || challenge.descricao}</p>
             </section>
 
             <section className="panel focus-board-panel">
               <div className="section-head">
-                <h3>Campo visual</h3>
+                <h3>Campo Visual</h3>
                 <TimerDisplay
                   label="Tempo"
                   value={phase === "playing" ? `${timeLeft}s` : "--"}
                   tone={phase === "playing" && timeLeft <= 10 ? "warning" : phase === "playing" ? "active" : "neutral"}
                 />
+              </div>
+              <div className="focus-board-prep">
+                <div className="attention-banner">
+                  <strong>Alvo</strong>
+                  <div className="target-pill">{variation.alvo}</div>
+                </div>
+                <div className="phase-summary focus-board-summary">
+                  <div className="phase-chip">
+                    <strong>Meta</strong>
+                    <span>{`${challenge.minimoParaConcluir}/${variation.targetCount} alvos`}</span>
+                  </div>
+                  <div className="phase-chip">
+                    <strong>Grade</strong>
+                    <span>{`${variation.gridSize} x ${variation.gridSize}`}</span>
+                  </div>
+                  <div className="phase-chip">
+                    <strong>Tempo</strong>
+                    <span>{`${challenge.tempoLimite}s`}</span>
+                  </div>
+                </div>
+                <p className="review-note focus-board-note">
+                  {feedback || "Fixe o ponto central. Use a periferia para localizar o alvo."}
+                </p>
               </div>
               <div className="button-row round-controls">
                 <button className="btn btn-primary btn-round-start" onClick={startRound} disabled={phase === "playing"}>
