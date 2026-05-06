@@ -1130,14 +1130,14 @@ export function Dashboard({
   const baseTrainingActions = [
     { label: "Jogo de memória", onOpen: onOpenMemory },
     { label: "Jogo de atenção", onOpen: onOpenAttention },
-    { label: "Procrastinação", onOpen: onOpenProcess },
-    { label: "Foco", onOpen: onOpenFocusVision },
     { label: "Jogo de comparação", onOpen: onOpenComparison },
-  ];
-  const exploreActions = [
     { label: "Memória visual", onOpen: onOpenVisual },
     { label: "Orientação espacial", onOpen: onOpenSpatial },
     { label: "Jogo de lógica", onOpen: onOpenLogic },
+  ];
+  const exploreActions = [
+    { label: "Procrastinação", onOpen: onOpenProcess },
+    { label: "Foco", onOpen: onOpenFocusVision },
   ];
   const specialActions = specialChallenges.map((challenge) => ({
     label: challenge.nome,
