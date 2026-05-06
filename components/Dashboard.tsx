@@ -4,6 +4,7 @@ import { type ReactNode, useEffect, useState } from "react";
 
 import { AppPreferencesPanel } from "@/components/AppPreferencesPanel";
 import { InternalAssistant } from "@/components/InternalAssistant";
+import { PauseReflectionButton } from "@/components/PauseReflectionButton";
 import { getRemoteBackendStatus } from "@/lib/app-repository";
 import type { AppSettings } from "@/lib/app-settings";
 import type { OfflineSyncStatus } from "@/lib/offline-store";
@@ -66,8 +67,6 @@ import type {
 
 type TrailMode = "memoria" | "visual" | "atencao" | "comparacao" | "espacial" | "logica" | "processo" | "visaoFocada";
 type DashboardTab = "hoje" | "progresso" | "rotina" | "insights";
-
-const REFLECTION_SECONDS = 40;
 
 const processReflectionPrompts = [
   "O que está ocupando sua mente neste momento?",
@@ -1059,10 +1058,6 @@ export function Dashboard({
   }
   const [activeTrailTab, setActiveTrailTab] = useState<TrailMode>("memoria");
   const [activeDashboardTab, setActiveDashboardTab] = useState<DashboardTab>("hoje");
-  const [reflectionPromptIndex, setReflectionPromptIndex] = useState(0);
-  const [reflectionSecondsLeft, setReflectionSecondsLeft] = useState(REFLECTION_SECONDS);
-  const [reflectionOpen, setReflectionOpen] = useState(false);
-  const [reflectionHistory, setReflectionHistory] = useState<string[]>([]);
   const trailTabs: Array<{
     id: TrailMode;
     label: string;
@@ -1120,35 +1115,6 @@ export function Dashboard({
       caption: usuario.role === "admin" ? "Análises e operação" : "Ajustes e leitura",
     },
   ];
-  const reflectionPrompt = processReflectionPrompts[reflectionPromptIndex] ?? processReflectionPrompts[0];
-  const reflectionComplete = reflectionOpen && reflectionSecondsLeft === 0;
-
-  useEffect(() => {
-    if (!reflectionOpen || reflectionSecondsLeft === 0) return undefined;
-
-    const timerId = window.setTimeout(() => {
-      setReflectionSecondsLeft((current) => Math.max(0, current - 1));
-    }, 1000);
-
-    return () => window.clearTimeout(timerId);
-  }, [reflectionOpen, reflectionSecondsLeft]);
-
-  function startProcessReflection() {
-    const randomIndex = Math.floor(Math.random() * processReflectionPrompts.length);
-    const nextIndex =
-      processReflectionPrompts.length <= 1
-        ? reflectionPromptIndex
-        : randomIndex === reflectionPromptIndex
-          ? (randomIndex + 1) % processReflectionPrompts.length
-          : randomIndex;
-    const nextPrompt = processReflectionPrompts[nextIndex] ?? processReflectionPrompts[0];
-
-    setReflectionPromptIndex(nextIndex);
-    setReflectionHistory((current) => [nextPrompt, ...current.filter((item) => item !== nextPrompt)].slice(0, 3));
-    setReflectionSecondsLeft(REFLECTION_SECONDS);
-    setReflectionOpen(true);
-  }
-
   return (
     <main className="shell shell-dashboard">
       <aside className="sidebar">
@@ -1260,6 +1226,13 @@ export function Dashboard({
           </div>
         </header>
 
+        <PauseReflectionButton
+          className="dashboard-reflection-slot"
+          variant="alarm"
+          prompts={processReflectionPrompts}
+          doneMessage="Guarde a percepção que apareceu e siga com calma."
+        />
+
         <section className="panel dashboard-tabs-panel">
           <div className="section-head">
             <h3>Navegação rápida</h3>
@@ -1290,32 +1263,6 @@ export function Dashboard({
               <span className="trail-tab-rate">Foco central e periférico</span>
             </button>
           </div>
-          <button className="process-pause-button" type="button" onClick={startProcessReflection}>
-            Pare e Pense
-          </button>
-          {reflectionOpen ? (
-            <article className="process-reflection-card" aria-live="polite">
-              <div>
-                <p className="small-muted process-reflection-label">Pausa de reflexão</p>
-                <h3>{reflectionComplete ? "Pausa concluída" : `${reflectionSecondsLeft}s para pensar`}</h3>
-                <p className="muted process-reflection-question">{reflectionPrompt}</p>
-              </div>
-              <div className="process-reflection-meter" aria-label={`${reflectionSecondsLeft} segundos restantes`}>
-                <span style={{ width: `${((REFLECTION_SECONDS - reflectionSecondsLeft) / REFLECTION_SECONDS) * 100}%` }} />
-              </div>
-              {reflectionComplete ? (
-                <p className="process-reflection-done">Guarde a percepção que apareceu e siga com calma.</p>
-              ) : null}
-              {reflectionHistory.length > 1 ? (
-                <div className="process-reflection-history">
-                  <span className="small-muted">Pausas recentes</span>
-                  {reflectionHistory.slice(1).map((item) => (
-                    <p key={item}>{item}</p>
-                  ))}
-                </div>
-              ) : null}
-            </article>
-          ) : null}
         </section>
 
         {activeDashboardTab === "progresso" ? (
