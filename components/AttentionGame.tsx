@@ -77,6 +77,7 @@ export function AttentionGame({
     completed: boolean;
     hits: string[];
     errors: string[];
+    target: string;
   } | null>(null);
   const { soundEnabled, toggleSound, playResultSound, playAnswerSound } = useSoundFeedback();
   const { settings } = useAppSettingsState();
@@ -161,6 +162,7 @@ export function AttentionGame({
         ...result,
         hits: Array.from({ length: result.foundCount }, () => activeTarget),
         errors: wrongSelections,
+        target: activeTarget,
       });
       setFeedback(
         result.completed
@@ -229,6 +231,7 @@ export function AttentionGame({
         ...result,
         hits: Array.from({ length: result.foundCount }, () => activeTarget),
         errors: wrongSelections,
+        target: activeTarget,
       });
       setFeedback(
         result.completed
@@ -392,7 +395,7 @@ export function AttentionGame({
             {!review.completed ? (
               <p className="review-note">
                 {review.wrongClicks > 0
-                  ? `Onde errou: houve ${review.wrongClicks} clique(s) fora do alvo ${variacaoAtual.alvo}.`
+                  ? `Onde errou: houve ${review.wrongClicks} clique(s) fora do alvo ${review.target}.`
                   : `Onde errou: faltaram ${Math.max(review.totalTargets - review.foundCount, 0)} alvo(s) para completar a meta.`}
               </p>
             ) : null}
@@ -431,7 +434,7 @@ export function AttentionGame({
               <div className="review-column">
                 <strong>Resumo</strong>
                 <div className="review-summary">
-                  <span>Alvo: {variacaoAtual.alvo}</span>
+                  <span>Alvo: {review.target}</span>
                   <span>
                     {review.foundCount}/{review.totalTargets} encontrados
                   </span>

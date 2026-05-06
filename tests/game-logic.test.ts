@@ -10,6 +10,7 @@ import {
   evaluateVisualRound,
   getNextVariationIndex,
 } from "@/lib/game-logic";
+import { getMemoryFigure, getMemoryFigureMap } from "@/lib/memory-figures";
 
 test("getNextVariationIndex avoids repeating the current variation when there is more than one option", () => {
   assert.equal(getNextVariationIndex(3, 1, 0.4), 2);
@@ -34,6 +35,28 @@ test("evaluateMemoryRound counts hits, wrong words and missed words correctly", 
   assert.deepEqual(result.missedWords, ["sol"]);
   assert.equal(result.completed, true);
   assert.equal(result.score, 21);
+});
+
+test("evaluateMemoryRound preserves selected tokens passed by the UI", () => {
+  const result = evaluateMemoryRound({
+    expectedWords: ["guarda-sol", "copo"],
+    response: ["guarda-sol", "mesa"],
+    answerSeconds: 5,
+    memorizationSeconds: 8,
+    minimumToComplete: 1,
+  });
+
+  assert.deepEqual(result.hits, ["guarda-sol"]);
+  assert.deepEqual(result.wrongWords, ["mesa"]);
+  assert.deepEqual(result.missedWords, ["copo"]);
+});
+
+test("memory figure map avoids duplicate visible figures in one round", () => {
+  const tokens = ["mesa", "cadeira", "retrato", "quadro", "copo", "leite"];
+  const figureMap = getMemoryFigureMap(tokens);
+  const figures = tokens.map((token) => getMemoryFigure(token, figureMap));
+
+  assert.equal(new Set(figures).size, tokens.length);
 });
 
 test("evaluateAttentionRound applies error penalty and completion threshold", () => {

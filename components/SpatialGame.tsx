@@ -111,6 +111,10 @@ export function SpatialGame({
     wrongMoves: string[];
     score: number;
     completed: boolean;
+    activeSequence: string[];
+    selectedMoves: string[];
+    expectedPath: BoardStep[];
+    userPath: BoardStep[];
   } | null>(null);
   const { soundEnabled, toggleSound, playResultSound, playAnswerSound } = useSoundFeedback();
   const { settings } = useAppSettingsState();
@@ -270,7 +274,13 @@ export function SpatialGame({
       }
 
       setPhase("result");
-      setReview(result);
+      setReview({
+        ...result,
+        activeSequence,
+        selectedMoves: nextMoves,
+        expectedPath: buildBoardPath(activeSequence),
+        userPath: buildBoardPath(nextMoves),
+      });
       setFeedback(
         result.completed
           ? `Você reconstruiu ${result.hits.length} direção(ões) corretamente e concluiu a rota.`
@@ -345,7 +355,7 @@ export function SpatialGame({
               items={[
                 { label: "Corretos", value: String(review.hits.length) },
                 { label: "Erros", value: String(review.wrongMoves.length) },
-                { label: "Passos", value: String(activeSequence.length) },
+                { label: "Passos", value: String(review.activeSequence.length) },
               ]}
               note="Compare a rota correta com a sua rota. Isso ajuda a perceber onde a referência espacial se perdeu."
             />
@@ -389,7 +399,7 @@ export function SpatialGame({
               <div className="review-column">
                 <strong>Movimentos esperados</strong>
                 <div className="review-tags">
-                  {activeSequence.map((item, index) => (
+                  {review.activeSequence.map((item, index) => (
                     <span key={`${item}-${index}`} className="review-tag">
                       {directionLabelMap[item]}
                     </span>
@@ -401,11 +411,11 @@ export function SpatialGame({
             <div className="spatial-review-boards">
               <div className="review-column">
                 <strong>Rota correta</strong>
-                <SpatialBoard path={expectedPath} />
+                <SpatialBoard path={review.expectedPath} />
               </div>
               <div className="review-column">
                 <strong>Sua rota</strong>
-                <SpatialBoard path={userPath} />
+                <SpatialBoard path={review.userPath} />
               </div>
             </div>
 

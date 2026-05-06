@@ -17,7 +17,7 @@ import {
   getNivel,
   isChallengeUnlockedInOrder,
 } from "@/lib/scoring";
-import type { ComparisonChallenge, ProgressState, Usuario } from "@/lib/types";
+import type { ComparisonChallenge, ComparisonRound, ProgressState, Usuario } from "@/lib/types";
 
 type ComparisonGameProps = {
   usuario: Usuario;
@@ -61,6 +61,8 @@ export function ComparisonGame({
     mistakes: number[];
     score: number;
     completed: boolean;
+    rounds: ComparisonRound[];
+    selectedAnswers: Array<"left" | "right">;
   } | null>(null);
   const { soundEnabled, toggleSound, playResultSound, playAnswerSound } = useSoundFeedback();
   const { settings } = useAppSettingsState();
@@ -196,7 +198,7 @@ export function ComparisonGame({
         ? `Você acertou ${result.hits.length} comparação(ões) e concluiu a fase.`
         : `Você acertou ${result.hits.length} comparação(ões). Precisa de ${sessionDifficulty.minimoParaConcluir} para concluir.`,
     );
-    setReview(result);
+    setReview({ ...result, rounds, selectedAnswers: answers });
     playResultSound(result.completed, result.completed ? "precision" : result.mistakes.length > 0 ? "logic" : "default");
     onSaveResult(challenge.id, result.score, elapsedSeconds, result.completed, variationIndex);
   }, [
@@ -298,7 +300,7 @@ export function ComparisonGame({
               items={[
                 { label: "Acertos", value: String(review.hits.length) },
                 { label: "Erros", value: String(review.mistakes.length) },
-                { label: "Rodadas", value: String(rounds.length) },
+                { label: "Rodadas", value: String(review.rounds.length) },
               ]}
               note="Leia sempre o critério da fase antes de responder. Em comparação, o erro mais comum e escolher rápido sem conferir a regra."
             />
@@ -309,8 +311,8 @@ export function ComparisonGame({
             ) : null}
 
             <div className="review-grid">
-              {rounds.map((round, index) => {
-                const userAnswer = selectedAnswers[index];
+              {review.rounds.map((round, index) => {
+                const userAnswer = review.selectedAnswers[index];
                 const correct = review.hits.includes(index);
                 return (
                   <div

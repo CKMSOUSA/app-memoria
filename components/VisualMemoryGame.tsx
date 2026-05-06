@@ -68,6 +68,7 @@ export function VisualMemoryGame({
     wrongMatches: number;
     score: number;
     completed: boolean;
+    symbols: string[];
   } | null>(null);
   const { soundEnabled, toggleSound, playResultSound, playAnswerSound } = useSoundFeedback();
 
@@ -126,7 +127,7 @@ export function VisualMemoryGame({
     });
 
     setPhase("result");
-    setReview(result);
+    setReview({ ...result, symbols });
     setFeedback(
       result.completed
         ? `Você encontrou ${result.pairsFound} pares e concluiu a fase visual.`
@@ -148,7 +149,7 @@ export function VisualMemoryGame({
     elapsedSeconds,
     onSaveResult,
     playResultSound,
-    symbols.length,
+    symbols,
     variationIndex,
     wrongMatches,
   ]);
@@ -317,7 +318,7 @@ export function VisualMemoryGame({
               <div className="review-column">
                 <strong>Figuras da fase</strong>
                 <div className="review-tags">
-                  {symbols.map((symbol) => (
+                  {review.symbols.map((symbol) => (
                     <span key={symbol} className="review-tag visual-tag">
                       {symbol}
                     </span>

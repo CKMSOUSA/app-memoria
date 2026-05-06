@@ -21,16 +21,18 @@ export function evaluateMemoryRound({
   minimumToComplete,
 }: {
   expectedWords: string[];
-  response: string;
+  response: string | string[];
   answerSeconds: number;
   memorizationSeconds: number;
   minimumToComplete: number;
 }) {
   const normalizedExpected = expectedWords.map((word) => normalizeText(word));
-  const typedWords = response
-    .split(/[;,\n\s]+/)
-    .map((item) => normalizeText(item))
-    .filter(Boolean);
+  const typedWords = Array.isArray(response)
+    ? response.map((item) => normalizeText(item)).filter(Boolean)
+    : response
+        .split(/[;,\n\s]+/)
+        .map((item) => normalizeText(item))
+        .filter(Boolean);
 
   const uniqueTyped = Array.from(new Set(typedWords));
   const hits = uniqueTyped.filter((item) => normalizedExpected.includes(item));

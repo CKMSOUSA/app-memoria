@@ -6,10 +6,10 @@ import { ReviewMetrics } from "@/components/ReviewMetrics";
 import { SoundToggle, useSoundFeedback } from "@/components/SoundToggle";
 import { TimerDisplay } from "@/components/TimerDisplay";
 import { getSessionAdjustments, useAppSettingsState } from "@/lib/app-settings";
-import { getChildVisual } from "@/lib/child-visuals";
 import { advancedMemoryChallenges } from "@/lib/advanced-game-data";
 import { memoryChallenges } from "@/lib/game-data-v3";
 import { evaluateMemoryRound, getNextVariationIndex } from "@/lib/game-logic";
+import { getMemoryFigure, getMemoryFigureMap, getStableVisualChoices, type MemoryFigureMap } from "@/lib/memory-figures";
 import {
   getAgeLabel,
   getAudienceFromAge,
@@ -38,56 +38,11 @@ type MemoryGameProps = {
 type Phase = "idle" | "memorizing" | "answering" | "result";
 type AdaptiveTuning = { timeBonus: number; itemDelta: number; minimumDelta: number };
 
-const MEMORY_FALLBACK_VISUALS = [
-  "🦋",
-  "🌈",
-  "🍀",
-  "🎈",
-  "🪁",
-  "🧸",
-  "🎯",
-  "🌟",
-  "🎨",
-  "🧩",
-  "🦄",
-  "🐠",
-  "🌼",
-  "🍎",
-  "🚂",
-  "⛵",
-  "🏕️",
-  "🛝",
-  "💎",
-  "🔔",
-];
-
-function getMemoryVisual(token: string) {
-  const base = getChildVisual(token);
-  if (base !== "✨") return base;
-
-  const hash = token.split("").reduce((sum, char, index) => sum + char.charCodeAt(0) * (index + 1), 0);
-  return MEMORY_FALLBACK_VISUALS[hash % MEMORY_FALLBACK_VISUALS.length];
-}
-
-function getStableVisualChoices(expectedItems: string[], allVariations: string[][], challengeId: number, variation: number) {
-  const extras = Array.from(new Set(allVariations.flat().filter((item) => !expectedItems.includes(item))));
-  const seed = challengeId * 31 + variation * 17;
-  const scoreFor = (token: string, offset: number) =>
-    (token + String(seed + offset)).split("").reduce((sum, char, index) => sum + char.charCodeAt(0) * (index + 1), 0);
-
-  const orderedExtras = [...extras].sort((left, right) => scoreFor(left, 11) - scoreFor(right, 11));
-  const pickedExtras = orderedExtras.slice(0, Math.max(3, Math.min(5, orderedExtras.length)));
-
-  return Array.from(new Set([...expectedItems, ...pickedExtras])).sort(
-    (left, right) => scoreFor(left, 23) - scoreFor(right, 23),
-  );
-}
-
-function MemoryFigureCard({ token }: { token: string }) {
+function MemoryFigureCard({ token, figureMap }: { token: string; figureMap?: MemoryFigureMap }) {
   return (
     <span className="memory-figure-card" aria-label={token} title={token}>
       <span className="memory-figure-emoji" aria-hidden="true">
-        {getMemoryVisual(token)}
+        {getMemoryFigure(token, figureMap)}
       </span>
     </span>
   );
@@ -118,6 +73,7 @@ export function MemoryGame({
     missedWords: string[];
     score: number;
     completed: boolean;
+    figureMap: MemoryFigureMap;
   } | null>(null);
   const { soundEnabled, toggleSound, playResultSound, playAnswerSound } = useSoundFeedback();
   const { settings } = useAppSettingsState();
@@ -148,6 +104,10 @@ export function MemoryGame({
   const visualChoices = useMemo(
     () => getStableVisualChoices(palavrasVisiveis, baseVariacoes, challenge.id, variationIndex),
     [baseVariacoes, challenge.id, palavrasVisiveis, variationIndex],
+  );
+  const memoryFigureMap = useMemo(
+    () => getMemoryFigureMap([...palavrasVisiveis, ...visualChoices]),
+    [palavrasVisiveis, visualChoices],
   );
   const dificuldade = isAdvancedMode
     ? {
@@ -262,7 +222,7 @@ export function MemoryGame({
 
     const result = evaluateMemoryRound({
       expectedWords: palavrasVisiveis,
-      response: selectedItems.join(", "),
+      response: selectedItems,
       answerSeconds,
       memorizationSeconds: sessionDifficulty.tempoMemorizacao,
       minimumToComplete: sessionDifficulty.minimoParaConcluir,
@@ -299,7 +259,7 @@ export function MemoryGame({
         ? `Você acertou ${result.hits.length} figura(s) e concluiu o desafio. Score da rodada: ${result.score}.`
         : `Você acertou ${result.hits.length} figura(s). Precisa de ${sessionDifficulty.minimoParaConcluir} para concluir este desafio.`,
     );
-    setReview(result);
+    setReview({ ...result, figureMap: memoryFigureMap });
     playResultSound(
       result.completed,
       result.completed ? "precision" : result.missedWords.length > 0 || result.wrongWords.length > 0 ? "memory" : "default",
@@ -387,7 +347,7 @@ export function MemoryGame({
                 <div className="review-tags">
                   {review.hits.length > 0 ? (
                     review.hits.map((item) => (
-                      <MemoryFigureCard key={item} token={item} />
+                      <MemoryFigureCard key={item} token={item} figureMap={review.figureMap} />
                     ))
                   ) : (
                     <span className="small-muted">Nenhuma figura correta.</span>
@@ -400,7 +360,7 @@ export function MemoryGame({
                 <div className="review-tags">
                   {review.wrongWords.length > 0 ? (
                     review.wrongWords.map((item) => (
-                      <MemoryFigureCard key={item} token={item} />
+                      <MemoryFigureCard key={item} token={item} figureMap={review.figureMap} />
                     ))
                   ) : (
                     <span className="small-muted">Nenhuma figura errada.</span>
@@ -413,7 +373,7 @@ export function MemoryGame({
                 <div className="review-tags">
                   {review.missedWords.length > 0 ? (
                     review.missedWords.map((item) => (
-                      <MemoryFigureCard key={item} token={item} />
+                      <MemoryFigureCard key={item} token={item} figureMap={review.figureMap} />
                     ))
                   ) : (
                     <span className="small-muted">Você lembrou de todas.</span>
@@ -526,7 +486,7 @@ export function MemoryGame({
                     <p className="small-muted memory-preview-label">Figuras para memorizar</p>
                     <div className="memory-selected-grid">
                       {palavrasVisiveis.map((item) => (
-                        <MemoryFigureCard key={item} token={item} />
+                        <MemoryFigureCard key={item} token={item} figureMap={memoryFigureMap} />
                       ))}
                     </div>
                   </div>
@@ -536,7 +496,7 @@ export function MemoryGame({
                   {selectedItems.length > 0 ? (
                     <div className="memory-selected-grid">
                       {selectedItems.map((item) => (
-                        <MemoryFigureCard key={item} token={item} />
+                        <MemoryFigureCard key={item} token={item} figureMap={memoryFigureMap} />
                       ))}
                     </div>
                   ) : (
@@ -553,7 +513,7 @@ export function MemoryGame({
                       onClick={() => toggleItem(item)}
                       disabled={phase !== "answering"}
                     >
-                      <MemoryFigureCard token={item} />
+                      <MemoryFigureCard token={item} figureMap={memoryFigureMap} />
                     </button>
                   ))}
                 </div>

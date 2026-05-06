@@ -11,7 +11,7 @@ import { advancedLogicChallenges } from "@/lib/advanced-game-data";
 import { logicChallenges } from "@/lib/game-data-v3";
 import { evaluateLogicRound, getNextVariationIndex } from "@/lib/game-logic";
 import { getAgeLabel, getAudienceFromAge, getLogicDifficulty, getNivel, isChallengeUnlockedInOrder } from "@/lib/scoring";
-import type { LogicChallenge, ProgressState, Usuario } from "@/lib/types";
+import type { LogicChallenge, LogicRound, ProgressState, Usuario } from "@/lib/types";
 
 type LogicGameProps = {
   usuario: Usuario;
@@ -55,6 +55,8 @@ export function LogicGame({
     mistakes: number[];
     score: number;
     completed: boolean;
+    rounds: LogicRound[];
+    selectedAnswers: string[];
   } | null>(null);
   const { soundEnabled, toggleSound, playResultSound, playAnswerSound } = useSoundFeedback();
   const { settings } = useAppSettingsState();
@@ -161,7 +163,7 @@ export function LogicGame({
           ? `Você acertou ${result.hits.length} sequência(s) e concluiu a fase.`
           : `Você acertou ${result.hits.length} sequência(s). Precisa de ${sessionDifficulty.minimoParaConcluir} para concluir.`,
       );
-      setReview(result);
+      setReview({ ...result, rounds: activeRounds, selectedAnswers: answers });
       playResultSound(result.completed, result.completed ? "precision" : result.mistakes.length > 0 ? "logic" : "default");
       onSaveResult(challenge.id, result.score, elapsedSeconds, result.completed, variationIndex);
     },
@@ -284,7 +286,7 @@ export function LogicGame({
               items={[
                 { label: "Acertos", value: String(review.hits.length) },
                 { label: "Erros", value: String(review.mistakes.length) },
-                { label: "Sequencias", value: String(activeRounds.length) },
+                { label: "Sequências", value: String(review.rounds.length) },
               ]}
               note="Leia a explicação correta depois de cada rodada. Isso ajuda a reconhecer o padrão com mais rapidez na próxima tentativa."
             />
@@ -295,8 +297,8 @@ export function LogicGame({
             ) : null}
 
             <div className="review-grid">
-              {activeRounds.map((round, index) => {
-                const userAnswer = selectedAnswers[index];
+              {review.rounds.map((round, index) => {
+                const userAnswer = review.selectedAnswers[index];
                 const correct = review.hits.includes(index);
                 return (
                   <div key={`${round.prompt}-${index}`} className={`review-column ${correct ? "review-good" : "review-bad"}`}>

@@ -217,27 +217,32 @@ function buildVisualVariation(baseItems: string[], extraItems: string[]) {
   return Array.from(new Set([...baseItems, ...extraItems])).slice(0, baseItems.length + 1);
 }
 
-export const visualChallenges: VisualMemoryChallenge[] = visualSets.map((items, index) => ({
-  id: index + 1,
-  difficultyLabel: PHASE_LABELS_15[index],
-  nome: `Memória visual ${index + 1}`,
-  nomeInfantil:
-    index < 5
-      ? index % 2 === 0
-        ? "Cartas de animais"
-        : "Cartas ilustradas"
-      : "Cartas de figuras",
-  variacoes: [
+export const visualChallenges: VisualMemoryChallenge[] = visualSets.map((items, index) => {
+  const variacoes = [
     items,
     buildVisualVariation(items.slice(1), [items[0], visualSets[(index + 1) % visualSets.length][0]]),
     buildVisualVariation(items.slice(0, 3), [visualSets[(index + 2) % visualSets.length][1], items[3]]),
     buildVisualVariation(rotateItems(items, 1), [visualSets[(index + 3) % visualSets.length][2]]),
     buildVisualVariation(rotateItems(items, 2), [visualSets[(index + 4) % visualSets.length][3]]),
-  ],
-  revealSeconds: Math.max(4, 7 - Math.floor(index / 4)),
-  tempoLimite: Math.max(18, 34 - index),
-  minimoParaConcluir: Math.min(6, 2 + Math.floor(index / 3)),
-}));
+  ];
+  const maxCompletablePairs = Math.min(...variacoes.map((variation) => variation.length));
+
+  return {
+    id: index + 1,
+    difficultyLabel: PHASE_LABELS_15[index],
+    nome: `Memória visual ${index + 1}`,
+    nomeInfantil:
+      index < 5
+        ? index % 2 === 0
+          ? "Cartas de animais"
+          : "Cartas ilustradas"
+        : "Cartas de figuras",
+    variacoes,
+    revealSeconds: Math.max(4, 7 - Math.floor(index / 4)),
+    tempoLimite: Math.max(18, 34 - index),
+    minimoParaConcluir: Math.min(maxCompletablePairs, 2 + Math.floor(index / 3)),
+  };
+});
 
 const attentionSeeds = [
   { nome: "Foco em T", nomeInfantil: "Caca ao T", alvo: "T", distratores: ["O", "Q", "D", "P", "R"] },
@@ -606,24 +611,29 @@ const exclusiveAdulto: ExclusiveSeed[] = [
 ];
 
 function createExclusiveChallenges(audience: "infantil" | "adolescente" | "adulto", baseId: number, seeds: ExclusiveSeed[]) {
-  return seeds.map((seed, index) => ({
-    id: baseId + index,
-    audience,
-    difficultyLabel: PHASE_LABELS_10[index],
-    nome: seed.nome,
-    descricao: seed.descricao,
-    minimoParaConcluir: Math.min(7, 2 + Math.floor(index / 2)),
-    variacoes: [
+  return seeds.map((seed, index) => {
+    const sequences = [
       ...seed.sequencias,
       rotateItems(seed.sequencias[0], 1),
       rotateItems(seed.sequencias[1], 2),
-    ].map((sequence) => ({
-      prompt: "Memorize a sequência e monte novamente na mesma ordem.",
-      sequence,
-      revealSeconds: Math.max(4, 8 - Math.floor(index / 4)),
-      options: Array.from(new Set([...sequence, ...sequence.slice(0, Math.min(sequence.length, 3))])).slice(0, sequence.length + 2),
-    })),
-  }));
+    ];
+    const maxCompletableItems = Math.min(...sequences.map((sequence) => sequence.length));
+
+    return {
+      id: baseId + index,
+      audience,
+      difficultyLabel: PHASE_LABELS_10[index],
+      nome: seed.nome,
+      descricao: seed.descricao,
+      minimoParaConcluir: Math.min(maxCompletableItems, 2 + Math.floor(index / 2)),
+      variacoes: sequences.map((sequence) => ({
+        prompt: "Memorize a sequência e monte novamente na mesma ordem.",
+        sequence,
+        revealSeconds: Math.max(4, 8 - Math.floor(index / 4)),
+        options: Array.from(new Set([...sequence, ...sequence.slice(0, Math.min(sequence.length, 3))])).slice(0, sequence.length + 2),
+      })),
+    };
+  });
 }
 
 export const exclusiveChallenges: ExclusiveChallenge[] = [
