@@ -31,19 +31,20 @@ export function PauseReflectionButton({
   const [promptIndex, setPromptIndex] = useState(0);
   const [secondsLeft, setSecondsLeft] = useState(seconds);
   const [open, setOpen] = useState(false);
+  const [paused, setPaused] = useState(false);
   const [history, setHistory] = useState<string[]>([]);
   const prompt = safePrompts[promptIndex] ?? safePrompts[0];
   const complete = open && secondsLeft === 0;
 
   useEffect(() => {
-    if (!open || secondsLeft === 0) return undefined;
+    if (!open || paused || secondsLeft === 0) return undefined;
 
     const timerId = window.setTimeout(() => {
       setSecondsLeft((current) => Math.max(0, current - 1));
     }, 1000);
 
     return () => window.clearTimeout(timerId);
-  }, [open, secondsLeft]);
+  }, [open, paused, secondsLeft]);
 
   function startReflection() {
     const randomIndex = Math.floor(Math.random() * safePrompts.length);
@@ -54,6 +55,7 @@ export function PauseReflectionButton({
     setPromptIndex(nextIndex);
     setHistory((current) => [nextPrompt, ...current.filter((item) => item !== nextPrompt)].slice(0, 3));
     setSecondsLeft(seconds);
+    setPaused(false);
     setOpen(true);
   }
 
@@ -81,9 +83,14 @@ export function PauseReflectionButton({
         <article className="pause-reflection-card" aria-live="polite">
           <div>
             <p className="small-muted pause-reflection-label">{title}</p>
-            <h3>{complete ? "Pausa concluída" : `${secondsLeft}s para pensar`}</h3>
+            <h3>{complete ? "Pausa concluída" : paused ? `${secondsLeft}s em pausa` : `${secondsLeft}s para pensar`}</h3>
             <p className="muted pause-reflection-question">{prompt}</p>
           </div>
+          {!complete ? (
+            <button className="btn btn-secondary pause-reflection-control" type="button" onClick={() => setPaused((current) => !current)}>
+              {paused ? "Continuar" : "Pausar"}
+            </button>
+          ) : null}
           <div className="pause-reflection-meter" aria-label={`${secondsLeft} segundos restantes`}>
             <span style={{ width: `${((seconds - secondsLeft) / seconds) * 100}%` }} />
           </div>

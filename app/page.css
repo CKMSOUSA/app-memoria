@@ -621,16 +621,31 @@ h2 {
 .dashboard-tab,
 .dashboard-action-card {
   display: grid;
-  gap: 4px;
+  gap: 8px;
   flex: 1 1 210px;
   min-width: 180px;
-  padding: 14px 16px;
+  min-height: 104px;
+  padding: 18px 18px;
   border-radius: 18px;
   border: 1px solid rgba(255, 255, 255, 0.72);
   background: rgba(255, 255, 255, 0.7);
   text-align: left;
   color: var(--ink-strong);
   box-shadow: 0 12px 22px rgba(56, 45, 35, 0.08);
+}
+
+.dashboard-primary-cards .trail-tab-label {
+  font-size: clamp(22px, 2.4vw, 30px);
+  font-weight: 900;
+  line-height: 1.05;
+  text-transform: uppercase;
+}
+
+.dashboard-primary-cards .trail-tab-rate {
+  font-size: 13px;
+  font-weight: 900;
+  line-height: 1.35;
+  text-transform: uppercase;
 }
 
 .dashboard-tab-hoje {
@@ -856,6 +871,13 @@ h2 {
   background: rgba(255, 244, 242, 0.96);
   color: #7f2d2d;
   box-shadow: 0 10px 18px rgba(184, 75, 75, 0.1);
+}
+
+.pause-reflection-control {
+  justify-self: start;
+  border-color: rgba(184, 75, 75, 0.24);
+  color: #7f2d2d;
+  font-weight: 900;
 }
 
 .pause-reflection-button-dot {
