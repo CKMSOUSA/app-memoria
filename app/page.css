@@ -612,21 +612,10 @@ h2 {
   gap: 16px;
 }
 
-.dashboard-tabs {
+.dashboard-primary-cards {
   display: flex;
   gap: 12px;
   flex-wrap: wrap;
-}
-
-.dashboard-quick-buttons {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-
-.dashboard-quick-button {
-  border-color: rgba(99, 88, 74, 0.16);
-  background: rgba(255, 255, 255, 0.86);
 }
 
 .dashboard-tab,
@@ -671,6 +660,57 @@ h2 {
 
 .dashboard-action-focus {
   background: linear-gradient(135deg, rgba(219, 242, 247, 0.98) 0%, rgba(248, 254, 255, 0.94) 100%);
+}
+
+.dashboard-quick-grid {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+}
+
+.dashboard-option-card {
+  display: grid;
+  align-content: start;
+  gap: 14px;
+  min-height: 148px;
+  padding: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.74);
+  border-radius: 18px;
+  text-align: left;
+  color: var(--ink-strong);
+  box-shadow: 0 12px 22px rgba(56, 45, 35, 0.08);
+}
+
+.dashboard-option-card h3 {
+  margin: 0 0 4px;
+}
+
+.dashboard-option-list {
+  display: grid;
+  gap: 8px;
+}
+
+.dashboard-option-button {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 12px;
+  text-align: left;
+}
+
+.dashboard-option-base {
+  background: linear-gradient(135deg, rgba(255, 242, 201, 0.96) 0%, rgba(255, 251, 236, 0.94) 100%);
+}
+
+.dashboard-option-special {
+  background: linear-gradient(135deg, rgba(245, 226, 255, 0.94) 0%, rgba(255, 249, 253, 0.94) 100%);
+}
+
+.dashboard-option-advanced {
+  background: linear-gradient(135deg, rgba(222, 240, 255, 0.96) 0%, rgba(246, 251, 255, 0.94) 100%);
+}
+
+.dashboard-option-explore {
+  background: linear-gradient(135deg, rgba(225, 244, 232, 0.96) 0%, rgba(248, 255, 250, 0.94) 100%);
 }
 
 .pause-reflection {

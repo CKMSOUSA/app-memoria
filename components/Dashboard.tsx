@@ -1114,6 +1114,18 @@ export function Dashboard({
       caption: usuario.role === "admin" ? "Análises e operação" : "Ajustes e leitura",
     },
   ];
+  const baseTrainingActions = [
+    { label: "Jogo de memória", onOpen: onOpenMemory },
+    { label: "Jogo de atenção", onOpen: onOpenAttention },
+    { label: "Procrastinação", onOpen: onOpenProcess },
+    { label: "Foco", onOpen: onOpenFocusVision },
+    { label: "Jogo de comparação", onOpen: onOpenComparison },
+  ];
+  const exploreActions = [
+    { label: "Memória visual", onOpen: onOpenVisual },
+    { label: "Orientação espacial", onOpen: onOpenSpatial },
+    { label: "Jogo de lógica", onOpen: onOpenLogic },
+  ];
   return (
     <main className="shell shell-dashboard">
       <aside className="sidebar">
@@ -1143,40 +1155,26 @@ export function Dashboard({
             </button>
           ))}
         </SidebarMenuGroup>
-        <SidebarMenuGroup title="Treinos base" defaultOpen>
-          <button className="btn btn-side" onClick={onOpenMemory}>
-            Jogo de memória
-          </button>
-          <button className="btn btn-side" onClick={onOpenAttention}>
-            Jogo de atenção
-          </button>
-          <button className="btn btn-side" onClick={onOpenProcess}>
-            Procrastinação
-          </button>
-          <button className="btn btn-side" onClick={onOpenFocusVision}>
-            Foco
-          </button>
-          <button className="btn btn-side" onClick={onOpenComparison}>
-            Jogo de comparação
-          </button>
+        <SidebarMenuGroup title="Treino Base" defaultOpen>
+          {baseTrainingActions.map((action) => (
+            <button key={action.label} className="btn btn-side" onClick={action.onOpen}>
+              {action.label}
+            </button>
+          ))}
         </SidebarMenuGroup>
         <SidebarMenuGroup title="Explorar mais">
-          <button className="btn btn-side" onClick={onOpenVisual}>
-            Memória visual
-          </button>
-          <button className="btn btn-side" onClick={onOpenSpatial}>
-            Orientação espacial
-          </button>
-          <button className="btn btn-side" onClick={onOpenLogic}>
-            Jogo de lógica
-          </button>
-          <button className="btn btn-side" onClick={onOpenSpecial}>
-            Trilha exclusiva
-          </button>
-          <button className="btn btn-side" onClick={onOpenAdvanced}>
-            Testes Avançados
-          </button>
+          {exploreActions.map((action) => (
+            <button key={action.label} className="btn btn-side" onClick={action.onOpen}>
+              {action.label}
+            </button>
+          ))}
         </SidebarMenuGroup>
+        <button className="btn btn-side" onClick={onOpenSpecial}>
+          Trilha exclusiva
+        </button>
+        <button className="btn btn-side" onClick={onOpenAdvanced}>
+          Testes Avançados
+        </button>
         <button className="btn btn-side" onClick={onOpenProfile}>
           Perfil
         </button>
@@ -1242,39 +1240,65 @@ export function Dashboard({
           </div>
         </header>
 
+        <section className="dashboard-primary-cards" aria-label="Acessos em destaque">
+          <button
+            type="button"
+            className={`dashboard-tab dashboard-tab-hoje ${activeDashboardTab === "hoje" ? "dashboard-tab-active" : ""}`}
+            onClick={() => setActiveDashboardTab("hoje")}
+          >
+            <span className="trail-tab-label">Hoje</span>
+            <span className="trail-tab-rate">Próximo passo e rotina imediata</span>
+          </button>
+          <button className="dashboard-action-card dashboard-action-process" type="button" onClick={onOpenProcess}>
+            <span className="trail-tab-label">Procrastinação</span>
+            <span className="trail-tab-rate">Começo, meio e fim</span>
+          </button>
+          <button className="dashboard-action-card dashboard-action-focus" type="button" onClick={onOpenFocusVision}>
+            <span className="trail-tab-label">Foco</span>
+            <span className="trail-tab-rate">Foco central e periférico</span>
+          </button>
+        </section>
+
         <section className="panel dashboard-tabs-panel">
           <div className="section-head">
             <h3>Navegação rápida</h3>
             <span className="small-muted">Abra só o grupo de informações que você quer ver agora</span>
           </div>
-          <div className="dashboard-quick-buttons" aria-label="Acessos principais">
-            <button className="btn btn-secondary dashboard-quick-button" type="button" onClick={onOpenMemory}>
-              Treino Base
+          <div className="dashboard-quick-grid" role="navigation" aria-label="Navegação rápida">
+            <article className="dashboard-option-card dashboard-option-base">
+              <div>
+                <h3>Treino Base</h3>
+                <p className="small-muted">Mesmas opções da guia lateral</p>
+              </div>
+              <div className="dashboard-option-list">
+                {baseTrainingActions.map((action) => (
+                  <button key={action.label} className="btn btn-secondary dashboard-option-button" type="button" onClick={action.onOpen}>
+                    {action.label}
+                  </button>
+                ))}
+              </div>
+            </article>
+            <button className="dashboard-option-card dashboard-option-special" type="button" onClick={onOpenSpecial}>
+              <span className="trail-tab-label">Trilha Exclusiva</span>
+              <span className="trail-tab-rate">Sequência personalizada por público</span>
             </button>
-            <button className="btn btn-secondary dashboard-quick-button" type="button" onClick={onOpenSpecial}>
-              Trilha Exclusiva
+            <button className="dashboard-option-card dashboard-option-advanced" type="button" onClick={onOpenAdvanced}>
+              <span className="trail-tab-label">Testes Avançados</span>
+              <span className="trail-tab-rate">Desafios com maior carga cognitiva</span>
             </button>
-            <button className="btn btn-secondary dashboard-quick-button" type="button" onClick={onOpenAdvanced}>
-              Testes avançados
-            </button>
-          </div>
-          <div className="dashboard-tabs" role="navigation" aria-label="Navegação rápida">
-            <button
-              type="button"
-              className={`dashboard-tab dashboard-tab-hoje ${activeDashboardTab === "hoje" ? "dashboard-tab-active" : ""}`}
-              onClick={() => setActiveDashboardTab("hoje")}
-            >
-              <span className="trail-tab-label">Hoje</span>
-              <span className="trail-tab-rate">Próximo passo e rotina imediata</span>
-            </button>
-            <button className="dashboard-action-card dashboard-action-process" type="button" onClick={onOpenProcess}>
-              <span className="trail-tab-label">Procrastinação</span>
-              <span className="trail-tab-rate">Começo, meio e fim</span>
-            </button>
-            <button className="dashboard-action-card dashboard-action-focus" type="button" onClick={onOpenFocusVision}>
-              <span className="trail-tab-label">Foco</span>
-              <span className="trail-tab-rate">Foco central e periférico</span>
-            </button>
+            <article className="dashboard-option-card dashboard-option-explore">
+              <div>
+                <h3>Explorar mais</h3>
+                <p className="small-muted">Mesmas opções da guia lateral</p>
+              </div>
+              <div className="dashboard-option-list">
+                {exploreActions.map((action) => (
+                  <button key={action.label} className="btn btn-secondary dashboard-option-button" type="button" onClick={action.onOpen}>
+                    {action.label}
+                  </button>
+                ))}
+              </div>
+            </article>
           </div>
         </section>
 
