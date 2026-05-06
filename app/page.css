@@ -618,6 +618,23 @@ h2 {
   flex-wrap: wrap;
 }
 
+.dashboard-feature-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(300px, 0.85fr);
+  gap: 16px;
+  align-items: stretch;
+}
+
+.dashboard-feature-row .topbar-personal,
+.dashboard-feature-row .dashboard-reflection-slot,
+.dashboard-feature-row .pause-reflection-card {
+  height: 100%;
+}
+
+.dashboard-feature-row .topbar-personal {
+  align-content: space-between;
+}
+
 .dashboard-tab,
 .dashboard-action-card {
   display: grid;
@@ -804,7 +821,12 @@ h2 {
 
 .dashboard-reflection-slot {
   width: 100%;
-  margin: 8px 0 4px;
+  margin: 0;
+  justify-items: stretch;
+}
+
+.dashboard-feature-row .pause-reflection-alarm .pause-reflection-card {
+  max-width: none;
 }
 
 .pause-reflection-button {
@@ -3038,6 +3060,10 @@ h2 {
 
   .topbar-support-actions {
     justify-content: flex-start;
+  }
+
+  .dashboard-feature-row {
+    grid-template-columns: 1fr;
   }
 
   .metrics-strip {

@@ -1254,22 +1254,6 @@ export function Dashboard({
                 Abrir ajuda
               </button>
             </div>
-            <section className={`topbar-personal panel audience-hero audience-${currentAudience}`}>
-              <div>
-                <p className="eyebrow">Experiência personalizada</p>
-                <h3>{getAudienceLabel(currentAudience)}</h3>
-                <p className="muted">
-                  {currentAudience === "infantil"
-                    ? "Painel com linguagem mais lúdica, jogos concretos e reforço positivo para crianças."
-                    : currentAudience === "adolescente"
-                      ? "Painel com ritmo mais rápido, metas intermediarias e desafios de foco e codificacao."
-                      : "Painel com maior densidade, rotina objetiva e desafios com mais carga cognitiva."}
-                </p>
-              </div>
-              <button className="btn btn-primary" onClick={() => onOpenSpecial()}>
-                Abrir minijogo
-              </button>
-            </section>
           </div>
         </header>
 
@@ -1305,12 +1289,30 @@ export function Dashboard({
           </button>
         </section>
 
-        <PauseReflectionButton
-          className="dashboard-reflection-slot"
-          variant="alarm"
-          prompts={processReflectionPrompts}
-          doneMessage="Guarde a percepção que apareceu e siga com calma."
-        />
+        <section className="dashboard-feature-row" aria-label="Pausa e experiência personalizada">
+          <PauseReflectionButton
+            className="dashboard-reflection-slot"
+            variant="alarm"
+            prompts={processReflectionPrompts}
+            doneMessage="Guarde a percepção que apareceu e siga com calma."
+          />
+          <section className={`topbar-personal panel audience-hero audience-${currentAudience}`}>
+            <div>
+              <p className="eyebrow">Experiência personalizada</p>
+              <h3>{getAudienceLabel(currentAudience)}</h3>
+              <p className="muted">
+                {currentAudience === "infantil"
+                  ? "Painel com linguagem mais lúdica, jogos concretos e reforço positivo para crianças."
+                  : currentAudience === "adolescente"
+                    ? "Painel com ritmo mais rápido, metas intermediárias e desafios de foco e codificação."
+                    : "Painel com maior densidade, rotina objetiva e desafios com mais carga cognitiva."}
+              </p>
+            </div>
+            <button className="btn btn-primary" onClick={() => onOpenSpecial()}>
+              Abrir minijogo
+            </button>
+          </section>
+        </section>
 
         <section className="panel dashboard-tabs-panel">
           <div className="section-head">
